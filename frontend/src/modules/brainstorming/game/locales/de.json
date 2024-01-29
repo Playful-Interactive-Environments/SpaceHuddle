@@ -7,5 +7,16 @@
     "keepShaking": "Schüttel weiter",
     "startShaking": "Schütteln, um Inspiration von anderen Nutzern zu bekommen. Nutze diese Ideen als Anstoß für eigene Ideen.",
     "noInspiration": "Es wurden noch keine Ideen verfasst. Bitte habe etwas Geduld."
+  },
+  "moderatorConfig": {
+    "mode": "Modus"
+  },
+  "enum": {
+    "mode": {
+      "Canvas": "canvas",
+      "Pixi": "pixi",
+      "PixiVue": "pixi VUE",
+      "GameEngine": "game engine"
+    }
   }
 }

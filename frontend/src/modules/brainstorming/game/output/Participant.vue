@@ -1,11 +1,8 @@
 <template>
-  <div class="canvas-container">
-    <canvas
-      ref="canvas"
-      id="canvas"
-      width="560"
-      height="360"
-      v-on:mousemove="draw"
+  <div class="canvas-container" ref="container">
+    <Canvas
+      v-if="mode === CanvasMode.Canvas && physicBodies"
+      :physic-bodies="physicBodies"
     />
     <div
       class="text-animation text-animation-center"
@@ -71,7 +68,8 @@ import * as moduleService from '@/services/module-service';
 import { Idea } from '@/types/api/Idea';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { CanvasBodies } from '@/modules/brainstorming/game/types/CanvasBodies';
+import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
+import Canvas from '@/modules/brainstorming/game/organisms/Canvas.vue';
 import NoSleep from 'nosleep.js';
 import * as viewService from '@/services/view-service';
 import * as taskService from '@/services/task-service';
@@ -80,6 +78,8 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import * as ideaService from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
+import { CanvasMode } from './ModeratorConfig.vue';
+import { isMobile } from '@/utils/dom';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -103,8 +103,9 @@ enum TextType {
 @Options({
   components: {
     ParticipantModuleDefaultContainer,
+    Canvas,
   },
-  emits: ['update:useFullSize'],
+  emits: ['update:useFullSize', 'update:backgroundClass'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -118,11 +119,10 @@ export default class Participant extends Vue {
 
   randomIdea: Idea | null = null;
 
-  vueCanvas!: CanvasRenderingContext2D;
-  readonly drawingIntervalTime = 100;
-  drawingInterval!: any;
-  mousePos: any = null;
-  bodies!: CanvasBodies;
+  mode: CanvasMode = CanvasMode.Canvas;
+  CanvasMode = CanvasMode;
+
+  physicBodies: PhysicBodies | null = null;
   shakeEvent: any;
   noSleep!: NoSleep;
 
@@ -194,14 +194,14 @@ export default class Participant extends Vue {
     textSize = 48
   ): void {
     const top = textSpan.parentNode.getBoundingClientRect().top;
-    if (textSpan && this.bodies) {
-      this.bodies.clearTexts(textId);
+    if (textSpan && this.physicBodies) {
+      this.physicBodies.clearTexts(textId);
       const textAnimation = textSpan as any;
       const rectAnimation = textAnimation.getBoundingClientRect();
-      textAnimation.childNodes.forEach((span) => {
+      for (const span of textAnimation.childNodes) {
         if (span.tagName === 'SPAN') {
           const rect = span.getBoundingClientRect();
-          this.bodies.addText(
+          this.physicBodies.addText(
             span.innerHTML,
             (rect.left + rect.right) / 2 - rectAnimation.x,
             rect.top + rect.height / 2 - top,
@@ -212,23 +212,12 @@ export default class Participant extends Vue {
             animationPathCount
           );
         }
-      });
+      }
     }
   }
 
-  get vueCanvasWidth(): number {
-    if (this.$refs.canvas) {
-      return (this.$refs.canvas as HTMLCanvasElement).width;
-    }
-    return 0;
-  }
-
-  get vueCanvasHeight(): number {
-    if (this.$refs.canvas) {
-      return (this.$refs.canvas as HTMLCanvasElement).height;
-    }
-    return 0;
-  }
+  containerWidth = 100;
+  containerHeight = 100;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -279,40 +268,23 @@ export default class Participant extends Vue {
 
   domKey = '';
   async mounted(): Promise<void> {
-    await this.requestFullscreen();
+    if (isMobile()) await this.requestFullscreen();
     this.$emit('update:useFullSize', true);
     this.$emit('update:backgroundClass', 'star-background');
     await o9n.orientation
       .lock('portrait-primary')
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .catch(function () {});
-    const canvas = this.$refs.canvas as HTMLCanvasElement;
     this.domKey = registerDomElement(
-      canvas,
+      this.$refs.container as HTMLElement,
       (targetWidth, targetHeight) => {
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
-        if (!this.vueCanvas) {
-          const context = canvas.getContext('2d');
-          if (context) this.vueCanvas = context;
-          window.addEventListener(
-            'deviceorientation',
-            this.onOrientationChange
-          );
-
-          this.setupPhysics();
-          this.drawingInterval = setInterval(() => {
-            this.update_drawing();
-          }, this.drawingIntervalTime);
-          this.setupShaking();
-        }
+        this.containerWidth = targetWidth;
+        this.containerHeight = targetHeight;
+        this.setupPhysics();
+        window.addEventListener('deviceorientation', this.onOrientationChange);
+        this.setupShaking();
       },
-      100,
-      false,
-      () => {
-        canvas.width = 100;
-        canvas.height = 100;
-      }
+      0
     );
 
     window.addEventListener('mousedown', this.mousedown);
@@ -325,11 +297,11 @@ export default class Participant extends Vue {
   }
 
   private mousedown(): void {
-    this.bodies.pressBody();
+    if (this.physicBodies) this.physicBodies.pressBody();
   }
 
   private mouseup(): void {
-    this.bodies.releaseBody();
+    if (this.physicBodies) this.physicBodies.releaseBody();
   }
 
   setupShaking(): void {
@@ -355,8 +327,8 @@ export default class Participant extends Vue {
     };
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const animateShaking = (): void => {
-      if (this.lastShakingTime === shakingTime) {
-        this.bodies.addShakingForce(actualShakingForce());
+      if (this.lastShakingTime === shakingTime && this.physicBodies) {
+        this.physicBodies.addShakingForce(actualShakingForce());
         setTimeout(() => {
           const animationTime = Date.now();
           if (shakingTime + this.maxShakingDelay > animationTime) {
@@ -370,7 +342,8 @@ export default class Participant extends Vue {
     this.lastShakingTime = shakingTime;
 
     if (
-      this.bodies.startAnimation(
+      this.physicBodies &&
+      this.physicBodies.startAnimation(
         50,
         TextType.Inspiration,
         TextType.StartShaking,
@@ -383,81 +356,75 @@ export default class Participant extends Vue {
   }
 
   setupPhysics(): void {
-    if (this.$refs.canvas) {
-      this.bodies = new CanvasBodies(
-        this.vueCanvas,
-        this.vueCanvasWidth,
-        this.vueCanvasHeight,
-        this.$refs.canvas as HTMLCanvasElement
-      );
-      const letterCount = 26;
-      const circleCount = 100;
-      const fillFactor = 1.5;
-      const areaPerCircle =
-        (this.vueCanvasWidth * this.vueCanvasHeight) / circleCount / fillFactor;
-      const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
-      const minRadius = maxRadius / 2;
-      for (let i = 0; i < circleCount; i++) {
-        const r = Math.floor(
-          Math.random() * (maxRadius - minRadius) + minRadius
-        );
-        const x = Math.floor(Math.random() * (this.vueCanvasWidth - r * 2) + r);
-        const y = Math.floor(
-          Math.random() * (this.vueCanvasHeight - r * 2) + r
-        );
-        const a = 'A';
-        const text = String.fromCharCode(a.charCodeAt(0) + (i % letterCount));
-        this.bodies.addCircle(x, y, r, { text: text, gradientSize: r });
-      }
-      const borderSize = 1;
-      this.bodies.addRect(
-        this.vueCanvasWidth / 2,
-        this.vueCanvasHeight - borderSize / 2,
-        this.vueCanvasWidth,
-        borderSize,
-        { isStatic: true, isHidden: true }
-      );
-      this.bodies.addRect(
-        this.vueCanvasWidth / 2,
-        borderSize / 2,
-        this.vueCanvasWidth,
-        borderSize,
-        { isStatic: true, isHidden: true }
-      );
-      this.bodies.addRect(
-        borderSize / 2,
-        this.vueCanvasHeight / 2,
-        borderSize,
-        this.vueCanvasHeight,
-        { isStatic: true, isHidden: true }
-      );
-      this.bodies.addRect(
-        this.vueCanvasWidth - borderSize / 2,
-        this.vueCanvasHeight / 2,
-        borderSize,
-        this.vueCanvasHeight,
-        { isStatic: true, isHidden: true }
-      );
-
-      this.setBodyText(
-        this.$refs.textAnimationStartShaking,
-        TextType.StartShaking,
-        '#FFFFFF44',
-        1,
-        24
-      );
-      this.setBodyText(
-        this.$refs.textAnimationKeepShaking,
-        TextType.KeepShaking,
-        '#FFFFFF44',
-        1
-      );
+    this.physicBodies = new PhysicBodies(
+      this.containerWidth,
+      this.containerHeight,
+      this.$refs.container as HTMLElement
+    );
+    const letterCount = 26;
+    const circleCount = 100;
+    const fillFactor = 1.5;
+    const areaPerCircle =
+      (this.containerWidth * this.containerHeight) / circleCount / fillFactor;
+    const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
+    const minRadius = maxRadius / 2;
+    for (let i = 0; i < circleCount; i++) {
+      const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
+      const x = Math.floor(Math.random() * (this.containerWidth - r * 2) + r);
+      const y = Math.floor(Math.random() * (this.containerHeight - r * 2) + r);
+      const a = 'A';
+      const text = String.fromCharCode(a.charCodeAt(0) + (i % letterCount));
+      this.physicBodies.addCircle(x, y, r, { text: text, gradientSize: r });
     }
+    const borderSize = 1;
+    this.physicBodies.addRect(
+      this.containerWidth / 2,
+      this.containerHeight - borderSize / 2,
+      this.containerWidth,
+      borderSize,
+      { isStatic: true, isHidden: true }
+    );
+    this.physicBodies.addRect(
+      this.containerWidth / 2,
+      borderSize / 2,
+      this.containerWidth,
+      borderSize,
+      { isStatic: true, isHidden: true }
+    );
+    this.physicBodies.addRect(
+      borderSize / 2,
+      this.containerHeight / 2,
+      borderSize,
+      this.containerHeight,
+      { isStatic: true, isHidden: true }
+    );
+    this.physicBodies.addRect(
+      this.containerWidth - borderSize / 2,
+      this.containerHeight / 2,
+      borderSize,
+      this.containerHeight,
+      { isStatic: true, isHidden: true }
+    );
+
+    this.setBodyText(
+      this.$refs.textAnimationStartShaking,
+      TextType.StartShaking,
+      '#FFFFFF44',
+      1,
+      24
+    );
+    this.setBodyText(
+      this.$refs.textAnimationKeepShaking,
+      TextType.KeepShaking,
+      '#FFFFFF44',
+      1
+    );
   }
 
   onOrientationChange(ev: DeviceOrientationEvent): void {
     const vec = this.deviceOrientationEventToVector(ev);
-    this.bodies.setGravity(-vec[0], vec[1], vec[1]);
+    if (this.physicBodies)
+      this.physicBodies.setGravity(-vec[0], vec[1], vec[1]);
   }
 
   deviceOrientationEventToVector(
@@ -492,6 +459,7 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+    if (module.parameter.mode) this.mode = module.parameter.mode;
   }
 
   deregisterAll(): void {
@@ -505,11 +473,16 @@ export default class Participant extends Vue {
   async unmounted(): Promise<void> {
     await this.exitFullscreen();
     if (this.noSleep) this.noSleep.disable();
-    clearInterval(this.drawingInterval);
     window.removeEventListener('shake', this.isShaking, false);
+    window.removeEventListener('deviceorientation', this.onOrientationChange);
     this.shakeEvent.stop();
     this.deregisterAll();
     unregisterDomElement(this.domKey);
+
+    window.removeEventListener('mousedown', this.mousedown);
+    window.removeEventListener('mouseup', this.mouseup);
+    window.removeEventListener('touchstart', this.mousedown);
+    window.removeEventListener('touchend', this.mouseup);
   }
 
   allIdeas: Idea[] = [];
@@ -531,14 +504,6 @@ export default class Participant extends Vue {
     setTimeout(() => {
       this.changeText();
     }, 100);
-  }
-
-  draw(e: MouseEvent): void {
-    this.mousePos = [e.offsetX, e.offsetY];
-  }
-
-  async update_drawing(): Promise<void> {
-    this.bodies.show();
   }
 }
 </script>

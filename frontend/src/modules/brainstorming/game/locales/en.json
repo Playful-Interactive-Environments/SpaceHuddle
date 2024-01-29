@@ -7,5 +7,16 @@
     "keepShaking": "keep shaking",
     "startShaking": "Start shaking to get inspiration from other users. Use these ideas as an impetus for your own ideas.",
     "noInspiration": "No texts would be delivered yet. Please be patient for a moment."
+  },
+  "moderatorConfig": {
+    "mode": "mode"
+  },
+  "enum": {
+    "mode": {
+      "Canvas": "canvas",
+      "Pixi": "pixi",
+      "PixiVue": "pixi VUE",
+      "GameEngine": "game engine"
+    }
   }
 }
