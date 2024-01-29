@@ -50,7 +50,7 @@ export class CombinedInputManager {
       this.taskId,
       this.orderType,
       null,
-      (result: any) => this._updateIdeas(result),
+      this.callUpdateIdeas,
       authHeaderType,
       20
     );
@@ -58,20 +58,20 @@ export class CombinedInputManager {
       this.taskId,
       this.orderType,
       null,
-      (result: any) => this._updateInputIdeas(result),
+      this.callUpdateInputIdeas,
       authHeaderType,
       60 * 60
     );
     if (determineVotes) {
       taskService.registerGetTaskById(
         this.taskId,
-        (result: any) => this._updateTask(result),
+        this.callUpdateTask,
         authHeaderType,
         60 * 60
       );
       this._votesCash = votingService.registerGetVotes(
         this.taskId,
-        (result: any) => this._updateVotes(result),
+        this.callUpdateVotes,
         authHeaderType,
         20
       );
@@ -79,7 +79,7 @@ export class CombinedInputManager {
         this._voteParameterCash = votingService.registerGetParameterResult(
           this.taskId,
           'points',
-          (result: any) => this._updateParameterResults(result),
+          this.callUpdateParameterResults,
           authHeaderType,
           20
         );
@@ -87,34 +87,36 @@ export class CombinedInputManager {
     }
   }
 
+  private readonly callUpdateTask = (result: any) => this._updateTask(result);
+  private readonly callUpdateIdeas = (result: any) => this._updateIdeas(result);
+  private readonly callUpdateInputIdeas = (result: any) =>
+    this._updateInputIdeas(result);
+  private readonly callUpdateVotes = (result: any) => this._updateVotes(result);
+  private readonly callUpdateParameterResults = (result: any) =>
+    this._updateParameterResults(result);
+  private readonly callUpdateInputVotes = (result: any) =>
+    this._updateInputVotes(result);
+  private readonly callUpdateInputParameterResults = (result: any) =>
+    this._updateInputParameterResults(result);
+
   deregisterAll(): void {
-    cashService.deregisterAllGet((result: any) => this._updateTask(result));
-    cashService.deregisterAllGet((result: any) => this._updateIdeas(result));
-    cashService.deregisterAllGet((result: any) =>
-      this._updateInputIdeas(result)
-    );
-    cashService.deregisterAllGet((result: any) => this._updateVotes(result));
-    cashService.deregisterAllGet((result: any) =>
-      this._updateParameterResults(result)
-    );
-    cashService.deregisterAllGet((result: any) =>
-      this._updateInputVotes(result)
-    );
-    cashService.deregisterAllGet((result: any) =>
-      this._updateInputParameterResults(result)
-    );
+    cashService.deregisterAllGet(this.callUpdateTask);
+    cashService.deregisterAllGet(this.callUpdateIdeas);
+    cashService.deregisterAllGet(this.callUpdateInputIdeas);
+    cashService.deregisterAllGet(this.callUpdateVotes);
+    cashService.deregisterAllGet(this.callUpdateParameterResults);
+    cashService.deregisterAllGet(this.callUpdateInputVotes);
+    cashService.deregisterAllGet(this.callUpdateInputParameterResults);
   }
 
   private _updateTask(task: Task): void {
     this.task = task;
-    cashService.deregisterAllGet((result: any) =>
-      this._updateInputVotes(result)
-    );
+    cashService.deregisterAllGet(this.callUpdateInputVotes);
     if (task.parameter.input.length > 0) {
       const inputTaskId = task.parameter.input[0].view.id;
       this._inputVotesCash = votingService.registerGetVotes(
         inputTaskId,
-        (result: any) => this._updateInputVotes(result),
+        this.callUpdateInputVotes,
         this._authHeaderType,
         60 * 60
       );
@@ -122,7 +124,7 @@ export class CombinedInputManager {
         this._inputVoteParameterCash = votingService.registerGetParameterResult(
           inputTaskId,
           'points',
-          (result: any) => this._updateInputParameterResults(result),
+          this.callUpdateInputParameterResults,
           this._authHeaderType,
           60 * 60
         );

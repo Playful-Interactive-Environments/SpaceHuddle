@@ -38,7 +38,7 @@ export class MissionInputData {
     this.deregisterAll();
     taskService.registerGetTaskById(
       taskId,
-      (result) => this._updateTask(result),
+      this.callUpdateTask,
       authHeaderType,
       60 * 60
     );
@@ -47,7 +47,7 @@ export class MissionInputData {
       taskId,
       orderType,
       null,
-      (result) => this._updateInputIdeas(result),
+      this.callUpdateInputIdeas,
       authHeaderType,
       20
     );
@@ -55,40 +55,46 @@ export class MissionInputData {
       taskId,
       orderType,
       null,
-      (result) => this._updateOwnIdeas(result),
+      this.callUpdateOwnIdeas,
       authHeaderType,
       20
     );
     votingService.registerGetParameterResult(
       taskId,
       'points',
-      (result) => this._updateOwnVoteResult(result),
+      this.callUpdateOwnVoteResult,
       authHeaderType,
       60
     );
   }
 
+  private readonly callUpdateTask = (result: any) => this._updateTask(result);
+  private readonly callUpdateInputIdeas = (result: any) =>
+    this._updateInputIdeas(result);
+  private readonly callUpdateOwnIdeas = (result: any) =>
+    this._updateOwnIdeas(result);
+  private readonly callUpdateOwnVoteResult = (result: any) =>
+    this._updateOwnVoteResult(result);
+  private readonly callUpdateInputVoteResult = (result: any) =>
+    this._updateInputVoteResult(result);
+
   deregisterAll(): void {
-    cashService.deregisterAllGet((result: any) => this._updateTask(result));
-    cashService.deregisterAllGet((result) => this._updateInputIdeas(result));
-    cashService.deregisterAllGet((result) => this._updateOwnIdeas(result));
-    cashService.deregisterAllGet((result) => this._updateOwnVoteResult(result));
-    cashService.deregisterAllGet((result) =>
-      this._updateInputVoteResult(result)
-    );
+    cashService.deregisterAllGet(this.callUpdateTask);
+    cashService.deregisterAllGet(this.callUpdateInputIdeas);
+    cashService.deregisterAllGet(this.callUpdateOwnIdeas);
+    cashService.deregisterAllGet(this.callUpdateOwnVoteResult);
+    cashService.deregisterAllGet(this.callUpdateInputVoteResult);
   }
 
   _updateTask(task: Task): void {
     if (!this.task && task.parameter.input.length > 0) {
       this.inputTaskId = task.parameter.input[0].view.id;
-      cashService.deregisterAllGet((result) =>
-        this._updateInputVoteResult(result)
-      );
+      cashService.deregisterAllGet(this.callUpdateInputVoteResult);
       if (this.inputTaskId) {
         votingService.registerGetParameterResult(
           this.inputTaskId,
           'points',
-          (result) => this._updateInputVoteResult(result),
+          this.callUpdateInputVoteResult,
           this.authHeaderType,
           60
         );

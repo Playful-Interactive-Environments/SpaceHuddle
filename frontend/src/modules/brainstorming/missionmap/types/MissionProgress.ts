@@ -34,7 +34,7 @@ export class MissionProgress {
     this.deregisterAll();
     taskService.registerGetTaskById(
       taskId,
-      (result) => this._updateTask(result),
+      this.callUpdateTask,
       authHeaderType,
       60 * 60
     );
@@ -42,23 +42,28 @@ export class MissionProgress {
       taskId,
       orderType,
       null,
-      (result) => this._updateIdeas(result),
+      this.callUpdateIdeas,
       authHeaderType,
       20
     );
     votingService.registerGetParameterResult(
       taskId,
       'points',
-      (result) => this._updateVoteResult(result),
+      this.callUpdateVoteResult,
       authHeaderType,
       60
     );
   }
 
+  private readonly callUpdateTask = (result: any) => this._updateTask(result);
+  private readonly callUpdateIdeas = (result: any) => this._updateIdeas(result);
+  private readonly callUpdateVoteResult = (result: any) =>
+    this._updateVoteResult(result);
+
   deregisterAll(): void {
-    cashService.deregisterAllGet((result: any) => this._updateTask(result));
-    cashService.deregisterAllGet((result) => this._updateIdeas(result));
-    cashService.deregisterAllGet((result) => this._updateVoteResult(result));
+    cashService.deregisterAllGet(this.callUpdateTask);
+    cashService.deregisterAllGet(this.callUpdateIdeas);
+    cashService.deregisterAllGet(this.callUpdateVoteResult);
     if (this.saveElectricityProgress) delete globalThis.electricityProgress;
   }
 
