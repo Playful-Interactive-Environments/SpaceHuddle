@@ -303,7 +303,8 @@ export default class ParticipantOverview extends Vue {
   oldBodyHeight = 'unset';
   mounted(): void {
     this.oldBodyHeight = document.body.style.height;
-    document.body.style.height = 'unset';
+    document.body.style.removeProperty('height');
+    document.body.style.removeProperty('overflow-y');
     this.avatar = authService.getAvatar();
     sessionService.registerGetParticipantSession(
       this.updateSession,

@@ -132,6 +132,7 @@ export default class Participant extends Vue {
   }
 
   unmounted(): void {
+    document.body.style.removeProperty('overflow-y');
     this.deregisterAll();
     unregisterDomElement(this.domKey);
   }
