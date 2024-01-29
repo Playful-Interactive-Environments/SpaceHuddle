@@ -21,6 +21,7 @@
                 v-if="canModify"
                 class="card__menu"
                 v-on:command="menuItemSelected($event)"
+                trigger="click"
               >
                 <span class="el-dropdown-link">
                   <font-awesome-icon icon="ellipsis-h" />
@@ -261,14 +262,26 @@ export default class TopicCard extends Vue {
   .level-right {
     flex-direction: column;
     align-items: stretch;
+    flex-wrap: wrap;
   }
 
   .level-right {
     align-items: center;
+    justify-content: center;
   }
 
   .level-left .level-item:not(:last-child) {
     margin-right: 0;
+  }
+
+  .level-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .settings {
+    align-self: center;
   }
 
   .level-item:not(:last-child) {

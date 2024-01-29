@@ -26,7 +26,7 @@
         :custom-scale-factor="customScale"
       ></LevelBuilder>
     </div>
-    <el-container>
+    <el-container class="content-container">
       <el-aside>
         <IdeaMap
           v-if="module"
@@ -502,8 +502,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   selectLevel(level: Idea): void {
-    this.selectedLevelType = getLevelType(level, gameConfig.obstacles as any);
-    this.selectedLevel = level;
+    if (this.selectedLevel !== level) {
+      this.selectedLevelType = getLevelType(level, gameConfig.obstacles as any);
+      this.selectedLevel = level;
+    } else {
+      this.selectedLevelType = '';
+      this.selectedLevel = null;
+    }
   }
 
   @Watch('showSettings', { immediate: true })
@@ -566,15 +571,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   color: var(--level-type-color);
 }
 
-.el-aside {
-  overflow: hidden;
-  --el-aside-width: 50%;
-  margin-right: 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
-}
-
 .level-layout {
   height: 25rem;
   margin-bottom: 0.5rem;
@@ -586,5 +582,30 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   flex-direction: column;
   align-items: stretch;
   padding-bottom: 1rem;
+}
+
+@media only screen and (min-width: 950px) {
+  .el-aside {
+    overflow: hidden;
+    --el-aside-width: 50%;
+    padding-right: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+  }
+}
+
+@media only screen and (max-width: 949px) {
+  .content-container {
+    flex-direction: column;
+  }
+  .el-aside {
+    overflow: hidden;
+    --el-aside-width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    height: 50vh;
+  }
 }
 </style>

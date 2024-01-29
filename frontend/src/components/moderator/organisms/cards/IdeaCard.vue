@@ -3,8 +3,8 @@
     :id="idea.id"
     ref="ideaCard"
     shadow="never"
-    v-on:click="changeSelection"
     class="idea-card"
+    v-on:click="changeSelection"
     :class="{
       landscape: !portrait,
       card: !portrait,
@@ -59,6 +59,7 @@
             v-if="isEditable"
             class="card__menu"
             v-on:command="menuItemSelected($event)"
+            trigger="click"
           >
             <span class="el-dropdown-link">
               <font-awesome-icon icon="ellipsis-h" />

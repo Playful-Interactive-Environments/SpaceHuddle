@@ -411,4 +411,25 @@ export default class IdeaFilter extends Vue {
 .el-input {
   width: 12rem;
 }
+
+.level-right {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: 0.4rem;
+}
+
+.level-left {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  .level-item {
+    width: 45%;
+    margin: 0.4rem;
+  }
+}
+
 </style>

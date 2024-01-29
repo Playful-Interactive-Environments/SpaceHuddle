@@ -398,7 +398,7 @@ export default class Participant extends Vue {
         this.gameIdeaInstance,
         EndpointAuthorisationType.PARTICIPANT
       );
-      await delay(5000);
+      await delay(1000);
       switch (this.gameIdeaInstance.parameter.active) {
         case false:
           this.gameIdeaInstance.parameter.playerNum += 1;

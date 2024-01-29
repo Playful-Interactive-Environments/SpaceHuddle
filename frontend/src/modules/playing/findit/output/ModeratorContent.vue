@@ -1,7 +1,7 @@
 <template>
   <div class="module-content">
     <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
-    <el-container>
+    <el-container class="content-container">
       <el-aside v-if="selectedLevel">
         <el-tabs v-model="activeTab" v-if="selectedLevel" type="border-card">
           <el-tab-pane
@@ -474,9 +474,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   selectLevel(level: Idea): void {
-    this.selectedLevelType = '';
-    this.selectedLevel = level;
-    this.activeTab = 'play';
+    if (this.selectedLevel !== level) {
+      this.selectedLevelType = '';
+      this.selectedLevel = level;
+      this.activeTab = 'play';
+    } else {
+      this.selectedLevel = null;
+    }
   }
 
   approved(): void {
@@ -543,15 +547,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   color: var(--level-type-color);
 }
 
-.el-aside {
-  overflow: hidden;
-  --el-aside-width: 50%;
-  padding-right: 2rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
-}
-
 .module-content {
   display: flex;
   flex: 1;
@@ -563,5 +558,30 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 .el-tabs::v-deep(.el-tabs__content) {
   background-color: transparent;
   padding: 0;
+}
+
+@media only screen and (min-width: 950px) {
+  .el-aside {
+    overflow: hidden;
+    --el-aside-width: 50%;
+    padding-right: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+  }
+}
+
+@media only screen and (max-width: 949px) {
+  .content-container {
+    flex-direction: column;
+  }
+  .el-aside {
+    overflow: hidden;
+    --el-aside-width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    height: 50vh;
+  }
 }
 </style>

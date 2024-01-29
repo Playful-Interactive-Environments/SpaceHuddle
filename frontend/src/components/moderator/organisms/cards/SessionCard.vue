@@ -9,6 +9,7 @@
               v-if="isModerator"
               class="card__menu"
               v-on:command="menuItemSelected"
+              trigger="click"
             >
               <span class="el-dropdown-link">
                 <font-awesome-icon icon="ellipsis-h" />
