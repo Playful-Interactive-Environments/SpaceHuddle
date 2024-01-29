@@ -56,6 +56,15 @@ export default class SidebarHeader extends Vue {
     justify-content: space-between;
     width: 100%;
 
+    span.toggleSidebarButton {
+      svg {
+        position: relative;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
     span.sidebar_icons {
       align-items: center;
 
@@ -74,6 +83,10 @@ export default class SidebarHeader extends Vue {
 
   &__logo {
     font-size: 1.3rem;
+    text-align: center;
+    margin-right: auto;
+    margin-left: 1rem;
+    transform: translateY(-3px);
   }
 }
 </style>
