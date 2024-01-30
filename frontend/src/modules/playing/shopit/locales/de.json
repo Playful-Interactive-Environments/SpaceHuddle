@@ -69,11 +69,11 @@
     "winPoints": "Dein Gegner hat seine maximalen Emissionen überschreitet.",
     "endCards": "Dies sind die teuersten Karten jeder Ressource, die du gespielt hast:",
     "endCardTexts": {
-      "CO²": "CO2 Information",
-      "electricity": "electricity Information",
-      "lifetime": "lifetime Information",
-      "water": "water Information",
-      "money": "money Information"
+      "CO²": "Es mag Sie überraschen zu erfahren, dass die Modeindustrie etwa 10 Prozent der jährlichen globalen Kohlendioxidemissionen produziert. Ein T-Shirt entspricht durchschnittlich 7 kg CO2-Äquivalent.",
+      "electricity": "Die Herstellung eines T-Shirts umfasst verschiedene Prozesse wie Stricken & Weben, Nassbehandlung oder Konfektionierung. Diese Prozesse erfordern etwa 10 kWh Energie.",
+      "lifetime": "Die Haltbarkeit eines T-Shirts kann oft sowohl von der Qualität des T-Shirts als auch von der Anzahl der Male, die es gewaschen wurde, beeinflusst werden. Einige T-Shirts halten 6 Monate, andere 2-5 Jahre oder länger.",
+      "water": "Bei der Produktion von Baumwolle werden etwa 2.700 Liter Wasser benötigt, um nur ein T-Shirt herzustellen, was ausreicht, um eine Person 900 Tage lang mit Wasser zu versorgen.",
+      "money": "Im Durchschnitt kann ein einfaches, schlichtes T-Shirt zwischen 5€ und 30€ kosten, während Designer- oder Marken-T-Shirts zwischen 30€ und 100€ oder mehr kosten können."
     },
     "cardProperties": {
       "CO²": "CO²",
