@@ -118,26 +118,49 @@ export default class ModeratorNavigationLayout extends Vue {
   }
 }
 
-.level-right {
-  min-height: var(--header-height);
-  padding: 0 2em 0 0;
-
-  .level-item {
-    padding-left: 3em;
-    margin-top: 2em;
-    margin-bottom: 2em;
+@media only screen and (max-width: 949px) {
+  .level-left {
+    min-height: var(--header-height);
+    display: none;
+  }
+  .level-right {
+    padding: 0 1em 0 1em;
+    .level-item {
+      padding-left: 1.5em;
+      padding-right: 1.5em;
+      margin-top: 2em;
+      margin-bottom: 2em;
+    }
   }
 }
 
-.level-left {
-  min-height: var(--header-height);
-  padding: 0 0 0 2em;
+@media only screen and (min-width: 950px) {
+  .level-left {
+    min-height: var(--header-height);
+    padding: 0 0 0 2em;
 
-  .level-item {
-    padding-right: 3em;
-    margin-top: 2em;
-    margin-bottom: 2em;
+    .level-item {
+      padding-right: 3em;
+      margin-top: 2em;
+      margin-bottom: 2em;
+    }
   }
+  .level-right {
+    padding: 0 2em 0 0;
+    .level-item {
+      padding-left: 3em;
+      margin-top: 2em;
+      margin-bottom: 2em;
+    }
+  }
+}
+
+.level-right {
+  min-height: var(--header-height);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }
 
 .nav {
