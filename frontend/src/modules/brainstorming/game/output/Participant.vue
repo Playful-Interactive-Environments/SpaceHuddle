@@ -124,7 +124,7 @@ export default class Participant extends Vue {
 
   randomIdea: Idea | null = null;
 
-  mode: CanvasMode = CanvasMode.Canvas;
+  mode: CanvasMode = CanvasMode.None;
   CanvasMode = CanvasMode;
 
   physicBodies: PhysicBodies | null = null;

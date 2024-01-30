@@ -5,7 +5,9 @@
   >
     <el-select v-model="modelValue.mode">
       <el-option
-        v-for="mode in Object.keys(CanvasMode)"
+        v-for="mode in Object.keys(CanvasMode).filter(
+          (item) => CanvasMode[item] !== CanvasMode.None
+        )"
         :key="mode"
         :value="mode"
         :label="$t(`module.brainstorming.game.enum.mode.${CanvasMode[mode]}`)"
@@ -21,6 +23,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 
 export enum CanvasMode {
+  None = 'None',
   Canvas = 'Canvas',
   Pixi = 'Pixi',
   PixiVue = 'PixiVue',

@@ -5,6 +5,11 @@
       :physic-bodies="physicBodies"
       :animation-timeline="animationTimeline"
     />
+    <PixiCanvas
+      v-else-if="canvasMode === CanvasMode.Pixi && physicBodies"
+      :physic-bodies="physicBodies"
+      :animation-timeline="animationTimeline"
+    />
   </div>
 </template>
 
@@ -16,9 +21,11 @@ import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
 import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
 import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.vue';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
+import PixiCanvas from '@/modules/brainstorming/game/organisms/PixiCanvas.vue';
 
 @Options({
   components: {
+    PixiCanvas,
     Canvas,
   },
   emits: [],
@@ -26,7 +33,7 @@ import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PhysicsContainer extends Vue {
-  @Prop({ default: CanvasMode.Canvas }) readonly canvasMode!: CanvasMode;
+  @Prop({ default: CanvasMode.None }) readonly canvasMode!: CanvasMode;
   @Prop() readonly animationTimeline!: AnimationTimeline;
   @Prop({ default: [0, -1, 0] }) readonly gravity!: [number, number, number];
   physicBodies: PhysicBodies | null = null;

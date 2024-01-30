@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { GradientFactory } from '@pixi-essentials/gradients';
 import { delay, until } from '@/utils/wait';
-import { Emitter } from 'mitt';
 import { EventType } from '@/types/enum/EventType';
 import { v4 as uuidv4 } from 'uuid';
 import app from '@/main';
@@ -11,6 +10,8 @@ export function drawCircleWithGradient(
   circle: PIXI.Graphics,
   renderer: PIXI.Renderer,
   radius = 10,
+  offset = 0.5,
+  opacity = 1,
   color = '#ffffff'
 ): void {
   if ((circle as any).radius) radius = (circle as any).radius;
@@ -20,6 +21,8 @@ export function drawCircleWithGradient(
     height: radius * 2,
   });
   if (!(renderer.renderTexture as any).renderer) return;
+  let gradOpacity = Math.floor(opacity * 255).toString(16);
+  if (gradOpacity.length === 1) gradOpacity = `0${gradOpacity}`;
   GradientFactory.createRadialGradient(renderer, renderTexture, {
     x0: radius,
     y0: radius,
@@ -28,8 +31,8 @@ export function drawCircleWithGradient(
     y1: radius,
     r1: radius,
     colorStops: [
-      { color: '#ffffffff', offset: 0.5 },
-      { color: '#ffffff00', offset: 1 },
+      { color: `#FFFFFF${gradOpacity}`, offset: 1 - offset },
+      { color: '#FFFFFF00', offset: 1 },
     ],
   });
   const matrix: PIXI.Matrix = new PIXI.Matrix();
@@ -113,10 +116,12 @@ export function drawRectWithGradient(
 
 export function generateCircleGradientTexture(
   radius: number,
-  renderer: PIXI.Renderer
+  renderer: PIXI.Renderer,
+  offset = 0.5,
+  opacity = 1
 ): PIXI.Texture {
   const circle = new PIXI.Graphics();
-  drawCircleWithGradient(circle, renderer, radius);
+  drawCircleWithGradient(circle, renderer, radius, offset, opacity);
   const bounds = new PIXI.Rectangle(-radius, -radius, radius * 2, radius * 2);
   return renderer.generateTexture(circle, {
     region: bounds,
