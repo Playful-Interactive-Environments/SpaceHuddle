@@ -9,6 +9,7 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 import { CanvasBodies } from '@/modules/brainstorming/game/types/CanvasBodies';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
+import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
 
 @Options({
   components: {
@@ -20,6 +21,7 @@ import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Canvas extends Vue {
   @Prop() readonly physicBodies!: PhysicBodies;
+  @Prop() readonly animationTimeline!: AnimationTimeline;
   vueCanvas!: CanvasRenderingContext2D;
   readonly drawingIntervalTime = 100;
   drawingInterval!: any;
@@ -53,6 +55,7 @@ export default class Canvas extends Vue {
           this.bodies = new CanvasBodies(
             this.vueCanvas,
             this.physicBodies,
+            this.animationTimeline,
             this.vueCanvasWidth,
             this.vueCanvasHeight
           );

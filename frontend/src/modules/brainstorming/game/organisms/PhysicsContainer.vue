@@ -1,0 +1,136 @@
+<template>
+  <div ref="container">
+    <Canvas
+      v-if="canvasMode === CanvasMode.Canvas && physicBodies"
+      :physic-bodies="physicBodies"
+      :animation-timeline="animationTimeline"
+    />
+  </div>
+</template>
+
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
+import Canvas from '@/modules/brainstorming/game/organisms/Canvas.vue';
+import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
+import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
+import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.vue';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
+
+@Options({
+  components: {
+    Canvas,
+  },
+  emits: [],
+})
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+export default class PhysicsContainer extends Vue {
+  @Prop({ default: CanvasMode.Canvas }) readonly canvasMode!: CanvasMode;
+  @Prop() readonly animationTimeline!: AnimationTimeline;
+  @Prop({ default: [0, -1, 0] }) readonly gravity!: [number, number, number];
+  physicBodies: PhysicBodies | null = null;
+  CanvasMode = CanvasMode;
+
+  containerWidth = 100;
+  containerHeight = 100;
+
+  domKey = '';
+  async mounted(): Promise<void> {
+    this.domKey = registerDomElement(
+      this.$refs.container as HTMLElement,
+      (targetWidth, targetHeight) => {
+        this.containerWidth = targetWidth;
+        this.containerHeight = targetHeight;
+        this.setupPhysics();
+      },
+      0
+    );
+
+    window.addEventListener('mousedown', this.mousedown);
+    window.addEventListener('mouseup', this.mouseup);
+    window.addEventListener('touchstart', this.mousedown);
+    window.addEventListener('touchend', this.mouseup);
+  }
+
+  async unmounted(): Promise<void> {
+    unregisterDomElement(this.domKey);
+    window.removeEventListener('mousedown', this.mousedown);
+    window.removeEventListener('mouseup', this.mouseup);
+    window.removeEventListener('touchstart', this.mousedown);
+    window.removeEventListener('touchend', this.mouseup);
+  }
+
+  private mousedown(): void {
+    if (this.physicBodies) this.physicBodies.pressBody();
+  }
+
+  private mouseup(): void {
+    if (this.physicBodies) this.physicBodies.releaseBody();
+  }
+
+  setupPhysics(): void {
+    this.physicBodies = new PhysicBodies(
+      this.containerWidth,
+      this.containerHeight,
+      this.$refs.container as HTMLElement
+    );
+    const letterCount = 26;
+    const circleCount = 100;
+    const fillFactor = 1.5;
+    const areaPerCircle =
+      (this.containerWidth * this.containerHeight) / circleCount / fillFactor;
+    const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
+    const minRadius = maxRadius / 2;
+    for (let i = 0; i < circleCount; i++) {
+      const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
+      const x = Math.floor(Math.random() * (this.containerWidth - r * 2) + r);
+      const y = Math.floor(Math.random() * (this.containerHeight - r * 2) + r);
+      const a = 'A';
+      const text = String.fromCharCode(a.charCodeAt(0) + (i % letterCount));
+      this.physicBodies.addCircle(x, y, r, { text: text, gradientSize: r });
+    }
+    const borderSize = 1;
+    this.physicBodies.addRect(
+      this.containerWidth / 2,
+      this.containerHeight - borderSize / 2,
+      this.containerWidth,
+      borderSize,
+      { isStatic: true, isHidden: true }
+    );
+    this.physicBodies.addRect(
+      this.containerWidth / 2,
+      borderSize / 2,
+      this.containerWidth,
+      borderSize,
+      { isStatic: true, isHidden: true }
+    );
+    this.physicBodies.addRect(
+      borderSize / 2,
+      this.containerHeight / 2,
+      borderSize,
+      this.containerHeight,
+      { isStatic: true, isHidden: true }
+    );
+    this.physicBodies.addRect(
+      this.containerWidth - borderSize / 2,
+      this.containerHeight / 2,
+      borderSize,
+      this.containerHeight,
+      { isStatic: true, isHidden: true }
+    );
+  }
+
+  @Watch('gravity', { immediate: true })
+  onGravityChanged(): void {
+    if (this.physicBodies)
+      this.physicBodies.setGravity(
+        this.gravity[0],
+        this.gravity[1],
+        this.gravity[2]
+      );
+  }
+}
+</script>
+
+<style lang="scss" scoped></style>

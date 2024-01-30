@@ -1,8 +1,10 @@
 <template>
   <div class="canvas-container" ref="container">
-    <Canvas
-      v-if="mode === CanvasMode.Canvas && physicBodies"
-      :physic-bodies="physicBodies"
+    <PhysicsContainer
+      v-if="mode !== CanvasMode.GameEngine && animationTimeline"
+      :canvas-mode="mode"
+      :animation-timeline="animationTimeline"
+      :gravity="gravity"
     />
     <div
       class="text-animation text-animation-center"
@@ -14,7 +16,7 @@
       </span>
     </div>
     <div
-      class="text-animation text-animation-bottom"
+      class="noInteraction text-animation text-animation-bottom"
       ref="textAnimationKeepShaking"
     >
       <span
@@ -27,7 +29,7 @@
       </span>
     </div>
     <div
-      class="text-animation text-animation-bottom text-animation-small"
+      class="noInteraction text-animation text-animation-bottom text-animation-small"
       ref="textAnimationStartShaking"
     >
       <span
@@ -40,7 +42,7 @@
       </span>
     </div>
     <div
-      class="text-animation text-animation-center"
+      class="noInteraction text-animation text-animation-center"
       ref="textAnimationNoInspiration"
     >
       <span
@@ -52,10 +54,10 @@
         {{ char }}
       </span>
     </div>
-    <div class="overlay disable-text-selection">
-      <div class="awesome-icon link" v-on:click="isShaking()">
+    <div class="noInteraction overlay disable-text-selection">
+      <span class="awesome-icon link" v-on:click="isShaking()">
         <font-awesome-icon :icon="['fac', 'shake']" />
-      </div>
+      </span>
     </div>
   </div>
 </template>
@@ -69,6 +71,7 @@ import { Idea } from '@/types/api/Idea';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
+import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
 import Canvas from '@/modules/brainstorming/game/organisms/Canvas.vue';
 import NoSleep from 'nosleep.js';
 import * as viewService from '@/services/view-service';
@@ -80,6 +83,7 @@ import * as cashService from '@/services/cash-service';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { CanvasMode } from './ModeratorConfig.vue';
 import { isMobile } from '@/utils/dom';
+import PhysicsContainer from '@/modules/brainstorming/game/organisms/PhysicsContainer.vue';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -94,7 +98,7 @@ const orientations: string[][] = [
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rad: number = Math.PI / 180;
 
-enum TextType {
+export enum TextType {
   Inspiration = 0,
   StartShaking = 1,
   KeepShaking = 2,
@@ -102,6 +106,7 @@ enum TextType {
 
 @Options({
   components: {
+    PhysicsContainer,
     ParticipantModuleDefaultContainer,
     Canvas,
   },
@@ -123,6 +128,8 @@ export default class Participant extends Vue {
   CanvasMode = CanvasMode;
 
   physicBodies: PhysicBodies | null = null;
+  animationTimeline: AnimationTimeline | null = null;
+  gravity: [number, number, number] = [0, 1, 0];
   shakeEvent: any;
   noSleep!: NoSleep;
 
@@ -194,14 +201,14 @@ export default class Participant extends Vue {
     textSize = 48
   ): void {
     const top = textSpan.parentNode.getBoundingClientRect().top;
-    if (textSpan && this.physicBodies) {
-      this.physicBodies.clearTexts(textId);
+    if (textSpan && this.animationTimeline) {
+      this.animationTimeline.clearTexts(textId);
       const textAnimation = textSpan as any;
       const rectAnimation = textAnimation.getBoundingClientRect();
       for (const span of textAnimation.childNodes) {
         if (span.tagName === 'SPAN') {
           const rect = span.getBoundingClientRect();
-          this.physicBodies.addText(
+          this.animationTimeline.addText(
             span.innerHTML,
             (rect.left + rect.right) / 2 - rectAnimation.x,
             rect.top + rect.height / 2 - top,
@@ -280,28 +287,15 @@ export default class Participant extends Vue {
       (targetWidth, targetHeight) => {
         this.containerWidth = targetWidth;
         this.containerHeight = targetHeight;
-        this.setupPhysics();
+        this.setupAnimationTimeline();
         window.addEventListener('deviceorientation', this.onOrientationChange);
         this.setupShaking();
       },
       0
     );
 
-    window.addEventListener('mousedown', this.mousedown);
-    window.addEventListener('mouseup', this.mouseup);
-    window.addEventListener('touchstart', this.mousedown);
-    window.addEventListener('touchend', this.mouseup);
-
     this.noSleep = new NoSleep();
     this.noSleep.enable();
-  }
-
-  private mousedown(): void {
-    if (this.physicBodies) this.physicBodies.pressBody();
-  }
-
-  private mouseup(): void {
-    if (this.physicBodies) this.physicBodies.releaseBody();
   }
 
   setupShaking(): void {
@@ -316,8 +310,8 @@ export default class Participant extends Vue {
   lastShakingTime = 0;
   maxShakingDelay = 4 * 1000;
   isShaking(): void {
-    const animationInterval = 1000;
     const shakingTime = Date.now();
+    /*const animationInterval = 1000;
     const actualShakingForce = (): number => {
       const actualTime = Date.now();
       const directionCount = Math.floor(
@@ -337,13 +331,13 @@ export default class Participant extends Vue {
           }
         }, animationInterval);
       }
-    };
+    };*/
 
     this.lastShakingTime = shakingTime;
 
     if (
-      this.physicBodies &&
-      this.physicBodies.startAnimation(
+      this.animationTimeline &&
+      this.animationTimeline.startAnimation(
         50,
         TextType.Inspiration,
         TextType.StartShaking,
@@ -355,57 +349,11 @@ export default class Participant extends Vue {
     }
   }
 
-  setupPhysics(): void {
-    this.physicBodies = new PhysicBodies(
+  setupAnimationTimeline(): void {
+    this.animationTimeline = new AnimationTimeline(
       this.containerWidth,
-      this.containerHeight,
-      this.$refs.container as HTMLElement
+      this.containerHeight
     );
-    const letterCount = 26;
-    const circleCount = 100;
-    const fillFactor = 1.5;
-    const areaPerCircle =
-      (this.containerWidth * this.containerHeight) / circleCount / fillFactor;
-    const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
-    const minRadius = maxRadius / 2;
-    for (let i = 0; i < circleCount; i++) {
-      const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
-      const x = Math.floor(Math.random() * (this.containerWidth - r * 2) + r);
-      const y = Math.floor(Math.random() * (this.containerHeight - r * 2) + r);
-      const a = 'A';
-      const text = String.fromCharCode(a.charCodeAt(0) + (i % letterCount));
-      this.physicBodies.addCircle(x, y, r, { text: text, gradientSize: r });
-    }
-    const borderSize = 1;
-    this.physicBodies.addRect(
-      this.containerWidth / 2,
-      this.containerHeight - borderSize / 2,
-      this.containerWidth,
-      borderSize,
-      { isStatic: true, isHidden: true }
-    );
-    this.physicBodies.addRect(
-      this.containerWidth / 2,
-      borderSize / 2,
-      this.containerWidth,
-      borderSize,
-      { isStatic: true, isHidden: true }
-    );
-    this.physicBodies.addRect(
-      borderSize / 2,
-      this.containerHeight / 2,
-      borderSize,
-      this.containerHeight,
-      { isStatic: true, isHidden: true }
-    );
-    this.physicBodies.addRect(
-      this.containerWidth - borderSize / 2,
-      this.containerHeight / 2,
-      borderSize,
-      this.containerHeight,
-      { isStatic: true, isHidden: true }
-    );
-
     this.setBodyText(
       this.$refs.textAnimationStartShaking,
       TextType.StartShaking,
@@ -423,8 +371,7 @@ export default class Participant extends Vue {
 
   onOrientationChange(ev: DeviceOrientationEvent): void {
     const vec = this.deviceOrientationEventToVector(ev);
-    if (this.physicBodies)
-      this.physicBodies.setGravity(-vec[0], vec[1], vec[1]);
+    this.gravity = [-vec[0], vec[1], vec[1]];
   }
 
   deviceOrientationEventToVector(
@@ -478,11 +425,6 @@ export default class Participant extends Vue {
     this.shakeEvent.stop();
     this.deregisterAll();
     unregisterDomElement(this.domKey);
-
-    window.removeEventListener('mousedown', this.mousedown);
-    window.removeEventListener('mouseup', this.mouseup);
-    window.removeEventListener('touchstart', this.mousedown);
-    window.removeEventListener('touchend', this.mouseup);
   }
 
   allIdeas: Idea[] = [];
@@ -563,6 +505,14 @@ export default class Participant extends Vue {
   font-family: Arial, sans-serif;
   font-size: 12px;
   white-space: pre-line;
+}
+
+.noInteraction {
+  pointer-events: none;
+}
+
+.link {
+  pointer-events: auto;
 }
 
 html,

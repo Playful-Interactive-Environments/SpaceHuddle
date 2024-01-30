@@ -1,21 +1,25 @@
 import { isNumber } from 'chart.js/helpers';
 import * as Matter from 'matter-js/build/matter.js';
 import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
+import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 export class CanvasBodies {
   physicBodies: PhysicBodies;
+  animationTimeline: AnimationTimeline;
   canvasWidth = 0;
   canvasHeight = 0;
   ctx!: CanvasRenderingContext2D;
   constructor(
     ctx: CanvasRenderingContext2D,
     physicBodies: PhysicBodies,
+    animationTimeline: AnimationTimeline,
     canvasWidth: number,
     canvasHeight: number
   ) {
     this.physicBodies = physicBodies;
+    this.animationTimeline = animationTimeline;
     this.ctx = ctx;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
@@ -93,11 +97,11 @@ export class CanvasBodies {
     this.frame++;
 
     this.clearCanvas();
-    if (this.physicBodies.animationTimeline.animationFrame === -1)
+    if (this.animationTimeline.timeline.animationFrame === -1)
       this.showBodies(255);
     else {
-      const frame = this.physicBodies.getKeyframeValue(
-        this.physicBodies.animationTimeline.animationFrame
+      const frame = this.animationTimeline.getKeyframeValue(
+        this.animationTimeline.timeline.animationFrame
       );
       if (frame && frame.opacity !== undefined) {
         const opacity = Math.floor(frame.opacity);
@@ -121,11 +125,11 @@ export class CanvasBodies {
         if (frame.forceDirection !== undefined) {
           if (frame.forceDirection === 'both') return true;
           return (
-            this.physicBodies.animationTimeline.animationDelta ===
+            this.animationTimeline.timeline.animationDelta ===
             frame.forceDirection
           );
         }
-        return this.physicBodies.animationTimeline.animationDelta === 1;
+        return this.animationTimeline.timeline.animationDelta === 1;
       };
       if (frame && frame.force !== undefined && useForce()) {
         const getRandomForceValue = (): number => {
@@ -156,63 +160,63 @@ export class CanvasBodies {
         const textProgressLength = 100;
 
         this.animateText(
-          this.physicBodies.animationTimeline.textAnimationId,
+          this.animationTimeline.timeline.textAnimationId,
           textProgressLength,
           textProgress
         );
       }
     }
-    if (this.physicBodies.isLastKeyframe()) {
-      this.physicBodies.animationTimeline.animationDelta = -1;
-      this.physicBodies.animationTimeline.infoTextFrame = 0;
+    if (this.animationTimeline.isLastKeyframe()) {
+      this.animationTimeline.timeline.animationDelta = -1;
+      this.animationTimeline.timeline.infoTextFrame = 0;
     }
-    if (this.physicBodies.animationTimeline.animationFrame >= 0)
-      this.physicBodies.animationTimeline.animationFrame +=
-        this.physicBodies.animationTimeline.animationDelta;
+    if (this.animationTimeline.timeline.animationFrame >= 0)
+      this.animationTimeline.timeline.animationFrame +=
+        this.animationTimeline.timeline.animationDelta;
     if (
-      this.physicBodies.animationTimeline.maxRunningFrame <
-      this.physicBodies.animationTimeline.animationFrame
+      this.animationTimeline.timeline.maxRunningFrame <
+      this.animationTimeline.timeline.animationFrame
     )
-      this.physicBodies.animationTimeline.maxRunningFrame =
-        this.physicBodies.animationTimeline.animationFrame;
+      this.animationTimeline.timeline.maxRunningFrame =
+        this.animationTimeline.timeline.animationFrame;
 
     if (
-      this.physicBodies.animationTimeline.animationDelta === -1 &&
-      this.physicBodies.animationTimeline.maxRunningFrame > 0 &&
-      this.physicBodies.animationTimeline.maxRunningFrame <
-        this.physicBodies.animationTimeline.animationCompletedFrame
+      this.animationTimeline.timeline.animationDelta === -1 &&
+      this.animationTimeline.timeline.maxRunningFrame > 0 &&
+      this.animationTimeline.timeline.maxRunningFrame <
+        this.animationTimeline.timeline.animationCompletedFrame
     ) {
       const textProgressLength = 15;
       const textProgress =
-        this.physicBodies.animationTimeline.infoTextFrame < textProgressLength
-          ? this.physicBodies.animationTimeline.infoTextFrame
+        this.animationTimeline.timeline.infoTextFrame < textProgressLength
+          ? this.animationTimeline.timeline.infoTextFrame
           : textProgressLength;
       this.animateText(
-        this.physicBodies.animationTimeline.textAnimationKeepId,
+        this.animationTimeline.timeline.textAnimationKeepId,
         textProgressLength,
         textProgress,
         100
       );
-      this.physicBodies.animationTimeline.infoTextFrame++;
+      this.animationTimeline.timeline.infoTextFrame++;
     }
 
     if (
-      this.physicBodies.animationTimeline.animationDelta === 1 &&
-      this.physicBodies.animationTimeline.maxRunningFrame === 0 &&
+      this.animationTimeline.timeline.animationDelta === 1 &&
+      this.animationTimeline.timeline.maxRunningFrame === 0 &&
       this.frame > 200
     ) {
       const textProgressLength = 15;
       const textProgress =
-        this.physicBodies.animationTimeline.infoTextFrame < textProgressLength
-          ? this.physicBodies.animationTimeline.infoTextFrame
+        this.animationTimeline.timeline.infoTextFrame < textProgressLength
+          ? this.animationTimeline.timeline.infoTextFrame
           : textProgressLength;
       this.animateText(
-        this.physicBodies.animationTimeline.textAnimationStartId,
+        this.animationTimeline.timeline.textAnimationStartId,
         textProgressLength,
         textProgress,
         100
       );
-      this.physicBodies.animationTimeline.infoTextFrame++;
+      this.animationTimeline.timeline.infoTextFrame++;
     }
   }
 
@@ -247,8 +251,8 @@ export class CanvasBodies {
     let hexOpacity = opacity.toString(16);
     if (hexOpacity.length === 1) hexOpacity = `0${hexOpacity}`;
 
-    if (this.physicBodies.texts[textId] !== undefined) {
-      this.physicBodies.texts[textId].forEach((text) => {
+    if (this.animationTimeline.texts[textId] !== undefined) {
+      this.animationTimeline.texts[textId].forEach((text) => {
         const delta = textProgressLength / (text.animation.path.length - 1);
         const pathIndexStart = Math.floor(textProgress / delta);
         const pathIndexEnd =
