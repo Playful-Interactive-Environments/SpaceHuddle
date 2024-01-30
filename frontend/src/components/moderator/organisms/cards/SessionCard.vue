@@ -11,7 +11,7 @@
               v-on:command="menuItemSelected"
               trigger="click"
             >
-              <span class="el-dropdown-link">
+              <span class="el-dropdown-link"  @click="stopPropagation">
                 <font-awesome-icon icon="ellipsis-h" />
               </span>
               <template #dropdown>
@@ -98,6 +98,10 @@ export default class SessionCard extends Vue {
 
   get isModerator(): boolean {
     return this.sessionRole === UserType.MODERATOR;
+  }
+
+  stopPropagation(event: Event) {
+    event.stopPropagation();
   }
 
   mounted(): void {

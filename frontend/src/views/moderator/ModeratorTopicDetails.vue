@@ -164,8 +164,9 @@
                         <el-dropdown
                           class="card__menu media-right"
                           v-on:command="taskCommand(task, $event)"
+                          trigger="click"
                         >
-                          <span class="el-dropdown-link">
+                          <span class="el-dropdown-link" @click="stopPropagation">
                             <font-awesome-icon icon="ellipsis-h" />
                           </span>
                           <template #dropdown>
@@ -381,6 +382,10 @@ export default class ModeratorTopicDetails extends Vue {
       }
     }
     return taskCategories;
+  }
+
+  stopPropagation(event: Event) {
+    event.stopPropagation();
   }
 
   get isModerator(): boolean {

@@ -61,7 +61,7 @@
             v-on:command="menuItemSelected($event)"
             trigger="click"
           >
-            <span class="el-dropdown-link">
+            <span class="el-dropdown-link" @click="stopPropagation">
               <font-awesome-icon icon="ellipsis-h" />
             </span>
             <template #dropdown>
@@ -196,6 +196,10 @@ export default class IdeaCard extends Vue {
 
   levelSharedChanged() {
     this.$emit('sharedStatusChanged', this.sharedStatus);
+  }
+
+  stopPropagation(event: Event) {
+    event.stopPropagation();
   }
 
   imageLoaded(event: Event): void {
