@@ -11,6 +11,7 @@ export class PhysicBodies {
 
   engine!: typeof Matter.Engine;
   runner!: typeof Matter.Runner;
+  private eventList: { name: string; callback: () => void }[] = [];
   constructor(width: number, height: number, mouseContainer: HTMLElement) {
     this.engine = Matter.Engine.create();
     this.runner = Matter.Runner.create();
@@ -30,6 +31,11 @@ export class PhysicBodies {
       },
     });
     Matter.Composite.add(this.engine.world, this.mouseConstraint);
+  }
+
+  addEvent(name: string, callback: () => void): void {
+    this.eventList.push({ name: name, callback: callback });
+    Matter.Events.on(this.engine, name, callback);
   }
 
   readonly defaultGravityScale = 0.0005;
@@ -117,6 +123,12 @@ export class PhysicBodies {
       if (!this.runner.enabled) this.completeAnimation();
     } else {
       if (this.runner.enabled) this.runner.enabled = false;
+    }
+  }
+
+  destroy(): void {
+    for (const event of this.eventList) {
+      Matter.Events.off(this.engine, event.name, event.callback);
     }
   }
 }

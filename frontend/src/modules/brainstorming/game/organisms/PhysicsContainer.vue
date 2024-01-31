@@ -66,6 +66,7 @@ export default class PhysicsContainer extends Vue {
     window.removeEventListener('mouseup', this.mouseup);
     window.removeEventListener('touchstart', this.mousedown);
     window.removeEventListener('touchend', this.mouseup);
+    if (this.physicBodies) this.physicBodies.destroy();
   }
 
   private mousedown(): void {

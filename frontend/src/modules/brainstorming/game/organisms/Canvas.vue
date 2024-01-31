@@ -23,8 +23,6 @@ export default class Canvas extends Vue {
   @Prop() readonly physicBodies!: PhysicBodies;
   @Prop() readonly animationTimeline!: AnimationTimeline;
   vueCanvas!: CanvasRenderingContext2D;
-  readonly drawingIntervalTime = 100;
-  drawingInterval!: any;
   bodies!: CanvasBodies;
 
   get vueCanvasWidth(): number {
@@ -59,9 +57,7 @@ export default class Canvas extends Vue {
             this.vueCanvasWidth,
             this.vueCanvasHeight
           );
-          this.drawingInterval = setInterval(() => {
-            this.update_drawing();
-          }, this.drawingIntervalTime);
+          this.physicBodies.addEvent('afterUpdate', this.update_drawing);
         }
       },
       100,
@@ -74,7 +70,6 @@ export default class Canvas extends Vue {
   }
 
   async unmounted(): Promise<void> {
-    clearInterval(this.drawingInterval);
     unregisterDomElement(this.domKey);
   }
 

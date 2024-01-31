@@ -5,7 +5,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
 import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
@@ -13,9 +12,7 @@ import * as PIXI from 'pixi.js';
 import { PixiBodies } from '@/modules/brainstorming/game/types/PixiBodies';
 
 @Options({
-  components: {
-    ParticipantModuleDefaultContainer,
-  },
+  components: {},
   emits: [],
 })
 
@@ -24,8 +21,6 @@ export default class PixiCanvas extends Vue {
   @Prop() readonly physicBodies!: PhysicBodies;
   @Prop() readonly animationTimeline!: AnimationTimeline;
   app!: PIXI.Application;
-  readonly drawingIntervalTime = 100;
-  drawingInterval!: any;
   bodies!: PixiBodies;
 
   domKey = '';
@@ -47,9 +42,7 @@ export default class PixiCanvas extends Vue {
           targetWidth,
           targetHeight
         );
-        this.drawingInterval = setInterval(() => {
-          this.update_drawing();
-        }, this.drawingIntervalTime);
+        this.physicBodies.addEvent('afterUpdate', this.update_drawing);
       },
       100,
       false
@@ -57,7 +50,6 @@ export default class PixiCanvas extends Vue {
   }
 
   async unmounted(): Promise<void> {
-    clearInterval(this.drawingInterval);
     unregisterDomElement(this.domKey);
   }
 
