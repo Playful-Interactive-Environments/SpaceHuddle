@@ -1,4 +1,3 @@
-import * as Matter from 'matter-js/build/matter.js';
 import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
 import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
 import * as PIXI from 'pixi.js';
@@ -15,6 +14,13 @@ export class PixiBodies {
   pixiGraphics: PIXI.Container[] = [];
   circleGradientTexture: PIXI.Texture;
   textContainer: PIXI.Container | null = null;
+  private textCallback = (
+    textId: number,
+    textProgressLength: number,
+    textProgress: number,
+    targetOpacity: number
+  ) =>
+    this.animateText(textId, textProgressLength, textProgress, targetOpacity);
   constructor(
     app: PIXI.Application,
     physicBodies: PhysicBodies,
@@ -24,6 +30,7 @@ export class PixiBodies {
   ) {
     this.physicBodies = physicBodies;
     this.animationTimeline = animationTimeline;
+    animationTimeline.addAnimateTextCallback(this.textCallback);
     this.app = app;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
@@ -44,16 +51,16 @@ export class PixiBodies {
       index,
       body,
     ] of this.physicBodies.engine.world.bodies.entries()) {
-      if (body.isStatic) return;
+      if (body.isStatic) continue;
       const options = this.physicBodies.bodies[index];
-      const position = Matter.Vector.create(
+      /*const position = Matter.Vector.create(
         Math.floor(Math.random() * this.canvasWidth),
         Math.floor(Math.random() * this.canvasHeight)
       );
-      Matter.Body.setPosition(body, position);
+      Matter.Body.setPosition(body, position);*/
       const container = new PIXI.Container();
-      container.x = position.x;
-      container.y = position.y;
+      container.x = body.position.x;
+      container.y = body.position.y;
       this.pixiGraphics.push(container);
       this.app.stage.addChild(container as any);
       const sprite = new PIXI.Sprite(this.circleGradientTexture);
@@ -102,135 +109,12 @@ export class PixiBodies {
     });
   }
 
-  frame = 0;
   show(): void {
-    this.frame++;
-    let showText = false;
-
-    if (this.animationTimeline.timeline.animationFrame === -1)
-      this.showBodies(255);
-    else {
-      const frame = this.animationTimeline.getKeyframeValue(
-        this.animationTimeline.timeline.animationFrame
-      );
-      if (frame && frame.opacity !== undefined) {
-        const opacity = Math.floor(frame.opacity);
-        this.physicBodies.enableEngine(opacity !== 0);
-      }
-      if (frame && frame.position !== undefined) {
-        if (frame.position === 'random') {
-          this.physicBodies.engine.world.bodies.forEach((body, index) => {
-            const options = this.physicBodies.bodies[index];
-            if (options.text) {
-              const position = Matter.Vector.create(
-                Math.floor(Math.random() * this.canvasWidth),
-                Math.floor(Math.random() * this.canvasHeight)
-              );
-              Matter.Body.setPosition(body, position);
-            }
-          });
-        }
-      }
-      const useForce = (): boolean => {
-        if (frame.forceDirection !== undefined) {
-          if (frame.forceDirection === 'both') return true;
-          return (
-            this.animationTimeline.timeline.animationDelta ===
-            frame.forceDirection
-          );
-        }
-        return this.animationTimeline.timeline.animationDelta === 1;
-      };
-      if (frame && frame.force !== undefined && useForce()) {
-        const getRandomForceValue = (): number => {
-          const value = Math.random() * 80 - 40;
-          if (value >= 0 && value < 10) return value + 10;
-          if (value < 0 && value > -10) return value - 10;
-          return value;
-        };
-        let x = frame.force !== 'random' ? frame.force[0] : 0;
-        let y = frame.force !== 'random' ? frame.force[1] : 0;
-        this.physicBodies.engine.world.bodies.forEach((body, index) => {
-          const options = this.physicBodies.bodies[index];
-          if (options.text) {
-            if (frame.force === 'random') {
-              x = getRandomForceValue();
-              y = getRandomForceValue();
-            }
-            Matter.Body.setVelocity(body, { x: x, y: y });
-          }
-        });
-      }
-      if (frame && frame.opacity !== undefined) {
-        const opacity = Math.floor(frame.opacity);
-        this.showBodies(opacity);
-      }
-      if (frame && frame.textProgress !== undefined) {
-        const textProgress = frame.textProgress;
-        const textProgressLength = 100;
-
-        this.animateText(
-          this.animationTimeline.timeline.textAnimationId,
-          textProgressLength,
-          textProgress
-        );
-        showText = true;
-      }
+    const opacity = this.animationTimeline.bodyOpacity();
+    if (opacity) {
+      this.showBodies(opacity);
     }
-    if (this.animationTimeline.isLastKeyframe()) {
-      this.animationTimeline.timeline.animationDelta = -1;
-      this.animationTimeline.timeline.infoTextFrame = 0;
-    }
-    if (this.animationTimeline.timeline.animationFrame >= 0)
-      this.animationTimeline.timeline.animationFrame +=
-        this.animationTimeline.timeline.animationDelta;
-    if (
-      this.animationTimeline.timeline.maxRunningFrame <
-      this.animationTimeline.timeline.animationFrame
-    )
-      this.animationTimeline.timeline.maxRunningFrame =
-        this.animationTimeline.timeline.animationFrame;
-
-    if (
-      this.animationTimeline.timeline.animationDelta === -1 &&
-      this.animationTimeline.timeline.maxRunningFrame > 0 &&
-      this.animationTimeline.timeline.maxRunningFrame <
-        this.animationTimeline.timeline.animationCompletedFrame
-    ) {
-      const textProgressLength = 15;
-      const textProgress =
-        this.animationTimeline.timeline.infoTextFrame < textProgressLength
-          ? this.animationTimeline.timeline.infoTextFrame
-          : textProgressLength;
-      this.animateText(
-        this.animationTimeline.timeline.textAnimationKeepId,
-        textProgressLength,
-        textProgress,
-        100
-      );
-      showText = true;
-      this.animationTimeline.timeline.infoTextFrame++;
-    }
-
-    if (
-      this.animationTimeline.timeline.animationDelta === 1 &&
-      this.animationTimeline.timeline.maxRunningFrame === 0 &&
-      this.frame > 200
-    ) {
-      const textProgressLength = 15;
-      const textProgress =
-        this.animationTimeline.timeline.infoTextFrame < textProgressLength
-          ? this.animationTimeline.timeline.infoTextFrame
-          : textProgressLength;
-      this.animateText(
-        this.animationTimeline.timeline.textAnimationStartId,
-        textProgressLength,
-        textProgress,
-        100
-      );
-      showText = true;
-      this.animationTimeline.timeline.infoTextFrame++;
-    }
+    const showText = this.animationTimeline.getActiveInfoTextId() > -1;
 
     if (
       !showText &&
@@ -247,72 +131,30 @@ export class PixiBodies {
     textProgress: number,
     targetOpacity = 255
   ): void {
-    const interpolate = (
-      start: number,
-      end: number,
-      step: number,
-      stepCount: number
-    ): number => {
-      return start + (step / stepCount) * (end - start);
-    };
-
-    let opacity = interpolate(
-      0,
-      targetOpacity,
+    const list = this.animationTimeline.getTextLetterList(
+      textId,
+      textProgressLength,
       textProgress,
-      textProgressLength
+      targetOpacity
     );
-    if (opacity < 0) {
-      opacity = 0;
-    }
-    if (opacity > targetOpacity) {
-      opacity = targetOpacity;
-    }
-    opacity = Math.floor(opacity);
-
     this.initText(textId);
     if (
-      this.animationTimeline.texts[textId] !== undefined &&
+      list.length > 0 &&
       this.textContainer &&
-      this.animationTimeline.texts[textId].length ===
-        this.textContainer.children.length
+      list.length === this.textContainer.children.length
     ) {
-      for (const [index, text] of this.animationTimeline.texts[
-        textId
-      ].entries()) {
+      for (const [index, text] of list.entries()) {
         const textBody = this.textContainer.getChildAt(index) as PIXI.Text;
-        const delta = textProgressLength / (text.animation.path.length - 1);
-        const pathIndexStart = Math.floor(textProgress / delta);
-        const pathIndexEnd =
-          pathIndexStart < text.animation.path.length - 1
-            ? pathIndexStart + 1
-            : pathIndexStart;
-        textBody.x = interpolate(
-          text.animation.path[pathIndexStart][0],
-          text.animation.path[pathIndexEnd][0],
-          textProgress % delta,
-          delta
-        );
-        textBody.y = interpolate(
-          text.animation.path[pathIndexStart][1],
-          text.animation.path[pathIndexEnd][1],
-          textProgress % delta,
-          delta
-        );
-        textBody.style.fontSize = interpolate(
-          text.animation.startSize,
-          text.size,
-          textProgress,
-          textProgressLength
-        );
-        textBody.alpha = opacity / 255;
-        textBody.rotation = interpolate(
-          text.animation.startAngle,
-          text.angle,
-          textProgress,
-          textProgressLength
-        );
+        textBody.x = text.x;
+        textBody.y = text.y;
+        textBody.style.fontSize = text.fontSize;
+        textBody.alpha = text.alpha;
+        textBody.rotation = text.rotation;
       }
     }
+  }
+
+  destroy(): void {
+    this.animationTimeline.removeAnimateTextCallback(this.textCallback);
   }
 }

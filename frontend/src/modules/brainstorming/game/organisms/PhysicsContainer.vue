@@ -10,6 +10,11 @@
       :physic-bodies="physicBodies"
       :animation-timeline="animationTimeline"
     />
+    <VuePixiCanvas
+      v-else-if="canvasMode === CanvasMode.PixiVue && physicBodies"
+      :physic-bodies="physicBodies"
+      :animation-timeline="animationTimeline"
+    />
   </div>
 </template>
 
@@ -22,9 +27,11 @@ import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationT
 import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.vue';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import PixiCanvas from '@/modules/brainstorming/game/organisms/PixiCanvas.vue';
+import VuePixiCanvas from '@/modules/brainstorming/game/organisms/VuePixiCanvas.vue';
 
 @Options({
   components: {
+    VuePixiCanvas,
     PixiCanvas,
     Canvas,
   },
@@ -81,7 +88,8 @@ export default class PhysicsContainer extends Vue {
     this.physicBodies = new PhysicBodies(
       this.containerWidth,
       this.containerHeight,
-      this.$refs.container as HTMLElement
+      this.$refs.container as HTMLElement,
+      this.animationTimeline
     );
     const letterCount = 26;
     const circleCount = 100;

@@ -425,6 +425,7 @@ export default class Participant extends Vue {
     this.shakeEvent.stop();
     this.deregisterAll();
     unregisterDomElement(this.domKey);
+    if (this.animationTimeline) this.animationTimeline.destroy();
   }
 
   allIdeas: Idea[] = [];

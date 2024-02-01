@@ -21,6 +21,8 @@ export default class PixiCanvas extends Vue {
   @Prop() readonly physicBodies!: PhysicBodies;
   @Prop() readonly animationTimeline!: AnimationTimeline;
   app!: PIXI.Application;
+  readonly drawingIntervalTime = 100;
+  drawingInterval!: any;
   bodies!: PixiBodies;
 
   domKey = '';
@@ -43,6 +45,9 @@ export default class PixiCanvas extends Vue {
           targetHeight
         );
         this.physicBodies.addEvent('afterUpdate', this.update_drawing);
+        /*this.drawingInterval = setInterval(() => {
+          this.update_drawing();
+        }, this.drawingIntervalTime);*/
       },
       100,
       false
@@ -50,7 +55,9 @@ export default class PixiCanvas extends Vue {
   }
 
   async unmounted(): Promise<void> {
+    clearInterval(this.drawingInterval);
     unregisterDomElement(this.domKey);
+    this.bodies.destroy();
   }
 
   async update_drawing(): Promise<void> {

@@ -5,16 +5,13 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import { CanvasBodies } from '@/modules/brainstorming/game/types/CanvasBodies';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
 import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
 
 @Options({
-  components: {
-    ParticipantModuleDefaultContainer,
-  },
+  components: {},
   emits: [],
 })
 
@@ -23,6 +20,8 @@ export default class Canvas extends Vue {
   @Prop() readonly physicBodies!: PhysicBodies;
   @Prop() readonly animationTimeline!: AnimationTimeline;
   vueCanvas!: CanvasRenderingContext2D;
+  readonly drawingIntervalTime = 100;
+  drawingInterval!: any;
   bodies!: CanvasBodies;
 
   get vueCanvasWidth(): number {
@@ -58,6 +57,9 @@ export default class Canvas extends Vue {
             this.vueCanvasHeight
           );
           this.physicBodies.addEvent('afterUpdate', this.update_drawing);
+          /*this.drawingInterval = setInterval(() => {
+            this.update_drawing();
+          }, this.drawingIntervalTime);*/
         }
       },
       100,
@@ -70,7 +72,9 @@ export default class Canvas extends Vue {
   }
 
   async unmounted(): Promise<void> {
+    clearInterval(this.drawingInterval);
     unregisterDomElement(this.domKey);
+    this.bodies.destroy();
   }
 
   async update_drawing(): Promise<void> {

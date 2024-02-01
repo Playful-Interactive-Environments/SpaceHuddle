@@ -1,8 +1,13 @@
 import * as Matter from 'matter-js/build/matter.js';
+import {
+  AnimationTimeline,
+  Keyframe,
+} from '@/modules/brainstorming/game/types/AnimationTimeline';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 export class PhysicBodies {
+  animationTimeline: AnimationTimeline;
   containerWidth = 0;
   containerHeight = 0;
   bodies: { [key: string]: string | number | boolean }[] = [];
@@ -12,7 +17,15 @@ export class PhysicBodies {
   engine!: typeof Matter.Engine;
   runner!: typeof Matter.Runner;
   private eventList: { name: string; callback: () => void }[] = [];
-  constructor(width: number, height: number, mouseContainer: HTMLElement) {
+  private updateCallback = () => this.updateAnimation();
+  constructor(
+    width: number,
+    height: number,
+    mouseContainer: HTMLElement,
+    animationTimeline: AnimationTimeline
+  ) {
+    this.animationTimeline = animationTimeline;
+    animationTimeline.addAnimationUpdatedCallback(this.updateCallback);
     this.engine = Matter.Engine.create();
     this.runner = Matter.Runner.create();
     Matter.Runner.run(this.runner, this.engine);
@@ -55,6 +68,19 @@ export class PhysicBodies {
           x: -this.engine.gravity.x * force,
           y: -this.engine.gravity.y * force,
         });
+      }
+    });
+  }
+
+  setRandomPosition(): void {
+    this.engine.world.bodies.forEach((body, index) => {
+      const options = this.bodies[index];
+      if (options.text) {
+        const position = Matter.Vector.create(
+          Math.floor(Math.random() * this.containerWidth),
+          Math.floor(Math.random() * this.containerHeight)
+        );
+        Matter.Body.setPosition(body, position);
       }
     });
   }
@@ -126,9 +152,44 @@ export class PhysicBodies {
     }
   }
 
+  updateAnimation(): Keyframe {
+    const frame = this.animationTimeline.getActiveKeyframeValue();
+    if (frame && frame.opacity !== undefined) {
+      const opacity = Math.floor(frame.opacity);
+      this.enableEngine(opacity !== 0);
+    }
+    if (frame && frame.position !== undefined) {
+      if (frame.position === 'random') {
+        this.setRandomPosition();
+      }
+    }
+    if (frame && frame.force !== undefined && frame.useForce) {
+      const getRandomForceValue = (): number => {
+        const value = Math.random() * 80 - 40;
+        if (value >= 0 && value < 10) return value + 10;
+        if (value < 0 && value > -10) return value - 10;
+        return value;
+      };
+      let x = frame.force !== 'random' ? frame.force[0] : 0;
+      let y = frame.force !== 'random' ? frame.force[1] : 0;
+      this.engine.world.bodies.forEach((body, index) => {
+        const options = this.bodies[index];
+        if (options.text) {
+          if (frame.force === 'random') {
+            x = getRandomForceValue();
+            y = getRandomForceValue();
+          }
+          Matter.Body.setVelocity(body, { x: x, y: y });
+        }
+      });
+    }
+    return frame;
+  }
+
   destroy(): void {
     for (const event of this.eventList) {
       Matter.Events.off(this.engine, event.name, event.callback);
     }
+    this.animationTimeline.removeAnimationUpdatedCallback(this.updateCallback);
   }
 }
