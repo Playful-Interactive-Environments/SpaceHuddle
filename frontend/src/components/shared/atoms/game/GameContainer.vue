@@ -16,6 +16,7 @@
       :width="gameWidth"
       :height="mapHeight"
       :backgroundColor="backgroundColor"
+      :backgroundAlpha="backgroundAlpha"
       v-if="ready && backgroundMovement === BackgroundMovement.Map"
     >
       <sprite
@@ -42,6 +43,7 @@
       :height="gameDisplayHeight"
       v-if="ready"
       :backgroundColor="backgroundColor"
+      :backgroundAlpha="backgroundAlpha"
       :transparent="transparent"
       @pointerdown="gameContainerClicked"
       @pointerup="gameContainerReleased"
@@ -341,6 +343,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly hasMouseInput!: boolean;
   @Prop({ default: true }) readonly detectCollision!: boolean;
   @Prop({ default: true }) readonly useGravity!: boolean;
+  @Prop({ default: [0, 1, 0] }) readonly gravity!: [number, number, number];
   @Prop({ default: 0 }) readonly windForce!: number;
   @Prop({ default: false }) readonly useDetector!: boolean;
   @Prop({ default: false }) readonly useObjectPooling!: boolean;
@@ -353,6 +356,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: undefined }) readonly height!: number | undefined;
   @Prop({ default: [0, 0] }) readonly offset!: [number, number];
   @Prop({ default: '#f4f4f4' }) readonly backgroundColor!: string;
+  @Prop({ default: 1 }) readonly backgroundAlpha!: number;
   @Prop({ default: null }) readonly backgroundTexture!: string | null;
   @Prop({ default: BackgroundPosition.Cover })
   readonly backgroundPosition!: BackgroundPosition;
@@ -420,7 +424,9 @@ export default class GameContainer extends Vue {
 
   //#region get
   get isBackgroundLoaded(): boolean {
-    return !!this.backgroundSprite && !!this.backgroundSprite.orig;
+    if (this.backgroundTexture)
+      return !!this.backgroundSprite && !!this.backgroundSprite.orig;
+    return true;
   }
 
   get backgroundTextureAspect(): number {
@@ -1617,19 +1623,7 @@ export default class GameContainer extends Vue {
     Matter.Events.on(this.engine, 'beforeUpdate', this.beforePhysicUpdate);
     Matter.Events.on(this.engine.world, 'afterAdd', this.bodyAdded);
     this.$emit('initEngine', this.engine);
-    if (this.useGravity) {
-      this.engine.gravity = {
-        x: 0,
-        y: 1,
-        scale: 0.0005,
-      };
-    } else {
-      this.engine.gravity = {
-        x: 0,
-        y: 1,
-        scale: 0,
-      };
-    }
+    this.setGravity();
     this.runner = Matter.Runner.create({
       deltaMax: 1000 / 15,
       deltaMin: 1000 / 90,
@@ -1641,6 +1635,20 @@ export default class GameContainer extends Vue {
     Matter.Runner.run(this.runner, this.engine);
     if (this.combinedActiveCollisionToChain)
       this.addToEngin(this.activeComposition);
+  }
+
+  readonly defaultGravityScale = 0.0005;
+  @Watch('gravity', { immediate: true })
+  setGravity(): void {
+    if (this.engine) {
+      this.engine.gravity = {
+        x: this.gravity[0],
+        y: this.gravity[1],
+        scale: this.useGravity
+          ? this.defaultGravityScale * (1 - this.gravity[2])
+          : 0,
+      };
+    }
   }
 
   addToEngin(
@@ -1940,8 +1948,9 @@ export default class GameContainer extends Vue {
   loopTime = 0;
   updateTime = Date.now();
   afterPhysicUpdate(): void {
+    if (!this.isBackgroundLoaded) return;
     for (const gameObject of this.gameObjects) {
-      if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
+      if (gameObject.moveWithBackground && !this.isBackgroundLoaded) continue;
       gameObject.checkTrigger();
       gameObject.afterPhysicUpdate();
       if (
@@ -1972,7 +1981,7 @@ export default class GameContainer extends Vue {
       /*if (gameObject.body && !gameObject.isStatic && this.isContainerReady) {
         gameObject.body.timeScale = deltaTime / 48;
       }*/
-      if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
+      if (gameObject.moveWithBackground && !this.isBackgroundLoaded) continue;
       gameObject.beforePhysicUpdate();
     }
 

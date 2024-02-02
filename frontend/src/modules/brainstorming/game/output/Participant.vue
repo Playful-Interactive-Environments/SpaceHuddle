@@ -6,6 +6,11 @@
       :animation-timeline="animationTimeline"
       :gravity="gravity"
     />
+    <GameCanvas
+      v-if="mode === CanvasMode.GameEngine && animationTimeline"
+      :animation-timeline="animationTimeline"
+      :gravity="gravity"
+    />
     <div
       class="text-animation text-animation-center"
       v-if="randomIdea"
@@ -84,6 +89,7 @@ import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { CanvasMode } from './ModeratorConfig.vue';
 import { isMobile } from '@/utils/dom';
 import PhysicsContainer from '@/modules/brainstorming/game/organisms/PhysicsContainer.vue';
+import GameCanvas from '@/modules/brainstorming/game/organisms/GameCanvas.vue';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -106,6 +112,7 @@ export enum TextType {
 
 @Options({
   components: {
+    GameCanvas,
     PhysicsContainer,
     ParticipantModuleDefaultContainer,
     Canvas,

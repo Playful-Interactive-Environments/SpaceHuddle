@@ -149,8 +149,8 @@ export default class GameObject extends Vue {
   body: typeof Matter.Body | null = null;
   position: [number, number] = [0, 0];
   rotationValue = 0;
-  containerSize!: PIXI.Container;
-  containerPosition!: PIXI.Container;
+  containerSize: PIXI.Container | null = null;
+  containerPosition: PIXI.Container | null = null;
   gameContainer!: GameContainer;
   offset: [number, number] = [0, 0];
   readonly defaultSize = 50;
@@ -173,13 +173,15 @@ export default class GameObject extends Vue {
   }
 
   getContainerWidth(): number {
-    if (this.fixSize === null) return this.containerSize.width;
+    if (this.fixSize === null)
+      return this.containerSize ? this.containerSize.width : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[0];
     return this.fixSize;
   }
 
   getContainerHeight(): number {
-    if (this.fixSize === null) return this.containerSize.height;
+    if (this.fixSize === null)
+      return this.containerSize ? this.containerSize.height : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[1];
     return this.fixSize;
   }
@@ -411,7 +413,9 @@ export default class GameObject extends Vue {
 
   //#region init body
   async containerLoad(container: PIXI.Container): Promise<void> {
+    if (this.containerSize) return;
     const setupBody = (): void => {
+      if (!this.containerPosition) return;
       this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
       switch (this.type) {
         case 'rect':
@@ -463,10 +467,12 @@ export default class GameObject extends Vue {
   }
 
   assignPoolBody(body: Matter.Body): void {
-    Matter.Body.setPosition(body, {
-      x: this.containerPosition.x,
-      y: this.containerPosition.y,
-    });
+    if (this.containerPosition) {
+      Matter.Body.setPosition(body, {
+        x: this.containerPosition.x,
+        y: this.containerPosition.y,
+      });
+    }
     this.body = body;
     this.$emit('update:id', this.body.id);
     if (this.clickable) {
