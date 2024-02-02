@@ -81,6 +81,7 @@
                 }}
               </div>
               <div class="media-right">
+                {{ $t('module.playing.moveit.participant.earned') + ': ' }}
                 <font-awesome-icon icon="coins" />
                 {{
                   getPointsForVehicle({

@@ -17,6 +17,7 @@
     "combined": "combined",
     "separate": "separate",
     "electricity": "electricity ratio in %",
+    "earned": "earned",
     "vehicle-parameter": {
       "fuel": "fuel",
       "mpg": "miles per gallon",

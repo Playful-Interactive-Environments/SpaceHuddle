@@ -412,23 +412,39 @@ export default class IdeaFilter extends Vue {
   width: 12rem;
 }
 
-.level-right {
+.level {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-evenly;
-  align-items: center;
-  margin: 0.4rem;
+  .level-item {
+    margin: 0.4rem;
+  }
 }
 
-.level-left {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: space-evenly;
-  align-items: center;
-  .level-item {
-    width: 45%;
+@media only screen and (max-width: 949px) {
+  .level {
+    justify-content: space-evenly;
+    align-items: center;
+    flex-shrink: unset;
+  }
+
+  .level-right {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
     margin: 0.4rem;
+  }
+
+  .level-left {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-shrink: unset;
+    .level-item {
+      width: 45%;
+    }
   }
 }
 
