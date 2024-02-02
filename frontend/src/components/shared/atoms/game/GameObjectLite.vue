@@ -10,7 +10,6 @@
     @render="containerLoad"
   >
     <slot></slot>
-    <slot name="background"></slot>
   </container>
 </template>
 
@@ -29,19 +28,6 @@ import { GrayscaleFilter } from 'pixi-filters';
 import { toDegrees, toRadians } from '@/utils/angle';
 import * as matterUtil from '@/utils/matter';
 
-export interface ConditionalVelocity {
-  velocity: { x: number; y: number };
-  condition: (object: GameObject) => boolean;
-}
-
-export enum FastObjectBehaviour {
-  none = 'none',
-  circle = 'circle',
-  bounce = 'bounce',
-}
-
-export const bounceCategory = 1 << 31;
-
 @Options({
   components: {},
   emits: [
@@ -56,11 +42,9 @@ export const bounceCategory = 1 << 31;
     'collision',
     'click',
     'release',
-    'handleTrigger',
     'update:highlighted',
     'positionChanged',
     'initialised',
-    'isPartOfChainChanged',
     'initError',
   ],
 })
