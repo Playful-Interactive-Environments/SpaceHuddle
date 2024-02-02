@@ -537,6 +537,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as cashService from '@/services/cash-service';
 import { reactivateTutorial } from '@/services/tutorial-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import { until } from '@/utils/wait';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -775,7 +776,7 @@ export default class TaskSettings extends Vue {
     this.previewLoading = false;
   }
 
-  updateTask(task: Task): void {
+  async updateTask(task: Task): Promise<void> {
     this.mainModule = new ModuleTask(task.taskType, 'default');
     this.formData.name = task.name;
     this.formData.description = task.description;
@@ -790,6 +791,8 @@ export default class TaskSettings extends Vue {
           input.order
         );
       });
+    if (task.modules.length > 1)
+      await until(() => this.formData.moduleListAddOn.length > 0);
     task.modules.forEach((module) => {
       const addOn = this.formData.moduleListAddOn.find((item) =>
         item.like(task.taskType, module.name)
