@@ -28,6 +28,8 @@ import { GrayscaleFilter } from 'pixi-filters';
 import { toDegrees, toRadians } from '@/utils/angle';
 import * as matterUtil from '@/utils/matter';
 
+const logCalls = false;
+
 @Options({
   components: {},
   emits: [
@@ -100,6 +102,7 @@ export default class GameObject extends Vue {
 
   //#region get / set
   getContainerWidth(): number {
+    //if (logCalls) console.log('getContainerWidth');
     if (this.fixSize === null)
       return this.containerSize ? this.containerSize.width : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[0];
@@ -107,6 +110,7 @@ export default class GameObject extends Vue {
   }
 
   getContainerHeight(): number {
+    //if (logCalls) console.log('getContainerHeight');
     if (this.fixSize === null)
       return this.containerSize ? this.containerSize.height : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[1];
@@ -114,6 +118,7 @@ export default class GameObject extends Vue {
   }
 
   isPositionVisible(x: number, y: number, delta = 0): boolean {
+    //if (logCalls) console.log('isPositionVisible');
     const deltaX = this.displayWidth / 2;
     const deltaY = this.displayHeight / 2;
     return (
@@ -125,6 +130,7 @@ export default class GameObject extends Vue {
   }
 
   isVisible(delta = 0): boolean {
+    //if (logCalls) console.log('isVisible');
     if (!this.body) return false;
     const x = this.body.position.x;
     const y = this.body.position.y;
@@ -134,6 +140,7 @@ export default class GameObject extends Vue {
 
   //#region load / unload
   async mounted(): Promise<void> {
+    if (logCalls) console.log('mounted');
     const container = document.getElementById('gameContainer');
     if (container) {
       const registerGameObject = new CustomEvent(
@@ -149,17 +156,20 @@ export default class GameObject extends Vue {
   }
 
   unmounted(): void {
+    if (logCalls) console.log('unmounted');
     this.kill();
     this.gameObjectReleased();
   }
 
   setGameContainer(gameContainer: GameContainer): void {
+    if (logCalls) console.log('setGameContainer');
     this.gameContainer = gameContainer;
     this.initPosition();
     this.manageEngin();
   }
 
   kill(): void {
+    if (logCalls) console.log('kill');
     this.destroyed = true;
     if (this.gameContainer) {
       this.gameContainer.deregisterGameObject(this);
@@ -180,6 +190,7 @@ export default class GameObject extends Vue {
   //#region interaction
   clickTime = 0;
   gameObjectClicked(): void {
+    if (logCalls) console.log('gameObjectClicked');
     if (this.disabled) {
       return;
     }
@@ -196,6 +207,7 @@ export default class GameObject extends Vue {
   }
 
   async gameObjectReleased(): Promise<void> {
+    if (logCalls) console.log('gameObjectReleased');
     if (this.body && !this.isStatic && !this.usePhysic) {
       this.body.isStatic = true;
     } else if (!this.isStatic && !this.usePhysic) {
@@ -221,6 +233,7 @@ export default class GameObject extends Vue {
   hasDisabled = false;
   @Watch('disabled', { immediate: true })
   onDisabledChanged(): void {
+    if (logCalls) console.log('onDisabledChanged');
     if (this.disabled) {
       this.collisionCategory = this.body.collisionFilter.category;
       this.collisionMask = this.body.collisionFilter.mask;
@@ -239,6 +252,7 @@ export default class GameObject extends Vue {
 
   @Watch('isActive', { immediate: true })
   onIsActiveChanged(): void {
+    if (logCalls) console.log('onIsActiveChanged');
     this.manageEngin();
     //this.isVisibleInContainer = this.isVisible();
   }
@@ -246,6 +260,7 @@ export default class GameObject extends Vue {
 
   //#region init body
   async containerLoad(container: PIXI.Container): Promise<void> {
+    if (logCalls) console.log('containerLoad');
     if (this.containerSize) return;
     const setupBody = (): void => {
       if (!this.containerPosition) return;
@@ -297,6 +312,7 @@ export default class GameObject extends Vue {
   }
 
   updatedColliderSize(): void {
+    if (logCalls) console.log('updatedColliderSize');
     const updateBody = (): void => {
       try {
         const containerWidth = this.getContainerWidth();
@@ -326,11 +342,13 @@ export default class GameObject extends Vue {
   }
 
   async updatePivot(delta = 100, alwaysUpdate = false): Promise<void> {
+    if (logCalls) console.log('updatePivot');
     await matterUtil.updatePivot(this.body, this.anchor, delta, alwaysUpdate);
     this.loadingFinished = true;
   }
 
   addRect(x: number, y: number, width: number, height: number): void {
+    if (logCalls) console.log('addRect');
     this.options.isStatic = this.isStatic;
     const colliderWidth = width + this.colliderDelta * 2;
     const colliderHeight = height + this.colliderDelta * 2;
@@ -353,6 +371,7 @@ export default class GameObject extends Vue {
   }
 
   addCircle(x: number, y: number, width: number, height: number): void {
+    if (logCalls) console.log('addCircle');
     this.options.isStatic = this.isStatic;
     const radius =
       (width > height ? width / 2 : height / 2) + this.colliderDelta;
@@ -375,6 +394,7 @@ export default class GameObject extends Vue {
     height: number,
     shape: [number, number][]
   ): void {
+    if (logCalls) console.log('addPolygon');
     this.options.isStatic = this.isStatic;
     this.body = matterUtil.createPolygonBody(
       this.options,
@@ -398,12 +418,14 @@ export default class GameObject extends Vue {
 
   //#region engine
   addBodyToEngine(): void {
+    if (logCalls) console.log('addBodyToEngine');
     if (this.gameContainer) {
       this.gameContainer.addGameObjectToEngin(this);
     }
   }
 
   manageEngin(): void {
+    if (logCalls) console.log('manageEngin');
     if (!this.clickable || !this.body) return;
     if (!this.isPartOfEngin) {
       this.addBodyToEngine();
@@ -413,6 +435,7 @@ export default class GameObject extends Vue {
 
   //#region position / rotation / scale
   initPosition(x: number | null = null, y: number | null = null): void {
+    if (logCalls) console.log('initPosition');
     if (x === null) x = this.x;
     if (y === null) y = this.y;
     this.position = [x, y];
@@ -425,12 +448,14 @@ export default class GameObject extends Vue {
   }
 
   convertPositionToInputFormat(): [number, number] {
+    //if (logCalls) console.log('convertPositionToInputFormat');
     return [this.position[0], this.position[1]];
   }
 
   @Watch('x', { immediate: true })
   @Watch('y', { immediate: true })
   onModelValueChanged(): void {
+    //if (logCalls) console.log('onModelValueChanged');
     const inputPosition = this.convertPositionToInputFormat();
     if (inputPosition[0] !== this.x || inputPosition[1] !== this.y) {
       this.initPosition();
@@ -439,6 +464,7 @@ export default class GameObject extends Vue {
 
   @Watch('rotation', { immediate: true })
   onRotationChanged(): void {
+    //if (logCalls) console.log('onRotationChanged');
     if (!isNaN(this.rotation)) {
       this.rotationValue = toRadians(360 - this.rotation);
       if (this.body) {
@@ -450,6 +476,7 @@ export default class GameObject extends Vue {
   appliedScaleFactor = 1;
   @Watch('scale', { immediate: true })
   onScaleChanged(): void {
+    //if (logCalls) console.log('onScaleChanged');
     if (this.body && this.scale !== this.appliedScaleFactor) {
       const scale = (1 / this.appliedScaleFactor) * this.scale;
       Matter.Body.scale(this.body, scale, scale);
@@ -462,6 +489,7 @@ export default class GameObject extends Vue {
   wasVisible = false;
   wasAtBorder = false;
   beforePhysicUpdate(): void {
+    //if (logCalls) console.log('beforePhysicUpdate');
     if (
       !this.destroyed &&
       this.body &&
@@ -477,6 +505,7 @@ export default class GameObject extends Vue {
 
   isVisibleInContainer = true;
   afterPhysicUpdate(): void {
+    //if (logCalls) console.log('afterPhysicUpdate');
     if (
       !this.destroyed &&
       this.body &&
@@ -523,6 +552,7 @@ export default class GameObject extends Vue {
 
   //#region collision
   notifyCollision(): void {
+    if (logCalls) console.log('notifyCollision');
     this.$emit('notifyCollision', this);
   }
 
@@ -533,6 +563,7 @@ export default class GameObject extends Vue {
     objectBody: Matter.Body,
     collisionBody: Matter.Body
   ): boolean {
+    if (logCalls) console.log('handleCollision');
     let deleteFlag = false;
     if (this.collisionHandler) {
       deleteFlag = this.collisionHandler.handleCollision(

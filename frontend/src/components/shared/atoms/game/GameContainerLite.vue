@@ -79,6 +79,8 @@ interface CollisionBounds {
   height: number;
 }
 
+const logCalls = false;
+
 @Options({
   components: {
     FontAwesomeIcon,
@@ -105,7 +107,6 @@ export default class GameContainer extends Vue {
   @Prop({ default: 0 }) readonly windForce!: number;
   @Prop({ default: 0 }) readonly borderDelta!: number;
   @Prop({ default: 1 }) readonly borderCategory!: number;
-  @Prop({ default: false }) readonly activatedObjectOnRegister!: boolean;
   @Prop({ default: undefined }) readonly width!: number | undefined;
   @Prop({ default: undefined }) readonly height!: number | undefined;
   @Prop({ default: [0, 0] }) readonly offset!: [number, number];
@@ -138,10 +139,12 @@ export default class GameContainer extends Vue {
 
   //#region get
   get gameDisplayHeight(): number {
+    //if (logCalls) console.log('gameDisplayHeight');
     return this.gameHeight;
   }
 
   getGameObjectForBody(body: Matter.Body): GameObject | null {
+    if (logCalls) console.log('getGameObjectForBody');
     if (body) {
       const obj = this.gameObjects.find(
         (obj) => obj.body && obj.body.id === body.id
@@ -152,6 +155,7 @@ export default class GameContainer extends Vue {
   }
 
   getCollisionRegionForBody(body: Matter.Body): CollisionRegion | null {
+    if (logCalls) console.log('getCollisionRegionForBody');
     if (body) {
       const obj = this.regionBodyList.find(
         (obj) => obj.body && obj.body.id === body.id
@@ -162,6 +166,7 @@ export default class GameContainer extends Vue {
   }
 
   get isContainerReady(): boolean {
+    //if (logCalls) console.log('isContainerReady');
     return this.ready && !this.loading && !this.waitForDataLoad;
   }
   //#endregion get
@@ -169,11 +174,13 @@ export default class GameContainer extends Vue {
   //#region watch
   @Watch('waitForDataLoad', { immediate: true })
   onWaitForDataLoadChanged(): void {
+    //if (logCalls) console.log('onWaitForDataLoadChanged');
     if (this.isContainerReady) this.$emit('containerReady');
   }
 
   @Watch('borderCategory', { immediate: true })
   onBorderCategoryChanged(): void {
+    if (logCalls) console.log('onBorderCategoryChanged');
     if (this.borders) {
       this.borders.bottom.collisionFilter.category = this.borderCategory;
       this.borders.top.collisionFilter.category = this.borderCategory;
@@ -185,16 +192,19 @@ export default class GameContainer extends Vue {
 
   //#region load / unload
   private async allTexturesLoaded(): Promise<void> {
+    //if (logCalls) console.log('allTexturesLoaded');
     this.loading = false;
     if (this.isContainerReady) this.$emit('containerReady');
   }
 
   private async texturesLoadingStart(): Promise<void> {
+    //if (logCalls) console.log('texturesLoadingStart');
     this.loading = true;
   }
 
   domKey = '';
   async mounted(): Promise<void> {
+    if (logCalls) console.log('mounted');
     this.eventBus.on(
       EventType.TEXTURES_LOADING_START,
       this.texturesLoadingStart
@@ -208,10 +218,6 @@ export default class GameContainer extends Vue {
     gameContainer.addEventListener(
       EventType.REGISTER_GAME_OBJECT,
       this.registerGameObject
-    );
-    gameContainer.addEventListener(
-      EventType.REGISTER_CUSTOM_OBJECT,
-      this.registerCustomObject
     );
 
     this.setupMatter();
@@ -240,6 +246,7 @@ export default class GameContainer extends Vue {
   }
 
   hierarchyChanged(mutationList: MutationRecord[]): void {
+    if (logCalls) console.log('hierarchyChanged');
     const addedNodes: Node[] = [];
     for (const mutation of mutationList) {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -256,16 +263,13 @@ export default class GameContainer extends Vue {
   }
 
   unmounted(): void {
+    if (logCalls) console.log('unmounted');
     this.hierarchyObserver.disconnect();
     const gameContainer = this.$refs.gameContainer as HTMLElement;
     if (gameContainer) {
       gameContainer.removeEventListener(
         EventType.REGISTER_GAME_OBJECT,
         this.registerGameObject
-      );
-      gameContainer.removeEventListener(
-        EventType.REGISTER_CUSTOM_OBJECT,
-        this.registerCustomObject
       );
     }
     pixiUtil.cleanupToken(this.textureToken);
@@ -283,6 +287,7 @@ export default class GameContainer extends Vue {
   }
 
   async setupPixiSpace(width: number, height: number): Promise<void> {
+    if (logCalls) console.log('setupPixiSpace');
     const dom = this.$refs.gameContainer as HTMLElement;
     if (dom && (width !== this.gameWidth || height !== this.gameHeight)) {
       this.gameWidth = width;
@@ -299,6 +304,7 @@ export default class GameContainer extends Vue {
   }
 
   setupMouseConstraint(canvas: HTMLCanvasElement | undefined): void {
+    if (logCalls) console.log('setupMouseConstraint');
     if (this.engine && canvas) {
       // add mouse control
       const mouse = Matter.Mouse.create(canvas);
@@ -315,35 +321,25 @@ export default class GameContainer extends Vue {
 
   //#region register object
   registerGameObject(e: any): void {
+    if (logCalls) console.log('registerGameObject');
     const gameObject = e.detail.data as GameObject;
     this.gameObjects.push(gameObject);
     gameObject.setGameContainer(this);
-    if (this.activatedObjectOnRegister) {
-      this.$emit('update:selectedObject', gameObject);
-      if (this.isMouseDown) {
-        this.activeObject = gameObject;
-        this.activeObject.$emit('update:highlighted', true);
-      } else gameObject.gameObjectReleased();
-    }
   }
 
   deregisterGameObject(gameObject: GameObject): void {
+    if (logCalls) console.log('deregisterGameObject');
     this.removeGameObjectFromEngin(gameObject);
     const index = this.gameObjects.findIndex((obj) => obj === gameObject);
     if (index > -1) {
       this.gameObjects.splice(index, 1);
     }
   }
-
-  registerCustomObject(e: any): void {
-    const gameObject = e.detail.data as CustomObject;
-    this.customObjects.push(gameObject);
-    gameObject.setGameContainer(this);
-  }
   //#endregion register object
 
   //#region force
   addWind(): void {
+    if (logCalls) console.log('addWind');
     const calcForce = (body: Matter.Body): number => {
       const windForce = this.windForce > 0 ? this.windForce : 1;
       const forceMagnitude = (0.05 + body.frictionAir) * windForce; // (0.05 * body.mass) * timeScale;
@@ -373,6 +369,7 @@ export default class GameContainer extends Vue {
   readonly minClickTimeDelta = 10;
   isMouseDown = false;
   gameContainerClicked(event: any): void {
+    if (logCalls) console.log('gameContainerClicked');
     const mousePosition = { x: event.offsetX, y: event.offsetY };
     const clickedBodies = Matter.Query.point(
       this.gameObjects
@@ -402,6 +399,7 @@ export default class GameContainer extends Vue {
   }
 
   gameContainerReleased(): void {
+    if (logCalls) console.log('gameContainerReleased');
     this.isMouseDown = false;
     if (this.activeObject) {
       this.activeObject.gameObjectReleased();
@@ -412,10 +410,12 @@ export default class GameContainer extends Vue {
   //#region bounds
   bordersScreen: undefined | CollisionBounds = undefined;
   getBordersForType(): CollisionBounds | undefined {
+    //if (logCalls) console.log('getBordersForType');
     return this.bordersScreen;
   }
 
   setBordersForType(borders: CollisionBounds): void {
+    //if (logCalls) console.log('setBordersForType');
     this.bordersScreen = borders;
   }
 
@@ -423,6 +423,7 @@ export default class GameContainer extends Vue {
   async setupCollisionBound(
     borderCategory: number
   ): Promise<CollisionBounds | undefined> {
+    if (logCalls) console.log('setupCollisionBound');
     const gameWidth = this.gameWidth ? this.gameWidth : 100;
     const gameHeight = this.gameDisplayHeight ? this.gameDisplayHeight : 100;
     const boundsWidth = gameWidth;
@@ -579,12 +580,14 @@ export default class GameContainer extends Vue {
 
   borders: undefined | CollisionBounds = undefined;
   async setupBound(): Promise<void> {
+    if (logCalls) console.log('setupBound');
     this.borders = await this.setupCollisionBound(this.borderCategory);
   }
   //#endregion bounds
 
   //#region matterjs
   setupMatter(): void {
+    if (logCalls) console.log('setupMatter');
     this.engine = Matter.Engine.create();
     if (this.detectCollision)
       Matter.Events.on(this.engine, 'collisionStart', this.collisionStart);
@@ -603,6 +606,7 @@ export default class GameContainer extends Vue {
   readonly defaultGravityScale = 0.0005;
   @Watch('gravity', { immediate: true })
   setGravity(): void {
+    if (logCalls) console.log('setGravity');
     if (this.engine) {
       this.engine.gravity = {
         x: this.gravity[0],
@@ -627,6 +631,7 @@ export default class GameContainer extends Vue {
           | Matter.MouseConstraint
         )[]
   ): void {
+    if (logCalls) console.log('addToEngin');
     if (
       this.engine &&
       !this.engine.world.bodies.find((item) => item.id === physicObject.id)
@@ -636,6 +641,7 @@ export default class GameContainer extends Vue {
   }
 
   bodyAdded(): void {
+    if (logCalls) console.log('bodyAdded');
     this.engine.world.bodies.sort((a, b) => a.zIndex - b.zIndex);
   }
 
@@ -652,6 +658,7 @@ export default class GameContainer extends Vue {
           | Matter.MouseConstraint
         )[]
   ): void {
+    if (logCalls) console.log('removeFromEngin');
     try {
       if (this.engine) Matter.Composite.remove(this.engine.world, physicObject);
     } catch (e) {
@@ -660,6 +667,7 @@ export default class GameContainer extends Vue {
   }
 
   addGameObjectToEngin(gameObject: GameObject): void {
+    if (logCalls) console.log('addGameObjectToEngin');
     if (gameObject.body && this.engine && !gameObject.isPartOfEngin) {
       gameObject.isPartOfEngin = true;
       this.addToEngin(gameObject.body);
@@ -667,6 +675,7 @@ export default class GameContainer extends Vue {
   }
 
   removeGameObjectFromEngin(gameObject: GameObject): void {
+    if (logCalls) console.log('removeGameObjectFromEngin');
     if (gameObject.body && this.engine && gameObject.isPartOfEngin) {
       gameObject.isPartOfEngin = false;
       this.removeFromEngin(gameObject.body);
@@ -674,11 +683,13 @@ export default class GameContainer extends Vue {
   }
 
   collisionStart(event: Matter.Event): void {
+    if (logCalls) console.log('collisionStart');
     const collisions = [...event.pairs] as Matter.Collision[];
     this.notifyCollision(collisions);
   }
 
   notifyCollision(collisions: Matter.Collision[]): void {
+    if (logCalls) console.log('notifyCollision');
     const handleCollision = (
       gameObject: GameObject,
       collisionObject: GameObject | CollisionRegion | null,
@@ -753,6 +764,7 @@ export default class GameContainer extends Vue {
   loopTime = 0;
   updateTime = Date.now();
   afterPhysicUpdate(): void {
+    //if (logCalls) console.log('afterPhysicUpdate');
     for (const gameObject of this.gameObjects) {
       gameObject.afterPhysicUpdate();
     }
@@ -761,6 +773,7 @@ export default class GameContainer extends Vue {
   nextWindUpdateTime = 0;
   readonly oneTickDelta = 50;
   beforePhysicUpdate(): void {
+    //if (logCalls) console.log('beforePhysicUpdate');
     const updateTime = Date.now();
     const deltaTime = updateTime - this.updateTime;
     this.updateTime = updateTime;
