@@ -27,6 +27,7 @@ export enum CanvasMode {
   Canvas = 'Canvas',
   Pixi = 'Pixi',
   PixiVue = 'PixiVue',
+  GameEngineLite = 'GameEngineLite',
   GameEngine = 'GameEngine',
 }
 

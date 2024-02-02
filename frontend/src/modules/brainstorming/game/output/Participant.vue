@@ -1,13 +1,23 @@
 <template>
   <div class="canvas-container" ref="container">
     <PhysicsContainer
-      v-if="mode !== CanvasMode.GameEngine && animationTimeline"
+      v-if="
+        (mode === CanvasMode.Canvas ||
+          mode === CanvasMode.Pixi ||
+          mode === CanvasMode.PixiVue) &&
+        animationTimeline
+      "
       :canvas-mode="mode"
       :animation-timeline="animationTimeline"
       :gravity="gravity"
     />
     <GameCanvas
-      v-if="mode === CanvasMode.GameEngine && animationTimeline"
+      v-if="
+        (mode === CanvasMode.GameEngineLite ||
+          mode === CanvasMode.GameEngine) &&
+        animationTimeline
+      "
+      :canvas-mode="mode"
       :animation-timeline="animationTimeline"
       :gravity="gravity"
     />

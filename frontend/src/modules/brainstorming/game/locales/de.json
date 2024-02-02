@@ -16,6 +16,7 @@
       "Canvas": "canvas",
       "Pixi": "pixi",
       "PixiVue": "pixi VUE",
+      "GameEngineLite": "game engine lite",
       "GameEngine": "game engine"
     }
   }
