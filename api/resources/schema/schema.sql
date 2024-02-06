@@ -1253,24 +1253,33 @@ AND
         )) != '';
 
 CREATE OR REPLACE VIEW task_info (task_id, task_type, participant_count) AS
-SELECT task_id, task_type, SUM(participant_count) as participant_count
-FROM (
-    SELECT vote.task_id,
-         task.task_type,
-         COUNT(DISTINCT vote.participant_id) AS participant_count
-    FROM vote
-           INNER JOIN task ON task.id = vote.task_id
-    GROUP BY vote.task_id
-    UNION
-    SELECT idea.task_id,
-         task.task_type,
-         COUNT(DISTINCT idea.participant_id) AS participant_count
-    FROM idea
-           INNER JOIN task ON task.id = idea.task_id
-    WHERE task.task_type LIKE 'BRAINSTORMING'
-    GROUP BY idea.task_id
-) AS task_info
-GROUP BY task_id;
+SELECT
+    task_id,
+    task_type,
+    COUNT(DISTINCT participant_id) AS participant_count
+FROM
+    (
+        SELECT
+            state.task_id,
+            state.participant_id
+        FROM
+            `task_participant_state` AS state
+        UNION
+        SELECT
+            vote.task_id,
+            vote.participant_id
+        FROM
+            vote
+        UNION
+        SELECT
+            idea.task_id,
+            idea.participant_id
+        FROM
+            idea
+    ) AS task_info
+        INNER JOIN task ON task.id = task_info.task_id
+GROUP BY
+    task_id;
 
 COMMIT;
 
