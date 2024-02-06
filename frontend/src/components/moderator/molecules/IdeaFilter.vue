@@ -70,17 +70,10 @@
       </div>
       <div
         class="level-item link"
-        :class="{ inactive: !isCollapseActive }"
-        @click="collapseChanged(true)"
+        @click="collapseChanged(!collapse)"
       >
-        <font-awesome-icon icon="window-minimize" />
-      </div>
-      <div
-        class="level-item link"
-        :class="{ inactive: !isExpandActive }"
-        @click="collapseChanged(false)"
-      >
-        <font-awesome-icon icon="window-maximize" />
+        <font-awesome-icon v-if="!collapse" icon="window-minimize" />
+        <font-awesome-icon v-else icon="window-maximize" />
       </div>
       <div
         class="level-item link"
@@ -168,6 +161,7 @@ export default class IdeaFilter extends Vue {
   IdeaStates = IdeaStates;
   IdeaStateKeys = Object.keys(IdeaStates);
   sessionId = '';
+  collapse = true;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -377,6 +371,7 @@ export default class IdeaFilter extends Vue {
   }
 
   collapseChanged(collapse: boolean): void {
+    this.collapse = collapse;
     if (collapse) this.modelValue.collapseIdeas = CollapseIdeas.collapseAll;
     else this.modelValue.collapseIdeas = CollapseIdeas.expandAll;
     this.change();
@@ -447,5 +442,4 @@ export default class IdeaFilter extends Vue {
     }
   }
 }
-
 </style>

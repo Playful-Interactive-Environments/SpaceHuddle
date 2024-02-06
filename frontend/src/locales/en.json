@@ -314,7 +314,9 @@
         "changePublicScreen": "display this task on the public screen",
         "activateParticipant": "activate this task for the participants",
         "changeOrder": "change the order of the tasks",
-        "selectItem": "select this task"
+        "selectItem": "select this task",
+        "on": "on",
+        "off": "off"
       }
     },
     "view": {

@@ -314,7 +314,9 @@
         "changePublicScreen": "Stelle diese Aufgabe auf der Publikumsansicht dar",
         "activateParticipant": "Aktiviere diese Aufgabe für die Teilnehmer*innen",
         "changeOrder": "Verändere die Ordnung der Aufgaben",
-        "selectItem": "Selektiere diese Aufgabe"
+        "selectItem": "Selektiere diese Aufgabe",
+        "on": "an",
+        "off": "aus"
       }
     },
     "view": {
