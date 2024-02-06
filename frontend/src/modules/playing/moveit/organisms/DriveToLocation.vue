@@ -343,6 +343,18 @@
         </CustomMapMarker>
       </mgl-map>
     </div>
+
+    <div id="overlayEndGoal">
+      <div class="overlayEndGoalBackground"></div>
+      <h1 class="heading heading--big">Goal reached!</h1>
+      <h2 class="heading heading--regular">
+        Average Speed: {{ Math.round(calculateSpeed('average')) }}
+      </h2>
+      <h2 class="heading heading--regular">
+        Maximum Speed: {{ Math.round(calculateSpeed('max')) }}
+      </h2>
+      <el-button type="submit" @click="endGame">Continue</el-button>
+    </div>
   </div>
   <!--<img v-if="streetMask" :src="streetMask" class="streetMask" />-->
 </template>
@@ -530,6 +542,8 @@ export default class DriveToLocation extends Vue {
   decreaseSpeedInterval = -1;
   NavigationType = NavigationType;
   MovingType = MovingType;
+
+  endGoalReached = false;
 
   chartData: ChartData = {
     labels: [],
@@ -1612,14 +1626,13 @@ export default class DriveToLocation extends Vue {
     this.addAnimationSteps(newDrivingPoint, subPath);
     this.setMapDrivingPoint(newDrivingPoint);
     if (this.goalReached(maxGoalDistance)) {
-      this.$emit(
-        'goalReached',
-        this.trackingData,
-        this.routePath,
-        this.drivenPath,
-        this.personCount,
-        this.stops
-      );
+      //TODO
+      const endOverlay = document.getElementById('overlayEndGoal');
+      if (endOverlay) {
+        endOverlay.style.pointerEvents = 'all';
+        endOverlay.style.opacity = '1';
+      }
+      this.endGoalReached = true;
       clearInterval(this.intervalCalculation);
       clearInterval(this.intervalAnimation);
       clearInterval(this.intervalChart);
@@ -1627,6 +1640,17 @@ export default class DriveToLocation extends Vue {
       clearInterval(this.intervalGas);
       clearInterval(this.intervalBreak);
     }
+  }
+
+  endGame() {
+    this.$emit(
+      'goalReached',
+      this.trackingData,
+      this.routePath,
+      this.drivenPath,
+      this.personCount,
+      this.stops
+    );
   }
 
   updateDrivingPath(path: [number, number][]): void {
@@ -2029,6 +2053,23 @@ export default class DriveToLocation extends Vue {
     this.mapVehiclePoint = segmentPath[segmentPath.length - 1];
   }
   //#endregion animation
+  calculateSpeed(type: string): number {
+    const speedList = this.trackingData.map((item) => item.speed);
+    if (type === 'max') {
+      const speedListSorted = speedList.sort((a, b) => b - a);
+      if (speedList.length > 0) {
+        return speedListSorted[0];
+      }
+    }
+    if (type === 'average') {
+      if (speedList.length > 0) {
+        return (
+          speedList.reduce((prev, curr) => prev + curr, 0) / speedList.length
+        );
+      }
+    }
+    return 0;
+  }
 }
 </script>
 
@@ -2278,6 +2319,44 @@ export default class DriveToLocation extends Vue {
   background-color: var(--acceleration-color);
   width: 1.5rem;
   height: 2rem;
+}
+
+#overlayEndGoal {
+  display: flex;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.5s ease-in-out;
+
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 2rem 2rem;
+
+  z-index: 1000;
+  .overlayEndGoalBackground {
+    background-color: var(--color-background);
+    top: 0;
+    position: absolute;
+    opacity: 85%;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  h1 {
+    z-index: 1;
+  }
+  h2 {
+    z-index: 1;
+  }
+  .el-button {
+    position: absolute;
+    z-index: 1;
+    bottom: 3rem;
+  }
 }
 </style>
 
