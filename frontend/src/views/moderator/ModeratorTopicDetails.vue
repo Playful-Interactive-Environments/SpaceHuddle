@@ -166,7 +166,10 @@
                           v-on:command="taskCommand(task, $event)"
                           trigger="click"
                         >
-                          <span class="el-dropdown-link" @click="stopPropagation">
+                          <span
+                            class="el-dropdown-link"
+                            @click="stopPropagation"
+                          >
                             <font-awesome-icon icon="ellipsis-h" />
                           </span>
                           <template #dropdown>

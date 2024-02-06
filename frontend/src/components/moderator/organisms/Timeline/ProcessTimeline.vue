@@ -118,7 +118,7 @@
                 :style="{
                   '--module-color': getContentListColor(element),
                   '--description-padding': hasParticipantToggle
-                    ? '3rem'
+                    ? '2.5rem'
                     : '12px',
                 }"
                 :status="
@@ -174,10 +174,30 @@
                         }"
                         v-on:click="timerContent = element"
                       >
-                        <span class="time" v-if="isParticipantActive(element)">
+                        <span
+                          class="time"
+                          v-if="
+                            isParticipantActive(element) &&
+                            formattedTime(element) !== ''
+                          "
+                        >
                           {{ formattedTime(element) }}
                         </span>
-                        <font-awesome-icon icon="mobile-screen-button" />
+                        <p class="onOff" v-if="!isParticipantActive(element) || formattedTime(element) === ''">
+                          {{
+                            isParticipantActive(element)
+                              ? $t(
+                                  'moderator.organism.' +
+                                    this.translationModuleName +
+                                    '.on'
+                                )
+                              : $t(
+                                  'moderator.organism.' +
+                                    this.translationModuleName +
+                                    '.off'
+                                )
+                          }}
+                        </p>
                       </div>
                     </TutorialStep>
                   </div>
@@ -587,6 +607,7 @@ export default class ProcessTimeline extends Vue {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   itemClicked(item: any): void {
     const result = this.getContentItem(this.getKey(item));
+    console.log(result);
     this.$emit('update:activeItem', result);
     this.$emit('changeActiveElement', result);
     if (
@@ -670,7 +691,7 @@ export default class ProcessTimeline extends Vue {
         return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
       }
     }
-    return 'Ꝏ';
+    return '';
   }
 
   interval!: any;
@@ -720,7 +741,7 @@ export default class ProcessTimeline extends Vue {
 .publicScreenViewDisabled {
   color: var(--color-background);
   height: 3.7rem;
-  width: 1.9rem;
+  width: 1.95rem;
   --tag-border-radius: 0.4rem;
   margin: auto;
   font-size: 1rem;
@@ -761,13 +782,14 @@ export default class ProcessTimeline extends Vue {
 }
 
 .participantView {
+  height: fit-content !important;
   background-color: var(--color-background);
   border-radius: 0 0 var(--tag-border-radius) var(--tag-border-radius);
   border-width: 2px;
   border-style: dashed;
   border-color: var(--color-gray-inactive);
   border-top-width: 0;
-  padding-top: 2.3rem;
+  padding-top: 1.6rem;
   display: flex;
   flex-direction: column;
   color: var(--color-gray-inactive);
@@ -780,14 +802,14 @@ export default class ProcessTimeline extends Vue {
   }
 
   .time {
-    border-radius: var(--tag-border-radius);
-    padding: 0 0.1rem;
+    padding: 0.1rem 0;
     font-size: 0.7rem;
-    background-color: var(--module-color);
-    position: absolute;
-    left: 50%;
-    top: 1.4rem;
-    transform: translate(-50%, 0);
+    pointer-events: none;
+  }
+
+  .onOff {
+    font-size: 0.8rem;
+    pointer-events: none;
   }
 }
 
