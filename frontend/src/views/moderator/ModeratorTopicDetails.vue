@@ -15,6 +15,18 @@
         v-on:delete="deleteTopic"
       >
         <template #settings>
+          <span v-on:click="download">
+            <font-awesome-icon
+              class="awesome-icon"
+              icon="download"
+            ></font-awesome-icon>
+          </span>
+          <span v-on:click="showDependencies = true">
+            <font-awesome-icon
+              class="awesome-icon"
+              icon="table"
+            ></font-awesome-icon>
+          </span>
           <TutorialStep
             v-if="isModerator"
             type="sessionDetails"
@@ -41,18 +53,6 @@
               ></font-awesome-icon>
             </span>
           </TutorialStep>
-          <span v-on:click="download">
-            <font-awesome-icon
-              class="awesome-icon"
-              icon="download"
-            ></font-awesome-icon>
-          </span>
-          <span v-on:click="showDependencies = true">
-            <font-awesome-icon
-              class="awesome-icon"
-              icon="table"
-            ></font-awesome-icon>
-          </span>
           <el-dropdown>
             <span class="el-dropdown-link">
               <font-awesome-icon class="awesome-icon" icon="info-circle" />
