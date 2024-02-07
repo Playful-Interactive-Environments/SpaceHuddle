@@ -792,10 +792,10 @@ $--font-size: (
 
 .el-popper.is-dark {
         color: white;
-        background: var(--color-brainstorming-dark);
+        background: var(--color-dark-contrast);
 
         .el-popper__arrow::before {
-                background: var(--color-brainstorming-dark);
+                background: var(--color-dark-contrast);
         }
 }
 

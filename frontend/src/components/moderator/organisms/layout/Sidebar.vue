@@ -19,18 +19,28 @@
             <div class="sidebar__icon" aria-label="settings" role="button">
               <slot name="settings" />
               <span v-on:click="$emit('openSettings', $event)">
-                <font-awesome-icon
-                  class="awesome-icon"
-                  icon="cog"
-                  v-if="canModify"
-                />
+                <ToolTip
+                  :effect="'light'"
+                  :text="$t('moderator.organism.settings.topicSettings.edit')"
+                >
+                  <font-awesome-icon
+                    class="awesome-icon"
+                    icon="cog"
+                    v-if="canModify"
+                  />
+                </ToolTip>
               </span>
               <span v-on:click="$emit('delete', $event)">
-                <font-awesome-icon
-                  class="awesome-icon"
-                  icon="trash"
-                  v-if="canModify"
-                />
+                <ToolTip
+                  :effect="'light'"
+                  :text="$t('moderator.organism.settings.topicSettings.delete')"
+                >
+                  <font-awesome-icon
+                    class="awesome-icon"
+                    icon="trash"
+                    v-if="canModify"
+                  />
+                </ToolTip>
               </span>
             </div>
           </div>
@@ -74,9 +84,10 @@ import { Session } from '@/types/api/Session';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import SidebarHeader from '@/components/moderator/organisms/layout/SidebarHeader.vue';
+import ToolTip from "@/components/shared/atoms/ToolTip.vue";
 
 @Options({
-  components: { SidebarHeader, SessionCode, TutorialStep },
+  components: {ToolTip, SidebarHeader, SessionCode, TutorialStep },
   emits: ['openSettings', 'delete'],
 })
 export default class Sidebar extends Vue {

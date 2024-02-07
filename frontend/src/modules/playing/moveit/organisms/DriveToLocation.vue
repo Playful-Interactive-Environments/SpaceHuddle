@@ -1626,7 +1626,6 @@ export default class DriveToLocation extends Vue {
     this.addAnimationSteps(newDrivingPoint, subPath);
     this.setMapDrivingPoint(newDrivingPoint);
     if (this.goalReached(maxGoalDistance)) {
-      //TODO
       const endOverlay = document.getElementById('overlayEndGoal');
       if (endOverlay) {
         endOverlay.style.pointerEvents = 'all';

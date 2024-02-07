@@ -66,7 +66,7 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>
+                <el-dropdown-item v-if="isSharable">
                   <el-switch
                     v-model="sharedStatus"
                     @click="levelSharedChanged"
@@ -172,6 +172,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) isEditable!: boolean;
   @Prop({ default: true }) handleEditable!: boolean;
   @Prop({ default: true }) canChangeState!: boolean;
+  @Prop({ default: true }) isSharable!: boolean;
   @Prop({ default: true }) showState!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: '#0192d0' }) selectionColor!: string;

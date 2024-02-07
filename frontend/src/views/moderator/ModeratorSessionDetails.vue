@@ -13,46 +13,61 @@
           {{ formatDate(session.creationDate) }}
         </template>
         <template #settings>
-          <TutorialStep
+          <!--          <TutorialStep
             v-if="!isModerator"
             type="sessionDetails"
             step="disconnect"
             :order="4"
-          >
-            <span v-on:click="disconnect">
-              <font-awesome-icon
-                class="awesome-icon"
-                icon="user-slash"
-              ></font-awesome-icon>
-            </span>
-          </TutorialStep>
+          >-->
+          <span v-on:click="disconnect" v-if="!isModerator">
+            <font-awesome-icon
+              class="awesome-icon"
+              icon="user-slash"
+            ></font-awesome-icon>
+          </span>
+          <!--          </TutorialStep>
           <TutorialStep
             v-else
             type="sessionDetails"
             step="coModerator"
             :order="4"
-          >
-            <span v-on:click="showRoles = true">
+          >-->
+
+          <span v-on:click="showRoles = true">
+            <ToolTip
+              :effect="'light'"
+              :text="
+                $t('moderator.organism.settings.facilitatorSettings.header')
+              "
+            >
               <font-awesome-icon
                 class="awesome-icon"
                 icon="user-group"
               ></font-awesome-icon>
-            </span>
-          </TutorialStep>
+            </ToolTip>
+          </span>
+          <!--          </TutorialStep>
           <TutorialStep
             v-if="isModerator"
             type="sessionDetails"
             step="participants"
             :order="10"
-          >
-            <span v-on:click="showParticipants = true">
+          >-->
+          <span v-on:click="showParticipants = true">
+            <ToolTip
+              :effect="'light'"
+              :text="
+                $t('moderator.organism.settings.participantSettings.header')
+              "
+            >
               <font-awesome-icon
                 class="awesome-icon"
                 icon="users"
               ></font-awesome-icon>
-            </span>
-          </TutorialStep>
-          <el-dropdown>
+            </ToolTip>
+          </span>
+          <!--          </TutorialStep>-->
+          <!--          <el-dropdown>
             <span class="el-dropdown-link">
               <font-awesome-icon class="awesome-icon" icon="info-circle" />
             </span>
@@ -63,7 +78,7 @@
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
-          </el-dropdown>
+          </el-dropdown>-->
         </template>
         <template #headerContent>
           <span :class="{ expired: isExpired }">
@@ -169,9 +184,11 @@ import { Task } from '@/types/api/Task';
 import { SessionRole } from '@/types/api/SessionRole';
 import { reactivateTutorial } from '@/services/tutorial-service';
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
+import ToolTip from "@/components/shared/atoms/ToolTip.vue";
 
 @Options({
   components: {
+    ToolTip,
     ParticipantSettings,
     TutorialStep,
     FacilitatorSettings,

@@ -181,6 +181,9 @@
         }
       },
       "settings": {
+        "sidebarSettings": {
+          "download": "herunterladen"
+        },
         "timerSettings": {
           "header": "Timer setzen",
           "time": "Zeitlimit",
@@ -313,6 +316,7 @@
         "activatePublicScreen": "Stelle diesen Inhalt auf der Publikumsansicht dar",
         "changePublicScreen": "Stelle diese Aufgabe auf der Publikumsansicht dar",
         "activateParticipant": "Aktiviere diese Aufgabe für die Teilnehmer*innen",
+        "deactivateParticipant": "Deaktiviere diese Aufgabe für die Teilnehmer*innen",
         "changeOrder": "Verändere die Ordnung der Aufgaben",
         "selectItem": "Selektiere diese Aufgabe",
         "on": "an",
@@ -407,8 +411,11 @@
         "participantCount": "Teilnehmer*innen",
         "topic": "Thema",
         "clone": "Duplizieren",
+        "edit": "bearbeiten",
+        "delete": "löschen",
         "clonePrompt": "Wollen die diese Aufgabe wirklich duplizieren?",
-        "statistic": "Statistik"
+        "statistic": "Statistik",
+        "settings": "Einstellungen"
       }
     }
   },

@@ -140,13 +140,14 @@
                     >
                       <font-awesome-icon :icon="['fac', 'presentation']" />
                     </div>
-                    <TutorialStep
+                    <!--                    <TutorialStep
                       :disableTutorial="readonly || modelValue.length < 2"
                       step="changeOrder"
                       :type="translationModuleName"
                       :order="2"
                       placement="bottom"
-                    >
+                    >-->
+                    <ToolTip :text="getTitle(element)">
                       <span @click="itemClicked(element)">
                         <font-awesome-icon
                           class="processIcon"
@@ -157,14 +158,31 @@
                           {{ index + 1 }}
                         </span>
                       </span>
-                    </TutorialStep>
-                    <TutorialStep
+                    </ToolTip>
+                    <!--                    </TutorialStep>-->
+                    <!--                    <TutorialStep
                       v-if="hasParticipantToggle"
                       :disableTutorial="readonly"
                       step="activateParticipant"
                       :type="translationModuleName"
                       :order="4"
                       placement="bottom"
+                    >-->
+                    <ToolTip
+                      :placement="'bottom'"
+                      :text="
+                        !isParticipantActive(element)
+                          ? $t(
+                              'moderator.organism.' +
+                                this.translationModuleName +
+                                '.activateParticipant'
+                            )
+                          : $t(
+                              'moderator.organism.' +
+                                this.translationModuleName +
+                                '.deactivateParticipant'
+                            )
+                      "
                     >
                       <div
                         class="participantView"
@@ -183,7 +201,13 @@
                         >
                           {{ formattedTime(element) }}
                         </span>
-                        <p class="onOff" v-if="!isParticipantActive(element) || formattedTime(element) === ''">
+                        <p
+                          class="onOff"
+                          v-if="
+                            !isParticipantActive(element) ||
+                            formattedTime(element) === ''
+                          "
+                        >
                           {{
                             isParticipantActive(element)
                               ? $t(
@@ -199,7 +223,8 @@
                           }}
                         </p>
                       </div>
-                    </TutorialStep>
+                    </ToolTip>
+                    <!--                    </TutorialStep>-->
                   </div>
                 </template>
                 <template #description>
@@ -329,6 +354,7 @@ import * as timerService from '@/services/timer-service';
 import { TimerEntity } from '@/types/enum/TimerEntity';
 import TaskStates from '@/types/enum/TaskStates';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 export enum TimelineArea {
   left = 'left',
@@ -338,6 +364,7 @@ export enum TimelineArea {
 
 @Options({
   components: {
+    ToolTip,
     TutorialStep,
     draggable,
     TimerSettings,

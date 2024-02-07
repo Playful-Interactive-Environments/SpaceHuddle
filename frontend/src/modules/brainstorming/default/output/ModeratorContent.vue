@@ -30,6 +30,7 @@
           <IdeaCard
             :idea="element"
             :isDraggable="true"
+            :is-sharable="false"
             v-model:collapseIdeas="filter.collapseIdeas"
             @ideaDeleted="reloadIdeas()"
           />

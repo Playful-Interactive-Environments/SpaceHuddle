@@ -181,6 +181,9 @@
         }
       },
       "settings": {
+        "sidebarSettings": {
+          "download": "download"
+        },
         "timerSettings": {
           "header": "Set Timer",
           "time": "Time limit",
@@ -218,7 +221,7 @@
         },
         "participantSettings": {
           "header": "manage participants",
-          "info": "Add new participants or delete unused participant keys.",
+          "info": "Add new participants or topicDependencySettingsdelete unused participant keys.",
           "avatar": "avatar",
           "browserKey": "individual connection key",
           "ideaCount": "number of ideas submitted",
@@ -265,7 +268,6 @@
         },
         "sessionSettings": {
           "header": "Create Session",
-          "headerEdit": "Edit Session",
           "info": "The session is the place that bundles all information belonging to your brainstorming adventure.",
           "title": "Title",
           "titleExample": "e.g. Marketing Meeting",
@@ -286,12 +288,19 @@
         },
         "topicSettings": {
           "header": "Create Topic",
+          "editTopic": "Edit Topic",
           "info": "Topics structure your session.",
           "title": "Title",
           "titleExample": "e.g. What is your favourite ...",
           "description": "Description",
           "descriptionExample": "",
-          "submit": "Save topic"
+          "submit": "Save topic",
+          "clone": "Clone Task",
+          "edit": "edit",
+          "delete": "delete",
+          "clonePrompt": "Do you really want to clone this task?",
+          "statistic": "statistics",
+          "settings": "topic settings"
         }
       },
       "session": {
@@ -313,6 +322,7 @@
         "activatePublicScreen": "display this topic on the public screen",
         "changePublicScreen": "display this task on the public screen",
         "activateParticipant": "activate this task for the participants",
+        "deactivateParticipant": "deactivate this task for the participants",
         "changeOrder": "change the order of the tasks",
         "selectItem": "select this task",
         "on": "on",
@@ -407,8 +417,11 @@
         "participantCount": "participants",
         "topic": "topic",
         "clone": "Clone Task",
+        "edit": "edit",
+        "delete": "delete",
         "clonePrompt": "Do you really want to clone this task?",
-        "statistic": "statistics"
+        "statistic": "statistics",
+        "settings": "task settings"
       }
     }
   },

@@ -24,26 +24,50 @@
                 trigger="click"
               >
                 <span class="el-dropdown-link" @click="stopPropagation">
-                  <font-awesome-icon icon="ellipsis-h" />
+                  <ToolTip :text="$t('moderator.view.topicSettings.settings')">
+                    <font-awesome-icon icon="ellipsis-h" />
+                  </ToolTip>
                 </span>
+
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item command="edit">
-                      <font-awesome-icon icon="pen" />
+                      <ToolTip
+                        :placement="'left'"
+                        :text="$t('moderator.view.topicSettings.edit')"
+                      >
+                        <font-awesome-icon icon="pen" />
+                      </ToolTip>
                     </el-dropdown-item>
                     <el-dropdown-item command="clone">
-                      <font-awesome-icon icon="clone" />
+                      <ToolTip
+                        :placement="'left'"
+                        :text="$t('moderator.view.topicSettings.clone')"
+                      >
+                        <font-awesome-icon icon="clone" />
+                      </ToolTip>
                     </el-dropdown-item>
                     <el-dropdown-item command="delete">
-                      <font-awesome-icon icon="trash" />
+                      <ToolTip
+                        :placement="'left'"
+                        :text="$t('moderator.view.topicSettings.delete')"
+                      >
+                        <font-awesome-icon icon="trash" />
+                      </ToolTip>
                     </el-dropdown-item>
                     <el-dropdown-item command="statistic">
-                      <font-awesome-icon icon="chart-column" />
+                      <ToolTip
+                        :placement="'left'"
+                        :text="$t('moderator.view.topicSettings.statistic')"
+                      >
+                        <font-awesome-icon icon="chart-column" />
+                      </ToolTip>
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
             </div>
+
             <TutorialStep
               type="sessionDetails"
               step="changeOrder"
@@ -72,7 +96,7 @@
     />
     <el-dialog v-model="showStatistic" width="calc(var(--app-width) * 0.8)">
       <template #header>
-        {{ $t('moderator.view.topicDetails.statistic') }}
+        {{ $t('moderator.view.topicSettings.statistic') }}
         {{ topic.title }}
       </template>
       <TopicStatistic :topic-id="topic.id" />
@@ -89,9 +113,10 @@ import TopicSettings from '@/components/moderator/organisms/settings/TopicSettin
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import { ElMessageBox } from 'element-plus';
 import TopicStatistic from '@/components/moderator/organisms/statistics/TopicStatistic.vue';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 @Options({
-  components: { TopicStatistic, TutorialStep, TopicSettings },
+  components: { ToolTip, TopicStatistic, TutorialStep, TopicSettings },
   emits: ['topicDeleted'],
 })
 export default class TopicCard extends Vue {

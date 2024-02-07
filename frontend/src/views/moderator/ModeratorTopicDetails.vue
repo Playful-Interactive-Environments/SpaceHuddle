@@ -16,44 +16,64 @@
       >
         <template #settings>
           <span v-on:click="download">
-            <font-awesome-icon
-              class="awesome-icon"
-              icon="download"
-            ></font-awesome-icon>
+            <ToolTip
+              :effect="'light'"
+              :text="$t('moderator.organism.settings.sidebarSettings.download')"
+            >
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="download"
+              ></font-awesome-icon>
+            </ToolTip>
           </span>
           <span v-on:click="showDependencies = true">
-            <font-awesome-icon
-              class="awesome-icon"
-              icon="table"
-            ></font-awesome-icon>
+            <ToolTip
+              :effect="'light'"
+              :text="$t('moderator.organism.settings.topicDependencySettings.header')"
+            >
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="table"
+              ></font-awesome-icon>
+            </ToolTip>
           </span>
-          <TutorialStep
+          <!--          <TutorialStep
             v-if="isModerator"
             type="sessionDetails"
             step="coModerator"
             :order="4"
-          >
-            <span v-on:click="showRoles = true">
+          >-->
+          <span v-on:click="showRoles = true">
+            <ToolTip
+              :effect="'light'"
+              :text="$t('moderator.organism.settings.facilitatorSettings.header')"
+            >
               <font-awesome-icon
                 class="awesome-icon"
                 icon="user-group"
               ></font-awesome-icon>
-            </span>
-          </TutorialStep>
-          <TutorialStep
+            </ToolTip>
+          </span>
+          <!--          </TutorialStep>-->
+          <!--          <TutorialStep
             v-if="isModerator"
             type="sessionDetails"
             step="participants"
             :order="10"
-          >
-            <span v-on:click="showParticipants = true">
+          >-->
+          <span v-on:click="showParticipants = true">
+            <ToolTip
+              :effect="'light'"
+              :text="$t('moderator.organism.settings.participantSettings.header')"
+            >
               <font-awesome-icon
                 class="awesome-icon"
                 icon="users"
               ></font-awesome-icon>
-            </span>
-          </TutorialStep>
-          <el-dropdown>
+            </ToolTip>
+          </span>
+          <!--          </TutorialStep>-->
+          <!--          <el-dropdown>
             <span class="el-dropdown-link">
               <font-awesome-icon class="awesome-icon" icon="info-circle" />
             </span>
@@ -64,7 +84,7 @@
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
-          </el-dropdown>
+          </el-dropdown>-->
         </template>
         <template #headerContent>
           <el-collapse accordion v-model="activeTab">
@@ -312,9 +332,11 @@ import { ElMessageBox } from 'element-plus';
 import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStatistic.vue';
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
 import TopicDependencySettings from '@/components/moderator/organisms/settings/TopicDependencySettings.vue';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 @Options({
   components: {
+    ToolTip,
     ParticipantSettings,
     TaskStatistic,
     TutorialStep,
