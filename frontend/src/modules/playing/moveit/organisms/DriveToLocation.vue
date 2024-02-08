@@ -348,10 +348,16 @@
       <div class="overlayEndGoalBackground"></div>
       <h1 class="heading heading--big">Goal reached!</h1>
       <h2 class="heading heading--regular">
-        Average Speed: {{ Math.round(calculateSpeed('average')) }}
+        {{ $t('module.playing.moveit.participant.drivingStats.avgSpeed') }} :
+        {{ Math.round(calculateSpeed('average')) }}
       </h2>
       <h2 class="heading heading--regular">
-        Maximum Speed: {{ Math.round(calculateSpeed('max')) }}
+        {{ $t('module.playing.moveit.participant.drivingStats.maxSpeed') }} :
+        {{ Math.round(calculateSpeed('max')) }}
+      </h2>
+      <h2 class="heading heading--regular">
+        {{ $t('module.playing.moveit.participant.drivingStats.time') }} :
+        {{ calculateTime() }}s
       </h2>
       <el-button type="submit" @click="endGame">Continue</el-button>
     </div>
@@ -544,6 +550,7 @@ export default class DriveToLocation extends Vue {
   MovingType = MovingType;
 
   endGoalReached = false;
+  startTime = 0;
 
   chartData: ChartData = {
     labels: [],
@@ -938,6 +945,7 @@ export default class DriveToLocation extends Vue {
   }
 
   async mounted(): Promise<void> {
+    this.startTime = Date.now();
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
     if (this.navigation === NavigationType.joystick && this.maxSpeed > 100)
@@ -2068,6 +2076,18 @@ export default class DriveToLocation extends Vue {
       }
     }
     return 0;
+  }
+
+  updateTime = true;
+  timeDriven = 0;
+  calculateTime(): number {
+    if (this.updateTime) {
+      this.timeDriven = Math.round((Date.now() - this.startTime) / 1000);
+      if (this.endGoalReached) {
+        this.updateTime = false;
+      }
+    }
+    return this.timeDriven;
   }
 }
 </script>

@@ -18,6 +18,11 @@
     "separate": "separate",
     "electricity": "electricity ratio in %",
     "earned": "earned",
+    "drivingStats": {
+      "maxSpeed": "Maximum speed",
+      "avgSpeed": "Average speed",
+      "time": "Time driven"
+    },
     "vehicle-parameter": {
       "fuel": "fuel",
       "mpg": "miles per gallon",

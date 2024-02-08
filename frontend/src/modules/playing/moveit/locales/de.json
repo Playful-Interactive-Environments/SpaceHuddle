@@ -18,6 +18,11 @@
     "separate": "separat",
     "electricity": "Stromanteil in %",
     "earned": "verdient",
+    "drivingStats": {
+      "maxSpeed": "Höchstgeschwindigkeit",
+      "avgSpeed": "Durchschnittsgeschwindigkeit",
+      "time": "Gefahrene Zeit"
+    },
     "vehicle-parameter": {
       "fuel": "Treibstoff",
       "mpg": "Verbrauch",
