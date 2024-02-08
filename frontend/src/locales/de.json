@@ -156,11 +156,19 @@
         "filterByState": "Nach Status filtern",
         "order": "Sortierung",
         "syncActiveMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht aktiviert",
-        "syncDeactivateMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht deaktiviert"
+        "syncDeactivateMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht deaktiviert",
+        "sortAscending": "aufsteigende Sortierung",
+        "sortDescending": "absteigende Sortierung",
+        "minimizeText": "minimize Texts",
+        "maximizeText": "maximize Texts",
+        "syncActive": "Synchronisierung der Filter mit der Publikumsansicht",
+        "syncDeactivate": "Deaktiviere Synchronisierung der Filter mit der Publikumsansicht"
       },
       "sessionFilter": {
         "filterPlaceholder": "Suchen...",
-        "subjectPlaceholder": "Betreff"
+        "subjectPlaceholder": "Betreff",
+        "sortAscending": "aufsteigende Sortierung",
+        "sortDescending": "absteigende Sortierung"
       }
     },
     "organism": {
@@ -201,7 +209,11 @@
           "imageExample": "",
           "link": "Link",
           "linkExample": "",
-          "submit": "speichern"
+          "submit": "speichern",
+          "edit": "bearbeiten",
+          "delete": "löschen",
+          "statistic": "Statistik",
+          "state": "Ändere den Status der Idee"
         },
         "linkSettings": {
           "link": "Link",
@@ -289,12 +301,20 @@
         },
         "topicSettings": {
           "header": "Thema erstellen",
+          "editTopic": "Thema bearbeiten",
           "info": "Themen strukturieren deine Sitzung.",
           "title": "Titel",
           "titleExample": "z.B. Was ist dein bevorzugter ...",
           "description": "Beschreibung",
           "descriptionExample": "",
-          "submit": "Thema speichern"
+          "submit": "Thema speichern",
+          "drag": "drag and drop",
+          "clone": "Thema duplizieren",
+          "edit": "bearbeiten",
+          "delete": "löschen",
+          "clonePrompt": "Möchtest du dieses Thema wirklich duplizieren?",
+          "statistic": "Statistik",
+          "settings": "Themen-einstellungen"
         }
       },
       "session": {

@@ -60,28 +60,49 @@
     </div>
     <div class="level-right">
       <div class="level-item link" @click="changeOrderAsc">
-        <font-awesome-icon
-          :icon="
+        <ToolTip
+          :text="
             modelValue.orderAsc
-              ? 'arrow-down-short-wide'
-              : 'arrow-up-short-wide'
+              ? $t('moderator.molecule.ideaFilter.sortAscending')
+              : $t('moderator.molecule.ideaFilter.sortDescending')
           "
-        />
+        >
+          <font-awesome-icon
+            :icon="
+              modelValue.orderAsc
+                ? 'arrow-down-short-wide'
+                : 'arrow-up-short-wide'
+            "
+          />
+        </ToolTip>
       </div>
-      <div
-        class="level-item link"
-        @click="collapseChanged(!collapse)"
-      >
-        <font-awesome-icon v-if="!collapse" icon="window-minimize" />
-        <font-awesome-icon v-else icon="window-maximize" />
+      <div class="level-item link" @click="collapseChanged(!collapse)">
+        <ToolTip
+          :text="
+            collapse
+              ? $t('moderator.molecule.ideaFilter.maximizeText')
+              : $t('moderator.molecule.ideaFilter.minimizeText')
+          "
+        >
+          <font-awesome-icon v-if="!collapse" icon="window-minimize" />
+          <font-awesome-icon v-else icon="window-maximize" />
+        </ToolTip>
       </div>
       <div
         class="level-item link"
         :class="{ disabled: !syncToPublicScreen }"
         @click="linkWithPublicScreen"
       >
-        <font-awesome-icon icon="link" v-if="syncToPublicScreen" />
-        <font-awesome-icon icon="link-slash" v-else />
+        <ToolTip
+          :text="
+            syncToPublicScreen
+              ? $t('moderator.molecule.ideaFilter.syncDisable')
+              : $t('moderator.molecule.ideaFilter.syncActive')
+          "
+        >
+          <font-awesome-icon icon="link" v-if="syncToPublicScreen" />
+          <font-awesome-icon icon="link-slash" v-else />
+        </ToolTip>
       </div>
     </div>
   </div>
@@ -108,6 +129,7 @@ import { ElMessage } from 'element-plus';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { SessionRole } from '@/types/api/SessionRole';
 import * as cashService from '@/services/cash-service';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 export interface FilterData {
   orderType: string;
@@ -143,6 +165,7 @@ export const getFilterForTask = (task: Task): FilterData => {
 };
 
 @Options({
+  components: { ToolTip },
   emits: ['change', 'update'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/

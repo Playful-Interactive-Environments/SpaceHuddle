@@ -4,6 +4,7 @@
     :placement="placement"
     :content="text"
     :effect="effect"
+    :enterable="false"
   >
     <slot />
   </el-tooltip>

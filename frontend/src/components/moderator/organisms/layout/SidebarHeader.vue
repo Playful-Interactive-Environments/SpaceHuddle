@@ -8,10 +8,22 @@
     </div>
     <span class="sidebar_icons">
       <router-link to="/sessions">
-        <font-awesome-icon icon="home" />
+        <ToolTip
+          :placement="'bottom'"
+          :text="$t('moderator.organism.session.overview.header')"
+          :effect="'light'"
+        >
+          <font-awesome-icon icon="home" />
+        </ToolTip>
       </router-link>
       <router-link to="/profile">
-        <font-awesome-icon icon="user" />
+        <ToolTip
+          :placement="'bottom'"
+          :text="$t('moderator.view.profile.header')"
+          :effect="'light'"
+        >
+          <font-awesome-icon icon="user" />
+        </ToolTip>
       </router-link>
     </span>
   </div>
@@ -21,9 +33,10 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { EventType } from '@/types/enum/EventType';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 @Options({
-  components: {},
+  components: { ToolTip },
   emits: ['update:sidebarVisible'],
 })
 export default class SidebarHeader extends Vue {

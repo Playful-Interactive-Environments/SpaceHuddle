@@ -29,7 +29,9 @@
           <span v-on:click="showDependencies = true">
             <ToolTip
               :effect="'light'"
-              :text="$t('moderator.organism.settings.topicDependencySettings.header')"
+              :text="
+                $t('moderator.organism.settings.topicDependencySettings.header')
+              "
             >
               <font-awesome-icon
                 class="awesome-icon"
@@ -46,7 +48,9 @@
           <span v-on:click="showRoles = true">
             <ToolTip
               :effect="'light'"
-              :text="$t('moderator.organism.settings.facilitatorSettings.header')"
+              :text="
+                $t('moderator.organism.settings.facilitatorSettings.header')
+              "
             >
               <font-awesome-icon
                 class="awesome-icon"
@@ -64,7 +68,9 @@
           <span v-on:click="showParticipants = true">
             <ToolTip
               :effect="'light'"
-              :text="$t('moderator.organism.settings.participantSettings.header')"
+              :text="
+                $t('moderator.organism.settings.participantSettings.header')
+              "
             >
               <font-awesome-icon
                 class="awesome-icon"
@@ -190,21 +196,65 @@
                             class="el-dropdown-link"
                             @click="stopPropagation"
                           >
-                            <font-awesome-icon icon="ellipsis-h" />
+                            <ToolTip
+                              :text="
+                                $t(
+                                  'moderator.organism.settings.taskSettings.settings'
+                                )
+                              "
+                            >
+                              <font-awesome-icon icon="ellipsis-h" />
+                            </ToolTip>
                           </span>
                           <template #dropdown>
                             <el-dropdown-menu>
                               <el-dropdown-item command="edit">
-                                <font-awesome-icon icon="pen" />
+                                <ToolTip
+                                  :placement="'right'"
+                                  :text="
+                                    $t(
+                                      'moderator.organism.settings.taskSettings.edit'
+                                    )
+                                  "
+                                >
+                                  <font-awesome-icon icon="pen" />
+                                </ToolTip>
                               </el-dropdown-item>
                               <el-dropdown-item command="delete">
-                                <font-awesome-icon icon="trash" />
+                                <ToolTip
+                                  :placement="'right'"
+                                  :text="
+                                    $t(
+                                      'moderator.organism.settings.taskSettings.delete'
+                                    )
+                                  "
+                                >
+                                  <font-awesome-icon icon="trash" />
+                                </ToolTip>
                               </el-dropdown-item>
                               <el-dropdown-item command="clone">
-                                <font-awesome-icon icon="clone" />
+                                <ToolTip
+                                  :placement="'right'"
+                                  :text="
+                                    $t(
+                                      'moderator.organism.settings.taskSettings.clone'
+                                    )
+                                  "
+                                >
+                                  <font-awesome-icon icon="clone" />
+                                </ToolTip>
                               </el-dropdown-item>
                               <el-dropdown-item command="statistic">
-                                <font-awesome-icon icon="chart-column" />
+                                <ToolTip
+                                  :placement="'right'"
+                                  :text="
+                                    $t(
+                                      'moderator.organism.settings.taskSettings.statistic'
+                                    )
+                                  "
+                                >
+                                  <font-awesome-icon icon="chart-column" />
+                                </ToolTip>
                               </el-dropdown-item>
                             </el-dropdown-menu>
                           </template>

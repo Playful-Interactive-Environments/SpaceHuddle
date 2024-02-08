@@ -60,43 +60,79 @@
             class="card__menu"
             v-on:command="menuItemSelected($event)"
             trigger="click"
+            :hide-on-click="!preventClosing"
           >
             <span class="el-dropdown-link" @click="stopPropagation">
-              <font-awesome-icon icon="ellipsis-h" />
+              <ToolTip
+                :text="$t('moderator.organism.settings.ideaSettings.header')"
+              >
+                <font-awesome-icon icon="ellipsis-h" />
+              </ToolTip>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item v-if="isSharable">
-                  <el-switch
-                    v-model="sharedStatus"
-                    @click="levelSharedChanged"
-                  />
+                  <ToolTip
+                    :placement="'right'"
+                    :text="
+                      $t(
+                        'moderator.organism.processTimeline.activateParticipant'
+                      )
+                    "
+                  >
+                    <el-switch
+                      v-model="sharedStatus"
+                      @click="levelSharedChanged"
+                    />
+                  </ToolTip>
                 </el-dropdown-item>
                 <el-dropdown-item command="edit">
-                  <font-awesome-icon icon="pen" />
+                  <ToolTip
+                    :placement="'right'"
+                    :text="$t('moderator.organism.settings.ideaSettings.edit')"
+                  >
+                    <font-awesome-icon icon="pen" />
+                  </ToolTip>
                 </el-dropdown-item>
                 <el-dropdown-item command="delete">
-                  <font-awesome-icon icon="trash" />
-                </el-dropdown-item>
-                <el-dropdown-item command="state" v-if="canChangeState">
-                  <el-dropdown
-                    class="card__menu"
-                    placement="top-start"
-                    v-on:command="menuItemSelected($event)"
+                  <ToolTip
+                    :placement="'right'"
+                    :text="
+                      $t('moderator.organism.settings.ideaSettings.delete')
+                    "
                   >
-                    <font-awesome-icon icon="star" />
-                    <template #dropdown>
-                      <el-dropdown-menu>
-                        <el-dropdown-item
-                          v-for="ideaState in IdeaStates"
-                          :key="ideaState"
-                          :command="ideaState"
-                        >
-                          {{ $t(`enum.ideaState.${ideaState}`) }}
-                        </el-dropdown-item>
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
+                    <font-awesome-icon icon="trash" />
+                  </ToolTip>
+                </el-dropdown-item>
+                <el-dropdown-item
+                  command="state"
+                  v-if="canChangeState"
+                  @mousedown="preventClosing = true"
+                >
+                  <ToolTip
+                    :placement="'right'"
+                    :text="$t('moderator.organism.settings.ideaSettings.state')"
+                  >
+                    <el-dropdown
+                      class="card__menu"
+                      placement="top-start"
+                      v-on:command="menuItemSelected($event)"
+                      trigger="click"
+                    >
+                      <font-awesome-icon icon="star" />
+                      <template #dropdown>
+                        <el-dropdown-menu @mousedown="preventClosing = false">
+                          <el-dropdown-item
+                            v-for="ideaState in IdeaStates"
+                            :key="ideaState"
+                            :command="ideaState"
+                          >
+                            {{ $t(`enum.ideaState.${ideaState}`) }}
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
+                  </ToolTip>
                 </el-dropdown-item>
                 <slot name="dropdown"></slot>
               </el-dropdown-menu>
@@ -147,6 +183,7 @@ import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as themeColors from '@/utils/themeColors';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 export enum CollapseIdeas {
   collapseAll = 'collapseAll',
@@ -155,7 +192,7 @@ export enum CollapseIdeas {
 }
 
 @Options({
-  components: { IdeaSettings },
+  components: { ToolTip, IdeaSettings },
   emits: [
     'ideaDeleted',
     'ideaStartEdit',
@@ -192,6 +229,7 @@ export default class IdeaCard extends Vue {
   ideaHeight = '50px';
 
   sharedStatus = false;
+  preventClosing = false;
 
   IdeaStates = IdeaStates;
 

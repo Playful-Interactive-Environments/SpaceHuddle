@@ -145,7 +145,14 @@
                 </template>
                 <template #dropdown>
                   <el-dropdown-item command="statistic">
-                    <font-awesome-icon icon="chart-column" />
+                    <ToolTip
+                      :placement="'right'"
+                      :text="
+                        $t('moderator.organism.settings.ideaSettings.statistic')
+                      "
+                    >
+                      <font-awesome-icon icon="chart-column" />
+                    </ToolTip>
                   </el-dropdown-item>
                 </template>
               </IdeaCard>
@@ -265,6 +272,7 @@ import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import { Module } from '@/types/api/Module';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const emptyParameter = {
@@ -275,6 +283,7 @@ const emptyParameter = {
 
 @Options({
   components: {
+    ToolTip,
     FontAwesomeIcon,
     PlayState,
     LevelBuilder,

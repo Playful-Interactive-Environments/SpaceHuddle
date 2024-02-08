@@ -24,7 +24,11 @@
                 trigger="click"
               >
                 <span class="el-dropdown-link" @click="stopPropagation">
-                  <ToolTip :text="$t('moderator.view.topicSettings.settings')">
+                  <ToolTip
+                    :text="
+                      $t('moderator.organism.settings.topicSettings.settings')
+                    "
+                  >
                     <font-awesome-icon icon="ellipsis-h" />
                   </ToolTip>
                 </span>
@@ -34,7 +38,9 @@
                     <el-dropdown-item command="edit">
                       <ToolTip
                         :placement="'left'"
-                        :text="$t('moderator.view.topicSettings.edit')"
+                        :text="
+                          $t('moderator.organism.settings.topicSettings.edit')
+                        "
                       >
                         <font-awesome-icon icon="pen" />
                       </ToolTip>
@@ -42,7 +48,9 @@
                     <el-dropdown-item command="clone">
                       <ToolTip
                         :placement="'left'"
-                        :text="$t('moderator.view.topicSettings.clone')"
+                        :text="
+                          $t('moderator.organism.settings.topicSettings.clone')
+                        "
                       >
                         <font-awesome-icon icon="clone" />
                       </ToolTip>
@@ -50,7 +58,9 @@
                     <el-dropdown-item command="delete">
                       <ToolTip
                         :placement="'left'"
-                        :text="$t('moderator.view.topicSettings.delete')"
+                        :text="
+                          $t('moderator.organism.settings.topicSettings.delete')
+                        "
                       >
                         <font-awesome-icon icon="trash" />
                       </ToolTip>
@@ -58,7 +68,11 @@
                     <el-dropdown-item command="statistic">
                       <ToolTip
                         :placement="'left'"
-                        :text="$t('moderator.view.topicSettings.statistic')"
+                        :text="
+                          $t(
+                            'moderator.organism.settings.topicSettings.statistic'
+                          )
+                        "
                       >
                         <font-awesome-icon icon="chart-column" />
                       </ToolTip>
@@ -68,19 +82,24 @@
               </el-dropdown>
             </div>
 
-            <TutorialStep
+            <!--            <TutorialStep
               type="sessionDetails"
               step="changeOrder"
               :order="7"
               placement="left"
-            >
-              <div class="card__drag level-item">
+            >-->
+            <div class="card__drag level-item">
+              <ToolTip
+                :placement="'left'"
+                :text="$t('moderator.organism.settings.topicSettings.drag')"
+              >
                 <font-awesome-icon
                   icon="grip-vertical"
                   class="card__drag__icon"
                 />
-              </div>
-            </TutorialStep>
+              </ToolTip>
+            </div>
+            <!--            </TutorialStep>-->
           </span>
         </span>
       </el-card>
@@ -96,7 +115,7 @@
     />
     <el-dialog v-model="showStatistic" width="calc(var(--app-width) * 0.8)">
       <template #header>
-        {{ $t('moderator.view.topicSettings.statistic') }}
+        {{ $t('moderator.organism.settings.topicSettings.statistic') }}
         {{ topic.title }}
       </template>
       <TopicStatistic :topic-id="topic.id" />

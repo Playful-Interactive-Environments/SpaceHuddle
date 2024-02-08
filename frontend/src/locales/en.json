@@ -156,11 +156,19 @@
         "filterByState": "filter by state",
         "order": "order",
         "syncActiveMessage": "Synchronization of the filter settings with the public screen enabled",
-        "syncDeactivateMessage": "Synchronization of the filter settings with the public screen disabled"
+        "syncDeactivateMessage": "Synchronization of the filter settings with the public screen disabled",
+        "sortAscending": "sort ascending",
+        "sortDescending": "sort descending",
+        "minimizeText": "minimize Texts",
+        "maximizeText": "maximize Texts",
+        "syncActive": "Enable sync of filters with public screen",
+        "syncDisable": "Disable sync of filters with public screen"
       },
       "sessionFilter": {
         "filterPlaceholder": "Search...",
-        "subjectPlaceholder": "Subject"
+        "subjectPlaceholder": "Subject",
+        "sortAscending": "sort ascending",
+        "sortDescending": "sort descending"
       }
     },
     "organism": {
@@ -201,7 +209,11 @@
           "imageExample": "",
           "link": "link",
           "linkExample": "",
-          "submit": "Save"
+          "submit": "Save",
+          "edit": "edit",
+          "delete": "delete",
+          "statistic": "statistics",
+          "state": "change state of Idea"
         },
         "linkSettings": {
           "link": "link",
@@ -264,10 +276,15 @@
           "confirm": "Confirm module",
           "confirmAndActivate": "Confirm and activate module",
           "moduleSearch": "type in a search module name",
-          "displayAllModules": "display all modules"
+          "displayAllModules": "display all modules",
+          "clone": "Clone Module",
+          "delete": "delete",
+          "statistic": "statistics",
+          "settings": "Module settings"
         },
         "sessionSettings": {
           "header": "Create Session",
+          "settings": "Session settings",
           "info": "The session is the place that bundles all information belonging to your brainstorming adventure.",
           "title": "Title",
           "titleExample": "e.g. Marketing Meeting",
@@ -300,6 +317,7 @@
           "delete": "delete",
           "clonePrompt": "Do you really want to clone this task?",
           "statistic": "statistics",
+          "drag": "drag and drop",
           "settings": "topic settings"
         }
       },

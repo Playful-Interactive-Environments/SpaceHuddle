@@ -58,13 +58,21 @@
       </div>
       <div class="level-item">
         <div class="link" @click="changeOrderAsc">
-          <font-awesome-icon
-            :icon="
+          <ToolTip
+            :text="
               modelValue.orderAsc
-                ? 'arrow-down-short-wide'
-                : 'arrow-up-short-wide'
+                ? $t('moderator.molecule.sessionFilter.sortAscending')
+                : $t('moderator.molecule.sessionFilter.sortDescending')
             "
-          />
+          >
+            <font-awesome-icon
+              :icon="
+                modelValue.orderAsc
+                  ? 'arrow-down-short-wide'
+                  : 'arrow-up-short-wide'
+              "
+            />
+          </ToolTip>
         </div>
       </div>
     </div>
@@ -72,13 +80,14 @@
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { DefaultSessionSortOrder } from '@/types/enum/SessionSortOrder';
 import { SessionSortOrderOption } from '@/types/api/SessionOrderGroup';
 import * as sessionService from '@/services/session-service';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 export interface SessionFilterData {
   orderType: string;
@@ -93,6 +102,10 @@ export const defaultFilterData: SessionFilterData = {
   textFilter: '',
   subjects: null,
 };
+
+@Options({
+  components: { ToolTip },
+})
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SessionFilter extends Vue {
   @Prop({
