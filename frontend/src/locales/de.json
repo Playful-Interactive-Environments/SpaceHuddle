@@ -159,10 +159,10 @@
         "syncDeactivateMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht deaktiviert",
         "sortAscending": "aufsteigende Sortierung",
         "sortDescending": "absteigende Sortierung",
-        "minimizeText": "minimize Texts",
-        "maximizeText": "maximize Texts",
+        "minimizeText": "Texte minimieren",
+        "maximizeText": "Texte maximieren",
         "syncActive": "Synchronisierung der Filter mit der Publikumsansicht",
-        "syncDeactivate": "Deaktiviere Synchronisierung der Filter mit der Publikumsansicht"
+        "syncDisable": "Deaktiviere Synchronisierung der Filter mit der Publikumsansicht"
       },
       "sessionFilter": {
         "filterPlaceholder": "Suchen...",
@@ -200,7 +200,7 @@
           "deactivate": "deaktivieren"
         },
         "ideaSettings": {
-          "header": "Ideen Einstellungen ",
+          "header": "Ideen-Einstellungen ",
           "keywords": "kurze Beschreibung",
           "keywordsExample": "Schlüsselwörter",
           "description": "lange Beschreibung",
@@ -232,13 +232,13 @@
           "header": "Aufgabenabhängigkeiten verwalten"
         },
         "participantSettings": {
-          "header": "Teilnehmer verwalten",
-          "info": "Fügen Sie neue Teilnehmer hinzu oder löschen Sie nicht verwendete Teilnehmerschlüssel.",
+          "header": "Teilnehmer*innen verwalten",
+          "info": "Fügen Sie neue Teilnehmer*innen hinzu oder löschen Sie nicht verwendete Teilnehmerschlüssel.",
           "avatar": "Avatar",
           "browserKey": "individueller Verbindungsschlüssel",
           "ideaCount": "Anzahl der eingereichten Ideen",
           "voteCount": "Anzahl der abgegebenen Stimmen",
-          "add": "einen neuen Teilnehmer anlegen",
+          "add": "Neue Teilnehmer*innen anlegen",
           "export": "Export Verbindungs-PDF",
           "connectionInfo": "Du wurdest zu einer interaktiven Aktivität eingeladen worden. Um der Aktivität teilzunehmen, gib bitte deinen individuellen Schlüssels ein.",
           "connectionSubject": "Deine individuelle Spacehuddle-Einladung",
@@ -276,10 +276,15 @@
           "confirm": "Modul bestätigen",
           "confirmAndActivate": "Modul speichern und aktivieren",
           "moduleSearch": "Gib einen Modulnamen ein",
-          "displayAllModules": "Alle Module anzeigen"
+          "displayAllModules": "Alle Module anzeigen",
+          "clone": "Modul duplizieren",
+          "delete": "löschen",
+          "statistic": "Statistik",
+          "settings": "Modul-Einstellungen"
         },
         "sessionSettings": {
           "header": "Sitzung erstellen",
+          "settings": "Sitzungs-Einstellungen",
           "headerEdit": "Sitzung bearbeiten",
           "info": "Die Sitzung ist, wo alle Informationen des Brainstorming-Abenteuers gebündelt werden",
           "title": "Titel",
@@ -630,7 +635,7 @@
       "connectionCode": "Teilnehmer*innen können der Sitzung über diesen Code beitreten.",
       "shareCode": "Teile den Code indem du eine Einladung an alle Teilnehmer*innen schickst.",
       "coModerator": "Co-Moderator*innen hinzufügen",
-      "participants": "Teilnehmer verwalten",
+      "participants": "Teilnehmer*innen verwalten",
       "disconnect": "Verbindung zur Sitzung trennen"
     },
     "topicDetails": {

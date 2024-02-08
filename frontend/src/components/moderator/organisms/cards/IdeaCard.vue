@@ -75,9 +75,13 @@
                   <ToolTip
                     :placement="'right'"
                     :text="
-                      $t(
-                        'moderator.organism.processTimeline.activateParticipant'
-                      )
+                      sharedStatus
+                        ? $t(
+                            'moderator.organism.taskTimeline.deactivateParticipant'
+                          )
+                        : $t(
+                            'moderator.organism.taskTimeline.activateParticipant'
+                          )
                     "
                   >
                     <el-switch

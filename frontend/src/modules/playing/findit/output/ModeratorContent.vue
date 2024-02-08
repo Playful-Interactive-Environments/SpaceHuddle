@@ -100,7 +100,16 @@
                   </template>
                   <template #dropdown>
                     <el-dropdown-item command="statistic">
-                      <font-awesome-icon icon="chart-column" />
+                      <ToolTip
+                        :placement="'right'"
+                        :text="
+                          $t(
+                            'moderator.organism.settings.ideaSettings.statistic'
+                          )
+                        "
+                      >
+                        <font-awesome-icon icon="chart-column" />
+                      </ToolTip>
                     </el-dropdown-item>
                   </template>
                 </IdeaCard>
@@ -145,14 +154,7 @@
                 </template>
                 <template #dropdown>
                   <el-dropdown-item command="statistic">
-                    <ToolTip
-                      :placement="'right'"
-                      :text="
-                        $t('moderator.organism.settings.ideaSettings.statistic')
-                      "
-                    >
-                      <font-awesome-icon icon="chart-column" />
-                    </ToolTip>
+                    <font-awesome-icon icon="chart-column" />
                   </el-dropdown-item>
                 </template>
               </IdeaCard>

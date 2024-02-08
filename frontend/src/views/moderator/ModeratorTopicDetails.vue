@@ -181,8 +181,18 @@
                     >
                       <template #moduleInfoLeft>
                         <span class="person">
-                          <font-awesome-icon icon="users" />
-                          {{ task.participantCount }}
+                          <ToolTip
+                            :text="
+                              $t(
+                                'moderator.view.topicDetails.participantCount'
+                              ) +
+                              ': ' +
+                              task.participantCount
+                            "
+                          >
+                            <font-awesome-icon icon="users" />
+                            </ToolTip>
+                            {{ task.participantCount }}
                         </span>
                         <span class="separator"> | </span>
                       </template>
