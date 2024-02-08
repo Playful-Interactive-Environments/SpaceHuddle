@@ -32,7 +32,7 @@ export class PhysicBodies {
 
     this.containerWidth = width;
     this.containerHeight = height;
-    this.clearBodies();
+    //this.clearBodies();
     this.setGravity(0, 1, 0);
 
     // add mouse control
@@ -53,10 +53,11 @@ export class PhysicBodies {
 
   readonly defaultGravityScale = 0.0005;
   setGravity(x: number, y: number, z: number): void {
+    const scaleFactor = 5;
     this.engine.gravity = {
-      x: x,
-      y: y,
-      scale: this.defaultGravityScale * (1 - z),
+      x: x * scaleFactor,
+      y: y * scaleFactor,
+      scale: this.defaultGravityScale * (1 - z) * scaleFactor,
     };
   }
 

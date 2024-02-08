@@ -81,7 +81,7 @@ export class AnimationTimeline {
   containerHeight = 0;
 
   readonly animationIntervalTime = 100;
-  animationInterval: number;
+  animationInterval!: number;
   private animateTextCallbackList: ((
     textId: number,
     textProgressLength: number,

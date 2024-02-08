@@ -231,6 +231,9 @@
         @touchstart="beginPan([0, -manualPanSpeed])"
       />
     </div>
+    <div class="frameInfo">
+      {{ frameDelta }}ms / {{ Math.round(1000 / frameDelta) }}fps
+    </div>
   </div>
 </template>
 
@@ -613,6 +616,29 @@ export default class GameContainer extends Vue {
     return this.ready && !this.loading && !this.waitForDataLoad;
   }
 
+  get boundsWidth(): number {
+    const gameWidth = this.gameWidth ? this.gameWidth : 100;
+    const backgroundTextureWidth =
+      this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
+        ? this.backgroundTextureSize[0] * 3
+        : this.backgroundTextureSize[0];
+    return this.collisionBorders !== CollisionBorderType.Background
+      ? gameWidth
+      : backgroundTextureWidth;
+  }
+
+  get boundsHeight(): number {
+    const gameHeight = this.gameDisplayHeight ? this.gameDisplayHeight : 100;
+    const backgroundTextureHeight =
+      this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
+        ? this.backgroundTextureSize[1] *
+          (this.backgroundMovement === BackgroundMovement.Pan ? 3 : 1)
+        : this.backgroundTextureSize[1];
+    return this.collisionBorders !== CollisionBorderType.Background
+      ? gameHeight
+      : backgroundTextureHeight;
+  }
+
   calculateRegionTextPosition(region: CollisionRegionData): number {
     const fullyVisible =
       region.body.position.x - region.size[0] / 2 <= 0 &&
@@ -797,20 +823,15 @@ export default class GameContainer extends Vue {
       this.texturesLoadingStart
     );
     this.eventBus.on(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
+    this.eventBus.on(EventType.REGISTER_GAME_OBJECT, this.registerGameObject);
+    this.eventBus.on(
+      EventType.REGISTER_CUSTOM_OBJECT,
+      this.registerCustomObject
+    );
 
     //initialise observer in mounted as otherwise this references observer
     this.hierarchyObserver = new MutationObserver(this.hierarchyChanged);
     //this.resizeObserver = new ResizeObserver(this.sizeChanged);
-
-    const gameContainer = this.$refs.gameContainer as HTMLElement;
-    gameContainer.addEventListener(
-      EventType.REGISTER_GAME_OBJECT,
-      this.registerGameObject
-    );
-    gameContainer.addEventListener(
-      EventType.REGISTER_CUSTOM_OBJECT,
-      this.registerCustomObject
-    );
 
     this.setupMatter();
     //this.resizeObserver.observe(this.$el.parentElement);
@@ -872,17 +893,6 @@ export default class GameContainer extends Vue {
   unmounted(): void {
     this.hierarchyObserver.disconnect();
     //this.resizeObserver.disconnect();
-    const gameContainer = this.$refs.gameContainer as HTMLElement;
-    if (gameContainer) {
-      gameContainer.removeEventListener(
-        EventType.REGISTER_GAME_OBJECT,
-        this.registerGameObject
-      );
-      gameContainer.removeEventListener(
-        EventType.REGISTER_CUSTOM_OBJECT,
-        this.registerCustomObject
-      );
-    }
     clearInterval(this.intervalPan);
     pixiUtil.cleanupToken(this.textureToken);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
@@ -892,6 +902,11 @@ export default class GameContainer extends Vue {
     this.eventBus.off(
       EventType.TEXTURES_LOADING_START,
       this.texturesLoadingStart
+    );
+    this.eventBus.off(EventType.REGISTER_GAME_OBJECT, this.registerGameObject);
+    this.eventBus.off(
+      EventType.REGISTER_CUSTOM_OBJECT,
+      this.registerCustomObject
     );
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
 
@@ -1078,7 +1093,7 @@ export default class GameContainer extends Vue {
 
   //#region register object
   registerGameObject(e: any): void {
-    const gameObject = e.detail.data as GameObject;
+    const gameObject = e.data as GameObject;
     if (gameObject.moveWithBackground) {
       if (gameObject.objectSpace === ObjectSpace.RelativeToBackground)
         gameObject.initOffset(this.gameObjectOffsetRelativeToBackground);
@@ -1086,6 +1101,7 @@ export default class GameContainer extends Vue {
         gameObject.initOffset(this.gameObjectOffsetRelativeToScreen);
     }
     this.gameObjects.push(gameObject);
+    this.setupGameObjectBody(gameObject);
     gameObject.setGameContainer(this);
     if (this.useObjectPooling) {
       if (!this.freePoolBody[gameObject.poolingKey]) {
@@ -1114,7 +1130,10 @@ export default class GameContainer extends Vue {
   }
 
   deregisterGameObject(gameObject: GameObject): void {
-    this.removeGameObjectFromEngin(gameObject);
+    if (gameObject.body && this.engine && gameObject.isPartOfEngin) {
+      gameObject.isPartOfEngin = false;
+      this.removeFromEngin(gameObject.body);
+    }
     this.removeGameObjectFromDetector(gameObject);
     const index = this.gameObjects.findIndex((obj) => obj === gameObject);
     if (index > -1) {
@@ -1129,7 +1148,7 @@ export default class GameContainer extends Vue {
   }
 
   registerCustomObject(e: any): void {
-    const gameObject = e.detail.data as CustomObject;
+    const gameObject = e.data as CustomObject;
     this.customObjects.push(gameObject);
     gameObject.setGameContainer(this);
   }
@@ -1141,6 +1160,79 @@ export default class GameContainer extends Vue {
     }
   }
   //#endregion register object
+
+  //#region game object bodies
+  async setupGameObjectBody(gameObject: GameObject): Promise<void> {
+    await until(() => !!gameObject.containerPosition);
+    await delay(100);
+    if (!gameObject.containerPosition) return;
+    let body: Matter.Body | null = null;
+    switch (gameObject.type) {
+      case 'rect':
+        body = this.addRect(gameObject);
+        break;
+      case 'circle':
+        body = this.addCircle(gameObject);
+        break;
+      case 'polygon':
+        body = this.addPolygon(gameObject);
+        break;
+    }
+    if (body) {
+      (body as any).zIndex = gameObject.zIndex;
+      gameObject.body = body;
+      gameObject.isPartOfEngin = true;
+      await this.addToEngin(body);
+    }
+  }
+
+  addRect(gameObject: GameObject): Matter.Body {
+    if (gameObject.containerPosition) {
+      gameObject.options.isStatic = gameObject.isStatic;
+      const colliderWidth =
+        gameObject.displayWidth + gameObject.colliderDelta * 2;
+      const colliderHeight =
+        gameObject.displayHeight + gameObject.colliderDelta * 2;
+      return Matter.Bodies.rectangle(
+        gameObject.containerPosition.x,
+        gameObject.containerPosition.y,
+        colliderWidth,
+        colliderHeight,
+        { ...gameObject.options }
+      );
+    }
+  }
+
+  addCircle(gameObject: GameObject): Matter.Body {
+    if (gameObject.containerPosition) {
+      gameObject.options.isStatic = gameObject.isStatic;
+      const width = gameObject.displayWidth;
+      const height = gameObject.displayHeight;
+      const radius =
+        (width > height ? width / 2 : height / 2) + gameObject.colliderDelta;
+      return Matter.Bodies.circle(
+        gameObject.containerPosition.x,
+        gameObject.containerPosition.y,
+        radius,
+        { ...gameObject.options }
+      );
+    }
+  }
+
+  addPolygon(gameObject: GameObject): Matter.Body {
+    if (gameObject.containerPosition) {
+      gameObject.options.isStatic = gameObject.isStatic;
+      return matterUtil.createPolygonBody(
+        { ...gameObject.options },
+        gameObject.containerPosition.x,
+        gameObject.containerPosition.y,
+        gameObject.displayWidth,
+        gameObject.displayHeight,
+        [...gameObject.polygonShape]
+      );
+    }
+  }
+  //#endregion game object bodies
 
   //#region force
   addWind(): void {
@@ -1641,17 +1733,18 @@ export default class GameContainer extends Vue {
   @Watch('gravity', { immediate: true })
   setGravity(): void {
     if (this.engine) {
+      const scaleFactor = 1;
       this.engine.gravity = {
-        x: this.gravity[0],
-        y: this.gravity[1],
+        x: this.gravity[0] * scaleFactor,
+        y: this.gravity[1] * scaleFactor,
         scale: this.useGravity
-          ? this.defaultGravityScale * (1 - this.gravity[2])
+          ? this.defaultGravityScale * (1 - this.gravity[2]) * scaleFactor
           : 0,
       };
     }
   }
 
-  addToEngin(
+  async addToEngin(
     physicObject:
       | Matter.Body
       | Matter.Composite
@@ -1663,7 +1756,8 @@ export default class GameContainer extends Vue {
           | Matter.Constraint
           | Matter.MouseConstraint
         )[]
-  ): void {
+  ): Promise<void> {
+    await until(() => !!this.engine);
     if (
       this.engine &&
       !this.engine.world.bodies.find((item) => item.id === physicObject.id)
@@ -1690,28 +1784,25 @@ export default class GameContainer extends Vue {
         )[]
   ): void {
     try {
-      if (this.engine) Matter.Composite.remove(this.engine.world, physicObject);
+      if (this.engine) {
+        const body = this.engine.world.bodies.find(
+          (item) => item.id === physicObject.id
+        );
+        if (body) Matter.Composite.remove(this.engine.world, body);
+        else Matter.Composite.remove(this.engine.world, physicObject);
+      }
     } catch (e) {
       //
     }
   }
 
-  addGameObjectToEngin(gameObject: GameObject): void {
-    if (gameObject.body && this.engine && !gameObject.isPartOfEngin) {
-      gameObject.isPartOfEngin = true;
-      this.addToEngin(gameObject.body);
-    }
-  }
-
-  removeGameObjectFromEngin(gameObject: GameObject): void {
-    if (gameObject.body && this.engine && gameObject.isPartOfEngin) {
-      gameObject.isPartOfEngin = false;
-      this.removeFromEngin(gameObject.body);
-    }
-  }
-
   addGameObjectToDetector(gameObject: GameObject): void {
-    if (gameObject.body && this.detector && this.useDetector) {
+    if (
+      gameObject.body &&
+      this.detector &&
+      this.useDetector &&
+      !this.detector.bodies.find((item) => item.id === gameObject.body.id)
+    ) {
       this.detector.bodies.push(gameObject.body);
     }
   }
@@ -1967,12 +2058,14 @@ export default class GameContainer extends Vue {
   nextPanUpdateTime = 0;
   nextDrawUpdateTime = 0;
   readonly oneTickDelta = 50;
+  frameDelta = 0;
   beforePhysicUpdate(): void {
     const updateTime = Date.now();
     const deltaTime = updateTime - this.updateTime;
     this.updateTime = updateTime;
     this.loopTime += deltaTime;
     this.loopCount++;
+    this.frameDelta = deltaTime;
     //let velocityIterations = 4;
     //if (deltaTime > 50) velocityIterations -= Math.round((deltaTime - 50) / 10);
     //this.engine.velocityIterations =
@@ -1997,6 +2090,12 @@ export default class GameContainer extends Vue {
         this.pan();
       }
     }
+    /*console.log(
+      'matter update',
+      deltaTime,
+      Date.now() - updateTime,
+      this.engine.world.bodies.length
+    );*/
   }
   //#endregion loop
 
@@ -2500,6 +2599,7 @@ export default class GameContainer extends Vue {
 <style scoped lang="scss">
 .gameContainer {
   position: relative;
+  overflow: hidden;
 }
 
 .navigation-overlay {
@@ -2522,5 +2622,14 @@ export default class GameContainer extends Vue {
 .overlay-down {
   bottom: 1rem;
   left: calc(var(--game-width) / 2);
+}
+
+.frameInfo {
+  pointer-events: none;
+  bottom: 1rem;
+  left: 1rem;
+  font-size: var(--font-size-xxxlarge);
+  position: absolute;
+  z-index: 100;
 }
 </style>

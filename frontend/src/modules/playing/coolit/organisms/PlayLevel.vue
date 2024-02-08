@@ -165,6 +165,7 @@
               :show-bounds="false"
               :source="ray"
               :fix-size="rayParticleSize"
+              :keep-inside="false"
               @collision="rayCollision"
               @initialised="rayInitialised"
               @initError="rayInitError"
@@ -273,7 +274,7 @@
       </template>
     </GameContainer>
     <GameContainer
-      v-else
+      v-else-if="gameOver && spriteSheetsLoaded"
       ref="gameContainerReplay"
       v-model:width="gameWidth"
       v-model:height="gameHeight"

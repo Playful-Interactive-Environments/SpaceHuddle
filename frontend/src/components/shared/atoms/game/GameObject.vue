@@ -125,6 +125,7 @@ export default class GameObject extends Vue {
   @Prop() readonly collisionHandler!: CollisionHandler;
   @Prop() readonly source!: any;
   @Prop({ default: true }) usePhysic!: boolean;
+  @Prop({ default: true }) keepInside!: boolean;
   @Prop({ default: true }) affectedByForce!: boolean;
   @Prop({ default: true }) moveWithBackground!: boolean;
   @Prop({ default: null }) triggerDelay!: number | null;
@@ -133,7 +134,6 @@ export default class GameObject extends Vue {
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: FastObjectBehaviour.none })
   fastObjectBehaviour!: FastObjectBehaviour;
-  @Prop({ default: false }) removeFromEnginIfNotVisible!: boolean;
   @Prop({ default: false }) sleepIfNotVisible!: boolean;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: 0 }) zIndex!: number;
@@ -201,12 +201,15 @@ export default class GameObject extends Vue {
   isPositionVisible(x: number, y: number, delta = 0): boolean {
     const deltaX = this.displayWidth / 2;
     const deltaY = this.displayHeight / 2;
-    return (
-      x >= -delta - deltaX &&
-      x <= this.gameContainer.gameWidth + delta + deltaX &&
-      y >= -delta - deltaY &&
-      y <= this.gameContainer.gameDisplayHeight + delta + deltaY
-    );
+    if (this.gameContainer) {
+      return (
+        x >= -delta - deltaX &&
+        x <= this.gameContainer.gameWidth + delta + deltaX &&
+        y >= -delta - deltaY &&
+        y <= this.gameContainer.gameDisplayHeight + delta + deltaY
+      );
+    }
+    return false;
   }
 
   isVisible(delta = 0): boolean {
@@ -254,18 +257,7 @@ export default class GameObject extends Vue {
 
   //#region load / unload
   async mounted(): Promise<void> {
-    const container = document.getElementById('gameContainer');
-    if (container) {
-      const registerGameObject = new CustomEvent(
-        EventType.REGISTER_GAME_OBJECT,
-        {
-          detail: {
-            data: this,
-          },
-        }
-      );
-      container.dispatchEvent(registerGameObject);
-    }
+    //
   }
 
   unmounted(): void {
@@ -322,7 +314,7 @@ export default class GameObject extends Vue {
   setGameContainer(gameContainer: GameContainer): void {
     this.gameContainer = gameContainer;
     this.initPosition();
-    this.manageEngin();
+    //this.manageEngin();
     this.addBodyToDetector();
   }
 
@@ -414,9 +406,8 @@ export default class GameObject extends Vue {
   //#region init body
   async containerLoad(container: PIXI.Container): Promise<void> {
     if (this.containerSize) return;
-    const setupBody = (): void => {
+    /*const setupBody = (): void => {
       if (!this.containerPosition) return;
-      this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
       switch (this.type) {
         case 'rect':
           this.addRect(
@@ -445,22 +436,29 @@ export default class GameObject extends Vue {
           break;
       }
       this.$emit('initialised', this);
-    };
+    };*/
 
     this.containerSize = container;
     this.containerPosition = container;
+    this.eventBus.emit(EventType.REGISTER_GAME_OBJECT, { data: this });
     const delayTime = this.fixSize === null ? 0 : this.renderDelay;
     await delay(delayTime);
     await until(() => !!this.gameContainer);
     try {
-      this.displayWidth = this.getContainerWidth();
-      this.displayHeight = this.getContainerHeight();
-      if (this.gameContainer && this.gameContainer.useObjectPooling) {
-        await delay(100);
+      const containerWidth = this.getContainerWidth();
+      const containerHeight = this.getContainerHeight();
+      if (
+        this.body &&
+        (this.displayWidth !== containerWidth ||
+          this.displayHeight !== containerHeight)
+      ) {
+        const scaleX = containerWidth / this.displayWidth;
+        const scaleY = containerHeight / this.displayHeight;
+        Matter.Body.scale(this.body, scaleX, scaleY);
       }
-      if (!this.body) {
-        setupBody();
-      }
+      this.displayWidth = containerWidth;
+      this.displayHeight = containerHeight;
+      this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
     } catch (e) {
       this.$emit('initError', this);
     }
@@ -518,96 +516,26 @@ export default class GameObject extends Vue {
     this.loadingFinished = true;
   }
 
-  addRect(x: number, y: number, width: number, height: number): void {
-    this.options.isStatic = this.isStatic;
-    const colliderWidth = width + this.colliderDelta * 2;
-    const colliderHeight = height + this.colliderDelta * 2;
-    this.body = Matter.Bodies.rectangle(
-      x,
-      y,
-      colliderWidth,
-      colliderHeight,
-      this.options
-    );
-    this.appliedScaleFactor = this.scale;
-    (this.body as any).zIndex = this.zIndex;
-    this.updatePivot();
-    this.onRotationChanged();
-    this.onScaleChanged();
-    this.$emit('update:id', this.body.id);
-    if (this.clickable) {
-      this.manageEngin();
-      this.addBodyToDetector();
-    }
-  }
-
-  addCircle(x: number, y: number, width: number, height: number): void {
-    this.options.isStatic = this.isStatic;
-    const radius =
-      (width > height ? width / 2 : height / 2) + this.colliderDelta;
-    this.body = Matter.Bodies.circle(x, y, radius, this.options);
-    this.appliedScaleFactor = this.scale;
-    (this.body as any).zIndex = this.zIndex;
-    this.updatePivot();
-    this.onRotationChanged();
-    this.onScaleChanged();
-    this.$emit('update:id', this.body.id);
-    if (this.clickable) {
-      this.manageEngin();
-      this.addBodyToDetector();
-    }
-  }
-
-  addPolygon(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    shape: [number, number][]
-  ): void {
-    this.options.isStatic = this.isStatic;
-    this.body = matterUtil.createPolygonBody(
-      this.options,
-      x,
-      y,
-      width,
-      height,
-      shape
-    );
-    this.appliedScaleFactor = this.scale;
-    (this.body as any).zIndex = this.zIndex;
-    this.updatePivot();
-    this.onRotationChanged();
-    this.onScaleChanged();
-    this.$emit('update:id', this.body.id);
-    if (this.clickable) {
-      this.manageEngin();
-      this.addBodyToDetector();
+  @Watch('body', { immediate: true })
+  onBodyChanged(): void {
+    if (this.body) {
+      this.appliedScaleFactor = this.scale;
+      this.updatePivot();
+      this.onRotationChanged();
+      this.onScaleChanged();
+      this.$emit('update:id', this.body.id);
+      if (this.clickable) {
+        this.manageEngin();
+        this.addBodyToDetector();
+      }
+      this.$emit('initialised', this);
     }
   }
   //#endregion init body
 
   //#region engine
-  addBodyToEngine(): void {
-    if (this.gameContainer) {
-      this.gameContainer.addGameObjectToEngin(this);
-    }
-  }
-
   manageEngin(): void {
     if (!this.clickable || !this.body) return;
-    if (this.removeFromEnginIfNotVisible || !this.isActive) {
-      const isVisible = this.isActive && this.isVisible(this.displayWidth * 3);
-      if (isVisible && !this.isPartOfEngin) {
-        this.addBodyToEngine();
-      } else if (!isVisible && this.isPartOfEngin) {
-        if (this.gameContainer) {
-          this.gameContainer.removeGameObjectFromEngin(this);
-        }
-      }
-    } else if (!this.isPartOfEngin) {
-      this.addBodyToEngine();
-    }
     if (this.sleepIfNotVisible) {
       const isVisible = this.isVisible(this.displayWidth * 3);
       this.body.isStatic = !isVisible || this.isStatic;
@@ -806,18 +734,14 @@ export default class GameObject extends Vue {
       if (hasPositionUpdate) {
         this.isVisibleInContainer = this.isVisible();
         if (this.gameContainer) {
-          /*const outsideRight =
-            this.body.position.x + this.offset[0] > this.gameContainer.gameWidth;
+          const outsideRight =
+            this.body.position.x + this.offset[0] >
+            this.gameContainer.boundsWidth;
           const outsideLeft = this.body.position.x + this.offset[0] < 0;
           const outsideBottom =
-            this.body.position.y + this.offset[1] > this.gameContainer.gameDisplayHeight;
-          const outsideTop = this.body.position.y + this.offset[1] < 0;*/
-          const outsideRight =
-            this.body.position.x > this.gameContainer.gameWidth;
-          const outsideLeft = this.body.position.x < 0;
-          const outsideBottom =
-            this.body.position.y > this.gameContainer.gameDisplayHeight;
-          const outsideTop = this.body.position.y < 0;
+            this.body.position.y + this.offset[1] >
+            this.gameContainer.boundsHeight;
+          const outsideTop = this.body.position.y + this.offset[1] < 0;
           if (outsideRight || outsideLeft || outsideBottom || outsideTop) {
             this.$emit('outsideDrawingSpace', this, {
               right: outsideRight,
@@ -825,6 +749,29 @@ export default class GameObject extends Vue {
               bottom: outsideBottom,
               top: outsideTop,
             });
+            if (
+              this.keepInside &&
+              !this.isStatic &&
+              !this.isSleeping &&
+              !this.body?.isStatic
+            ) {
+              const pos: [number, number] = [
+                outsideLeft
+                  ? -this.offset[0]
+                  : outsideRight
+                  ? this.gameContainer.boundsWidth - this.offset[0]
+                  : this.body.position.x,
+                outsideTop
+                  ? -this.offset[1]
+                  : outsideBottom
+                  ? this.gameContainer.boundsHeight - this.offset[1]
+                  : this.body.position.y,
+              ];
+              Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
+              Matter.Body.setVelocity(this.body, { x: 0, y: 0 });
+              Matter.Body.setAngularVelocity(this.body, 0);
+              Matter.Body.setSpeed(this.body, 0);
+            }
           }
         }
         if (
@@ -875,8 +822,7 @@ export default class GameObject extends Vue {
       }
     }
     if (this.boundsGraphic) this.drawBorder();
-    if (this.removeFromEnginIfNotVisible || this.sleepIfNotVisible)
-      this.manageEngin();
+    if (this.sleepIfNotVisible) this.manageEngin();
 
     if (this.gameContainer.endlessPanning) {
       const maxX = this.gameContainer.backgroundTextureSize[0];

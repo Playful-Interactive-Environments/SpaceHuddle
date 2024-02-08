@@ -186,6 +186,7 @@
                 mask: particleCategory,
               },
             }"
+            :keep-inside="false"
             :source="particle"
             :anchor="0.5"
             :collision-handler="particleCollisionHandler"

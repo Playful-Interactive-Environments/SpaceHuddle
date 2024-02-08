@@ -7,51 +7,53 @@
       :backgroundAlpha="0"
       backgroundColor="#ffffff"
     >
-      <container
-        v-if="circleGradientTexture && bodyList.length > 0 && showBodies"
-      >
+      <container>
         <container
-          v-for="body of bodyList"
-          :key="body.id"
-          :x="body.position.x"
-          :y="body.position.y"
-          :alpha="body.alpha"
+          v-if="circleGradientTexture && bodyList.length > 0 && showBodies"
         >
-          <sprite
-            :texture="circleGradientTexture"
-            :anchor="0.5"
-            :width="body.size * 2"
-            :height="body.size * 2"
-          />
+          <container
+            v-for="body of bodyList"
+            :key="body.id"
+            :x="body.position.x"
+            :y="body.position.y"
+            :alpha="body.alpha"
+          >
+            <sprite
+              :texture="circleGradientTexture"
+              :anchor="0.5"
+              :width="body.size * 2"
+              :height="body.size * 2"
+            />
+            <text
+              :style="{
+                fontFamily: 'Arial',
+                fontSize: body.size,
+                fill: '#27133B',
+              }"
+              :anchor="0.5"
+            >
+              {{ body.text }}
+            </text>
+          </container>
+        </container>
+        <container v-if="textList.length > 0">
           <text
+            v-for="text of textList"
+            :key="text.id"
+            :anchor="0.5"
+            :x="text.x"
+            :y="text.y"
+            :rotation="text.rotation"
+            :alpha="text.alpha"
             :style="{
               fontFamily: 'Arial',
-              fontSize: body.size,
-              fill: '#27133B',
+              fontSize: text.fontSize,
+              fill: text.color.substring(0, 7),
             }"
-            :anchor="0.5"
           >
-            {{ body.text }}
+            {{ text.text }}
           </text>
         </container>
-      </container>
-      <container v-if="textList.length > 0">
-        <text
-          v-for="text of textList"
-          :key="text.id"
-          :anchor="0.5"
-          :x="text.x"
-          :y="text.y"
-          :rotation="text.rotation"
-          :alpha="text.alpha"
-          :style="{
-            fontFamily: 'Arial',
-            fontSize: text.fontSize,
-            fill: text.color.substring(0, 7),
-          }"
-        >
-          {{ text.text }}
-        </text>
       </container>
     </Application>
   </div>
@@ -159,7 +161,11 @@ export default class PixiCanvas extends Vue {
     this.animationTimeline.removeAnimationUpdatedCallback(this.updateCallback);
   }
 
+  updateTime = Date.now();
   async update_drawing(): Promise<void> {
+    const updateTime = Date.now();
+    const deltaTime = updateTime - this.updateTime;
+    this.updateTime = updateTime;
     let opacity = 255;
     if (this.animationTimeline.timeline.animationFrame !== -1) {
       const frame = this.animationTimeline.getActiveKeyframeValue();
@@ -174,6 +180,7 @@ export default class PixiCanvas extends Vue {
       item.alpha = options.isHidden ? 0 : opacity / 255;
     }
     //console.log(this.bodyList);
+    console.log('afterPhysicUpdate', deltaTime, Date.now() - updateTime);
   }
 
   updateFrame(): void {

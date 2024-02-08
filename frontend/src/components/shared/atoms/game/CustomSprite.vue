@@ -181,18 +181,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   }
 
   mounted(): void {
-    const container = document.getElementById('gameContainer');
-    if (container) {
-      const registerCustomObject = new CustomEvent(
-        EventType.REGISTER_CUSTOM_OBJECT,
-        {
-          detail: {
-            data: this,
-          },
-        }
-      );
-      container.dispatchEvent(registerCustomObject);
-    }
+    this.eventBus.emit(EventType.REGISTER_CUSTOM_OBJECT, { data: this });
   }
 
   unmounted(): void {

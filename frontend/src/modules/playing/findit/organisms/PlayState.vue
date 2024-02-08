@@ -73,6 +73,7 @@
             v-model:x="searchPosition[0]"
             v-model:y="searchPosition[1]"
             type="circle"
+            :z-index="10"
             :options="{
               name: 'searchObject',
               collisionFilter: {
