@@ -21,6 +21,8 @@
           type="circle"
           :source="body"
           :move-with-background="false"
+          @click="click"
+          @release="release"
         >
           <sprite
             :texture="circleGradientTexture"
@@ -62,6 +64,9 @@
       </container>
     </template>
   </GameContainer>
+  <!--
+    :body-list="bodyList.length === circleCount ? bodyList : null"
+  -->
   <GameContainerLite
     v-if="canvasMode === CanvasMode.GameEngineLite"
     v-model:width="gameWidth"
@@ -76,9 +81,37 @@
         <GameObjectLite
           v-for="body of bodyList"
           :key="body.id"
+          :x="body.position.x"
+          :y="body.position.y"
+          :body-data="body"
+          @click="click"
+          @release="release"
+        >
+          <sprite
+            :texture="circleGradientTexture"
+            :anchor="0.5"
+            :width="body.size * 2"
+            :height="body.size * 2"
+            :alpha="alpha"
+          />
+          <text
+            :style="{
+              fontFamily: 'Arial',
+              fontSize: body.size,
+              fill: '#27133B',
+            }"
+            :anchor="0.5"
+            :alpha="alpha"
+          >
+            {{ body.text }}
+          </text>
+        </GameObjectLite>
+        <!--<GameObjectLite
+          v-for="body of bodyList"
+          :key="body.id"
           :id="body.id"
-          v-model:x="body.position.x"
-          v-model:y="body.position.y"
+          :x="body.position.x"
+          :y="body.position.y"
           :fix-size="body.size * 2"
           :anchor="0.5"
           type="circle"
@@ -103,7 +136,7 @@
           >
             {{ body.text }}
           </text>
-        </GameObjectLite>
+        </GameObjectLite>-->
       </container>
       <container v-if="textList.length > 0">
         <text
@@ -125,6 +158,97 @@
       </container>
     </template>
   </GameContainerLite>
+  <GameContainerLite2
+    v-if="canvasMode === CanvasMode.GameEngineLite2"
+    v-model:width="gameWidth"
+    v-model:height="gameHeight"
+    :backgroundAlpha="0"
+    @initRenderer="initRenderer"
+    :gravity="gravity"
+    :wind-force="windForce"
+  >
+    <template v-slot:default>
+      <container v-if="gameWidth && circleGradientTexture && showBodies">
+        <GameObjectLite2
+          v-for="body of bodyList"
+          :key="body.id"
+          :x="body.position.x"
+          :y="body.position.y"
+          :body-data="body"
+          @click="click"
+          @release="release"
+        >
+          <sprite
+            :texture="circleGradientTexture"
+            :anchor="0.5"
+            :width="body.size * 2"
+            :height="body.size * 2"
+            :alpha="alpha"
+          />
+          <text
+            :style="{
+              fontFamily: 'Arial',
+              fontSize: body.size,
+              fill: '#27133B',
+            }"
+            :anchor="0.5"
+            :alpha="alpha"
+          >
+            {{ body.text }}
+          </text>
+        </GameObjectLite2>
+        <!--<GameObjectLite2
+          v-for="body of bodyList"
+          :key="body.id"
+          :id="body.id"
+          :x="body.position.x"
+          :y="body.position.y"
+          :fix-size="body.size * 2"
+          :anchor="0.5"
+          type="circle"
+          :source="body"
+          :move-with-background="false"
+        >
+          <sprite
+            :texture="circleGradientTexture"
+            :anchor="0.5"
+            :width="body.size * 2"
+            :height="body.size * 2"
+            :alpha="alpha"
+          />
+          <text
+            :style="{
+              fontFamily: 'Arial',
+              fontSize: body.size,
+              fill: '#27133B',
+            }"
+            :anchor="0.5"
+            :alpha="alpha"
+          >
+            {{ body.text }}
+          </text>
+        </GameObjectLite>-->
+      </container>
+      <container v-if="textList.length > 0">
+        <text
+          v-for="text of textList"
+          :key="text.id"
+          :anchor="0.5"
+          :x="text.x"
+          :y="text.y"
+          :rotation="text.rotation"
+          :alpha="text.alpha"
+          :style="{
+            fontFamily: 'Arial',
+            fontSize: text.fontSize,
+            fill: text.color.substring(0, 7),
+          }"
+        >
+          {{ text.text }}
+        </text>
+      </container>
+    </template>
+  </GameContainerLite2>
 </template>
 
 <script lang="ts">
@@ -139,14 +263,20 @@ import * as pixiUtil from '@/utils/pixi';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainerLite from '@/components/shared/atoms/game/GameContainerLite.vue';
+import GameContainerLite2 from '@/components/shared/atoms/game/GameContainerLite2.vue';
 import GameObjectLite from '@/components/shared/atoms/game/GameObjectLite.vue';
+import GameObjectLite2 from '@/components/shared/atoms/game/GameObjectLite2.vue';
 import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.vue';
+import * as Matter from 'matter-js/build/matter';
 
 interface BodyData {
   id: number;
   position: { x: number; y: number };
   size: number;
   text: string;
+  body: Matter.Body | null;
+  options: { [key: string]: string | number | boolean };
+  alpha: number;
 }
 
 @Options({
@@ -154,7 +284,9 @@ interface BodyData {
     GameObject,
     GameContainer,
     GameObjectLite,
+    GameObjectLite2,
     GameContainerLite,
+    GameContainerLite2,
   },
   emits: [],
 })
@@ -194,15 +326,15 @@ export default class PixiCanvas extends Vue {
     this.setupBodies();
   }
 
+  circleCount = 100;
   setupBodies(): void {
     const letterCount = 26;
-    const circleCount = 100;
     const fillFactor = 1.5;
     const areaPerCircle =
-      (this.gameWidth * this.gameHeight) / circleCount / fillFactor;
+      (this.gameWidth * this.gameHeight) / this.circleCount / fillFactor;
     const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
     const minRadius = maxRadius / 2;
-    for (let i = 0; i < circleCount; i++) {
+    for (let i = 0; i < this.circleCount; i++) {
       const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
       const x = Math.floor(Math.random() * (this.gameWidth - r * 2) + r);
       const y = Math.floor(Math.random() * (this.gameHeight - r * 2) + r);
@@ -213,6 +345,9 @@ export default class PixiCanvas extends Vue {
         position: { x: x, y: y },
         size: r,
         text: text,
+        body: null,
+        options: {},
+        alpha: 1,
       });
     }
   }
@@ -225,9 +360,26 @@ export default class PixiCanvas extends Vue {
     this.alpha = this.animationTimeline.bodyOpacity() / 255;
     this.showBodies = this.alpha > 0;
     const frame = this.animationTimeline.getActiveKeyframeValue();
-    if (frame && frame.force !== undefined && frame.useForce) {
+    if (frame && frame.useForce && this.alpha < 1) {
       this.windForce = (1 - this.alpha) * 50 + 100;
     } else this.windForce = 0;
+  }
+
+  private readonly pressFactor = 3;
+  click(gameObject: GameObject): void {
+    if (gameObject && gameObject.body) {
+      Matter.Body.scale(gameObject.body, this.pressFactor, this.pressFactor);
+    }
+  }
+
+  release(gameObject: GameObject): void {
+    if (gameObject && gameObject.body) {
+      Matter.Body.scale(
+        gameObject.body,
+        1 / this.pressFactor,
+        1 / this.pressFactor
+      );
+    }
   }
 }
 </script>

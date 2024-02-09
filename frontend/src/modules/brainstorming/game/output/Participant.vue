@@ -14,6 +14,7 @@
     <GameCanvas
       v-if="
         (mode === CanvasMode.GameEngineLite ||
+          mode === CanvasMode.GameEngineLite2 ||
           mode === CanvasMode.GameEngine) &&
         animationTimeline
       "
