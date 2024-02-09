@@ -149,8 +149,7 @@ export default class GameObject extends Vue {
   body: typeof Matter.Body | null = null;
   position: [number, number] = [0, 0];
   rotationValue = 0;
-  containerSize: PIXI.Container | null = null;
-  containerPosition: PIXI.Container | null = null;
+  gameObjectContainer: PIXI.Container | null = null;
   gameContainer!: GameContainer;
   offset: [number, number] = [0, 0];
   readonly defaultSize = 50;
@@ -174,26 +173,26 @@ export default class GameObject extends Vue {
 
   getContainerWidth(): number {
     if (this.fixSize === null)
-      return this.containerSize ? this.containerSize.width : 100;
+      return this.gameObjectContainer ? this.gameObjectContainer.width : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[0];
     return this.fixSize;
   }
 
   getContainerHeight(): number {
     if (this.fixSize === null)
-      return this.containerSize ? this.containerSize.height : 100;
+      return this.gameObjectContainer ? this.gameObjectContainer.height : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[1];
     return this.fixSize;
   }
 
   get clickWidth(): number {
-    //if (this.containerSize) return this.containerSize.width + this.colliderDelta * 2;
+    //if (this.containerPosition) return this.containerPosition.width + this.colliderDelta * 2;
     //if (this.body) return this.body.bounds.max.x - this.body.bounds.min.x;
     return this.displayWidth + this.colliderDelta * 2;
   }
 
   get clickHeight(): number {
-    //if (this.containerSize) return this.containerSize.height + this.colliderDelta * 2;
+    //if (this.containerPosition) return this.containerPosition.height + this.colliderDelta * 2;
     //if (this.body) return this.body.bounds.max.y - this.body.bounds.min.y;
     return this.displayHeight + this.colliderDelta * 2;
   }
@@ -325,12 +324,12 @@ export default class GameObject extends Vue {
       this.body = null;
     }
     setTimeout(() => {
-      if (this.containerPosition) {
-        const parent = this.containerPosition.parent;
+      if (this.gameObjectContainer) {
+        const parent = this.gameObjectContainer.parent;
         if (parent) {
-          parent.removeChild(this.containerPosition as any);
+          parent.removeChild(this.gameObjectContainer as any);
         }
-        this.containerPosition.destroy({ children: true });
+        this.gameObjectContainer.destroy({ children: true });
       }
     }, 100);
   }
@@ -405,7 +404,7 @@ export default class GameObject extends Vue {
 
   //#region init body
   async containerLoad(container: PIXI.Container): Promise<void> {
-    if (this.containerSize) return;
+    if (this.gameObjectContainer) return;
     /*const setupBody = (): void => {
       if (!this.containerPosition) return;
       switch (this.type) {
@@ -438,8 +437,7 @@ export default class GameObject extends Vue {
       this.$emit('initialised', this);
     };*/
 
-    this.containerSize = container;
-    this.containerPosition = container;
+    this.gameObjectContainer = container;
     this.eventBus.emit(EventType.REGISTER_GAME_OBJECT, { data: this });
     const delayTime = this.fixSize === null ? 0 : this.renderDelay;
     await delay(delayTime);
@@ -465,10 +463,10 @@ export default class GameObject extends Vue {
   }
 
   assignPoolBody(body: Matter.Body): void {
-    if (this.containerPosition) {
+    if (this.gameObjectContainer) {
       Matter.Body.setPosition(body, {
-        x: this.containerPosition.x,
-        y: this.containerPosition.y,
+        x: this.gameObjectContainer.x,
+        y: this.gameObjectContainer.y,
       });
     }
     this.body = body;
@@ -487,7 +485,7 @@ export default class GameObject extends Vue {
         const containerWidth = this.getContainerWidth();
         if (
           this.body &&
-          this.containerPosition &&
+          this.gameObjectContainer &&
           containerWidth !== this.displayWidth
         ) {
           const scale = containerWidth / this.displayWidth;
@@ -502,7 +500,7 @@ export default class GameObject extends Vue {
       }
     };
 
-    if (this.body && this.containerPosition) {
+    if (this.body && this.gameObjectContainer) {
       updateBody();
     } else {
       setTimeout(() => {

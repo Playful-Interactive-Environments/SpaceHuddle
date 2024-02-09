@@ -161,11 +161,7 @@ export default class PixiCanvas extends Vue {
     this.animationTimeline.removeAnimationUpdatedCallback(this.updateCallback);
   }
 
-  updateTime = Date.now();
   async update_drawing(): Promise<void> {
-    const updateTime = Date.now();
-    const deltaTime = updateTime - this.updateTime;
-    this.updateTime = updateTime;
     let opacity = 255;
     if (this.animationTimeline.timeline.animationFrame !== -1) {
       const frame = this.animationTimeline.getActiveKeyframeValue();
@@ -179,8 +175,6 @@ export default class PixiCanvas extends Vue {
       const options = item.options;
       item.alpha = options.isHidden ? 0 : opacity / 255;
     }
-    //console.log(this.bodyList);
-    console.log('afterPhysicUpdate', deltaTime, Date.now() - updateTime);
   }
 
   updateFrame(): void {

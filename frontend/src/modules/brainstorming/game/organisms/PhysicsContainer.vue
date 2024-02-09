@@ -15,6 +15,7 @@
       :physic-bodies="physicBodies"
       :animation-timeline="animationTimeline"
     />
+    <div class="frameInfo">{{ Math.round(1000 / frameDelta) }}fps</div>
   </div>
 </template>
 
@@ -135,6 +136,7 @@ export default class PhysicsContainer extends Vue {
       this.containerHeight,
       { isStatic: true, isHidden: true }
     );
+    this.physicBodies.addEvent('afterUpdate', this.calcFPS);
   }
 
   @Watch('gravity', { immediate: true })
@@ -146,7 +148,29 @@ export default class PhysicsContainer extends Vue {
         this.gravity[2]
       );
   }
+
+  updateTime = Date.now();
+  frameDelta = 0;
+  frameDeltaList: number[] = [];
+  calcFPS(): void {
+    const updateTime = Date.now();
+    const deltaTime = updateTime - this.updateTime;
+    this.updateTime = updateTime;
+    this.frameDeltaList.splice(0, 0, deltaTime);
+    this.frameDelta =
+      this.frameDeltaList.reduce((sum, a) => sum + a, 0) /
+      this.frameDeltaList.length;
+  }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.frameInfo {
+  pointer-events: none;
+  bottom: 1rem;
+  left: 1rem;
+  font-size: var(--font-size-xxxlarge);
+  position: absolute;
+  z-index: 100;
+}
+</style>

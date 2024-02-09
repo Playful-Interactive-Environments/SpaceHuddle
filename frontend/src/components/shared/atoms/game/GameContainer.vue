@@ -231,9 +231,7 @@
         @touchstart="beginPan([0, -manualPanSpeed])"
       />
     </div>
-    <div class="frameInfo">
-      {{ frameDelta }}ms / {{ Math.round(1000 / frameDelta) }}fps
-    </div>
+    <div class="frameInfo">{{ Math.round(1000 / frameDelta) }}fps</div>
   </div>
 </template>
 
@@ -1163,9 +1161,9 @@ export default class GameContainer extends Vue {
 
   //#region game object bodies
   async setupGameObjectBody(gameObject: GameObject): Promise<void> {
-    await until(() => !!gameObject.containerPosition);
+    await until(() => !!gameObject.gameObjectContainer);
     await delay(100);
-    if (!gameObject.containerPosition) return;
+    if (!gameObject.gameObjectContainer) return;
     let body: Matter.Body | null = null;
     switch (gameObject.type) {
       case 'rect':
@@ -1187,15 +1185,15 @@ export default class GameContainer extends Vue {
   }
 
   addRect(gameObject: GameObject): Matter.Body {
-    if (gameObject.containerPosition) {
+    if (gameObject.gameObjectContainer) {
       gameObject.options.isStatic = gameObject.isStatic;
       const colliderWidth =
         gameObject.displayWidth + gameObject.colliderDelta * 2;
       const colliderHeight =
         gameObject.displayHeight + gameObject.colliderDelta * 2;
       return Matter.Bodies.rectangle(
-        gameObject.containerPosition.x,
-        gameObject.containerPosition.y,
+        gameObject.gameObjectContainer.x,
+        gameObject.gameObjectContainer.y,
         colliderWidth,
         colliderHeight,
         { ...gameObject.options }
@@ -1204,15 +1202,15 @@ export default class GameContainer extends Vue {
   }
 
   addCircle(gameObject: GameObject): Matter.Body {
-    if (gameObject.containerPosition) {
+    if (gameObject.gameObjectContainer) {
       gameObject.options.isStatic = gameObject.isStatic;
       const width = gameObject.displayWidth;
       const height = gameObject.displayHeight;
       const radius =
         (width > height ? width / 2 : height / 2) + gameObject.colliderDelta;
       return Matter.Bodies.circle(
-        gameObject.containerPosition.x,
-        gameObject.containerPosition.y,
+        gameObject.gameObjectContainer.x,
+        gameObject.gameObjectContainer.y,
         radius,
         { ...gameObject.options }
       );
@@ -1220,12 +1218,12 @@ export default class GameContainer extends Vue {
   }
 
   addPolygon(gameObject: GameObject): Matter.Body {
-    if (gameObject.containerPosition) {
+    if (gameObject.gameObjectContainer) {
       gameObject.options.isStatic = gameObject.isStatic;
       return matterUtil.createPolygonBody(
         { ...gameObject.options },
-        gameObject.containerPosition.x,
-        gameObject.containerPosition.y,
+        gameObject.gameObjectContainer.x,
+        gameObject.gameObjectContainer.y,
         gameObject.displayWidth,
         gameObject.displayHeight,
         [...gameObject.polygonShape]
@@ -2059,13 +2057,18 @@ export default class GameContainer extends Vue {
   nextDrawUpdateTime = 0;
   readonly oneTickDelta = 50;
   frameDelta = 0;
+  frameDeltaList: number[] = [];
   beforePhysicUpdate(): void {
     const updateTime = Date.now();
     const deltaTime = updateTime - this.updateTime;
     this.updateTime = updateTime;
     this.loopTime += deltaTime;
     this.loopCount++;
-    this.frameDelta = deltaTime;
+    this.frameDeltaList.splice(0, 0, deltaTime);
+    if (this.frameDeltaList.length > 10) this.frameDeltaList.length = 10;
+    this.frameDelta =
+      this.frameDeltaList.reduce((sum, a) => sum + a, 0) /
+      this.frameDeltaList.length;
     //let velocityIterations = 4;
     //if (deltaTime > 50) velocityIterations -= Math.round((deltaTime - 50) / 10);
     //this.engine.velocityIterations =

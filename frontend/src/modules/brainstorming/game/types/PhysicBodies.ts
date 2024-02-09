@@ -53,7 +53,7 @@ export class PhysicBodies {
 
   readonly defaultGravityScale = 0.0005;
   setGravity(x: number, y: number, z: number): void {
-    const scaleFactor = 5;
+    const scaleFactor = 1;
     this.engine.gravity = {
       x: x * scaleFactor,
       y: y * scaleFactor,
@@ -184,6 +184,14 @@ export class PhysicBodies {
         }
       });
     }
+    this.engine.world.bodies.forEach((body) => {
+      if (body.position.x < 0) body.position.x = 0;
+      if (body.position.x > this.containerWidth)
+        body.position.x = this.containerWidth;
+      if (body.position.y < 0) body.position.y = 0;
+      if (body.position.y > this.containerHeight)
+        body.position.y = this.containerHeight;
+    });
     return frame;
   }
 
