@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
-import SpaceCalculator from '@/types/game/SpaceCalculator';
+import SpaceCalculator, { SpaceContainer } from '@/types/game/SpaceCalculator';
 import ColorFilter from '@/types/game/ColorFilter';
 
-export class SpriteConverter extends PIXI.Sprite {
+export class SpriteConverter extends PIXI.Sprite implements SpaceContainer {
   space: SpaceCalculator;
   colorFilter: ColorFilter;
 

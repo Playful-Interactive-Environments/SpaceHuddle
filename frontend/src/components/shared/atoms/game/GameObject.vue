@@ -4,7 +4,6 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { h } from 'vue';
 import * as Matter from 'matter-js/build/matter';
 import * as PIXI from 'pixi.js';
-import { EventType } from '@/types/enum/EventType';
 import { CollisionHandler } from '@/types/game/CollisionHandler';
 import GameContainer, {
   BackgroundMovement,
@@ -98,7 +97,6 @@ export default class GameObject extends Vue {
   //#endregion props
 
   //#region variables
-  body: typeof Matter.Body | null = null;
   position: [number, number] = [0, 0];
   rotation = 0;
   gameObjectContainer: PIXI.Container | null = null;
@@ -115,6 +113,21 @@ export default class GameObject extends Vue {
   //#endregion variables
 
   //#region get / set
+  bodyId = -1;
+
+  get body(): Matter.Body | null {
+    if (this.bodyId === -1) return null;
+    if (this.gameContainer) {
+      return this.gameContainer.getBodyForId(this.bodyId);
+    }
+    return null;
+  }
+
+  set body(value: Matter.Body | null) {
+    if (value) this.bodyId = value.id;
+    else this.bodyId = -1;
+  }
+
   get displayX(): number {
     return this.position[0] - this.offset[0];
   }
@@ -218,10 +231,23 @@ export default class GameObject extends Vue {
         scale: this.scale,
         filter: this.filter,
         onRender: this.onRender,
+        onAdded: this.isAdded,
         source: this,
       },
       this.$slots
     );
+  }
+
+  isAdded(container: PIXI.Container): void {
+    setTimeout(() => {
+      let parent = container;
+      while (parent.parent) {
+        parent = parent.parent;
+        if (Object.hasOwn(parent, 'gameContainer')) break;
+      }
+      const gameContainer = (parent as any).gameContainer as GameContainer;
+      if (gameContainer) gameContainer.registerGameObject({ data: this });
+    }, 100);
   }
 
   async mounted(): Promise<void> {
@@ -407,7 +433,7 @@ export default class GameObject extends Vue {
     };*/
 
     this.gameObjectContainer = container;
-    this.eventBus.emit(EventType.REGISTER_GAME_OBJECT, { data: this });
+    //this.eventBus.emit(EventType.REGISTER_GAME_OBJECT, { data: this });
     const delayTime = this.fixSize === null ? 0 : this.renderDelay;
     await delay(delayTime);
     await until(() => !!this.gameContainer);
@@ -439,7 +465,7 @@ export default class GameObject extends Vue {
       });
     }
     this.body = body;
-    this.$emit('update:id', this.body.id);
+    this.$emit('update:id', this.bodyId);
     if (this.clickable) {
       this.manageEngin();
       this.addBodyToDetector();
@@ -483,14 +509,14 @@ export default class GameObject extends Vue {
     this.loadingFinished = true;
   }
 
-  @Watch('body', { immediate: true })
+  @Watch('bodyId', { immediate: true })
   onBodyChanged(): void {
-    if (this.body) {
+    if (this.bodyId > -1) {
       this.appliedScaleFactor = this.scale;
       this.updatePivot();
       this.onRotationChanged();
       this.onScaleChanged();
-      this.$emit('update:id', this.body.id);
+      this.$emit('update:id', this.bodyId);
       if (this.clickable) {
         this.manageEngin();
         this.addBodyToDetector();
@@ -658,7 +684,7 @@ export default class GameObject extends Vue {
       const isAtBorder = this.isVisible(this.displayWidth / 2) && !isVisible;
       if (
         this.fastObjectBehaviour === FastObjectBehaviour.bounce &&
-        this.gameContainer.mouseConstraint?.body?.id !== this.body.id
+        this.gameContainer.mouseConstraint?.body?.id !== this.bodyId
       ) {
         const combinedMask = this.body.collisionFilter.mask | bounceCategory;
         if (this.wasVisible || isVisible) {
@@ -766,7 +792,7 @@ export default class GameObject extends Vue {
         }
         if (
           this.fastObjectBehaviour === FastObjectBehaviour.circle &&
-          this.gameContainer.mouseConstraint?.body?.id !== this.body.id
+          this.gameContainer.mouseConstraint?.body?.id !== this.bodyId
         ) {
           const velocityAmount = this.getVelocityAmount();
           if (velocityAmount > 10) {
@@ -802,7 +828,7 @@ export default class GameObject extends Vue {
       }
       if (
         this.conditionalVelocity &&
-        this.gameContainer.mouseConstraint?.body?.id !== this.body.id
+        this.gameContainer.mouseConstraint?.body?.id !== this.bodyId
       ) {
         const velocityAmount = this.getVelocityAmount();
         if (velocityAmount < 5) {

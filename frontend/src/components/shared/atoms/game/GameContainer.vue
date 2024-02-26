@@ -50,6 +50,7 @@
     >
       <container
         v-if="$slots.preRender && backgroundSprite"
+        :gameContainer="this"
         @render="preRenderData"
       >
         <sprite
@@ -63,7 +64,7 @@
         ></sprite>
         <slot name="preRender"></slot>
       </container>
-      <container :filters="pixiFilterList">
+      <container :filters="pixiFilterList" :gameContainer="this">
         <sprite
           v-if="
             backgroundTexturePositionSprite &&
@@ -231,7 +232,9 @@
         @touchstart="beginPan([0, -manualPanSpeed])"
       />
     </div>
-    <div class="frameInfo">{{ Math.round(1000 / frameDelta) }}fps</div>
+    <div v-if="showFPS" class="frameInfo">
+      {{ Math.round(1000 / frameDelta) }}fps
+    </div>
   </div>
 </template>
 
@@ -245,7 +248,7 @@ import GameObject, {
   FastObjectBehaviour,
   bounceCategory,
 } from '@/components/shared/atoms/game/GameObject.vue';
-import { CustomObject } from '@/types/game/CustomObject';
+import { SpaceObject } from '@/types/game/SpaceObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
@@ -406,7 +409,7 @@ export default class GameContainer extends Vue {
   regionBodyList: CollisionRegionData[] = [];
 
   gameObjects: GameObject[] = [];
-  customObjects: CustomObject[] = [];
+  customObjects: SpaceObject[] = [];
   activeObject: GameObject | null = null;
   activeComposition: Matter.Composite = Matter.Composite.create();
 
@@ -424,6 +427,10 @@ export default class GameContainer extends Vue {
   //#endregion variables
 
   //#region get
+  get showFPS(): boolean {
+    return process.env.VUE_APP_SHOW_FPS;
+  }
+
   get isBackgroundLoaded(): boolean {
     if (this.backgroundTexture)
       return !!this.backgroundSprite && !!this.backgroundSprite.orig;
@@ -510,10 +517,16 @@ export default class GameContainer extends Vue {
   getGameObjectForBody(body: Matter.Body): GameObject | null {
     if (body) {
       const obj = this.gameObjects.find(
-        (obj) => obj.body && obj.body.id === body.id
+        (obj) => obj.body && obj.bodyId === body.id
       );
       if (obj) return obj;
     }
+    return null;
+  }
+
+  getBodyForId(id: number): Matter.Body | null {
+    const body = this.engine.world.bodies.find((item) => item.id === id);
+    if (body) return body;
     return null;
   }
 
@@ -1094,6 +1107,26 @@ export default class GameContainer extends Vue {
   //#endregion load / unload
 
   //#region register object
+  registerObject(data: GameObject | SpaceObject): void {
+    //todo check data type
+    /*if (data instanceof GameObject) {
+      this.registerGameObject({ data: data });
+    } else { //if (data instanceof SpaceObject) {
+      this.registerCustomObject({ data: data });
+    }*/
+    this.registerCustomObject({ data: data });
+  }
+
+  deregisterObject(data: GameObject | SpaceObject): void {
+    //todo check data type
+    /*if (data instanceof GameObject) {
+      this.deregisterGameObject(data);
+    } else { //if (data instanceof SpaceObject) {
+      this.deregisterCustomObject(data);
+    }*/
+    this.deregisterCustomObject(data as any);
+  }
+
   registerGameObject(e: any): void {
     const gameObject = e.data as GameObject;
     if (gameObject.moveWithBackground) {
@@ -1150,12 +1183,12 @@ export default class GameContainer extends Vue {
   }
 
   registerCustomObject(e: any): void {
-    const gameObject = e.data as CustomObject;
-    this.customObjects.push(gameObject);
-    gameObject.setGameContainer(this);
+    const spaceObject = e.data as SpaceObject;
+    this.customObjects.push(spaceObject);
+    spaceObject.setGameContainer(this);
   }
 
-  deregisterCustomObject(gameObject: CustomObject): void {
+  deregisterCustomObject(gameObject: SpaceObject): void {
     const index = this.customObjects.findIndex((obj) => obj === gameObject);
     if (index > -1) {
       this.customObjects.splice(index, 1);
@@ -1182,9 +1215,9 @@ export default class GameContainer extends Vue {
     }
     if (body) {
       (body as any).zIndex = gameObject.zIndex;
+      await this.addToEngin(body);
       gameObject.body = body;
       gameObject.isPartOfEngin = true;
-      await this.addToEngin(body);
     }
   }
 
@@ -1803,7 +1836,7 @@ export default class GameContainer extends Vue {
       gameObject.body &&
       this.detector &&
       this.useDetector &&
-      !this.detector.bodies.find((item) => item.id === gameObject.body.id)
+      !this.detector.bodies.find((item) => item.id === gameObject.bodyId)
     ) {
       this.detector.bodies.push(gameObject.body);
     }
@@ -1812,7 +1845,7 @@ export default class GameContainer extends Vue {
   removeGameObjectFromDetector(gameObject: GameObject): void {
     if (gameObject.body && this.detector && this.useDetector) {
       const index = this.detector.bodies.findIndex(
-        (b) => b.id === gameObject.body.id
+        (b) => b.id === gameObject.bodyId
       );
       if (index > -1) this.detector.bodies.splice(index, 1);
     }
@@ -1837,12 +1870,12 @@ export default class GameContainer extends Vue {
       if (
         this.combinedActiveCollisionToChain &&
         this.activeComposition.bodies.find(
-          (item) => gameObject.body.id === item.id
+          (item) => gameObject.bodyId === item.id
         )
       ) {
         for (const chainBody of this.activeComposition.bodies) {
           const chainObject = this.getGameObjectForBody(chainBody);
-          const isGameObject = chainBody.id === gameObject.body.id;
+          const isGameObject = chainBody.id === gameObject.bodyId;
           if (isGameObject) gameObjectIsPartOfChain = true;
           if (chainObject && !isGameObject) {
             chainObject.$emit('update:highlighted', false);

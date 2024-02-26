@@ -36,7 +36,6 @@ import * as Matter from 'matter-js/build/matter';
 import { Application } from 'vue3-pixi';
 import { EventType } from '@/types/enum/EventType';
 import GameObject from '@/components/shared/atoms/game/GameObjectLite.vue';
-import { CustomObject } from '@/types/game/CustomObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as pixiUtil from '@/utils/pixi';
@@ -134,7 +133,6 @@ export default class GameContainer extends Vue {
   regionBodyList: CollisionRegionData[] = [];
 
   gameObjects: GameObject[] = [];
-  customObjects: CustomObject[] = [];
   activeObject: GameObject | null = null;
   loading = false;
   //#endregion variables

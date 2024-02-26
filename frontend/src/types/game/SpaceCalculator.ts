@@ -1,28 +1,27 @@
-import { CustomObject } from '@/types/game/CustomObject';
+import { SpaceObject } from '@/types/game/SpaceObject';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
-import app from '@/main';
-import { EventType } from '@/types/enum/EventType';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 
+export interface SpaceContainer {
+  space: SpaceCalculator;
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class SpaceCalculator implements CustomObject {
+export default class SpaceCalculator implements SpaceObject {
   private readonly defaultSize = 50;
-  displayWidth = this.defaultSize;
-  displayHeight = this.defaultSize;
-  pixiObject: PIXI.Container;
+  pixiObject: PIXI.Container & SpaceContainer;
 
   private gameContainer!: GameContainer;
-  private eventBus = app.config.globalProperties.eventBus;
 
-  constructor(pixiObject: PIXI.Container) {
+  constructor(pixiObject: PIXI.Container & SpaceContainer) {
     this.pixiObject = pixiObject;
+    this.pixiObject.space = this;
     this.pixiObject.addEventListener('added', this.isAdded);
     this.calcDisplayWidth();
     this.calcDisplayHeight();
     this.calcDisplayX();
     this.calcDisplayY();
-    this.eventBus.emit(EventType.REGISTER_CUSTOM_OBJECT, { data: this });
   }
 
   destroy(): void {
@@ -123,7 +122,6 @@ export default class SpaceCalculator implements CustomObject {
       value = (value / 100) * this.gameContainer.backgroundTextureSize[0];
     }
     this.pixiObject.width = value;
-    this.displayWidth = value;
     return value;
   }
 
@@ -145,7 +143,6 @@ export default class SpaceCalculator implements CustomObject {
       value = (value / 100) * this.gameContainer.backgroundTextureSize[0];
     }
     this.pixiObject.height = value;
-    this.displayHeight = value;
     return value;
   }
 
@@ -198,10 +195,22 @@ export default class SpaceCalculator implements CustomObject {
 
   //#region events
   isAdded(container: any): void {
-    const source = container.source;
-    if (source && Object.hasOwn(source, 'updatedColliderSize')) {
-      source.updatedColliderSize();
-    }
+    setTimeout(() => {
+      const source = container.source;
+      if (source && Object.hasOwn(source, 'updatedColliderSize')) {
+        source.updatedColliderSize();
+      }
+      let parent = container;
+      while (parent.parent) {
+        parent = parent.parent;
+        if (Object.hasOwn(parent, 'gameContainer')) break;
+      }
+      const gameContainer = (parent as any).gameContainer as GameContainer;
+      if (gameContainer) {
+        const spaceContainer = this as any as SpaceContainer;
+        gameContainer.registerObject(spaceContainer.space);
+      }
+    }, 100);
   }
   //#endregion events
 }

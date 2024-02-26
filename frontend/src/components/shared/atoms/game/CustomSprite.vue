@@ -21,7 +21,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
-import { CustomObject } from '@/types/game/CustomObject';
+import { SpaceObject } from '@/types/game/SpaceObject';
 import { EventType } from '@/types/enum/EventType';
 import {
   OutlineFilter,
@@ -35,7 +35,7 @@ import {
   emits: [],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class CustomSprite extends Vue implements CustomObject {
+export default class CustomSprite extends Vue implements SpaceObject {
   @Prop({ default: 0 }) customX!: number;
   @Prop({ default: 0 }) customY!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
