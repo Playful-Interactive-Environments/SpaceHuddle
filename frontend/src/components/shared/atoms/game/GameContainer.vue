@@ -428,7 +428,7 @@ export default class GameContainer extends Vue {
 
   //#region get
   get showFPS(): boolean {
-    return process.env.VUE_APP_SHOW_FPS;
+    return JSON.parse(process.env.VUE_APP_SHOW_FPS);
   }
 
   get isBackgroundLoaded(): boolean {
