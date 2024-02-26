@@ -1,21 +1,7 @@
-<template>
-  <container
-    v-if="isVisibleInContainer && isActive"
-    :mask="mask"
-    :x="position[0] - offset[0]"
-    :y="position[1] - offset[1]"
-    :rotation="rotationValue"
-    :scale="scale"
-    :filters="objectFilters"
-    @render="containerLoad"
-  >
-    <slot></slot>
-  </container>
-</template>
-
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
+import { h } from 'vue';
 import * as Matter from 'matter-js/build/matter';
 import * as PIXI from 'pixi.js';
 import { EventType } from '@/types/enum/EventType';
@@ -141,6 +127,23 @@ export default class GameObject extends Vue {
   //#endregion get / set
 
   //#region load / unload
+  render(): any {
+    return h(
+      'container',
+      {
+        mask: this.mask,
+        x: this.position[0] - this.offset[0],
+        y: this.position[1] - this.offset[1],
+        rotation: this.rotation,
+        scale: this.scale,
+        filter: this.objectFilters,
+        onRender: this.containerLoad,
+        source: this,
+      },
+      this.$slots
+    );
+  }
+
   async mounted(): Promise<void> {
     if (logStartCalls) console.log('mounted');
     this.eventBus.emit(EventType.REGISTER_GAME_OBJECT, {
@@ -476,5 +479,3 @@ export default class GameObject extends Vue {
   //#endregion collision
 }
 </script>
-
-<style scoped lang="scss"></style>

@@ -4,7 +4,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { h } from 'vue';
 import * as PIXI from 'pixi.js';
 import { CollisionHandler } from '@/types/game/CollisionHandler';
-import GameContainer from '@/components/shared/atoms/game/GameContainerLite2.vue';
+import GameContainer from '@/components/shared/atoms/game/GameContainerLite3.vue';
 import { delay, until } from '@/utils/wait';
 import { EventType } from '@/types/enum/EventType';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,7 +21,6 @@ const logEndCalls = false;
     'update:rotation',
     'destroyObject',
     'collision',
-    'click',
     'release',
     'update:highlighted',
     'positionChanged',
@@ -59,15 +58,11 @@ export default class GameObject extends Vue {
   //#region variables
   position: [number, number] = [0, 0];
   rotationValue = 0;
-  containerSize: PIXI.Container | null = null;
-  containerPosition: PIXI.Container | null = null;
+  gameObjectContainer: PIXI.Container | null = null;
   gameContainer!: GameContainer;
   readonly defaultSize = 50;
   displayWidth = this.defaultSize;
   displayHeight = this.defaultSize;
-  destroyed = false;
-  loadingFinished = false;
-  isPartOfEngin = false;
   uuid = uuidv4();
   //#endregion variables
 
@@ -75,7 +70,7 @@ export default class GameObject extends Vue {
   getContainerWidth(): number {
     //if (logStartCalls) console.log('getContainerWidth');
     if (this.fixSize === null)
-      return this.containerSize ? this.containerSize.width : 100;
+      return this.gameObjectContainer ? this.gameObjectContainer.width : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[0];
     return this.fixSize;
   }
@@ -83,7 +78,7 @@ export default class GameObject extends Vue {
   getContainerHeight(): number {
     //if (logStartCalls) console.log('getContainerHeight');
     if (this.fixSize === null)
-      return this.containerSize ? this.containerSize.height : 100;
+      return this.gameObjectContainer ? this.gameObjectContainer.height : 100;
     if (Array.isArray(this.fixSize)) return this.fixSize[1];
     return this.fixSize;
   }
@@ -123,24 +118,22 @@ export default class GameObject extends Vue {
     if (logStartCalls) console.log('setGameContainer');
     this.gameContainer = gameContainer;
     this.initPosition();
-    this.manageEngin();
     this.$emit('initialised', this);
     if (logEndCalls) console.log('setGameContainer');
   }
 
   kill(): void {
     if (logStartCalls) console.log('kill');
-    this.destroyed = true;
     if (this.gameContainer) {
       this.gameContainer.deregisterGameObject(this);
     }
     setTimeout(() => {
-      if (this.containerPosition) {
-        const parent = this.containerPosition.parent;
+      if (this.gameObjectContainer) {
+        const parent = this.gameObjectContainer.parent;
         if (parent) {
-          parent.removeChild(this.containerPosition as any);
+          parent.removeChild(this.gameObjectContainer as any);
         }
-        this.containerPosition.destroy({ children: true });
+        this.gameObjectContainer.destroy({ children: true });
       }
     }, 100);
     if (logEndCalls) console.log('kill');
@@ -150,18 +143,14 @@ export default class GameObject extends Vue {
   //#region init body
   setupBodyId(id: number): void {
     this.$emit('update:id', id);
-    if (this.clickable) {
-      this.manageEngin();
-    }
   }
 
   index = 0;
   async containerLoad(container: PIXI.Container): Promise<void> {
-    if (logStartCalls) console.log('containerLoad', this.containerSize);
-    if (this.containerSize) return;
+    if (logStartCalls) console.log('containerLoad', this.gameObjectContainer);
+    if (this.gameObjectContainer) return;
 
-    this.containerSize = container;
-    this.containerPosition = container;
+    this.gameObjectContainer = container;
     const delayTime = this.fixSize === null ? 0 : this.renderDelay;
     await delay(delayTime);
     await until(() => !!this.gameContainer);
@@ -174,25 +163,6 @@ export default class GameObject extends Vue {
     if (logEndCalls) console.log('containerLoad');
   }
   //#endregion init body
-
-  //#region engine
-  addBodyToEngine(): void {
-    /*if (logStartCalls) console.log('addBodyToEngine');
-    if (this.gameContainer) {
-      this.gameContainer.addGameObjectToEngin(this);
-    }
-    if (logEndCalls) console.log('addBodyToEngine');*/
-  }
-
-  manageEngin(): void {
-    if (logStartCalls) console.log('manageEngin');
-    if (!this.clickable) return;
-    if (!this.isPartOfEngin) {
-      this.addBodyToEngine();
-    }
-    if (logEndCalls) console.log('manageEngin');
-  }
-  //#endregion engine
 
   //#region position / rotation / scale
   initPosition(x: number | null = null, y: number | null = null): void {

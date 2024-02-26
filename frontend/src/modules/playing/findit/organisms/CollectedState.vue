@@ -232,10 +232,7 @@ export default class CollectedState extends Vue {
         setTimeout(() => {
           if (settings && settings.spritesheet) {
             pixiUtil
-              .loadTexture(
-                settings.spritesheet,
-                this.textureToken
-              )
+              .loadTexture(settings.spritesheet, this.textureToken)
               .then((sheet) => {
                 this.levelTypeImages[typeName] = {};
                 pixiUtil.convertSpritesheetToBase64(
@@ -373,7 +370,7 @@ export default class CollectedState extends Vue {
   overflow-x: scroll;
   overflow-y: hidden;
   -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  //scrollbar-width: none; /* Firefox */
   margin: 2rem 0;
   background-color: var(--color-brown-xlight);
   outline: 0.5rem solid var(--color-brown);

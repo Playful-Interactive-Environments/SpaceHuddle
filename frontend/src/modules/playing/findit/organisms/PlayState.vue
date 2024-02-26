@@ -30,9 +30,9 @@
             :collider-delta="20"
             :show-bounds="false"
             :object-space="ObjectSpace.RelativeToBackground"
-            :x="getDisplayPosition(placeable)[0]"
-            :y="getDisplayPosition(placeable)[1]"
-            :rotation="placeable.rotation"
+            :posX="getDisplayPosition(placeable)[0]"
+            :posY="getDisplayPosition(placeable)[1]"
+            :angle="placeable.rotation"
             :scale="placeable.scale"
             :options="{
               name: placeable.name,
@@ -52,26 +52,25 @@
             :trigger-delay-pause="showToolbox"
             @handleTrigger="handleEscalation(placeable)"
           >
-            <CustomSprite
+            <SpriteConverter
               :texture="placeable.texture"
               :anchor="0.5"
-              :width="placeable.width"
+              :space-width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.RelativeToBackground"
               :saturation="placeable.saturation"
             >
-            </CustomSprite>
-            <custom-particle-container
+            </SpriteConverter>
+            <ParticlePlayer
               v-if="placeable.escalationStepIndex > 0"
               :config="getConfigForPlaceable(placeable)"
-              :parentEventBus="eventBus"
             />
           </GameObject>
           <GameObject
             v-if="gameWidth > 0"
             :moveWithBackground="false"
-            v-model:x="searchPosition[0]"
-            v-model:y="searchPosition[1]"
+            v-model:posX="searchPosition[0]"
+            v-model:posY="searchPosition[1]"
             type="circle"
             :z-index="10"
             :options="{
@@ -245,8 +244,6 @@ function convertToFindItPlaceable(
   },
   components: {
     CustomParticleContainer,
-    GameObject,
-    GameContainer,
     CustomSprite,
     DrawerBottomOverlay,
   },
@@ -587,10 +584,7 @@ export default class PlayState extends Vue {
             this.previousLevelType !== this.levelType
           ) {
             pixiUtil
-              .loadTexture(
-                settings.spritesheet,
-                this.textureToken
-              )
+              .loadTexture(settings.spritesheet, this.textureToken)
               .then((sheet) => {
                 this.stylesheets[typeName] = sheet;
                 this.levelTypeImages[typeName] = {};

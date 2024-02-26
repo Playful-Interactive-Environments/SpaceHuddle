@@ -376,8 +376,8 @@ export default class GameContainer extends Vue {
   @Prop({ default: [] }) readonly collisionRegions!: CollisionRegion[];
   @Prop({ default: false }) readonly showBounds!: boolean;
   @Prop({ default: false }) readonly showAllEnginColliders!: boolean;
-  @Prop({ default: [] }) readonly pixiFilterList!: any[];
-  @Prop({ default: [] }) readonly pixiFilterListBackground!: any[];
+  @Prop({ default: null }) readonly pixiFilterList!: any[] | null;
+  @Prop({ default: null }) readonly pixiFilterListBackground!: any[] | null;
   @Prop({ default: 0.4 }) readonly autoPanSpeed!: number;
   @Prop({ default: 2 }) readonly manualPanSpeed!: number;
   @Prop({ default: false }) readonly resetPositionOnSpeedChanged!: boolean;
@@ -908,6 +908,10 @@ export default class GameContainer extends Vue {
     );
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
 
+    Matter.Runner.stop(this.runner);
+    Matter.Composite.clear(this.engine.world);
+    Matter.Engine.clear(this.engine);
+
     unregisterDomElement(this.domKey);
   }
 
@@ -1165,7 +1169,7 @@ export default class GameContainer extends Vue {
     await delay(100);
     if (!gameObject.gameObjectContainer) return;
     let body: Matter.Body | null = null;
-    switch (gameObject.type) {
+    switch (gameObject.shape) {
       case 'rect':
         body = this.addRect(gameObject);
         break;
@@ -2065,7 +2069,7 @@ export default class GameContainer extends Vue {
     this.loopTime += deltaTime;
     this.loopCount++;
     this.frameDeltaList.splice(0, 0, deltaTime);
-    if (this.frameDeltaList.length > 10) this.frameDeltaList.length = 10;
+    if (this.frameDeltaList.length > 30) this.frameDeltaList.length = 30;
     this.frameDelta =
       this.frameDeltaList.reduce((sum, a) => sum + a, 0) /
       this.frameDeltaList.length;
@@ -2289,10 +2293,12 @@ export default class GameContainer extends Vue {
       }
     }
 
-    for (const filter of this.pixiFilterList) {
-      if (filter.center) {
-        filter.center[0] += deltaX;
-        filter.center[1] += deltaY;
+    if (this.pixiFilterList) {
+      for (const filter of this.pixiFilterList) {
+        if (filter.center) {
+          filter.center[0] += deltaX;
+          filter.center[1] += deltaY;
+        }
       }
     }
 

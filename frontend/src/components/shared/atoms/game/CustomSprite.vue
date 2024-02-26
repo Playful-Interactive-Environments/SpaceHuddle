@@ -36,11 +36,11 @@ import {
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CustomSprite extends Vue implements CustomObject {
-  @Prop({ default: 0 }) x!: number;
-  @Prop({ default: 0 }) y!: number;
+  @Prop({ default: 0 }) customX!: number;
+  @Prop({ default: 0 }) customY!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
-  @Prop({ default: undefined }) width!: number | undefined;
-  @Prop({ default: undefined }) height!: number | undefined;
+  @Prop({ default: undefined }) customWidth!: number | undefined;
+  @Prop({ default: undefined }) customHeight!: number | undefined;
   @Prop({ default: 1 }) aspectRation!: number;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: '#ffffff' }) tint!: string;
@@ -55,7 +55,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   @Prop({ default: 2 }) outlineWidth!: number;
   @Prop({ default: 1 }) saturation!: number;
   @Prop() texture!: string | PIXI.Texture;
-  @Prop({ default: [] }) filters!: any[];
+  @Prop({ default: [] }) customFilters!: any[];
   gameContainer!: GameContainer;
 
   readonly defaultSize = 50;
@@ -68,7 +68,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   saturationFilter: PIXI.Filter[] = [];
 
   get objectFilters(): any[] {
-    const filters: any[] = [...this.filters];
+    const filters: any[] = [...this.customFilters];
     if (this.saturationFilter) filters.push(...this.saturationFilter);
     if (this.outlineFilter) filters.push(this.outlineFilter);
     if (this.colorOverlayFilter) filters.push(this.colorOverlayFilter);
@@ -77,9 +77,9 @@ export default class CustomSprite extends Vue implements CustomObject {
 
   calcDisplayWidth(): number {
     let value = this.defaultSize;
-    if (this.width) value = this.width;
-    else if (this.height && this.aspectRation)
-      value = this.height * this.aspectRation;
+    if (this.customWidth) value = this.customWidth;
+    else if (this.customHeight && this.aspectRation)
+      value = this.customHeight * this.aspectRation;
 
     if (
       this.objectSpace === ObjectSpace.RelativeToScreen &&
@@ -98,9 +98,9 @@ export default class CustomSprite extends Vue implements CustomObject {
 
   calcDisplayHeight(): number {
     let value = this.defaultSize;
-    if (this.height) value = this.height;
-    else if (this.width && this.aspectRation)
-      value = this.width / this.aspectRation;
+    if (this.customHeight) value = this.customHeight;
+    else if (this.customWidth && this.aspectRation)
+      value = this.customWidth / this.aspectRation;
 
     if (
       this.objectSpace == ObjectSpace.RelativeToScreen &&
@@ -122,15 +122,15 @@ export default class CustomSprite extends Vue implements CustomObject {
       this.objectSpace == ObjectSpace.RelativeToScreen &&
       this.gameContainer
     ) {
-      return (this.x / 100) * this.gameContainer.gameWidth;
+      return (this.customX / 100) * this.gameContainer.gameWidth;
     }
     if (
       this.objectSpace == ObjectSpace.RelativeToBackground &&
       this.gameContainer
     ) {
-      return (this.x / 100) * this.gameContainer.backgroundTextureSize[0];
+      return (this.customX / 100) * this.gameContainer.backgroundTextureSize[0];
     }
-    return this.x;
+    return this.customX;
   }
 
   calcDisplayY(): number {
@@ -138,15 +138,15 @@ export default class CustomSprite extends Vue implements CustomObject {
       this.objectSpace === ObjectSpace.RelativeToScreen &&
       this.gameContainer
     ) {
-      return (this.y / 100) * this.gameContainer.gameWidth;
+      return (this.customY / 100) * this.gameContainer.gameWidth;
     }
     if (
       this.objectSpace === ObjectSpace.RelativeToBackground &&
       this.gameContainer
     ) {
-      return (this.y / 100) * this.gameContainer.backgroundTextureSize[0];
+      return (this.customY / 100) * this.gameContainer.backgroundTextureSize[0];
     }
-    return this.y;
+    return this.customY;
   }
 
   @Watch('colorOverlay', { immediate: true })

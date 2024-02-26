@@ -7,7 +7,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 export class PhysicBodies {
-  animationTimeline: AnimationTimeline;
+  animationTimeline: AnimationTimeline | null;
   containerWidth = 0;
   containerHeight = 0;
   bodies: { [key: string]: string | number | boolean }[] = [];
@@ -22,10 +22,11 @@ export class PhysicBodies {
     width: number,
     height: number,
     mouseContainer: HTMLElement,
-    animationTimeline: AnimationTimeline
+    animationTimeline: AnimationTimeline | null
   ) {
     this.animationTimeline = animationTimeline;
-    animationTimeline.addAnimationUpdatedCallback(this.updateCallback);
+    if (animationTimeline)
+      animationTimeline.addAnimationUpdatedCallback(this.updateCallback);
     this.engine = Matter.Engine.create();
     this.runner = Matter.Runner.create();
     Matter.Runner.run(this.runner, this.engine);
@@ -154,6 +155,18 @@ export class PhysicBodies {
   }
 
   updateAnimation(): Keyframe {
+    if (!this.animationTimeline)
+      return {
+        keyframe: -1,
+        position: 'random',
+        opacity: undefined,
+        textProgress: undefined,
+        force: undefined,
+        forceDirection: 1,
+        source: undefined,
+        target: undefined,
+        useForce: undefined,
+      };
     const frame = this.animationTimeline.getActiveKeyframeValue();
     if (frame && frame.opacity !== undefined) {
       const opacity = Math.floor(frame.opacity);
@@ -199,6 +212,9 @@ export class PhysicBodies {
     for (const event of this.eventList) {
       Matter.Events.off(this.engine, event.name, event.callback);
     }
-    this.animationTimeline.removeAnimationUpdatedCallback(this.updateCallback);
+    if (this.animationTimeline)
+      this.animationTimeline.removeAnimationUpdatedCallback(
+        this.updateCallback
+      );
   }
 }

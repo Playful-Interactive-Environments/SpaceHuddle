@@ -25,15 +25,15 @@
             v-for="placeable in renderList"
             :key="placeable.uuid"
             v-model:id="placeable.id"
-            :type="placeable.shape"
+            :shape="placeable.shape"
             :polygon-shape="placeable.polygonShape"
             :collider-delta="colliderDelta"
             :show-bounds="false"
             :anchor="placeable.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
-            v-model:x="placeable.position[0]"
-            v-model:y="placeable.position[1]"
-            v-model:rotation="placeable.rotation"
+            v-model:posX="placeable.position[0]"
+            v-model:posY="placeable.position[1]"
+            v-model:angle="placeable.rotation"
             v-model:scale="placeable.scale"
             :options="{
               name: placeable.name,
@@ -45,10 +45,10 @@
             :use-physic="false"
             @positionChanged="placeablePositionChanged"
           >
-            <CustomSprite
+            <SpriteConverter
               :texture="placeable.texture"
               :anchor="placeable.pivot"
-              :width="placeable.width"
+              :space-width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.RelativeToBackground"
               :outline="
@@ -58,7 +58,7 @@
               "
               :saturation="placeable.saturation"
             >
-            </CustomSprite>
+            </SpriteConverter>
           </GameObject>
           <!--<Graphics
             @render="drawSelectedBorder"
@@ -317,8 +317,6 @@ export function getLevelType(
     CustomSprite,
     FontAwesomeIcon,
     LevelSettings,
-    GameObject,
-    GameContainer,
     DrawerBottomOverlay,
     draggable,
   },
@@ -472,7 +470,7 @@ export default class LevelBuilder extends Vue {
   }
 
   get selectionMaskRotation(): number {
-    if (this.selectedObject) return this.selectedObject.rotationValue;
+    if (this.selectedObject) return this.selectedObject.rotation;
     return 0;
   }
 
@@ -486,7 +484,7 @@ export default class LevelBuilder extends Vue {
       const width = this.selectedObject.displayWidth;
       const height = this.selectedObject.displayHeight;
 
-      if (this.selectedObject.type === 'rect') {
+      if (this.selectedObject.shape === 'rect') {
         this.selectionMaskGraphic.clear();
         this.selectionMaskGraphic.lineStyle(2, '#ff0000');
         this.selectionMaskGraphic.drawRect(

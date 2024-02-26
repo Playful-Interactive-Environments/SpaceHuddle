@@ -135,9 +135,9 @@
           <GameObject
             v-for="(particle, index) in Object.keys(gameConfig.particles)"
             :key="particle"
-            :x="index * containerSpace + containerSpace / 2"
-            :y="containerHeight / 2 + padding"
-            type="rect"
+            :posX="index * containerSpace + containerSpace / 2"
+            :posY="containerHeight / 2 + padding"
+            shape="rect"
             :isStatic="true"
             :options="{
               name: particle,
@@ -172,9 +172,9 @@
             v-for="particle in cleanupParticles"
             :key="particle.uuid"
             v-model:id="particle.id"
-            type="circle"
-            v-model:x="particle.position[0]"
-            v-model:y="particle.position[1]"
+            shape="circle"
+            v-model:posX="particle.position[0]"
+            v-model:posY="particle.position[1]"
             :fix-size="particleRadius * 2"
             :options="{
               name: particle.name,
@@ -198,13 +198,13 @@
             @outsideDrawingSpace="outsideDrawingSpace"
             @isPartOfChainChanged="isPartOfChainChanged"
           >
-            <CustomSprite
+            <SpriteConverter
               v-if="getParticleTexture(particle.name)"
               :texture="getParticleTexture(particle.name)"
               :anchor="0.5"
               :tint="particle.color"
-              :width="particleRadius * 2"
-              :height="particleRadius * 2"
+              :space-width="particleRadius * 2"
+              :space-height="particleRadius * 2"
               :outline="particle.highlighted ? 'red' : null"
             />
             <!--<text
@@ -229,7 +229,6 @@ import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
-import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { Chart } from 'chart.js';
 import { ParticleCollisionHandler } from '@/modules/playing/moveit/types/ParticleCollisionHandler';
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -291,8 +290,6 @@ interface ParticleStateExtended extends ParticleState {
 @Options({
   methods: { center },
   components: {
-    GameObject,
-    GameContainer,
     CustomSprite,
     Line,
   },

@@ -16,8 +16,10 @@
       "Canvas": "canvas",
       "Pixi": "pixi",
       "PixiVue": "pixi VUE",
+      "PixiVueWrapped": "pixi VUE wrapped",
       "GameEngineLite": "game engine lite",
       "GameEngineLite2": "game engine lite 2",
+      "GameEngineLite3": "game engine lite 3",
       "GameEngine": "game engine"
     }
   }

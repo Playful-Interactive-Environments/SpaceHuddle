@@ -3,6 +3,11 @@
     class="gameArea"
     v-if="playStateType === PlayStateType.play && levelType"
   >
+    <!--
+
+      :pixi-filter-list="[...collisionAnimation, ...hitAnimation]"
+      :pixi-filter-list-background="[colorFilter]"
+    -->
     <GameContainer
       v-if="!gameOver && spriteSheetsLoaded"
       ref="gameContainer"
@@ -23,8 +28,6 @@
       @backgroundSizeChanged="containerTextureSizeChanged"
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
-      :pixi-filter-list="[...collisionAnimation, ...hitAnimation]"
-      :pixi-filter-list-background="[colorFilter]"
       :auto-pan-speed="autoPanSpeed"
       :reset-position-on-speed-changed="gameOver"
       :waitForDataLoad="waitForDataLoad"
@@ -37,14 +40,14 @@
             v-for="obstacle in obstacleList"
             :key="obstacle.uuid"
             v-model:id="obstacle.id"
-            :type="obstacle.shape"
+            :shape="obstacle.shape"
             :polygon-shape="obstacle.polygonShape"
             :show-bounds="false"
             :anchor="obstacle.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
-            :x="obstacle.position[0]"
-            :y="obstacle.position[1]"
-            :rotation="obstacle.rotation"
+            :posX="obstacle.position[0]"
+            :posY="obstacle.position[1]"
+            :angle="obstacle.rotation"
             :scale="obstacle.scale"
             :options="obstacle.options"
             :is-static="true"
@@ -54,15 +57,15 @@
             :clickable="obstacle.reflectionProbability > 0"
             @collision="obstacleCollision"
           >
-            <CustomSprite
+            <SpriteConverter
               :texture="obstacle.texture"
               :anchor="obstacle.pivot"
-              :width="obstacle.width"
+              :space-width="obstacle.width"
               :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
               :object-space="ObjectSpace.RelativeToBackground"
               :saturation="obstacle.saturation"
             >
-            </CustomSprite>
+            </SpriteConverter>
           </GameObject>
         </container>
       </template>
@@ -119,10 +122,10 @@
               :loop="vehicleIsActive && !gameOver"
               @frame-change="animationFrameChanged"
             />
-            <custom-particle-container
+            <!--<ParticlePlayer
               v-if="weatherStylesheets"
               :config="snow"
-              :parentEventBus="eventBus"
+              :frequency="snow.frequency"
               :default-texture="[
                 weatherStylesheets.textures['snow_01.png'],
                 weatherStylesheets.textures['snow_02.png'],
@@ -139,25 +142,25 @@
                 snow.startTime + minExtremeWeatherTime < Date.now()
               "
             />
-            <custom-particle-container
+            <ParticlePlayer
               v-if="weatherStylesheets"
               :config="hail"
-              :parentEventBus="eventBus"
+              :frequency="hail.frequency"
               :default-texture="weatherStylesheets.textures['hail.png']"
               :deep-clone-config="true"
               :disabled="
                 !hail.frequency &&
                 hail.startTime + minExtremeWeatherTime < Date.now()
               "
-            />
+            />-->
             <GameObject
               v-for="ray in rayList"
               :key="ray.uuid"
-              type="circle"
+              shape="circle"
               :object-space="ObjectSpace.RelativeToBackground"
-              v-model:x="ray.position[0]"
-              v-model:y="ray.position[1]"
-              :rotation="ray.angle"
+              :posX="ray.position[0]"
+              :posY="ray.position[1]"
+              :angle="ray.angle"
               :scale="ray.intensity"
               :options="getRayTypeOptions(ray.type)"
               :is-static="false"
@@ -197,27 +200,29 @@
                   :loop="false"
                 />
               </container>
-              <template #background>
-                <simple-rope
-                  v-if="weatherStylesheets"
-                  :texture="weatherStylesheets.textures['light.png']"
-                  :x="0"
-                  :y="0"
-                  :scale="0.2"
-                  :tint="ray.type === RayType.light ? yellowColor : redColor"
-                  :points="ray.displayPoints"
-                  :alpha="ray.type === RayType.heatReadonly ? 0.5 : 1"
-                />
-              </template>
+              <simple-rope
+                v-if="
+                  weatherStylesheets &&
+                  ray.gameObject &&
+                  !ray.gameObject?.isSleeping
+                "
+                :texture="weatherStylesheets.textures['light.png']"
+                :x="0"
+                :y="0"
+                :scale="0.2"
+                :tint="ray.type === RayType.light ? yellowColor : redColor"
+                :points="ray.displayPoints"
+                :alpha="ray.type === RayType.heatReadonly ? 0.5 : 1"
+              />
             </GameObject>
             <GameObject
               v-for="molecule of moleculeList"
               :key="molecule.id"
               :is-active="molecule.isActive"
-              type="circle"
+              shape="circle"
               :object-space="ObjectSpace.RelativeToBackground"
-              v-model:x="molecule.position[0]"
-              v-model:y="molecule.position[1]"
+              :posX="molecule.position[0]"
+              :posY="molecule.position[1]"
               :options="molecule.options"
               :is-static="false"
               :fix-size="molecule.size * moleculeSize"
@@ -225,7 +230,7 @@
               :z-index="1"
               :fast-object-behaviour="FastObjectBehaviour.bounce"
               :sleep-if-not-visible="true"
-              v-model:rotation="molecule.rotation"
+              v-model:angle="molecule.rotation"
               :conditional-velocity="{
                 velocity: {x: 0, y: -3},
                 condition: (object: GameObject) => {
@@ -238,36 +243,37 @@
               }"
               @click="moleculeClicked"
               @release="moduleReleased"
+              @visibilityChanged="
+                (visibility) => (molecule.isVisible = visibility)
+              "
             >
-              <CustomSprite
+              <SpriteConverter
                 v-if="getMoleculeTexture(molecule.type)"
                 :texture="getMoleculeTexture(molecule.type)"
                 :anchor="0.5"
                 :tint="molecule.color"
-                :width="molecule.size * moleculeSize"
-                :height="molecule.size * moleculeSize"
+                :space-width="molecule.size * moleculeSize"
+                :space-height="molecule.size * moleculeSize"
                 :alpha="molecule.controllable ? 1 : 0.4"
               />
-              <template #background>
-                <text
-                  v-if="molecule.isClicked"
-                  :anchor="[0.5, 3]"
-                  :style="{
-                    fontFamily: 'Arial',
-                    fontSize: 18,
-                    fill: contrastColor,
-                  }"
-                  :scale="textScaleFactor"
-                  :rotation="(molecule.rotation / 180) * Math.PI"
-                >
-                  {{
-                    $t(
-                      `module.playing.coolit.participant.moleculeInfo.${molecule.name}.title`
-                    )
-                  }}
-                  {{ getMoleculeConfig(molecule.name).globalWarmingFactorReal }}
-                </text>
-              </template>
+              <text
+                v-if="molecule.isClicked"
+                :anchor="[0.5, 3]"
+                :style="{
+                  fontFamily: 'Arial',
+                  fontSize: 18,
+                  fill: contrastColor,
+                }"
+                :scale="textScaleFactor"
+                :rotation="(molecule.rotation / 180) * Math.PI"
+              >
+                {{
+                  $t(
+                    `module.playing.coolit.participant.moleculeInfo.${molecule.name}.title`
+                  )
+                }}
+                {{ getMoleculeConfig(molecule.name).globalWarmingFactorReal }}
+              </text>
             </GameObject>
           </container>
         </container>
@@ -326,16 +332,16 @@
               :scale="obstacle.scale"
               @pointerdown="obstacleClicked(obstacle)"
             >
-              <CustomSprite
+              <SpriteConverter
                 :colorOverlay="calculateTintColor(obstacle, 0.7)"
                 :texture="obstacle.texture"
                 :anchor="obstacle.pivot"
-                :width="obstacle.width"
+                :space-width="obstacle.width"
                 :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
                 :object-space="ObjectSpace.RelativeToBackground"
-                :filters="!selectedObstacle ? [flashFilter] : []"
+                :custom-filters="!selectedObstacle ? [flashFilter] : []"
               >
-              </CustomSprite>
+              </SpriteConverter>
               <text
                 :anchor="[0.5, 1]"
                 :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
@@ -483,7 +489,6 @@ import GameContainer, {
 import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
-import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import { delay, until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import * as votingService from '@/services/voting-service';
@@ -492,8 +497,6 @@ import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
-//import backgroundParticle from '@/modules/playing/coolit/data/backgroundParticle.json';
-//import * as PIXIParticles from '@pixi/particle-emitter';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import { v4 as uuidv4 } from 'uuid';
@@ -663,6 +666,7 @@ interface MoleculeData extends CoolItHitRegion {
   rise: boolean;
   isActive: boolean;
   isClicked: boolean;
+  isVisible: boolean;
   rotation: number;
 }
 
@@ -690,9 +694,6 @@ interface ColorValues {
   },
   components: {
     FontAwesomeIcon,
-    GameObject,
-    GameContainer,
-    CustomSprite,
     CustomParticleContainer,
     DrawerBottomOverlay,
     SpriteCanvas,
@@ -1350,18 +1351,12 @@ export default class PlayLevel extends Vue {
     this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
 
     pixiUtil
-      .loadTexture(
-        '/assets/games/coolit/city/weather.json',
-        this.textureToken
-      )
+      .loadTexture('/assets/games/coolit/city/weather.json', this.textureToken)
       .then((sheet) => {
         this.weatherStylesheets = sheet;
       });
     pixiUtil
-      .loadTexture(
-        '/assets/games/moveit/molecules.json',
-        this.textureToken
-      )
+      .loadTexture('/assets/games/moveit/molecules.json', this.textureToken)
       .then((sheet) => {
         this.moleculeStylesheets = sheet;
         this.generateMoleculeTextures();
@@ -1376,18 +1371,12 @@ export default class PlayLevel extends Vue {
         this.setRandomAnimation();
       });
     pixiUtil
-      .loadTexture(
-        '/assets/games/coolit/city/river.png',
-        this.textureToken
-      )
+      .loadTexture('/assets/games/coolit/city/river.png', this.textureToken)
       .then((sheet) => {
         this.riverTexture = sheet;
       });
     pixiUtil
-      .loadTexture(
-        '/assets/games/coolit/city/sun.json',
-        this.textureToken
-      )
+      .loadTexture('/assets/games/coolit/city/sun.json', this.textureToken)
       .then((sheet) => {
         this.sunStylesheets = sheet;
       });
@@ -1498,6 +1487,7 @@ export default class PlayLevel extends Vue {
         calculateTemperature: true,
         isActive: true,
         isClicked: false,
+        isVisible: true,
         rotation: 0,
         options: this.getMoleculeTypeOptions(moleculeName),
         hits: [],
@@ -1620,6 +1610,7 @@ export default class PlayLevel extends Vue {
           calculateTemperature: true,
           isActive: true,
           isClicked: false,
+          isVisible: true,
           rotation: 0,
           options: this.getMoleculeTypeOptions(moleculeConfigName),
           hits: [],
@@ -1758,10 +1749,7 @@ export default class PlayLevel extends Vue {
             this.previousLevelType !== this.levelType
           ) {
             pixiUtil
-              .loadTexture(
-                settings.spritesheet,
-                this.textureToken
-              )
+              .loadTexture(settings.spritesheet, this.textureToken)
               .then(async (sheet) => {
                 this.stylesheets[typeName] = sheet;
                 this.categoryImages[typeName] = {};
@@ -2205,9 +2193,7 @@ export default class PlayLevel extends Vue {
 
     const inactiveMolecules = this.moleculeList.filter(
       (item) =>
-        item.isActive &&
-        item.globalWarmingFactor === 0 &&
-        !this.isGameObjectVisible(item)
+        item.isActive && item.globalWarmingFactor === 0 && !item.isVisible //!this.isGameObjectVisible(item)
     );
     for (const item of inactiveMolecules) {
       item.isActive = false;
@@ -2517,7 +2503,7 @@ export default class PlayLevel extends Vue {
       } else if (ray.type === RayType.heat && !ray.hit) {
         ray.hit = true;
         const rayIntensity = ray.intensity;
-        const hitPosition = [...ray.position] as [number, number];
+        const hitPosition = rayObject.convertPositionToInputFormat();
         const hitPositionBody = [
           rayObject.body.position.x,
           rayObject.body.position.y,
@@ -2675,7 +2661,7 @@ export default class PlayLevel extends Vue {
     }
   }
 
-  isGameObjectVisible(
+  /*isGameObjectVisible(
     item: { position: [number, number] },
     delta = 10
   ): boolean {
@@ -2685,7 +2671,7 @@ export default class PlayLevel extends Vue {
       (item.position[0] - 100 > this.panOffsetMin[0] - delta &&
         item.position[0] - 100 < this.panOffsetMax[0] + delta)
     );
-  }
+  }*/
   //#endregion scroll
 
   //#region finished

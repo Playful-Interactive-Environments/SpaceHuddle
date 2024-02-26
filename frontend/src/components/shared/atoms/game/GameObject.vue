@@ -1,57 +1,7 @@
-<template>
-  <container
-    v-if="isVisibleInContainer && isActive"
-    :mask="mask"
-    :x="position[0] - offset[0]"
-    :y="position[1] - offset[1]"
-    :rotation="rotationValue"
-    :scale="scale"
-    :filters="objectFilters"
-    @render="containerLoad"
-  >
-    <slot></slot>
-    <slot name="background"></slot>
-  </container>
-  <!--
-  <container
-    v-if="isVisibleInContainer && isActive"
-    :mask="mask"
-    :x="position[0] - offset[0]"
-    :y="position[1] - offset[1]"
-    :rotation="rotationValue"
-    :scale="scale"
-    :filters="objectFilters"
-    @render="containerLoad"
-  >
-    <slot></slot>
-  </container>
-  <container
-    v-if="isVisibleInContainer && isActive && $slots.background"
-    :mask="mask"
-    :x="position[0] - offset[0]"
-    :y="position[1] - offset[1]"
-    :rotation="rotationValue"
-    :scale="scale"
-    :filters="objectFilters"
-  >
-    <slot name="background"></slot>
-  </container>
-  <Graphics
-    :mask="mask"
-    v-if="
-      isVisibleInContainer && isActive && body && showBounds && loadingFinished
-    "
-    @render="drawBorder"
-    :x="body.position.x"
-    :y="body.position.y"
-    :width="boundsWidth ?? clickWidth"
-    :height="boundsHeight ?? clickHeight"
-  ></Graphics>-->
-</template>
-
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
+import { h } from 'vue';
 import * as Matter from 'matter-js/build/matter';
 import * as PIXI from 'pixi.js';
 import { EventType } from '@/types/enum/EventType';
@@ -80,12 +30,13 @@ export enum FastObjectBehaviour {
 export const bounceCategory = 1 << 31;
 
 @Options({
+  name: 'GameObject',
   components: {},
   emits: [
-    'update:x',
-    'update:y',
+    'update:posX',
+    'update:posY',
     'update:id',
-    'update:rotation',
+    'update:angle',
     'destroyObject',
     'notifyCollision',
     'outsideDrawingSpace',
@@ -99,6 +50,7 @@ export const bounceCategory = 1 << 31;
     'initialised',
     'isPartOfChainChanged',
     'initError',
+    'visibilityChanged',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -106,13 +58,13 @@ export default class GameObject extends Vue {
   //#region props
   @Prop({ default: 100 }) renderDelay!: number;
   @Prop({ default: 0 }) id!: number;
-  @Prop({ default: 0 }) x!: number;
-  @Prop({ default: 0 }) y!: number;
+  @Prop({ default: 0 }) posX!: number;
+  @Prop({ default: 0 }) posY!: number;
   @Prop({ default: null }) fixSize!: [number, number] | number | null;
-  @Prop({ default: 0 }) rotation!: number;
+  @Prop({ default: 0 }) angle!: number;
   @Prop({ default: 1 }) scale!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
-  @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle' | 'polygon';
+  @Prop({ default: 'rect' }) readonly shape!: 'rect' | 'circle' | 'polygon';
   @Prop({ default: [] }) readonly polygonShape!: [number, number][];
   @Prop({ default: 0 }) readonly colliderDelta!: number;
   @Prop({ default: false }) readonly showBounds!: boolean;
@@ -148,7 +100,7 @@ export default class GameObject extends Vue {
   //#region variables
   body: typeof Matter.Body | null = null;
   position: [number, number] = [0, 0];
-  rotationValue = 0;
+  rotation = 0;
   gameObjectContainer: PIXI.Container | null = null;
   gameContainer!: GameContainer;
   offset: [number, number] = [0, 0];
@@ -157,7 +109,7 @@ export default class GameObject extends Vue {
   displayHeight = this.defaultSize;
   triggerStartTime: number | null = null;
   destroyed = false;
-  objectFilters: any[] = [];
+  filter: any[] | null = null;
   loadingFinished = false;
   isPartOfEngin = false;
   //#endregion variables
@@ -255,6 +207,23 @@ export default class GameObject extends Vue {
   //#endregion get / set
 
   //#region load / unload
+  render(): any {
+    return h(
+      'container',
+      {
+        mask: this.mask,
+        x: this.position[0] - this.offset[0],
+        y: this.position[1] - this.offset[1],
+        rotation: this.rotation,
+        scale: this.scale,
+        filter: this.filter,
+        onRender: this.onRender,
+        source: this,
+      },
+      this.$slots
+    );
+  }
+
   async mounted(): Promise<void> {
     //
   }
@@ -384,14 +353,14 @@ export default class GameObject extends Vue {
       this.collisionMask = this.body.collisionFilter.mask;
       this.body.collisionFilter.category = 0b0010;
       this.body.collisionFilter.mask = 0b11111111111111111111111111111110;
-      this.objectFilters = [new GrayscaleFilter()];
+      this.filter = [new GrayscaleFilter()];
       this.hasDisabled = true;
     } else if (this.hasDisabled) {
       if (this.body) {
         this.body.collisionFilter.category = this.collisionCategory;
         this.body.collisionFilter.mask = this.collisionMask;
       }
-      this.objectFilters = [];
+      this.filter = null;
     }
   }
 
@@ -403,7 +372,7 @@ export default class GameObject extends Vue {
   //#endregion watch
 
   //#region init body
-  async containerLoad(container: PIXI.Container): Promise<void> {
+  async onRender(container: PIXI.Container): Promise<void> {
     if (this.gameObjectContainer) return;
     /*const setupBody = (): void => {
       if (!this.containerPosition) return;
@@ -580,8 +549,8 @@ export default class GameObject extends Vue {
 
   //#region position / rotation / scale
   initPosition(x: number | null = null, y: number | null = null): void {
-    if (x === null) x = this.x;
-    if (y === null) y = this.y;
+    if (x === null) x = this.posX;
+    if (y === null) y = this.posY;
     if (
       this.objectSpace === ObjectSpace.RelativeToScreen &&
       this.gameContainer
@@ -627,13 +596,22 @@ export default class GameObject extends Vue {
     return [this.position[0], this.position[1]];
   }
 
-  @Watch('x', { immediate: true })
-  @Watch('y', { immediate: true })
+  @Watch('posX', { immediate: true })
+  @Watch('posY', { immediate: true })
   onModelValueChanged(): void {
     const inputPosition = this.convertPositionToInputFormat();
-    if (inputPosition[0] !== this.x || inputPosition[1] !== this.y) {
+    if (inputPosition[0] !== this.posX || inputPosition[1] !== this.posY) {
       this.initPosition();
     }
+  }
+
+  x = 0;
+  y = 0;
+  @Watch('position', { immediate: true, deep: true })
+  @Watch('offset', { immediate: true, deep: true })
+  onPositionChanged(): void {
+    this.x = this.position[0] - this.offset[0];
+    this.y = this.position[1] - this.offset[1];
   }
 
   updatePosition(position: [number, number]): void {
@@ -643,12 +621,12 @@ export default class GameObject extends Vue {
     }
   }
 
-  @Watch('rotation', { immediate: true })
+  @Watch('angle', { immediate: true })
   onRotationChanged(): void {
-    if (!isNaN(this.rotation)) {
-      this.rotationValue = toRadians(360 - this.rotation);
+    if (!isNaN(this.angle)) {
+      this.rotation = toRadians(360 - this.angle);
       if (this.body) {
-        Matter.Body.setAngle(this.body, this.rotationValue);
+        Matter.Body.setAngle(this.body, this.rotation);
         if (this.boundsGraphic) this.drawBorder();
       }
     }
@@ -730,12 +708,18 @@ export default class GameObject extends Vue {
         this.body.position.x + this.offset[0] !== this.position[0] ||
         this.body.position.y + this.offset[1] !== this.position[1];
       if (hasPositionUpdate) {
-        this.isVisibleInContainer = this.isVisible();
+        const isVisible = this.isVisible();
+        if (this.isVisibleInContainer !== isVisible) {
+          this.isVisibleInContainer = isVisible;
+          this.$emit('visibilityChanged', isVisible);
+        }
         if (this.gameContainer) {
-          const outsideRight =
-            this.body.position.x + this.offset[0] >
-            this.gameContainer.boundsWidth;
-          const outsideLeft = this.body.position.x + this.offset[0] < 0;
+          const maxRight = this.gameContainer.endlessPanning
+            ? this.gameContainer.boundsWidth + 10
+            : this.gameContainer.boundsWidth;
+          const minLeft = this.gameContainer.endlessPanning ? -10 : 0;
+          const outsideRight = this.body.position.x + this.offset[0] > maxRight;
+          const outsideLeft = this.body.position.x + this.offset[0] < minLeft;
           const outsideBottom =
             this.body.position.y + this.offset[1] >
             this.gameContainer.boundsHeight;
@@ -765,6 +749,14 @@ export default class GameObject extends Vue {
                   ? this.gameContainer.boundsHeight - this.offset[1]
                   : this.body.position.y,
               ];
+              if (this.gameContainer.endlessPanning) {
+                if (outsideLeft)
+                  pos[0] =
+                    this.body.position.x + this.gameContainer.boundsWidth;
+                else if (outsideRight)
+                  pos[0] =
+                    this.body.position.x - this.gameContainer.boundsWidth;
+              }
               Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
               Matter.Body.setVelocity(this.body, { x: 0, y: 0 });
               Matter.Body.setAngularVelocity(this.body, 0);
@@ -795,14 +787,18 @@ export default class GameObject extends Vue {
           this.body.position.x + this.offset[0],
           this.body.position.y + this.offset[1],
         ];
-        this.rotationValue = this.body.angle;
-        this.$emit('update:rotation', 360 - toDegrees(this.rotationValue));
+        this.rotation = this.body.angle;
+        this.$emit('update:angle', 360 - toDegrees(this.rotation));
         const inputPosition = this.convertPositionToInputFormat();
-        if (this.x !== inputPosition[0] || this.y !== inputPosition[1]) {
+        if (this.posX !== inputPosition[0] || this.posY !== inputPosition[1]) {
           this.$emit('positionChanged', inputPosition);
         }
-        this.$emit('update:x', inputPosition[0]);
-        this.$emit('update:y', inputPosition[1]);
+        if (this.posX !== inputPosition[0]) {
+          this.$emit('update:posX', inputPosition[0]);
+        }
+        if (this.posY !== inputPosition[1]) {
+          this.$emit('update:posY', inputPosition[1]);
+        }
       }
       if (
         this.conditionalVelocity &&
@@ -939,5 +935,3 @@ export default class GameObject extends Vue {
   //#endregion trigger
 }
 </script>
-
-<style scoped lang="scss"></style>

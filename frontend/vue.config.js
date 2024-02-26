@@ -38,6 +38,12 @@ module.exports = {
               'particlecontainer',
               'simple-rope',
               'simplerope',
+              'game-object-test',
+              'gameobjecttest',
+              'sprite-converter',
+              'spriteconverter',
+              'particle-player',
+              'particleplayer',
             ].includes(tag.toLowerCase());
           },
         },

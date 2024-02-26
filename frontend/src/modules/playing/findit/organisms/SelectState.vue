@@ -5,11 +5,8 @@
         {{ $t('module.playing.findit.participant.newLevel') }}
       </span>
       <div class="newLevelSelectionContainer" v-if="selection">
-        <el-button
-          class="backButtonSelection"
-          type="primary"
-
-          >{{ $t('participant.molecules.moduleInfo.prev') }}</el-button
+        <el-button class="backButtonSelection" type="primary">
+          {{ $t('participant.molecules.moduleInfo.prev') }}</el-button
         >
         <div
           v-for="configType of Object.keys(gameConfig)"
@@ -25,15 +22,20 @@
           class="newLevelSelection"
           @click="levelSelected(null, configType)"
         >
-          <div class="selectionWhite" :style="{height: 100 / Object.keys(gameConfig).length + '%'}"></div>
+          <div
+            class="selectionWhite"
+            :style="{ height: 100 / Object.keys(gameConfig).length + '%' }"
+          ></div>
           <font-awesome-icon
             :icon="getSettingsForLevelType(gameConfig, configType).icon"
           />
-          <p>{{
-            $t(
+          <p>
+            {{
+              $t(
                 `module.playing.findit.participant.placeables.${configType}.name`
-            )
-          }}</p>
+              )
+            }}
+          </p>
         </div>
       </div>
       <!--      <el-dropdown

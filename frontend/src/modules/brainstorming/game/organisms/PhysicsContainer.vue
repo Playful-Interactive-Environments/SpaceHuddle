@@ -15,6 +15,11 @@
       :physic-bodies="physicBodies"
       :animation-timeline="animationTimeline"
     />
+    <VuePixiCanvasWrapped
+      v-else-if="canvasMode === CanvasMode.PixiVueWrapped && physicBodies"
+      :physic-bodies="physicBodies"
+      :animation-timeline="animationTimeline"
+    />
     <div class="frameInfo">{{ Math.round(1000 / frameDelta) }}fps</div>
   </div>
 </template>
@@ -29,9 +34,11 @@ import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import PixiCanvas from '@/modules/brainstorming/game/organisms/PixiCanvas.vue';
 import VuePixiCanvas from '@/modules/brainstorming/game/organisms/VuePixiCanvas.vue';
+import VuePixiCanvasWrapped from '@/modules/brainstorming/game/organisms/VuePixiCanvasWrapped.vue';
 
 @Options({
   components: {
+    VuePixiCanvasWrapped,
     VuePixiCanvas,
     PixiCanvas,
     Canvas,
@@ -157,6 +164,7 @@ export default class PhysicsContainer extends Vue {
     const deltaTime = updateTime - this.updateTime;
     this.updateTime = updateTime;
     this.frameDeltaList.splice(0, 0, deltaTime);
+    if (this.frameDeltaList.length > 30) this.frameDeltaList.length = 30;
     this.frameDelta =
       this.frameDeltaList.reduce((sum, a) => sum + a, 0) /
       this.frameDeltaList.length;

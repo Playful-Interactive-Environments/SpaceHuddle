@@ -4,7 +4,8 @@
       v-if="
         (mode === CanvasMode.Canvas ||
           mode === CanvasMode.Pixi ||
-          mode === CanvasMode.PixiVue) &&
+          mode === CanvasMode.PixiVue ||
+          mode === CanvasMode.PixiVueWrapped) &&
         animationTimeline
       "
       :canvas-mode="mode"
@@ -15,6 +16,7 @@
       v-if="
         (mode === CanvasMode.GameEngineLite ||
           mode === CanvasMode.GameEngineLite2 ||
+          mode === CanvasMode.GameEngineLite3 ||
           mode === CanvasMode.GameEngine) &&
         animationTimeline
       "
@@ -86,7 +88,6 @@ import * as moduleService from '@/services/module-service';
 import { Idea } from '@/types/api/Idea';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { PhysicBodies } from '@/modules/brainstorming/game/types/PhysicBodies';
 import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
 import Canvas from '@/modules/brainstorming/game/organisms/Canvas.vue';
 import NoSleep from 'nosleep.js';
@@ -145,7 +146,6 @@ export default class Participant extends Vue {
   mode: CanvasMode = CanvasMode.None;
   CanvasMode = CanvasMode;
 
-  physicBodies: PhysicBodies | null = null;
   animationTimeline: AnimationTimeline | null = null;
   gravity: [number, number, number] = [0, 1, 0];
   shakeEvent: any;
@@ -215,10 +215,12 @@ export default class Participant extends Vue {
     textSpan: any,
     textId: number,
     color: string,
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     animationPathCount = 8,
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     textSize = 48
   ): void {
-    const top = textSpan.parentNode.getBoundingClientRect().top;
+    /*const top = textSpan.parentNode.getBoundingClientRect().top;
     if (textSpan && this.animationTimeline) {
       this.animationTimeline.clearTexts(textId);
       const textAnimation = textSpan as any;
@@ -238,7 +240,7 @@ export default class Participant extends Vue {
           );
         }
       }
-    }
+    }*/
   }
 
   containerWidth = 100;
@@ -329,27 +331,6 @@ export default class Participant extends Vue {
   maxShakingDelay = 4 * 1000;
   isShaking(): void {
     const shakingTime = Date.now();
-    /*const animationInterval = 1000;
-    const actualShakingForce = (): number => {
-      const actualTime = Date.now();
-      const directionCount = Math.floor(
-        (actualTime - this.shakingStartTime) / animationInterval
-      );
-      return directionCount % 2 === 0 ? 20 : -10;
-    };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const animateShaking = (): void => {
-      if (this.lastShakingTime === shakingTime && this.physicBodies) {
-        this.physicBodies.addShakingForce(actualShakingForce());
-        setTimeout(() => {
-          const animationTime = Date.now();
-          if (shakingTime + this.maxShakingDelay > animationTime) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            animateShaking();
-          }
-        }, animationInterval);
-      }
-    };*/
 
     this.lastShakingTime = shakingTime;
 

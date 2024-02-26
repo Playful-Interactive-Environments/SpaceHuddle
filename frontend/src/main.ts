@@ -8,6 +8,10 @@ import VueObserveVisibility from 'vue3-observe-visibility2';
 import * as i18n from '@/i18n';
 import * as authService from '@/services/auth-service';
 
+import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
+import GameObject from '@/components/shared/atoms/game/GameObject.vue';
+import initCustomPixiRenderer from '@/utils/game/customPixiRenderer';
+
 import '@/assets/styles/global.scss';
 import ElementPlus from 'element-plus';
 import '@/assets/styles/element-plus.scss';
@@ -74,6 +78,10 @@ app.config.globalProperties.eventBus = eventBus;
 app.use(ElementPlus);
 app.use(VueObserveVisibility);
 app.use(i18n.customI18n(authService.getLocale()));
+
+app.component('GameContainer', GameContainer);
+app.component('GameObject', GameObject);
+initCustomPixiRenderer();
 
 //import { isCustomElement } from 'vue3-pixi';
 //app.config.compilerOptions.isCustomElement = (tag) => isCustomElement(tag);

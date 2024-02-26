@@ -427,7 +427,7 @@
           @initRenderer="initRenderer"
         >
           <template v-slot:overlay>
-            <custom-particle-container
+            <ParticlePlayer
               v-if="circleGradientTexture"
               :config="difficultySettings.particleConfig"
               :x="100"
@@ -435,7 +435,6 @@
               :auto-update="false"
               :deep-clone-config="false"
               :default-texture="circleGradientTexture"
-              :parentEventBus="eventBus"
             />
             <sprite
               v-if="circleGradientTexture"
@@ -704,10 +703,7 @@ export default class SelectLevel extends Vue {
     this.showHighScore = this.openHighScore;
     setTimeout(() => {
       pixiUtil
-        .loadTexture(
-          '/assets/games/moveit/molecules.json',
-          this.textureToken
-        )
+        .loadTexture('/assets/games/moveit/molecules.json', this.textureToken)
         .then((sheet) => {
           this.spritesheet = sheet;
           pixiUtil.convertSpritesheetToBase64(sheet, this.moleculeImages);
@@ -715,10 +711,7 @@ export default class SelectLevel extends Vue {
     }, 100);
     setTimeout(() => {
       pixiUtil
-        .loadTexture(
-          '/assets/games/coolit/city/city.json',
-          this.textureToken
-        )
+        .loadTexture('/assets/games/coolit/city/city.json', this.textureToken)
         .then((sheet) => {
           this.spritesheetBuilding = sheet;
           pixiUtil.convertSpritesheetToBase64(sheet, this.obstacleImages);

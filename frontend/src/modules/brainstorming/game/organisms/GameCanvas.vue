@@ -14,11 +14,11 @@
           v-for="body of bodyList"
           :key="body.id"
           :id="body.id"
-          v-model:x="body.position.x"
-          v-model:y="body.position.y"
+          :posX="body.position.x"
+          :posY="body.position.y"
           :fix-size="body.size * 2"
           :anchor="0.5"
-          type="circle"
+          shape="circle"
           :source="body"
           :move-with-background="false"
           @click="click"
@@ -249,6 +249,98 @@
       </container>
     </template>
   </GameContainerLite2>
+  <GameContainerLite3
+    v-if="canvasMode === CanvasMode.GameEngineLite3"
+    v-model:width="gameWidth"
+    v-model:height="gameHeight"
+    :backgroundAlpha="0"
+    @initRenderer="initRenderer"
+    :gravity="gravity"
+    :wind-force="windForce"
+  >
+    <template v-slot:default>
+      <container v-if="gameWidth && circleGradientTexture && showBodies">
+        <GameObjectLite3
+          v-for="body of bodyList"
+          :key="body.id"
+          :x="body.position.x"
+          :y="body.position.y"
+          :body-data="body"
+          :fix-size="body.size * 2"
+          @click="click"
+          @release="release"
+        >
+          <SpriteConverter
+            :texture="circleGradientTexture"
+            :anchor="0.5"
+            :space-width="body.size * 2"
+            :space-height="body.size * 2"
+            :alpha="alpha"
+          />
+          <text
+            :style="{
+              fontFamily: 'Arial',
+              fontSize: body.size,
+              fill: '#27133B',
+            }"
+            :anchor="0.5"
+            :alpha="alpha"
+          >
+            {{ body.text }}
+          </text>
+        </GameObjectLite3>
+        <!--<GameObjectLite2
+          v-for="body of bodyList"
+          :key="body.id"
+          :id="body.id"
+          :x="body.position.x"
+          :y="body.position.y"
+          :fix-size="body.size * 2"
+          :anchor="0.5"
+          type="circle"
+          :source="body"
+          :move-with-background="false"
+        >
+          <sprite
+            :texture="circleGradientTexture"
+            :anchor="0.5"
+            :width="body.size * 2"
+            :height="body.size * 2"
+            :alpha="alpha"
+          />
+          <text
+            :style="{
+              fontFamily: 'Arial',
+              fontSize: body.size,
+              fill: '#27133B',
+            }"
+            :anchor="0.5"
+            :alpha="alpha"
+          >
+            {{ body.text }}
+          </text>
+        </GameObjectLite>-->
+      </container>
+      <container v-if="textList.length > 0">
+        <text
+          v-for="text of textList"
+          :key="text.id"
+          :anchor="0.5"
+          :x="text.x"
+          :y="text.y"
+          :rotation="text.rotation"
+          :alpha="text.alpha"
+          :style="{
+            fontFamily: 'Arial',
+            fontSize: text.fontSize,
+            fill: text.color.substring(0, 7),
+          }"
+        >
+          {{ text.text }}
+        </text>
+      </container>
+    </template>
+  </GameContainerLite3>
 </template>
 
 <script lang="ts">
@@ -264,8 +356,10 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainerLite from '@/components/shared/atoms/game/GameContainerLite.vue';
 import GameContainerLite2 from '@/components/shared/atoms/game/GameContainerLite2.vue';
+import GameContainerLite3 from '@/components/shared/atoms/game/GameContainerLite3.vue';
 import GameObjectLite from '@/components/shared/atoms/game/GameObjectLite.vue';
 import GameObjectLite2 from '@/components/shared/atoms/game/GameObjectLite2.vue';
+import GameObjectLite3 from '@/components/shared/atoms/game/GameObjectLite3.vue';
 import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.vue';
 import * as Matter from 'matter-js/build/matter';
 
@@ -285,8 +379,10 @@ interface BodyData {
     GameContainer,
     GameObjectLite,
     GameObjectLite2,
+    GameObjectLite3,
     GameContainerLite,
     GameContainerLite2,
+    GameContainerLite3,
   },
   emits: [],
 })

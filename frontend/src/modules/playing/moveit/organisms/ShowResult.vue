@@ -26,9 +26,9 @@
           <GameObject
             v-for="index of particleVisualisation[activeTabName].length"
             :key="`${activeTabName}.${index}`"
-            type="circle"
-            :x="getX(activeTabName, index - 1)"
-            :y="getY(activeTabName, index - 1)"
+            shape="circle"
+            :posX="getX(activeTabName, index - 1)"
+            :posY="getY(activeTabName, index - 1)"
             :fix-size="particleRadius * 2"
           >
             <sprite
@@ -284,8 +284,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { ParticleState } from '@/modules/playing/moveit/organisms/CleanUpParticles.vue';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
-import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
-import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
@@ -313,7 +311,9 @@ interface DatasetData {
 }
 
 @Options({
-  components: { GameObject, GameContainer, Line },
+  components: {
+    Line,
+  },
   emits: [],
 })
 export default class ShowResult extends Vue {
@@ -584,10 +584,7 @@ export default class ShowResult extends Vue {
       }
     }
     pixiUtil
-      .loadTexture(
-        '/assets/games/moveit/molecules.json',
-        this.textureToken
-      )
+      .loadTexture('/assets/games/moveit/molecules.json', this.textureToken)
       .then((sheet) => {
         this.spritesheet = sheet;
         this.generateParticleTextures();
