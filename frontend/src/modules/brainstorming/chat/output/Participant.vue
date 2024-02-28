@@ -147,7 +147,7 @@
         </span>
       </span>
     </div>
-    <div class="media" v-if="newIdea.description">
+    <div class="media" v-if="newIdea.description && !newIdea.keywords">
       <span class="media-left media-left-error">
         {{ $t('module.brainstorming.chat.participant.addKeywords') }}
       </span>
@@ -264,9 +264,14 @@ export default class Participant extends Vue {
     ) {
       if (!this.newIdea.image)
         this.newIdea.link = this.formData.newIdeaInput.trim();
-    } else if (this.formData.newIdeaInput.length > MAX_KEYWORDS_LENGTH)
+    } else if (this.formData.newIdeaInput.length > MAX_KEYWORDS_LENGTH) {
       this.newIdea.description = this.formData.newIdeaInput.trim();
-    else this.newIdea.keywords = this.formData.newIdeaInput.trim();
+      this.newIdea.keywords =
+        this.formData.newIdeaInput.trim().slice(0, MAX_KEYWORDS_LENGTH - 4) +
+        '...';
+    } else {
+      this.newIdea.keywords = this.formData.newIdeaInput.trim();
+    }
     this.formData.newIdeaInput = '';
     this.scrollToBottom(0);
     if (this.newIdea.keywords) {
