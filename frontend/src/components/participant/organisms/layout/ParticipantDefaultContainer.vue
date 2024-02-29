@@ -58,6 +58,19 @@ export default class ParticipantDefaultContainer extends Vue {
   border-left: var(--color-primary) 1px solid;
 }
 
+@media screen and (max-width: 949px) and (orientation: landscape) {
+  .participant-background {
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+}
+
 .participant-header {
   pointer-events: none;
   z-index: 100;
