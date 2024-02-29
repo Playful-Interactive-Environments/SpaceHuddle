@@ -147,7 +147,17 @@
                       :order="2"
                       placement="bottom"
                     >-->
-                    <ToolTip :text="getTitle(element)">
+                    <ToolTip
+                      :text="
+                        $t(
+                          'module.' +
+                            element.taskType.toLowerCase() +
+                            '.' +
+                            element.modules[0].name +
+                            '.description.title'
+                        )
+                      "
+                    >
                       <span @click="itemClicked(element)">
                         <font-awesome-icon
                           class="processIcon"
@@ -355,6 +365,7 @@ import { TimerEntity } from '@/types/enum/TimerEntity';
 import TaskStates from '@/types/enum/TaskStates';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import { TaskCategoryType } from '@/types/enum/TaskCategory';
 
 export enum TimelineArea {
   left = 'left',
