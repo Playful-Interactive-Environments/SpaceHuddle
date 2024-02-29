@@ -519,6 +519,7 @@ import CustomParticleContainer from '@/components/shared/atoms/game/CustomPartic
 import globalWarmingParticle from '@/modules/playing/coolit/data/globalWarming.json';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import { Doughnut } from 'vue-chartjs';
+import {getDarkBlueLightColor} from "@/utils/themeColors";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 enum DifficultyLevel {
@@ -884,7 +885,7 @@ export default class SelectLevel extends Vue {
     );
     this.chartDataAtmosphere.datasets[0].data.push(sumGreenhouse);
     (this.chartDataAtmosphere.datasets[0].backgroundColor as string[]).push(
-      themeColors.getGreenColor()
+      themeColors.getDarkBlueLightColor()
     );
   }
 

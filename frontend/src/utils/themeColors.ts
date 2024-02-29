@@ -53,6 +53,12 @@ export function getGreenColor(): string {
   return getComputedStyle(document.body).getPropertyValue('--color-green');
 }
 
+export function getDarkBlueLightColor(): string {
+  return getComputedStyle(document.body).getPropertyValue(
+    '--color-darkblue-light'
+  );
+}
+
 export function getYellowColor(): string {
   return getComputedStyle(document.body).getPropertyValue('--color-yellow');
 }
