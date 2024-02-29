@@ -147,7 +147,7 @@
                       :order="2"
                       placement="bottom"
                     >-->
-                    <ToolTip
+                    <!--<ToolTip
                       :text="
                         $t(
                           'module.' +
@@ -157,7 +157,8 @@
                             '.description.title'
                         )
                       "
-                    >
+                    >-->
+                    <ToolTip :text="getTitle(element)">
                       <span @click="itemClicked(element)">
                         <font-awesome-icon
                           class="processIcon"
