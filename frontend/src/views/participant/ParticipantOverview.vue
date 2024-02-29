@@ -3,6 +3,11 @@
     <template #header>
       <div class="participant-header__header">
         <MenuBar />
+        <div class="participant-header__language">
+          <el-button class="lang" @click="saveLang('en')">EN</el-button>
+          <p>|</p>
+          <el-button class="lang" @click="saveLang('de')">DE</el-button>
+        </div>
       </div>
       <div class="participant-header__infobox">
         <div>
@@ -226,6 +231,7 @@ import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import { ElMessageBox } from 'element-plus';
 import { getModuleConfig } from '@/modules';
+import * as userService from '@/services/user-service';
 
 @Options({
   components: {
@@ -502,6 +508,14 @@ export default class ParticipantOverview extends Vue {
       }
     });
   }
+  async saveLang(locale): Promise<void> {
+    authService.setLocale(locale);
+    this.$i18n.locale = locale;
+    console.log(locale);
+    await participantService.changeParameter({
+      locale: locale,
+    });
+  }
 }
 </script>
 
@@ -583,6 +597,26 @@ export default class ParticipantOverview extends Vue {
       padding-top: 0.5rem;
       font-weight: var(--font-weight-default);
       font-size: var(--font-size-small);
+    }
+  }
+  &__language {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    position: absolute;
+    top: 0.2rem;
+    right: 0.5rem;
+    .lang {
+      z-index: 1000;
+      margin: 0.2rem;
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      color: white;
+      width: 2rem;
+      height: 2rem;
+      pointer-events: auto;
     }
   }
 }
