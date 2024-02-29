@@ -723,7 +723,7 @@ export default class Participant extends Vue {
       return;
     } else {
       const answer = this.storedActiveAnswer;
-      if (answer && this.activeAnswer.textValue === answer.keywords) return;
+      if (answer && this.activeAnswer.textValue === answer.description) return;
     }
     const inputTime = Date.now();
     this.lastInputCharacterTime = inputTime;
@@ -796,6 +796,7 @@ export default class Participant extends Vue {
       if (answer && answer.id) {
         if (answerValue) {
           answer.keywords = answerValue.toString();
+          answer.description = answerValue.toString();
           answer.link = answerLink;
           answer.image = answerImage;
           await hierarchyService.putHierarchy(
@@ -816,6 +817,7 @@ export default class Participant extends Vue {
           {
             parentId: this.activeQuestionId,
             keywords: answerValue.toString(),
+            description: answerValue.toString(),
             order: 0,
           },
           EndpointAuthorisationType.PARTICIPANT
@@ -1060,10 +1062,18 @@ export default class Participant extends Vue {
   storedActiveAnswer!: Hierarchy | undefined;
   updateAnswers(answers: Hierarchy[]): void {
     const answer = answers.find((item) => item.isOwn);
+    if (
+      answer &&
+      this.storedActiveAnswer &&
+      answer.id === this.storedActiveAnswer.id
+    )
+      return;
     this.storedActiveAnswer = answer;
     if (answer) {
       if (this.activeQuestionType === QuestionType.TEXT) {
-        this.activeAnswer.textValue = answer.keywords;
+        if (answer.description)
+          this.activeAnswer.textValue = answer.description;
+        else this.activeAnswer.textValue = answer.keywords;
       } else if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
