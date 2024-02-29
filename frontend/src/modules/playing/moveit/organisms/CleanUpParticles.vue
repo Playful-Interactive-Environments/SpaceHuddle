@@ -198,23 +198,33 @@
             @outsideDrawingSpace="outsideDrawingSpace"
             @isPartOfChainChanged="isPartOfChainChanged"
           >
-            <SpriteConverter
+            <!--<SpriteConverter
+              v-if="getParticleTexture(particle.name)"
+              :texture="getParticleTexture(particle.name)"
+              :anchor="0.5"
+              :pre-tint="particle.color"
+              :space-width="particleRadius * 2"
+              :space-height="particleRadius * 2"
+              :outline="particle.highlighted ? 0xff0000 : null"
+              :preRenderFilters="false"
+            />-->
+            <sprite
               v-if="getParticleTexture(particle.name)"
               :texture="getParticleTexture(particle.name)"
               :anchor="0.5"
               :tint="particle.color"
-              :space-width="particleRadius * 2"
-              :space-height="particleRadius * 2"
-              :outline="particle.highlighted ? 'red' : null"
+              :width="particleRadius * 2"
+              :height="particleRadius * 2"
             />
-            <!--<text
-              :anchor="[0.5, 0.5]"
-              :x="0"
-              :y="0"
-              :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
-            >
-              {{ particle.id }}
-            </text>-->
+            <sprite
+              v-if="circleOutlineTexture"
+              :texture="circleOutlineTexture"
+              :anchor="0.5"
+              :width="particleRadius * 2"
+              :height="particleRadius * 2"
+              :tint="0xff0000"
+              :alpha="particle.highlighted ? 1 : 0"
+            />
           </GameObject>
         </container>
       </template>
@@ -329,6 +339,7 @@ export default class CleanUpParticles extends Vue {
   loading = false;
   circleGradientTexture: PIXI.Texture | null = null;
   linearGradientTexture: PIXI.Texture | null = null;
+  circleOutlineTexture: PIXI.Texture | null = null;
   dumpsterTexture: PIXI.Texture | null = null;
   textureToken = pixiUtil.createLoadingToken();
 
@@ -606,6 +617,12 @@ export default class CleanUpParticles extends Vue {
       this.gameWidth,
       this.gameHeight - this.particleBorder,
       this.renderer
+    );
+    this.circleOutlineTexture = pixiUtil.generateCircleOutlineTexture(
+      this.particleRadius,
+      10,
+      this.renderer,
+      0.5
     );
     this.generateParticleTextures();
   }

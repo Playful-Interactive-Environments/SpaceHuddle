@@ -114,6 +114,21 @@ export function drawRectWithGradient(
   rect.endFill();
 }
 
+export function generateCircleOutlineTexture(
+  radius: number,
+  thickness: number,
+  renderer: PIXI.Renderer,
+  opacity = 1
+): PIXI.Texture {
+  const circle = new PIXI.Graphics();
+  circle.lineStyle(thickness, '#ffffff', opacity, 0);
+  circle.drawCircle(0, 0, radius);
+  const bounds = new PIXI.Rectangle(-radius, -radius, radius * 2, radius * 2);
+  return renderer.generateTexture(circle, {
+    region: bounds,
+  });
+}
+
 export function generateCircleGradientTexture(
   radius: number,
   renderer: PIXI.Renderer,

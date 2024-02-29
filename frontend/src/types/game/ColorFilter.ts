@@ -101,18 +101,18 @@ export default class ColorFilter {
 
   get outlineRenderWidth(): number {
     if (!this._outline) return 0;
-    if (this.preRenderFilters) return this.outlineWidth * 10;
+    if (this.preRenderFilters) return this.outlineWidth * 3;
     return this.outlineWidth;
   }
 
-  private _tint = '#ffffff';
-  get tint(): string {
-    return this._tint;
+  private _preTint: string | null = null;
+  get preTint(): string | null {
+    return this._preTint;
   }
 
-  set tint(value: string) {
-    this._tint = value;
-    this.sprite.tint = value;
+  set preTint(value: string | null) {
+    this._preTint = value;
+    this.updateFilter();
   }
 
   private _alpha = 1;
@@ -196,6 +196,7 @@ export default class ColorFilter {
       this.preRenderData(baseTexture);
     } else {
       this.sprite.filters = this.objectFilters;
+      if (this.preTint) this.sprite.tint = this.preTint;
     }
   }
 
@@ -207,7 +208,10 @@ export default class ColorFilter {
     if (filter) {
       const isAllPreRendered =
         filter.length <= this._preRenderedFilterList.length;
-      if (!isAllPreRendered) this.sprite.filters = this.objectFilters;
+      if (!isAllPreRendered) {
+        if (this.preTint) this.sprite.tint = this.preTint;
+        this.sprite.filters = this.objectFilters;
+      }
       const preRenderTimeStamp = Date.now();
       this.preRenderTimeStamp = preRenderTimeStamp;
       await until(() => this.sprite.space.getRenderer());
@@ -219,6 +223,7 @@ export default class ColorFilter {
       const sprite = new PIXI.Sprite(this.baseTexture);
       sprite.width = this.baseTexture.orig.width;
       sprite.height = this.baseTexture.orig.height;
+      if (this.preTint) sprite.tint = this.preTint;
       sprite.filters = filter;
       const renderDelta = this.outlineRenderWidth;
       const bounds = new PIXI.Rectangle(
@@ -232,8 +237,14 @@ export default class ColorFilter {
           region: bounds,
         });
         this._preRenderedFilterList = filter;
-        if (!isAllPreRendered) this.sprite.filters = this.objectFilters;
+        if (!isAllPreRendered) {
+          this.sprite.filters = this.objectFilters;
+          if (this.preTint) this.sprite.tint = '#ffffff';
+        }
       }
+    } else if (this.baseTexture) {
+      this.sprite.preTexture = this.baseTexture;
+      if (this.preTint) this.sprite.tint = this.preTint;
     }
   }
   //#endregion prerender

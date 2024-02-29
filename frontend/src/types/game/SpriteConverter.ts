@@ -118,6 +118,17 @@ export class SpriteConverter extends PIXI.Sprite implements SpaceContainer {
     this.colorFilter.preFilters = value;
   }
 
+  get preTint() {
+    return this.colorFilter.preTint;
+  }
+
+  set preTint(value) {
+    if (this.colorFilter.preTint !== value) {
+      this.colorFilter.preTint = value;
+      if (value) this.tint = value;
+    }
+  }
+
   get texture() {
     return super.texture;
   }

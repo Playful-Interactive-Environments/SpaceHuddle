@@ -136,3 +136,16 @@ export async function updatePivot(
     Matter.Body.setPosition(body, { x: position[0], y: position[1] });
   }
 }
+
+export function copyBody(body: Matter.Body): Matter.Body {
+  return Matter.Body.create({
+    position: body.position,
+    vertices: body.vertices,
+    collisionFilter: body.collisionFilter,
+    angle: body.angle,
+    frictionAir: body.frictionAir,
+    isStatic: body.isStatic,
+    isHidden: body.isHidden,
+    mass: body.mass,
+  });
+}

@@ -411,7 +411,7 @@ export default class GameContainer extends Vue {
   gameObjects: GameObject[] = [];
   customObjects: SpaceObject[] = [];
   activeObject: GameObject | null = null;
-  activeComposition: Matter.Composite = Matter.Composite.create();
+  activeComposition: Matter.Composite | null = null;
 
   readonly intervalTimePan = 50;
   intervalPan = -1;
@@ -527,6 +527,10 @@ export default class GameContainer extends Vue {
   getBodyForId(id: number): Matter.Body | null {
     const body = this.engine.world.bodies.find((item) => item.id === id);
     if (body) return body;
+    if (this.combinedActiveCollisionToChain && this.activeComposition) {
+      const body = this.activeComposition.bodies.find((item) => item.id === id);
+      if (body) return body;
+    }
     return null;
   }
 
@@ -745,29 +749,53 @@ export default class GameContainer extends Vue {
     }
   }
 
+  private chainObjects: GameObject[] = [];
+  private addChainObject(gameObject: GameObject): void {
+    this.chainObjects.push(gameObject);
+    if (this.activeComposition) {
+      const isMouseObject =
+        this.mouseConstraint &&
+        this.mouseConstraint.body &&
+        this.mouseConstraint.body.id === gameObject.bodyId;
+      const body = matterUtil.copyBody(gameObject.body);
+      this.removeFromEngin(gameObject.body);
+      Matter.Composite.add(this.activeComposition, body);
+      gameObject.body = body;
+      if (isMouseObject) this.mouseConstraint.body = body;
+    }
+    gameObject.$emit('update:highlighted', true);
+    gameObject.$emit('isPartOfChainChanged', gameObject, true);
+  }
+
+  private removeChainObject(gameObject: GameObject, reAddObject = true): void {
+    gameObject.$emit('update:highlighted', false);
+    gameObject.$emit('isPartOfChainChanged', gameObject, false);
+    if (reAddObject) {
+      const body = matterUtil.copyBody(gameObject.body);
+      this.addToEngin(body).then(() => (gameObject.body = body));
+      gameObject.updatePivot(100, true);
+    }
+  }
+
+  private clearChain(
+    reAddObject: ((item: GameObject) => boolean) | null = null
+  ): void {
+    for (const gameObject of this.chainObjects) {
+      if (reAddObject) {
+        this.removeChainObject(gameObject, reAddObject(gameObject));
+      } else this.removeChainObject(gameObject);
+    }
+    this.chainObjects.length = 0;
+    if (this.activeComposition) Matter.Composite.clear(this.activeComposition);
+  }
+
   @Watch('activeObject', { immediate: true })
   onActiveObjectChanged(): void {
     if (this.combinedActiveCollisionToChain && this.activeComposition) {
       if (!this.activeObject) {
-        for (const body of this.activeComposition.bodies) {
-          const gameObject = this.getGameObjectForBody(body);
-          if (gameObject) {
-            gameObject.$emit('update:highlighted', false);
-            gameObject.$emit('isPartOfChainChanged', gameObject, false);
-            this.addToEngin(body);
-            gameObject.updatePivot(100, true);
-          }
-        }
-        Matter.Composite.clear(this.activeComposition);
+        this.clearChain();
       } else {
-        this.removeFromEngin(this.activeObject.body);
-        Matter.Composite.add(this.activeComposition, this.activeObject.body);
-        this.activeObject.$emit('update:highlighted', true);
-        this.activeObject.$emit(
-          'isPartOfChainChanged',
-          this.activeObject,
-          true
-        );
+        this.addChainObject(this.activeObject);
         if (this.mouseConstraint && this.mouseConstraint.body === null) {
           this.mouseConstraint.body = this.activeObject.body;
         }
@@ -1045,7 +1073,7 @@ export default class GameContainer extends Vue {
       if (!region.body) {
         collisionRegion.options.isStatic = true;
         collisionRegion.options.isSensor = true;
-        region.body = matterUtil.createPolygonBody(
+        const body = matterUtil.createPolygonBody(
           collisionRegion.options,
           x,
           y,
@@ -1054,17 +1082,14 @@ export default class GameContainer extends Vue {
           collisionRegion.path,
           false
         );
-        this.addToEngin(region.body);
-        if (this.detector && this.useDetector)
-          this.detector.bodies.push(region.body);
+        this.addToEngin(body);
+        region.body = body;
+        if (this.detector && this.useDetector) this.detector.bodies.push(body);
         region.position = [
-          region.body.position.x - this.backgroundPositionOffsetMax[0],
-          region.body.position.y - this.backgroundPositionOffsetMax[1],
+          x - this.backgroundPositionOffsetMax[0],
+          y - this.backgroundPositionOffsetMax[1],
         ];
-        region.size = [
-          this.getBodyWidth(region.body),
-          this.getBodyHeight(region.body),
-        ];
+        region.size = [this.getBodyWidth(body), this.getBodyHeight(body)];
       } else {
         collisionRegion.options.isStatic = true;
         const body = matterUtil.createPolygonBody(
@@ -1095,13 +1120,14 @@ export default class GameContainer extends Vue {
     if (this.engine && canvas) {
       // add mouse control
       const mouse = Matter.Mouse.create(canvas);
-      this.mouseConstraint = Matter.MouseConstraint.create(this.engine, {
+      const mouseConstraint = Matter.MouseConstraint.create(this.engine, {
         mouse: mouse,
         constraint: {
           stiffness: 0.2,
         },
       });
-      this.addToEngin(this.mouseConstraint);
+      this.addToEngin(mouseConstraint);
+      this.mouseConstraint = mouseConstraint;
     }
   }
   //#endregion load / unload
@@ -1717,11 +1743,19 @@ export default class GameContainer extends Vue {
         this.removeFromEngin(this.borders.top);
         this.removeFromEngin(this.borders.right);
         this.removeFromEngin(this.borders.left);
-      } else if (!this.engine.world.bodies.includes(this.borders.bottom)) {
-        this.addToEngin(this.borders.bottom);
-        this.addToEngin(this.borders.top);
-        this.addToEngin(this.borders.right);
-        this.addToEngin(this.borders.left);
+      } else if (!this.getBodyForId(this.borders.bottom.id)) {
+        const bottom = matterUtil.copyBody(this.borders.bottom);
+        this.addToEngin(bottom);
+        this.borders.bottom = bottom;
+        const top = matterUtil.copyBody(this.borders.top);
+        this.addToEngin(top);
+        this.borders.top = top;
+        const right = matterUtil.copyBody(this.borders.right);
+        this.addToEngin(right);
+        this.borders.right = right;
+        const left = matterUtil.copyBody(this.borders.left);
+        this.addToEngin(left);
+        this.borders.left = left;
       }
     }
   }
@@ -1766,8 +1800,11 @@ export default class GameContainer extends Vue {
       this.$emit('initDetector', this.detector);
     }
     Matter.Runner.run(this.runner, this.engine);
-    if (this.combinedActiveCollisionToChain)
-      this.addToEngin(this.activeComposition);
+    if (this.combinedActiveCollisionToChain) {
+      const activeComposition = Matter.Composite.create();
+      this.addToEngin(activeComposition);
+      this.activeComposition = activeComposition;
+    }
   }
 
   readonly defaultGravityScale = 0.0005;
@@ -1796,11 +1833,15 @@ export default class GameContainer extends Vue {
           | Matter.Composite
           | Matter.Constraint
           | Matter.MouseConstraint
-        )[]
+        )[],
+    parent: Matter.Composite | null = null
   ): Promise<void> {
     await until(() => !!this.engine);
-    if (this.engine && !this.getBodyForId(physicObject.id)) {
-      Matter.Composite.add(this.engine.world, physicObject);
+    if (!parent && this.engine) {
+      parent = this.engine.world;
+    }
+    if (parent && !this.getBodyForId(physicObject.id)) {
+      Matter.Composite.add(parent, physicObject);
     }
   }
 
@@ -1819,13 +1860,17 @@ export default class GameContainer extends Vue {
           | Matter.Composite
           | Matter.Constraint
           | Matter.MouseConstraint
-        )[]
+        )[],
+    parent: Matter.Composite | null = null
   ): void {
     try {
-      if (this.engine) {
+      if (!parent && this.engine) {
+        parent = this.engine.world;
+      }
+      if (parent) {
         const body = this.getBodyForId(physicObject.id);
-        if (body) Matter.Composite.remove(this.engine.world, body);
-        else Matter.Composite.remove(this.engine.world, physicObject);
+        if (body) Matter.Composite.remove(parent, body);
+        else Matter.Composite.remove(parent, physicObject);
       }
     } catch (e) {
       //
@@ -1867,47 +1912,29 @@ export default class GameContainer extends Vue {
       objectBody: Matter.Body,
       collisionBody: Matter.Body
     ): void => {
-      let gameObjectIsPartOfChain = false;
-      if (
+      const gameObjectIsPartOfChain =
         this.combinedActiveCollisionToChain &&
-        this.activeComposition.bodies.find(
-          (item) => gameObject.bodyId === item.id
-        )
-      ) {
-        for (const chainBody of this.activeComposition.bodies) {
-          const chainObject = this.getGameObjectForBody(chainBody);
-          const isGameObject = chainBody.id === gameObject.bodyId;
-          if (isGameObject) gameObjectIsPartOfChain = true;
-          if (chainObject && !isGameObject) {
-            chainObject.$emit('update:highlighted', false);
-            chainObject.$emit('isPartOfChainChanged', chainObject, false);
-            const deleteFlag = chainObject.handleCollision(
+        !!this.chainObjects.find((item) => item.bodyId === gameObject.bodyId);
+      if (gameObjectIsPartOfChain) {
+        this.clearChain(
+          (item) =>
+            !item.handleCollision(
               collisionObject,
               hitPoint,
               hitPointScreen,
               objectBody,
               collisionBody
-            );
-            if (!deleteFlag) {
-              this.addToEngin(chainBody);
-              chainObject.updatePivot(100, true);
-            }
-          }
-        }
-        Matter.Composite.clear(this.activeComposition);
-      }
-      if (gameObject) gameObject.$emit('update:highlighted', false);
-      const deleteFlag = gameObject.handleCollision(
-        collisionObject,
-        hitPoint,
-        hitPointScreen,
-        objectBody,
-        collisionBody
-      );
-      if (!deleteFlag && gameObjectIsPartOfChain) {
-        this.addToEngin(gameObject.body);
-        gameObject.updatePivot(100, true);
-        gameObject.$emit('isPartOfChainChanged', gameObject, false);
+            )
+        );
+      } else if (gameObject) {
+        gameObject.$emit('update:highlighted', false);
+        gameObject.handleCollision(
+          collisionObject,
+          hitPoint,
+          hitPointScreen,
+          objectBody,
+          collisionBody
+        );
       }
     };
 
@@ -1987,18 +2014,13 @@ export default class GameContainer extends Vue {
               : collisionObject.bodyA;
           if (
             group === collidingObj.collisionFilter.group &&
-            !this.activeComposition.bodies.find(
-              (item) => item.id === collidingObj.id
-            )
+            !this.chainObjects.find((item) => item.bodyId === collidingObj.id)
           ) {
-            this.removeFromEngin(collidingObj);
-            Matter.Composite.add(this.activeComposition, collidingObj);
             const gameObject = this.getGameObjectForBody(collidingObj);
             if (gameObject) {
-              gameObject.$emit('update:highlighted', true);
-              gameObject.$emit('isPartOfChainChanged', gameObject, true);
+              this.addChainObject(gameObject);
+              this.createChain();
             }
-            this.createChain();
           }
         }
       }
@@ -2006,6 +2028,7 @@ export default class GameContainer extends Vue {
   }
 
   createChain(): void {
+    if (!this.activeComposition) return;
     const createConstraintForPair = (
       bodyA: Matter.Body,
       bodyB: Matter.Body
@@ -2043,21 +2066,6 @@ export default class GameContainer extends Vue {
       this.activeComposition.constraints.push(constraint);
     };
 
-    /*if (this.activeComposition.constraints.length > 0)
-      this.activeComposition.constraints.length--;
-    for (
-      let i = this.activeComposition.constraints.length + 2;
-      i < this.activeComposition.bodies.length;
-      i++
-    ) {
-      const bodyA = this.activeComposition.bodies[i],
-        bodyB = this.activeComposition.bodies[i - 1];
-      createConstraintForPair(bodyA, bodyB);
-    }
-    createConstraintForPair(
-      this.activeComposition.bodies[this.activeComposition.bodies.length - 1],
-      this.activeComposition.bodies[0]
-    );*/
     for (
       let i = this.activeComposition.constraints.length + 1;
       i < this.activeComposition.bodies.length;
@@ -2570,7 +2578,8 @@ export default class GameContainer extends Vue {
     if (graphics) {
       graphics.clear();
       drawBodies(this.engine.world.bodies, graphics);
-      drawBodies(this.activeComposition.bodies, graphics);
+      if (this.activeComposition)
+        drawBodies(this.activeComposition.bodies, graphics);
     }
   }
 
@@ -2665,6 +2674,7 @@ export default class GameContainer extends Vue {
 }
 
 .frameInfo {
+  background-color: #ffffff66;
   pointer-events: none;
   bottom: 1rem;
   left: 1rem;
