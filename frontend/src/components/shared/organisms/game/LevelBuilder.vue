@@ -57,6 +57,9 @@
                   : null
               "
               :saturation="placeable.saturation"
+              :pre-render-filters="
+                !selectedObject || selectedObject.id !== placeable.id
+              "
             >
             </SpriteConverter>
           </GameObject>

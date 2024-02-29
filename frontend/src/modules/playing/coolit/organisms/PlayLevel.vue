@@ -108,11 +108,11 @@
                 {{ Math.round(averageTemperature) }}°C
               </text>
             </container>
-            <animated-sprite
+            <!--<animated-sprite
               ref="vehicle"
-              v-if="vehicleStylesheets && randomVehicleName"
+              v-if="vehicleStylesheets && randomVehicleName && active"
               :textures="vehicleStylesheets.animations[randomVehicleName]"
-              :animation-speed="0.2"
+              :animation-speed="0.1"
               :width="vehicleWidth"
               :height="vehicleWidth / getVehicleAspect(randomVehicleName)"
               :x="vehicleXPosition"
@@ -121,8 +121,8 @@
               playing
               :loop="vehicleIsActive && !gameOver"
               @frame-change="animationFrameChanged"
-            />
-            <!--<ParticlePlayer
+            />-->
+            <ParticlePlayer
               v-if="weatherStylesheets"
               :config="snow"
               :frequency="snow.frequency"
@@ -152,7 +152,7 @@
                 !hail.frequency &&
                 hail.startTime + minExtremeWeatherTime < Date.now()
               "
-            />-->
+            />
             <GameObject
               v-for="ray in rayList"
               :key="ray.uuid"
@@ -189,7 +189,7 @@
               </container>
               <container v-else>
                 <animated-sprite
-                  v-if="sunStylesheets"
+                  v-if="sunStylesheets && active"
                   :textures="sunStylesheets.animations['sun']"
                   :animation-speed="0.3"
                   :width="rayParticleSize"
@@ -286,6 +286,7 @@
       v-model:height="gameHeight"
       :detect-collision="true"
       :use-gravity="false"
+      :wind-force="windForce"
       :background-texture="levelTypeSettings.background"
       :background-position="BackgroundPosition.Cover"
       :background-movement="
@@ -299,7 +300,7 @@
       @updateOffset="updateOffset"
     >
       <template v-slot:default>
-        <container v-if="gameWidth && circleGradientTexture">
+        <container v-if="gameWidth">
           <container v-if="$refs.gameContainerReplay">
             <sprite
               v-if="temperatureScaleResultTexture"
@@ -339,7 +340,7 @@
                 :space-width="obstacle.width"
                 :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
                 :object-space="ObjectSpace.RelativeToBackground"
-                :custom-filters="!selectedObstacle ? [flashFilter] : []"
+                :custom-filters="replayFilter"
               >
               </SpriteConverter>
               <text
@@ -547,7 +548,6 @@ interface Ray {
   displayPoints: { x: number; y: number }[];
   displayPointsCount: number;
   animationIndex: number;
-  body: Matter.Body | null;
   intensity: number;
   gameObject: GameObject | null;
 }
@@ -800,6 +800,7 @@ export default class PlayLevel extends Vue {
     color: 0xffffff,
     alpha: 0.7,
   });
+  replayFilter: PIXI.Filter[] = [this.flashFilter];
 
   temperatureScaleTexture: PIXI.Texture | null = null;
   temperatureScaleResultTexture: PIXI.Texture | null = null;
@@ -1257,11 +1258,12 @@ export default class PlayLevel extends Vue {
   }
 
   get moleculeSize(): number {
-    return this.textScaleFactor * 220;
+    return this.textScaleFactor * 320;
   }
 
   get vehicleWidth(): number {
-    return this.gameWidth / 3.5;
+    if (this.gameWidth > 0) return this.gameWidth / 3.5;
+    return 100;
   }
 
   get vehicleYPosition(): number {
@@ -1299,6 +1301,7 @@ export default class PlayLevel extends Vue {
   @Watch('gameWidth', { immediate: true })
   onGameWidthChanged(): void {
     if (this.gameWidth) {
+      this.vehicleXPosition = -this.vehicleWidth;
       const spawnShapeSnow = this.snow.behaviors.find(
         (behavior) => behavior.type === 'spawnShape'
       );
@@ -1395,22 +1398,28 @@ export default class PlayLevel extends Vue {
     if (this.vehicleStylesheets) {
       const list = ['compact-car', 'e-car', 'sport-car', 'suv']; //Object.keys(this.vehicleStylesheets.animations);
       this.randomVehicleName = list[Math.floor(Math.random() * list.length)];
-      this.vehicleXPosition = -this.vehicleWidth / 2;
+      this.vehicleXPosition = -this.vehicleWidth;
       this.vehicleHasEmitted = false;
       this.vehicleIsActive = false;
     }
   }
 
   animationFrameChanged(): void {
-    if (!this.vehicleIsActive) {
-      if (this.vehicleSprite) this.vehicleSprite.stop();
-      return;
-    }
-    if (this.gameOver) {
-      if (this.vehicleSprite) this.vehicleSprite.stop();
-      return;
-    }
     this.vehicleXPosition += this.vehicleWidth / 50;
+    this.manageCar();
+  }
+
+  stopCar(): void {
+    if (this.vehicleSprite && this.vehicleSprite.playing)
+      this.vehicleSprite.stop();
+  }
+
+  manageCar(): void {
+    if (!this.vehicleSprite || !this.vehicleSprite.playing) return;
+    if (!this.vehicleIsActive || this.gameOver) {
+      this.stopCar();
+      return;
+    }
     if (this.vehicleXPosition > this.gameWidth + this.vehicleWidth / 2) {
       this.setRandomAnimation();
       setTimeout(() => {
@@ -1569,7 +1578,6 @@ export default class PlayLevel extends Vue {
         }),
         displayPointsCount: 0,
         animationIndex: 0,
-        body: null,
         gameObject: null,
         intensity: this.lightIntensity,
         hit: false,
@@ -1654,7 +1662,7 @@ export default class PlayLevel extends Vue {
         await until(() => !!this.vehicleStylesheets);
         this.vehicleIsActive = true;
         this.vehicleSprite = this.$refs.vehicle as PIXI.AnimatedSprite;
-        this.vehicleSprite.play();
+        if (this.vehicleSprite) this.vehicleSprite.play();
       }, Math.random() * 1000);
     }
   }
@@ -1673,12 +1681,16 @@ export default class PlayLevel extends Vue {
   }
 
   unmounted(): void {
+    this.stopCar();
     this.active = false;
     clearInterval(this.interval);
     this.deregisterAll();
     this.vehicleIsActive = false;
-    pixiUtil.cleanupToken(this.textureToken);
+    this.moleculeStylesheets = null;
     this.vehicleStylesheets = null;
+    this.weatherStylesheets = null;
+    this.sunStylesheets = null;
+    pixiUtil.cleanupToken(this.textureToken);
     this.eventBus.off(
       EventType.TEXTURES_LOADING_START,
       this.texturesLoadingStart
@@ -1950,13 +1962,14 @@ export default class PlayLevel extends Vue {
           poolRay.displayPoints[i].y = 0;
         }
         poolRay.hit = false;
-        if (poolRay.body) {
+        if (poolRay.gameObject?.body) {
           const options = this.getRayTypeOptions(poolRay.type);
-          (poolRay.body as any).name = options.name;
-          poolRay.body.collisionFilter.mask = options.collisionFilter.mask;
-          poolRay.body.collisionFilter.category =
+          (poolRay.gameObject.body as any).name = options.name;
+          poolRay.gameObject.body.collisionFilter.mask =
+            options.collisionFilter.mask;
+          poolRay.gameObject.body.collisionFilter.category =
             options.collisionFilter.category;
-          Matter.Body.setInertia(poolRay.body, Infinity);
+          Matter.Body.setInertia(poolRay.gameObject.body, Infinity);
         }
       }
       poolRay.angle = rayAngle;
@@ -1990,7 +2003,6 @@ export default class PlayLevel extends Vue {
     if (item.body) {
       item.moveToPool(0);
       item.source.gameObject = item;
-      item.source.body = item.body;
     }
     const waitForDataLoad = !!this.rayList.find((item) => !item.initialised);
     if (!waitForDataLoad) {
@@ -2005,16 +2017,19 @@ export default class PlayLevel extends Vue {
   }
 
   calculateRayVelocity(ray: Ray): void {
-    if (ray.body) {
+    if (ray.gameObject?.body) {
       const force = Matter.Vector.create(ray.direction[0], ray.direction[1]);
-      Matter.Body.setVelocity(ray.body, force);
+      Matter.Body.setVelocity(ray.gameObject.body, force);
       this.setConstRaySpeed(ray);
     }
   }
 
   setConstRaySpeed(ray: Ray): void {
-    if (ray.body) {
-      (Matter.Body as any).setSpeed(ray.body, this.autoPanSpeed * 10);
+    if (ray.gameObject?.body) {
+      (Matter.Body as any).setSpeed(
+        ray.gameObject.body,
+        this.autoPanSpeed * 10
+      );
     }
   }
 
@@ -2068,7 +2083,7 @@ export default class PlayLevel extends Vue {
       (item) => item.gameObject && !item.gameObject.isSleeping
     );
     for (const ray of activeRays) {
-      if (ray.initialised && ray.body?.speed) {
+      if (ray.initialised && ray.gameObject?.body?.speed) {
         ray.animationIndex++;
         if (ray.hit) {
           if (ray.displayPointsCount > ray.displayPoints.length)
@@ -2828,12 +2843,16 @@ export default class PlayLevel extends Vue {
         this.selectedObstacle.type,
         name
       );
+      this.selectedObstacle.width = this.getLevelTypeCategoryItems(
+        this.selectedObstacle.type
+      )[name].width;
     }
     this.showObstacleSelection = false;
   }
 
   obstacleClicked(obstacle: CoolItObstacle): void {
     this.selectedObstacle = obstacle;
+    this.replayFilter = [];
     this.showObstacleSelection = true;
     clearInterval(this.interval);
   }

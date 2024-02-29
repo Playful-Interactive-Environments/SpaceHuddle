@@ -97,6 +97,7 @@ export default class GameObject extends Vue {
   //#endregion props
 
   //#region variables
+  bodyId = -1;
   position: [number, number] = [0, 0];
   rotation = 0;
   gameObjectContainer: PIXI.Container | null = null;
@@ -113,8 +114,6 @@ export default class GameObject extends Vue {
   //#endregion variables
 
   //#region get / set
-  bodyId = -1;
-
   get body(): Matter.Body | null {
     if (this.bodyId === -1) return null;
     if (this.gameContainer) {
@@ -134,6 +133,27 @@ export default class GameObject extends Vue {
 
   get displayY(): number {
     return this.position[1] - this.offset[1];
+  }
+
+  get possibleSpace(): [number, number] {
+    if (
+      this.objectSpace === ObjectSpace.RelativeToScreen &&
+      this.gameContainer
+    ) {
+      return [
+        this.gameContainer.gameWidth,
+        this.gameContainer.gameDisplayHeight,
+      ];
+    } else if (
+      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.gameContainer
+    ) {
+      return [
+        this.gameContainer.backgroundTextureSize[0],
+        this.gameContainer.backgroundTextureSize[1],
+      ];
+    }
+    return [this.gameContainer.gameWidth, this.gameContainer.gameHeight];
   }
 
   getContainerWidth(): number {
@@ -239,6 +259,7 @@ export default class GameObject extends Vue {
   }
 
   isAdded(container: PIXI.Container): void {
+    if (this.gameContainer) return;
     setTimeout(() => {
       let parent = container;
       while (parent.parent) {
@@ -740,15 +761,13 @@ export default class GameObject extends Vue {
           this.$emit('visibilityChanged', isVisible);
         }
         if (this.gameContainer) {
-          const maxRight = this.gameContainer.endlessPanning
-            ? this.gameContainer.boundsWidth + 10
-            : this.gameContainer.boundsWidth;
-          const minLeft = this.gameContainer.endlessPanning ? -10 : 0;
+          const possibleSpace = this.possibleSpace;
+          const maxRight = possibleSpace[0];
+          const minLeft = 0;
           const outsideRight = this.body.position.x + this.offset[0] > maxRight;
           const outsideLeft = this.body.position.x + this.offset[0] < minLeft;
           const outsideBottom =
-            this.body.position.y + this.offset[1] >
-            this.gameContainer.boundsHeight;
+            this.body.position.y + this.offset[1] > possibleSpace[1];
           const outsideTop = this.body.position.y + this.offset[1] < 0;
           if (outsideRight || outsideLeft || outsideBottom || outsideTop) {
             this.$emit('outsideDrawingSpace', this, {
@@ -767,21 +786,20 @@ export default class GameObject extends Vue {
                 outsideLeft
                   ? -this.offset[0]
                   : outsideRight
-                  ? this.gameContainer.boundsWidth - this.offset[0]
+                  ? possibleSpace[0] - this.offset[0]
                   : this.body.position.x,
                 outsideTop
                   ? -this.offset[1]
                   : outsideBottom
-                  ? this.gameContainer.boundsHeight - this.offset[1]
+                  ? possibleSpace[1] - this.offset[1]
                   : this.body.position.y,
               ];
               if (this.gameContainer.endlessPanning) {
-                if (outsideLeft)
-                  pos[0] =
-                    this.body.position.x + this.gameContainer.boundsWidth;
+                /*if (outsideLeft)
+                  pos[0] = this.body.position.x + possibleSpace[0];
                 else if (outsideRight)
-                  pos[0] =
-                    this.body.position.x - this.gameContainer.boundsWidth;
+                  pos[0] = this.body.position.x - possibleSpace[0];*/
+                pos[0] = this.body.position.x;
               }
               Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
               Matter.Body.setVelocity(this.body, { x: 0, y: 0 });

@@ -1,8 +1,10 @@
 import * as PIXI from 'pixi.js';
 import SpaceCalculator, { SpaceContainer } from '@/types/game/SpaceCalculator';
 import ColorFilter from '@/types/game/ColorFilter';
+import { v4 as uuidv4 } from 'uuid';
 
 export class SpriteConverter extends PIXI.Sprite implements SpaceContainer {
+  uuid: string;
   space: SpaceCalculator;
   colorFilter: ColorFilter;
 
@@ -10,6 +12,7 @@ export class SpriteConverter extends PIXI.Sprite implements SpaceContainer {
     super(texture);
     this.space = new SpaceCalculator(this);
     this.colorFilter = new ColorFilter(this);
+    this.uuid = uuidv4();
   }
 
   destroy(options?) {
@@ -60,6 +63,18 @@ export class SpriteConverter extends PIXI.Sprite implements SpaceContainer {
     this.space.aspectRation = value;
   }
 
+  get preRenderFilters() {
+    return this.colorFilter.preRenderFilters;
+  }
+
+  set preRenderFilters(value) {
+    if (this.colorFilter.preRenderFilters !== value) {
+      this.colorFilter.preRenderFilters = value;
+      this.colorFilter.preRenderData();
+      this.filters = this.colorFilter.objectFilters;
+    }
+  }
+
   get colorOverlay() {
     return this.colorFilter.colorOverlay;
   }
@@ -93,6 +108,28 @@ export class SpriteConverter extends PIXI.Sprite implements SpaceContainer {
   }
   set customFilters(value) {
     this.colorFilter.filters = value;
+  }
+
+  get preFilters() {
+    return this.colorFilter.preFilters;
+  }
+
+  set preFilters(value) {
+    this.colorFilter.preFilters = value;
+  }
+
+  get texture() {
+    return super.texture;
+  }
+
+  set texture(value) {
+    if (super.texture === value) return;
+    super.texture = value;
+    if (this.colorFilter) this.colorFilter.updateFilter(value);
+  }
+
+  set preTexture(value) {
+    super.texture = value;
   }
   //#endregion properties
 }

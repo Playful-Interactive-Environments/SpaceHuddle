@@ -1129,6 +1129,7 @@ export default class GameContainer extends Vue {
 
   registerGameObject(e: any): void {
     const gameObject = e.data as GameObject;
+    if (this.gameObjects.includes(gameObject)) return;
     if (gameObject.moveWithBackground) {
       if (gameObject.objectSpace === ObjectSpace.RelativeToBackground)
         gameObject.initOffset(this.gameObjectOffsetRelativeToBackground);
@@ -1143,14 +1144,16 @@ export default class GameContainer extends Vue {
         this.freePoolBody[gameObject.poolingKey] = [];
       } else if (
         this.freePoolBody[gameObject.poolingKey].length > 0 &&
-        !gameObject.body
+        gameObject.bodyId === -1
       ) {
         const poolBody = this.freePoolBody[gameObject.poolingKey].pop();
         gameObject.assignPoolBody(poolBody);
       }
     }
     if (this.activatedObjectOnRegister) {
-      this.$emit('update:selectedObject', gameObject);
+      if (!this.selectedObject) {
+        this.$emit('update:selectedObject', gameObject);
+      }
       if (this.isMouseDown) {
         this.activeObject = gameObject;
         this.activeObject.$emit('update:highlighted', true);
@@ -1165,7 +1168,7 @@ export default class GameContainer extends Vue {
   }
 
   deregisterGameObject(gameObject: GameObject): void {
-    if (gameObject.body && this.engine && gameObject.isPartOfEngin) {
+    if (gameObject.bodyId > -1 && this.engine && gameObject.isPartOfEngin) {
       gameObject.isPartOfEngin = false;
       this.removeFromEngin(gameObject.body);
     }
@@ -1184,6 +1187,7 @@ export default class GameContainer extends Vue {
 
   registerCustomObject(e: any): void {
     const spaceObject = e.data as SpaceObject;
+    if (this.customObjects.includes(spaceObject)) return;
     this.customObjects.push(spaceObject);
     spaceObject.setGameContainer(this);
   }
@@ -1273,7 +1277,7 @@ export default class GameContainer extends Vue {
   addWind(): void {
     const calcForce = (body: Matter.Body): number => {
       const windForce = this.windForce > 0 ? this.windForce : 1;
-      const forceMagnitude = (0.05 + body.frictionAir) * windForce; // (0.05 * body.mass) * timeScale;
+      const forceMagnitude = (0.05 + body.frictionAir) * windForce;
       return (
         (forceMagnitude + Matter.Common.random() * forceMagnitude) *
         Matter.Common.choose([1, -1])
@@ -1282,15 +1286,17 @@ export default class GameContainer extends Vue {
 
     for (const gameObject of this.gameObjects) {
       if (
-        gameObject.body &&
+        gameObject.bodyId > -1 &&
         gameObject.affectedByForce &&
         !gameObject.isStatic &&
         gameObject.isVisible()
       ) {
-        Matter.Body.setVelocity(gameObject.body, {
-          x: gameObject.body.velocity.x + calcForce(gameObject.body),
-          y: gameObject.body.velocity.y + calcForce(gameObject.body),
-        });
+        const body = this.getBodyForId(gameObject.bodyId); //gameObject.body;
+        const newVelocity = {
+          x: body.velocity.x + calcForce(body),
+          y: body.velocity.y + calcForce(body),
+        };
+        if (body) Matter.Body.setVelocity(body, newVelocity);
       }
     }
   }
@@ -1793,10 +1799,7 @@ export default class GameContainer extends Vue {
         )[]
   ): Promise<void> {
     await until(() => !!this.engine);
-    if (
-      this.engine &&
-      !this.engine.world.bodies.find((item) => item.id === physicObject.id)
-    ) {
+    if (this.engine && !this.getBodyForId(physicObject.id)) {
       Matter.Composite.add(this.engine.world, physicObject);
     }
   }
@@ -1820,9 +1823,7 @@ export default class GameContainer extends Vue {
   ): void {
     try {
       if (this.engine) {
-        const body = this.engine.world.bodies.find(
-          (item) => item.id === physicObject.id
-        );
+        const body = this.getBodyForId(physicObject.id);
         if (body) Matter.Composite.remove(this.engine.world, body);
         else Matter.Composite.remove(this.engine.world, physicObject);
       }
@@ -1833,7 +1834,7 @@ export default class GameContainer extends Vue {
 
   addGameObjectToDetector(gameObject: GameObject): void {
     if (
-      gameObject.body &&
+      gameObject.bodyId > -1 &&
       this.detector &&
       this.useDetector &&
       !this.detector.bodies.find((item) => item.id === gameObject.bodyId)
@@ -1843,7 +1844,7 @@ export default class GameContainer extends Vue {
   }
 
   removeGameObjectFromDetector(gameObject: GameObject): void {
-    if (gameObject.body && this.detector && this.useDetector) {
+    if (gameObject.bodyId > -1 && this.detector && this.useDetector) {
       const index = this.detector.bodies.findIndex(
         (b) => b.id === gameObject.bodyId
       );
@@ -2083,7 +2084,7 @@ export default class GameContainer extends Vue {
         this.showAllEnginColliders &&
         this.nextDrawUpdateTime < this.loopTime
       ) {
-        this.nextDrawUpdateTime += this.oneTickDelta * 50;
+        this.nextDrawUpdateTime = this.loopTime + this.oneTickDelta * 50; // += this.oneTickDelta * 50;
         this.drawAllCollider();
       }
     }
@@ -2111,22 +2112,19 @@ export default class GameContainer extends Vue {
     //this.engine.velocityIterations =
     //  velocityIterations > 0 ? velocityIterations : 1;
     for (const gameObject of this.gameObjects) {
-      /*if (gameObject.body && !gameObject.isStatic && this.isContainerReady) {
-        gameObject.body.timeScale = deltaTime / 48;
-      }*/
       if (gameObject.moveWithBackground && !this.isBackgroundLoaded) continue;
       gameObject.beforePhysicUpdate();
     }
 
     if (this.windForce > 0 && this.nextWindUpdateTime < this.loopTime) {
-      this.nextWindUpdateTime += this.oneTickDelta * 5;
+      this.nextWindUpdateTime = this.loopTime + this.oneTickDelta * 20; // += this.oneTickDelta * 10;
       this.addWind();
     }
     if (this.panSpeed > 0 && this.nextPanUpdateTime < this.loopTime) {
-      const panTimeDelta =
-        this.oneTickDelta * this.getPanInterval(this.panSpeed);
       while (this.nextPanUpdateTime < this.loopTime) {
-        this.nextPanUpdateTime += panTimeDelta;
+        const panTimeDelta =
+          this.oneTickDelta * this.getPanInterval(this.panSpeed);
+        this.nextPanUpdateTime = this.loopTime + panTimeDelta; // += panTimeDelta;
         this.pan();
       }
     }

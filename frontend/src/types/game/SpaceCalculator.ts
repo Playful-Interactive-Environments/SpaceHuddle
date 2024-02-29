@@ -25,11 +25,17 @@ export default class SpaceCalculator implements SpaceObject {
   }
 
   destroy(): void {
-    this.gameContainer.deregisterCustomObject(this);
+    if (this.gameContainer) this.gameContainer.deregisterCustomObject(this);
     this.pixiObject.removeEventListener('added', this.isAdded);
   }
 
   //#region properties
+  getRenderer(): PIXI.IRenderer | null {
+    if (this.gameContainer && this.gameContainer.app)
+      return this.gameContainer.app.renderer;
+    return null;
+  }
+
   private _width: number | undefined = undefined;
   get width(): number | undefined {
     return this._width;
@@ -121,7 +127,7 @@ export default class SpaceCalculator implements SpaceObject {
     ) {
       value = (value / 100) * this.gameContainer.backgroundTextureSize[0];
     }
-    this.pixiObject.width = value;
+    if (this.pixiObject) this.pixiObject.width = value;
     return value;
   }
 
@@ -142,7 +148,7 @@ export default class SpaceCalculator implements SpaceObject {
     ) {
       value = (value / 100) * this.gameContainer.backgroundTextureSize[0];
     }
-    this.pixiObject.height = value;
+    if (this.pixiObject) this.pixiObject.height = value;
     return value;
   }
 
@@ -159,7 +165,7 @@ export default class SpaceCalculator implements SpaceObject {
     ) {
       value = (this.x / 100) * this.gameContainer.backgroundTextureSize[0];
     }
-    this.pixiObject.x = value;
+    if (this.pixiObject) this.pixiObject.x = value;
     return value;
   }
 
@@ -176,7 +182,7 @@ export default class SpaceCalculator implements SpaceObject {
     ) {
       value = (this.y / 100) * this.gameContainer.backgroundTextureSize[0];
     }
-    this.pixiObject.x = value;
+    if (this.pixiObject) this.pixiObject.x = value;
     return value;
   }
 
@@ -195,6 +201,7 @@ export default class SpaceCalculator implements SpaceObject {
 
   //#region events
   isAdded(container: any): void {
+    if (this.gameContainer) return;
     setTimeout(() => {
       const source = container.source;
       if (source && Object.hasOwn(source, 'updatedColliderSize')) {
