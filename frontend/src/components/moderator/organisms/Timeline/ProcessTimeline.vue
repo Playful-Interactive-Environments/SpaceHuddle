@@ -147,18 +147,19 @@
                       :order="2"
                       placement="bottom"
                     >-->
-                    <!--<ToolTip
+                    <ToolTip
                       :text="
-                        $t(
-                          'module.' +
-                            element.taskType.toLowerCase() +
-                            '.' +
-                            element.modules[0].name +
-                            '.description.title'
-                        )
+                        hasParticipantOption(element)
+                          ? $t(
+                              'module.' +
+                                element.taskType.toLowerCase() +
+                                '.' +
+                                element.modules[0].name +
+                                '.description.title'
+                            )
+                          : getTitle(element)
                       "
-                    >-->
-                    <ToolTip :text="getTitle(element)">
+                    >
                       <span @click="itemClicked(element)">
                         <font-awesome-icon
                           class="processIcon"
