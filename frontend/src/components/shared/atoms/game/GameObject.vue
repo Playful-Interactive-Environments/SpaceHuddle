@@ -14,6 +14,7 @@ import { delay, until } from '@/utils/wait';
 import { GrayscaleFilter } from 'pixi-filters';
 import { toDegrees, toRadians } from '@/utils/angle';
 import * as matterUtil from '@/utils/matter';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface ConditionalVelocity {
   velocity: { x: number; y: number };
@@ -26,6 +27,10 @@ export enum FastObjectBehaviour {
   bounce = 'bounce',
 }
 
+export interface IGameObjectSource {
+  gameObject: GameObject | null;
+}
+
 export const bounceCategory = 1 << 31;
 
 @Options({
@@ -34,7 +39,6 @@ export const bounceCategory = 1 << 31;
   emits: [
     'update:posX',
     'update:posY',
-    'update:id',
     'update:angle',
     'destroyObject',
     'notifyCollision',
@@ -56,7 +60,6 @@ export const bounceCategory = 1 << 31;
 export default class GameObject extends Vue {
   //#region props
   @Prop({ default: 100 }) renderDelay!: number;
-  @Prop({ default: 0 }) id!: number;
   @Prop({ default: 0 }) posX!: number;
   @Prop({ default: 0 }) posY!: number;
   @Prop({ default: null }) fixSize!: [number, number] | number | null;
@@ -74,7 +77,7 @@ export default class GameObject extends Vue {
   @Prop({ default: true }) readonly isActive!: boolean;
   @Prop({ default: true }) readonly clickable!: boolean;
   @Prop() readonly collisionHandler!: CollisionHandler;
-  @Prop() readonly source!: any;
+  @Prop({ default: null }) readonly source!: IGameObjectSource | null;
   @Prop({ default: true }) usePhysic!: boolean;
   @Prop({ default: true }) keepInside!: boolean;
   @Prop({ default: true }) affectedByForce!: boolean;
@@ -97,6 +100,7 @@ export default class GameObject extends Vue {
   //#endregion props
 
   //#region variables
+  readonly uuid = uuidv4();
   bodyId = -1;
   position: [number, number] = [0, 0];
   rotation = 0;
@@ -416,6 +420,11 @@ export default class GameObject extends Vue {
     this.manageEngin();
     //this.isVisibleInContainer = this.isVisible();
   }
+
+  @Watch('source', { immediate: true })
+  onSourceChanged(): void {
+    if (this.source) this.source.gameObject = this;
+  }
   //#endregion watch
 
   //#region init body
@@ -486,7 +495,6 @@ export default class GameObject extends Vue {
       });
     }
     this.body = body;
-    this.$emit('update:id', this.bodyId);
     if (this.clickable) {
       this.manageEngin();
       this.addBodyToDetector();
@@ -537,7 +545,6 @@ export default class GameObject extends Vue {
       this.updatePivot();
       this.onRotationChanged();
       this.onScaleChanged();
-      this.$emit('update:id', this.bodyId);
       if (this.clickable) {
         this.manageEngin();
         this.addBodyToDetector();

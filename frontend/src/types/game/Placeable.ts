@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { v4 as uuidv4 } from 'uuid';
+import { IGameObjectSource } from '@/components/shared/atoms/game/GameObject.vue';
 
 export enum BoundingBoxShape {
   rect = 'rect',
@@ -19,7 +20,6 @@ export interface PlaceableBase {
 
 export interface Placeable extends PlaceableBase {
   uuid: string;
-  id: number;
   pivot: [number, number];
   texture: string | PIXI.Texture;
   width: number;
@@ -95,7 +95,6 @@ export function convertToDetailData(
   if (!configParameter) {
     return {
       uuid: uuidv4(),
-      id: 0,
       type: value.type,
       name: value.name,
       texture: texture,
@@ -112,7 +111,6 @@ export function convertToDetailData(
   }
   return {
     uuid: uuidv4(),
-    id: 0,
     type: value.type,
     name: value.name,
     texture: texture,
@@ -126,4 +124,14 @@ export function convertToDetailData(
     placingRegions: configParameter.placingRegions,
     saturation: value.saturation ?? 1,
   };
+}
+
+export function convertToGameSourceData(
+  value: PlaceableBase,
+  categoryConfig: PlaceableThemeConfig,
+  texture: string | PIXI.Texture
+): Placeable & IGameObjectSource {
+  const item = convertToDetailData(value, categoryConfig, texture) as any;
+  item.gameObject = null;
+  return item;
 }

@@ -39,7 +39,6 @@
           <GameObject
             v-for="obstacle in obstacleList"
             :key="obstacle.uuid"
-            v-model:id="obstacle.id"
             :shape="obstacle.shape"
             :polygon-shape="obstacle.polygonShape"
             :show-bounds="false"
@@ -217,7 +216,7 @@
             </GameObject>
             <GameObject
               v-for="molecule of moleculeList"
-              :key="molecule.id"
+              :key="molecule.uuid"
               :is-active="molecule.isActive"
               shape="circle"
               :object-space="ObjectSpace.RelativeToBackground"
@@ -230,7 +229,7 @@
               :z-index="1"
               :fast-object-behaviour="FastObjectBehaviour.bounce"
               :sleep-if-not-visible="true"
-              v-model:angle="molecule.rotation"
+              :angle="molecule.rotation"
               :conditional-velocity="{
                 velocity: {x: 0, y: -3},
                 condition: (object: GameObject) => {
@@ -257,7 +256,7 @@
                 :alpha="molecule.controllable ? 1 : 0.4"
               />
               <text
-                v-if="molecule.isClicked"
+                v-if="molecule.gameObject && molecule.isClicked"
                 :anchor="[0.5, 3]"
                 :style="{
                   fontFamily: 'Arial',
@@ -265,7 +264,7 @@
                   fill: contrastColor,
                 }"
                 :scale="textScaleFactor"
-                :rotation="(molecule.rotation / 180) * Math.PI"
+                :rotation="-molecule.gameObject.rotation"
               >
                 {{
                   $t(
@@ -480,6 +479,7 @@ import * as PIXI from 'pixi.js';
 import { Prop, Watch } from 'vue-property-decorator';
 import GameObject, {
   FastObjectBehaviour,
+  IGameObjectSource,
 } from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
@@ -535,7 +535,7 @@ enum GasType {
   greenhouseGas = 'greenhouseGas',
 }
 
-interface Ray {
+interface Ray extends IGameObjectSource {
   uuid: string;
   type: RayType;
   hit: boolean;
@@ -654,8 +654,8 @@ interface Hit {
   radiationFactor: number;
 }
 
-interface MoleculeData extends CoolItHitRegion {
-  id: string;
+interface MoleculeData extends CoolItHitRegion, IGameObjectSource {
+  uuid: string;
   type: string;
   position: [number, number];
   globalWarmingFactor: number;
@@ -670,7 +670,10 @@ interface MoleculeData extends CoolItHitRegion {
   rotation: number;
 }
 
-interface CoolItObstacle extends placeable.Placeable, CoolItHitRegion {}
+interface CoolItObstacle
+  extends placeable.Placeable,
+    CoolItHitRegion,
+    IGameObjectSource {}
 
 interface ColorValues {
   code: number;
@@ -1258,7 +1261,7 @@ export default class PlayLevel extends Vue {
   }
 
   get moleculeSize(): number {
-    return this.textScaleFactor * 320;
+    return this.textScaleFactor * 270;
   }
 
   get vehicleWidth(): number {
@@ -1452,26 +1455,22 @@ export default class PlayLevel extends Vue {
     const reactiveMolecule = this.moleculeList.find((item) => !item.isActive);
     if (reactiveMolecule) {
       this.updatedMolecule(reactiveMolecule, moleculeName);
-      const container = this.$refs.gameContainer as GameContainer;
-      if (container) {
-        const gameObject = container.gameObjects.find(
-          (item) => item.source.id === reactiveMolecule.id
-        );
-        if (gameObject && gameObject.body) {
-          matterUtil.resetBody(gameObject.body);
-          gameObject.body.collisionFilter.category =
-            this.getMoleculeCategory(moleculeName);
-          gameObject.body.collisionFilter.mask =
-            this.getMoleculeMask(moleculeName);
-        }
+      const gameObject = reactiveMolecule.gameObject;
+      if (gameObject && gameObject.body) {
+        matterUtil.resetBody(gameObject.body);
+        gameObject.body.collisionFilter.category =
+          this.getMoleculeCategory(moleculeName);
+        gameObject.body.collisionFilter.mask =
+          this.getMoleculeMask(moleculeName);
       }
       reactiveMolecule.position = position;
       reactiveMolecule.rise = true;
       reactiveMolecule.isActive = true;
     } else {
       this.moleculeList.push({
+        gameObject: null,
         name: moleculeName,
-        id: uuidv4(),
+        uuid: uuidv4(),
         type: moleculeName,
         position: position,
         globalWarmingFactor:
@@ -1525,8 +1524,8 @@ export default class PlayLevel extends Vue {
       ? (configParameter.calculateTemperature as boolean)
       : true;
     return {
+      gameObject: null,
       uuid: result.uuid,
-      id: result.id,
       type: result.type,
       name: result.name,
       texture: result.texture,
@@ -1595,8 +1594,9 @@ export default class PlayLevel extends Vue {
       const moleculeList: MoleculeData[] = [];
       for (let i = 0; i < moleculeCount; i++) {
         moleculeList.push({
+          gameObject: null,
           name: moleculeConfigName,
-          id: uuidv4(),
+          uuid: uuidv4(),
           type: moleculeConfigName,
           position: [Math.random() * 100, Math.random() * 50],
           globalWarmingFactor: moleculeConfig.globalWarmingFactor,
@@ -1999,10 +1999,10 @@ export default class PlayLevel extends Vue {
 
   countDownEndTime = -1;
   async rayInitialised(item: GameObject): Promise<void> {
-    item.source.initialised = true;
+    const ray = item.source as Ray;
+    ray.initialised = true;
     if (item.body) {
       item.moveToPool(0);
-      item.source.gameObject = item;
     }
     const waitForDataLoad = !!this.rayList.find((item) => !item.initialised);
     if (!waitForDataLoad) {
@@ -2035,7 +2035,7 @@ export default class PlayLevel extends Vue {
 
   rayInitError(item: GameObject): void {
     const ray = item.source as Ray;
-    const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+    const index = this.rayList.indexOf(ray);
     if (index > -1) {
       this.rayList.splice(index, 1);
     }
@@ -2398,7 +2398,7 @@ export default class PlayLevel extends Vue {
     obstacleBody: Matter.Body
   ): Promise<void> {
     const ray = rayObject.source as Ray;
-    const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+    const index = this.rayList.indexOf(ray);
     const hitObstacle = obstacleObject?.source as CoolItHitRegion;
     const probability = Math.random();
     if (
@@ -2603,27 +2603,19 @@ export default class PlayLevel extends Vue {
     moleculeObject: GameObject
   ): void {
     if (!moleculeObject) return;
-    const obstacleType = this.getLevelTypeCategoryItems(
-      obstacleObject.source.type
-    )[obstacleObject.source.name].type;
-    if (
-      obstacleType === ObstacleType.carbonSink &&
-      moleculeObject.source.absorbedByTree
-    ) {
-      const index = this.moleculeList.findIndex(
-        (item) => item.id === moleculeObject.source.id
-      );
-      if (index > -1) {
-        this.moleculeState[moleculeObject.source.name].decreaseCount++;
-        const moleculeName = 'oxygen';
-        this.updatedMolecule(moleculeObject.source, moleculeName);
-        moleculeObject.body.collisionFilter.category =
-          this.getMoleculeCategory(moleculeName);
-        moleculeObject.body.collisionFilter.mask =
-          this.getMoleculeMask(moleculeName);
-        //moleculeObject.source.heatRationCoefficient = oxygenConfig.globalWarmingFactor;
-        //this.moleculeList.splice(index, 1);
-      }
+    const obstacle = obstacleObject.source as CoolItObstacle;
+    const molecule = moleculeObject.source as MoleculeData;
+    const obstacleType = this.getLevelTypeCategoryItems(obstacle.type)[
+      obstacle.name
+    ].type;
+    if (obstacleType === ObstacleType.carbonSink && molecule.absorbedByTree) {
+      this.moleculeState[molecule.name].decreaseCount++;
+      const moleculeName = 'oxygen';
+      this.updatedMolecule(molecule, moleculeName);
+      moleculeObject.body.collisionFilter.category =
+        this.getMoleculeCategory(moleculeName);
+      moleculeObject.body.collisionFilter.mask =
+        this.getMoleculeMask(moleculeName);
     }
   }
 

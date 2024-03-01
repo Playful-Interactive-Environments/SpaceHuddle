@@ -171,10 +171,9 @@
           <GameObject
             v-for="particle in cleanupParticles"
             :key="particle.uuid"
-            v-model:id="particle.id"
             shape="circle"
-            v-model:posX="particle.position[0]"
-            v-model:posY="particle.position[1]"
+            :posX="particle.position[0]"
+            :posY="particle.position[1]"
             :fix-size="particleRadius * 2"
             :options="{
               name: particle.name,
@@ -238,7 +237,9 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
-import GameObject from '@/components/shared/atoms/game/GameObject.vue';
+import GameObject, {
+  IGameObjectSource,
+} from '@/components/shared/atoms/game/GameObject.vue';
 import { Chart } from 'chart.js';
 import { ParticleCollisionHandler } from '@/modules/playing/moveit/types/ParticleCollisionHandler';
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -262,16 +263,14 @@ import { EventType } from '@/types/enum/EventType';
 Chart.register(annotationPlugin);
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-interface DrawingParticle {
+interface DrawingParticle extends IGameObjectSource {
   uuid: string;
-  id: number;
   name: string;
   label: string;
   group: number;
   color: string;
   position: [number, number];
   highlighted: boolean;
-  gameObject: GameObject | null;
 }
 
 interface DatasetData {
@@ -653,7 +652,6 @@ export default class CleanUpParticles extends Vue {
         if (!poolParticle) {
           const particle: DrawingParticle = {
             uuid: uuidv4(),
-            id: 0,
             name: dataset.name,
             label: dataset.label,
             group: index + 2,
@@ -726,39 +724,42 @@ export default class CleanUpParticles extends Vue {
     }
   }
 
-  destroyParticle(particle: GameObject): void {
-    const id = particle.id;
-    const index = this.cleanupParticles.findIndex((p) => p.id === id);
+  destroyParticle(particleObject: GameObject): void {
+    const particle = particleObject.source as DrawingParticle;
+    const index = this.cleanupParticles.indexOf(particle);
     if (index > -1) this.cleanupParticles.splice(index, 1);
-    this.particleState[particle.options.name as string].collectedCount++;
+    this.particleState[particleObject.options.name as string].collectedCount++;
   }
 
-  particleCollected(particle: GameObject): void {
-    if (particle.isSleeping) return;
-    if (particle.source) {
-      particle.source.gameObject = particle;
-      particle.moveToPool();
+  particleCollected(particleObject: GameObject): void {
+    if (particleObject.isSleeping) return;
+    if (particleObject.source) {
+      particleObject.source.gameObject = particleObject;
+      particleObject.moveToPool();
     }
-    this.particleState[particle.options.name as string].collectedCount++;
+    this.particleState[particleObject.options.name as string].collectedCount++;
   }
 
-  outsideDrawingSpace(particle: GameObject): void {
-    if (particle.source) {
-      particle.source.gameObject = particle;
-      particle.moveToPool();
+  outsideDrawingSpace(particleObject: GameObject): void {
+    if (particleObject.source) {
+      particleObject.source.gameObject = particleObject;
+      particleObject.moveToPool();
     }
-    /*const id = particle.id;
-    const index = this.cleanupParticles.findIndex((p) => p.id === id);
+    /*const particle = particleObject.source as DrawingParticle;
+    const index = this.cleanupParticles.indexOf(particle);
     if (index > -1) this.cleanupParticles.splice(index, 1);*/
-    this.particleState[particle.options.name as string].outsideCount++;
+    this.particleState[particleObject.options.name as string].outsideCount++;
   }
 
-  isPartOfChainChanged(particle: GameObject, isPartOfChain: boolean): void {
-    if (particle.body) {
+  isPartOfChainChanged(
+    particleObject: GameObject,
+    isPartOfChain: boolean
+  ): void {
+    if (particleObject.body) {
       if (isPartOfChain)
-        particle.body.collisionFilter.mask =
+        particleObject.body.collisionFilter.mask =
           this.particleCategory | this.boarderDisabledCategory;
-      else particle.body.collisionFilter.mask = this.particleCategory;
+      else particleObject.body.collisionFilter.mask = this.particleCategory;
     }
   }
 

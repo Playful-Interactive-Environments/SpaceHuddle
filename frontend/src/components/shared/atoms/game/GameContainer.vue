@@ -1199,7 +1199,7 @@ export default class GameContainer extends Vue {
       this.removeFromEngin(gameObject.body);
     }
     this.removeGameObjectFromDetector(gameObject);
-    const index = this.gameObjects.findIndex((obj) => obj === gameObject);
+    const index = this.gameObjects.indexOf(gameObject);
     if (index > -1) {
       this.gameObjects.splice(index, 1);
     }
@@ -1218,8 +1218,8 @@ export default class GameContainer extends Vue {
     spaceObject.setGameContainer(this);
   }
 
-  deregisterCustomObject(gameObject: SpaceObject): void {
-    const index = this.customObjects.findIndex((obj) => obj === gameObject);
+  deregisterCustomObject(spaceObject: SpaceObject): void {
+    const index = this.customObjects.indexOf(spaceObject);
     if (index > -1) {
       this.customObjects.splice(index, 1);
     }
@@ -1996,7 +1996,7 @@ export default class GameContainer extends Vue {
 
   checkChainCollision(collisions: Matter.Collision[]): void {
     if (this.activeObject && this.combinedActiveCollisionToChain) {
-      const activeId = this.activeObject.id;
+      const activeId = this.activeObject.bodyId;
       const group = (this.activeObject.options.collisionFilter as any).group;
       const collisionWithActiveObject = collisions.filter(
         (collision) =>

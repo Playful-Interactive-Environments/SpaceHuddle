@@ -24,7 +24,6 @@
           <GameObject
             v-for="placeable in renderList"
             :key="placeable.uuid"
-            v-model:id="placeable.id"
             :shape="placeable.shape"
             :polygon-shape="placeable.polygonShape"
             :collider-delta="colliderDelta"
@@ -52,13 +51,13 @@
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.RelativeToBackground"
               :outline="
-                selectedObject && selectedObject.id === placeable.id
+                selectedObject && selectedObject === placeable.gameObject
                   ? 0xff0000
                   : null
               "
               :saturation="placeable.saturation"
               :pre-render-filters="
-                !selectedObject || selectedObject.id !== placeable.id
+                !selectedObject || selectedObject !== placeable.gameObject
               "
             >
             </SpriteConverter>
@@ -187,7 +186,7 @@
           <template v-slot:item="{ element }">
             <div
               :style="{
-                color: element.id === selectedObject?.id ? 'red' : 'white',
+                color: element.gameObject === selectedObject ? 'red' : 'white',
               }"
             >
               {{ element.name }}
@@ -260,7 +259,9 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as PIXI from 'pixi.js';
-import GameObject from '@/components/shared/atoms/game/GameObject.vue';
+import GameObject, {
+  IGameObjectSource,
+} from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
   CollisionBorderType,
@@ -307,6 +308,8 @@ export function getLevelType(
     : configParameter.getDefaultLevelType(gameConfig);
 }
 
+interface LevelPlaceable extends placeable.Placeable, IGameObjectSource {}
+
 @Options({
   computed: {
     ObjectSpace() {
@@ -343,13 +346,13 @@ export default class LevelBuilder extends Vue {
   @Prop() readonly gameConfig!: placeable.PlaceableConfig;
   @Prop({ default: 0 }) readonly colliderDelta!: number;
   @Prop({ default: null }) readonly customSortOrder!:
-    | ((placeable: placeable.Placeable) => number)
+    | ((placeable: LevelPlaceable) => number)
     | null;
   @Prop({ default: null }) readonly customScaleFactor!:
-    | ((placeable: placeable.Placeable) => number)
+    | ((placeable: LevelPlaceable) => number)
     | null;
   @Prop({ default: null }) readonly customSaturation!:
-    | ((placeable: placeable.Placeable) => number)
+    | ((placeable: LevelPlaceable) => number)
     | null;
   activeObjectType = '';
   activeObjectName = '';
@@ -359,7 +362,7 @@ export default class LevelBuilder extends Vue {
   showOptions = false;
   showLayers = false;
 
-  placedObjects: placeable.Placeable[] = [];
+  placedObjects: LevelPlaceable[] = [];
   placementState: { [key: string]: BuildState } = {};
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   levelTypeImages: { [key: string]: { [key: string]: string } } = {};
@@ -691,7 +694,7 @@ export default class LevelBuilder extends Vue {
       this.placedObjects = items
         .filter((item) => this.hasTexture(item.type, item.name))
         .map((item) =>
-          placeable.convertToDetailData(
+          placeable.convertToGameSourceData(
             item,
             this.gameConfig[levelType],
             this.getTexture(item.type, item.name)
@@ -812,9 +815,9 @@ export default class LevelBuilder extends Vue {
           configParameter.width,
           position
         );
-        const placeable: placeable.Placeable = {
+        const placeable: LevelPlaceable = {
+          gameObject: null,
           uuid: uuidv4(),
-          id: 0,
           type: this.activeObjectType,
           name: this.activeObjectName,
           texture: texture,
@@ -922,34 +925,29 @@ export default class LevelBuilder extends Vue {
   }
 
   placeablePositionChanged(position: [number, number]): void {
-    if (this.selectedObject) {
-      const selectionId = this.selectedObject.source.id;
-      const selectionObject = this.placedObjects.find(
-        (item) => item.id === selectionId
+    if (this.selectedObject && this.selectedObject.source) {
+      const selectedSource = this.selectedObject.source as LevelPlaceable;
+      const texture = this.getTexture(
+        selectedSource.type,
+        selectedSource.name
+      ) as PIXI.Texture<PIXI.Resource>;
+      const configParameter =
+        this.gameConfig[this.levelType].categories[selectedSource.type].items[
+          selectedSource.name
+        ];
+      const previousPosition = [...position];
+      const newPosition = this.ensurePositionVisibility(
+        selectedSource.type,
+        selectedSource.name,
+        texture,
+        configParameter.width * selectedSource.scale,
+        position
       );
-      if (selectionObject) {
-        const texture = this.getTexture(
-          this.selectedObject.source.type,
-          this.selectedObject.source.name
-        ) as PIXI.Texture<PIXI.Resource>;
-        const configParameter =
-          this.gameConfig[this.levelType].categories[
-            this.selectedObject.source.type
-          ].items[this.selectedObject.source.name];
-        const previousPosition = [...position];
-        const newPosition = this.ensurePositionVisibility(
-          this.selectedObject.source.type,
-          this.selectedObject.source.name,
-          texture,
-          configParameter.width * this.selectedObject.source.scale,
-          position
-        );
-        if (
-          newPosition[0] !== previousPosition[0] ||
-          newPosition[1] !== previousPosition[1]
-        ) {
-          this.selectedObject.updatePosition([...newPosition]);
-        }
+      if (
+        newPosition[0] !== previousPosition[0] ||
+        newPosition[1] !== previousPosition[1]
+      ) {
+        this.selectedObject.updatePosition([...newPosition]);
       }
     }
   }
@@ -960,40 +958,43 @@ export default class LevelBuilder extends Vue {
   }
 
   deleteSelectedObject(): void {
-    const selected = this.selectedObject?.source;
-    const index = this.placedObjects.indexOf(selected);
-    if (selected && index >= 0) {
+    const selectedSource = this.selectedObject?.source as LevelPlaceable;
+    const index = this.placedObjects.indexOf(selectedSource);
+    if (selectedSource && index >= 0) {
       this.selectionMaskGraphic = null;
       this.selectedObject = null;
-      this.placementState[selected.name].currentCount--;
+      this.placementState[selectedSource.name].currentCount--;
       this.placedObjects.splice(index, 1);
     }
   }
 
   rotateSelectedObject(angle: number): void {
-    if (this.selectedObject) {
-      let newValue = this.selectedObject.source.rotation + angle;
+    if (this.selectedObject && this.selectedObject.source) {
+      const selectedSource = this.selectedObject.source as LevelPlaceable;
+      let newValue = selectedSource.rotation + angle;
       if (newValue < 0) newValue += 360;
       if (newValue > 360) newValue -= 360;
-      this.selectedObject.source.rotation = newValue;
+      selectedSource.rotation = newValue;
     }
   }
 
   scaleSelectedObject(value: number): void {
-    if (this.selectedObject) {
-      const newValue = this.selectedObject.source.scale + value;
+    if (this.selectedObject && this.selectedObject.source) {
+      const selectedSource = this.selectedObject.source as LevelPlaceable;
+      const newValue = selectedSource.scale + value;
       if (newValue > 0.5 && newValue <= 3) {
-        this.selectedObject.source.scale = newValue;
-        this.placeablePositionChanged(this.selectedObject.source.position);
+        selectedSource.scale = newValue;
+        this.placeablePositionChanged(selectedSource.position);
       }
     }
   }
 
   changeSaturation(value: number): void {
     if (this.selectedObject) {
-      const newValue = this.selectedObject.source.saturation + value;
+      const selectedSource = this.selectedObject.source as LevelPlaceable;
+      const newValue = selectedSource.saturation + value;
       if (newValue > 0.3 && newValue <= 1) {
-        this.selectedObject.source.saturation = newValue;
+        selectedSource.saturation = newValue;
       }
     }
   }
@@ -1008,8 +1009,8 @@ export default class LevelBuilder extends Vue {
     this.createObject(this.clickPosition);
   }
 
-  get renderList(): placeable.Placeable[] {
-    const getSortNumber = (placeable: placeable.Placeable): number => {
+  get renderList(): LevelPlaceable[] {
+    const getSortNumber = (placeable: LevelPlaceable): number => {
       if (this.customSortOrder) return this.customSortOrder(placeable);
       return this.gameConfig[this.levelType].categories[placeable.type].settings
         .order;
@@ -1069,7 +1070,7 @@ export default class LevelBuilder extends Vue {
                 this.placedObjects = items
                   .filter((item) => this.hasTexture(item.type, item.name))
                   .map((item) =>
-                    placeable.convertToDetailData(
+                    placeable.convertToGameSourceData(
                       item,
                       this.gameConfig[this.levelType],
                       this.getTexture(item.type, item.name)
