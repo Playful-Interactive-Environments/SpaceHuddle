@@ -332,9 +332,12 @@
         "activatePublicScreen": "display this content on the public screen",
         "changePublicScreen": "display this item on the public screen",
         "activateParticipant": "activate this item for the participants",
+        "deactivateParticipant": "deactivate this task for the participants",
         "changeOrder": "change the order of the items",
         "selectItem": "select this item",
-        "otherTopic": "topic"
+        "otherTopic": "topic",
+        "on": "on",
+        "off": "off"
       },
       "taskTimeline": {
         "activatePublicScreen": "display this topic on the public screen",

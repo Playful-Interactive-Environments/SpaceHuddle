@@ -333,9 +333,12 @@
         "activatePublicScreen": "Stelle diesen Inhalt auf der Publikumsansicht dar",
         "changePublicScreen": "Stelle dieses Element auf der Publikumsansicht dar",
         "activateParticipant": "Aktiviere dieses Element für die Teilnehmer*innen",
+        "deactivateParticipant": "Deaktiviere diese Aufgabe für die Teilnehmer*innen",
         "changeOrder": "Verändere die Ordnung der Elemente",
         "selectItem": "Selektiere dieses Element",
-        "otherTopic": "Thema"
+        "otherTopic": "Thema",
+        "on": "an",
+        "off": "aus"
       },
       "taskTimeline": {
         "activatePublicScreen": "Stelle diesen Inhalt auf der Publikumsansicht dar",
