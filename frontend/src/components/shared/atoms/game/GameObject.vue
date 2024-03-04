@@ -37,9 +37,6 @@ export const bounceCategory = 1 << 31;
   name: 'GameObject',
   components: {},
   emits: [
-    'update:posX',
-    'update:posY',
-    'update:angle',
     'destroyObject',
     'notifyCollision',
     'outsideDrawingSpace',
@@ -48,7 +45,6 @@ export const bounceCategory = 1 << 31;
     'click',
     'release',
     'handleTrigger',
-    'update:highlighted',
     'positionChanged',
     'initialised',
     'isPartOfChainChanged',
@@ -84,7 +80,6 @@ export default class GameObject extends Vue {
   @Prop({ default: true }) moveWithBackground!: boolean;
   @Prop({ default: null }) triggerDelay!: number | null;
   @Prop({ default: false }) triggerDelayPause!: boolean;
-  @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: FastObjectBehaviour.none })
   fastObjectBehaviour!: FastObjectBehaviour;
@@ -115,6 +110,7 @@ export default class GameObject extends Vue {
   filter: any[] | null = null;
   loadingFinished = false;
   isPartOfEngin = false;
+  highlighted = false;
   //#endregion variables
 
   //#region get / set
@@ -369,7 +365,7 @@ export default class GameObject extends Vue {
       this.clickTime = Date.now();
       this.gameContainer.$emit('update:selectedObject', this);
       this.gameContainer.activeObject = this;
-      this.$emit('update:highlighted', true);
+      this.highlighted = true;
     }
   }
 
@@ -388,7 +384,7 @@ export default class GameObject extends Vue {
         this.gameContainer.minClickTimeDelta + 10 - clickTimeDelta;
       if (releaseDelay > 0) await delay(releaseDelay);
       this.gameContainer.activeObject = null;
-      this.$emit('update:highlighted', false);
+      this.highlighted = false;
     }
   }
   //#endregion interaction
@@ -463,7 +459,6 @@ export default class GameObject extends Vue {
     };*/
 
     this.gameObjectContainer = container;
-    //this.eventBus.emit(EventType.REGISTER_GAME_OBJECT, { data: this });
     const delayTime = this.fixSize === null ? 0 : this.renderDelay;
     await delay(delayTime);
     await until(() => !!this.gameContainer);
@@ -633,7 +628,7 @@ export default class GameObject extends Vue {
     }
   }
 
-  convertPositionToInputFormat(): [number, number] {
+  get inputPosition(): [number, number] {
     if (this.objectSpace === ObjectSpace.RelativeToScreen && this.gameContainer)
       return [
         (this.position[0] / this.gameContainer.gameWidth) * 100,
@@ -650,10 +645,18 @@ export default class GameObject extends Vue {
     return [this.position[0], this.position[1]];
   }
 
+  get inputAngle(): number {
+    return 360 - toDegrees(this.rotation);
+  }
+
+  get inputScale(): number {
+    return this.scale;
+  }
+
   @Watch('posX', { immediate: true })
   @Watch('posY', { immediate: true })
   onModelValueChanged(): void {
-    const inputPosition = this.convertPositionToInputFormat();
+    const inputPosition = this.inputPosition;
     if (inputPosition[0] !== this.posX || inputPosition[1] !== this.posY) {
       this.initPosition();
     }
@@ -669,7 +672,7 @@ export default class GameObject extends Vue {
   }
 
   updatePosition(position: [number, number]): void {
-    const inputPosition = this.convertPositionToInputFormat();
+    const inputPosition = this.inputPosition;
     if (inputPosition[0] !== position[0] || inputPosition[1] !== position[1]) {
       this.initPosition(position[0], position[1]);
     }
@@ -839,16 +842,9 @@ export default class GameObject extends Vue {
           this.body.position.y + this.offset[1],
         ];
         this.rotation = this.body.angle;
-        this.$emit('update:angle', 360 - toDegrees(this.rotation));
-        const inputPosition = this.convertPositionToInputFormat();
+        const inputPosition = this.inputPosition;
         if (this.posX !== inputPosition[0] || this.posY !== inputPosition[1]) {
           this.$emit('positionChanged', inputPosition);
-        }
-        if (this.posX !== inputPosition[0]) {
-          this.$emit('update:posX', inputPosition[0]);
-        }
-        if (this.posY !== inputPosition[1]) {
-          this.$emit('update:posY', inputPosition[1]);
         }
       }
       if (

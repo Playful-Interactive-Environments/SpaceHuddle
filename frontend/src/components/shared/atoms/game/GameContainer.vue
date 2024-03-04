@@ -763,12 +763,12 @@ export default class GameContainer extends Vue {
       gameObject.body = body;
       if (isMouseObject) this.mouseConstraint.body = body;
     }
-    gameObject.$emit('update:highlighted', true);
+    gameObject.highlighted = true;
     gameObject.$emit('isPartOfChainChanged', gameObject, true);
   }
 
   private removeChainObject(gameObject: GameObject, reAddObject = true): void {
-    gameObject.$emit('update:highlighted', false);
+    gameObject.highlighted = false;
     gameObject.$emit('isPartOfChainChanged', gameObject, false);
     if (reAddObject) {
       const body = matterUtil.copyBody(gameObject.body);
@@ -862,11 +862,6 @@ export default class GameContainer extends Vue {
       this.texturesLoadingStart
     );
     this.eventBus.on(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
-    this.eventBus.on(EventType.REGISTER_GAME_OBJECT, this.registerGameObject);
-    this.eventBus.on(
-      EventType.REGISTER_CUSTOM_OBJECT,
-      this.registerCustomObject
-    );
 
     //initialise observer in mounted as otherwise this references observer
     this.hierarchyObserver = new MutationObserver(this.hierarchyChanged);
@@ -941,11 +936,6 @@ export default class GameContainer extends Vue {
     this.eventBus.off(
       EventType.TEXTURES_LOADING_START,
       this.texturesLoadingStart
-    );
-    this.eventBus.off(EventType.REGISTER_GAME_OBJECT, this.registerGameObject);
-    this.eventBus.off(
-      EventType.REGISTER_CUSTOM_OBJECT,
-      this.registerCustomObject
     );
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
 
@@ -1181,8 +1171,8 @@ export default class GameContainer extends Vue {
         this.$emit('update:selectedObject', gameObject);
       }
       if (this.isMouseDown) {
+        gameObject.highlighted = true;
         this.activeObject = gameObject;
-        this.activeObject.$emit('update:highlighted', true);
       } else gameObject.gameObjectReleased();
     }
     if (
@@ -1927,7 +1917,7 @@ export default class GameContainer extends Vue {
             )
         );
       } else if (gameObject) {
-        gameObject.$emit('update:highlighted', false);
+        gameObject.highlighted = false;
         gameObject.handleCollision(
           collisionObject,
           hitPoint,

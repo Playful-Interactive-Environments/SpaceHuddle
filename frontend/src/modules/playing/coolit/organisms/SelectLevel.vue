@@ -515,7 +515,6 @@ import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottom
 import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 import * as cashService from '@/services/cash-service';
 import { VoteParameterResult } from '@/types/api/Vote';
-import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import globalWarmingParticle from '@/modules/playing/coolit/data/globalWarming.json';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import { Doughnut } from 'vue-chartjs';
@@ -551,7 +550,6 @@ export interface ChartData {
     FontAwesomeIcon,
     IdeaMap,
     DrawerBottomOverlay,
-    CustomParticleContainer,
     Doughnut,
   },
   emits: ['play'],

@@ -511,7 +511,6 @@ import {
   GlowFilter,
 } from 'pixi-filters';
 import * as matterUtil from '@/utils/matter';
-import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import { Vote } from '@/types/api/Vote';
 import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -697,7 +696,6 @@ interface ColorValues {
   },
   components: {
     FontAwesomeIcon,
-    CustomParticleContainer,
     DrawerBottomOverlay,
     SpriteCanvas,
   },
@@ -2518,7 +2516,7 @@ export default class PlayLevel extends Vue {
       } else if (ray.type === RayType.heat && !ray.hit) {
         ray.hit = true;
         const rayIntensity = ray.intensity;
-        const hitPosition = rayObject.convertPositionToInputFormat();
+        const hitPosition = rayObject.inputPosition;
         const hitPositionBody = [
           rayObject.body.position.x,
           rayObject.body.position.y,

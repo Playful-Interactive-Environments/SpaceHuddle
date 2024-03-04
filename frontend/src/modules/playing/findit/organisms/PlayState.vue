@@ -65,16 +65,12 @@
               :config="getConfigForPlaceable(placeable)"
             />
           </GameObject>
-          <Graphics
-            v-if="gameWidth"
-            ref="searchMask"
-            @render="drawSearchMask"
-          />
+          <Graphics ref="searchMask" @render="drawSearchMask" />
           <GameObject
             v-if="gameWidth > 0"
             :moveWithBackground="false"
-            v-model:posX="searchPosition[0]"
-            v-model:posY="searchPosition[1]"
+            :posX="gameWidth / 2"
+            :posY="gameHeight / 2"
             type="circle"
             :z-index="10"
             :options="{
@@ -83,6 +79,7 @@
                 group: -1,
               },
             }"
+            @positionChanged="onSearchPositionChanged"
           >
             <Graphics @render="drawSearchObject" />
           </GameObject>
@@ -152,7 +149,6 @@ import GameContainer, {
 import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
-import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import { until } from '@/utils/wait';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import * as tutorialService from '@/services/tutorial-service';
@@ -161,7 +157,6 @@ import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import { ElMessage } from 'element-plus';
 import * as escalationConfig from '@/modules/playing/findit/data/escalation.json';
-import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
@@ -244,8 +239,6 @@ function convertToFindItPlaceable(
     },
   },
   components: {
-    CustomParticleContainer,
-    CustomSprite,
     DrawerBottomOverlay,
   },
   emits: ['playFinished'],
@@ -520,8 +513,8 @@ export default class PlayState extends Vue {
     this.calculateRelativeSearchPosition();
   }
 
-  @Watch('searchPosition', { immediate: true, deep: true })
-  onSearchPositionChanged(): void {
+  onSearchPositionChanged(searchPosition: [number, number]): void {
+    this.searchPosition = searchPosition;
     this.updatedSearchMask();
     this.calculateRelativeSearchPosition();
   }

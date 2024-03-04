@@ -30,10 +30,10 @@
             :show-bounds="false"
             :anchor="placeable.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
-            v-model:posX="placeable.position[0]"
-            v-model:posY="placeable.position[1]"
-            v-model:angle="placeable.rotation"
-            v-model:scale="placeable.scale"
+            :posX="placeable.position[0]"
+            :posY="placeable.position[1]"
+            :angle="placeable.rotation"
+            :scale="placeable.scale"
             :options="{
               name: placeable.name,
               collisionFilter: {
@@ -275,7 +275,6 @@ import LevelSettings from '@/components/shared/organisms/game/LevelSettings.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
-import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import * as themeColors from '@/utils/themeColors';
 import { Idea } from '@/types/api/Idea';
@@ -320,7 +319,6 @@ interface LevelPlaceable extends placeable.Placeable, IGameObjectSource {}
     },
   },
   components: {
-    CustomSprite,
     FontAwesomeIcon,
     LevelSettings,
     DrawerBottomOverlay,
@@ -577,7 +575,13 @@ export default class LevelBuilder extends Vue {
 
   saveChanges(): void {
     const sceneItems = this.renderList.map((obj) => {
-      return placeable.convertToBase(obj);
+      const saveObj = placeable.convertToBase(obj);
+      if (obj.gameObject) {
+        saveObj.position = obj.gameObject.inputPosition;
+        saveObj.rotation = obj.gameObject.inputAngle;
+        saveObj.scale = obj.gameObject.inputScale;
+      }
+      return saveObj;
     });
     let hasChanges = sceneItems.length !== this.savedItems.length;
     if (!hasChanges) {
@@ -713,16 +717,18 @@ export default class LevelBuilder extends Vue {
 
   async saveCurrentLevel(name: string): Promise<void> {
     this.isSaving = true;
-    const idea = await this.saveLevel(
-      this.level,
-      this.levelType,
-      this.renderList.map((obj) => {
-        return placeable.convertToBase(obj);
-      }),
-      name
-    );
+    const items = this.renderList.map((obj) => {
+      const saveObj = placeable.convertToBase(obj);
+      if (obj.gameObject) {
+        saveObj.position = obj.gameObject.inputPosition;
+        saveObj.rotation = obj.gameObject.inputAngle;
+        saveObj.scale = obj.gameObject.inputScale;
+      }
+      return saveObj;
+    });
+    const idea = await this.saveLevel(this.level, this.levelType, items, name);
     this.$emit('editFinished', idea.id, this.buildResult);
-    this.cacheSavedItems();
+    this.savedItems = items;
     this.isSaving = false;
   }
 

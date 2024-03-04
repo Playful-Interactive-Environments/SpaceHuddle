@@ -191,7 +191,6 @@
             :collision-handler="particleCollisionHandler"
             :sleep-if-not-visible="true"
             :pooling-key="particle.name"
-            v-model:highlighted="particle.highlighted"
             @notifyCollision="particleCollected"
             @destroyObject="destroyParticle"
             @outsideDrawingSpace="outsideDrawingSpace"
@@ -204,7 +203,7 @@
               :pre-tint="particle.color"
               :space-width="particleRadius * 2"
               :space-height="particleRadius * 2"
-              :outline="particle.highlighted ? 0xff0000 : null"
+              :outline="particle.gameObject.highlighted ? 0xff0000 : null"
               :preRenderFilters="false"
             />-->
             <sprite
@@ -222,7 +221,7 @@
               :width="particleRadius * 2"
               :height="particleRadius * 2"
               :tint="0xff0000"
-              :alpha="particle.highlighted ? 1 : 0"
+              :alpha="particle.gameObject.highlighted ? 1 : 0"
             />
           </GameObject>
         </container>
@@ -256,7 +255,6 @@ import * as pixiUtil from '@/utils/pixi';
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
-import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
 import { EventType } from '@/types/enum/EventType';
 
@@ -270,7 +268,6 @@ interface DrawingParticle extends IGameObjectSource {
   group: number;
   color: string;
   position: [number, number];
-  highlighted: boolean;
 }
 
 interface DatasetData {
@@ -299,7 +296,6 @@ interface ParticleStateExtended extends ParticleState {
 @Options({
   methods: { center },
   components: {
-    CustomSprite,
     Line,
   },
   emits: ['finished'],
@@ -661,7 +657,6 @@ export default class CleanUpParticles extends Vue {
                 this.particleRadius,
               this.particleBorder + this.particleRadius,
             ],
-            highlighted: false,
             gameObject: null,
           };
           this.cleanupParticles.push(particle);
