@@ -1,6 +1,6 @@
 {
   "description": {
-    "title": "idea launch",
+    "title": "Idea Launch",
     "description": "Default form to collect new ideas. Short description, long text, image and link can be entered. The short description is required, the other fields are optional."
   },
   "publicScreen": {
