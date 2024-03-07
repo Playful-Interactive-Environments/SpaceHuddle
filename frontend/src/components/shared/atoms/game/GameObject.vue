@@ -267,7 +267,7 @@ export default class GameObject extends Vue {
         if (Object.hasOwn(parent, 'gameContainer')) break;
       }
       const gameContainer = (parent as any).gameContainer as GameContainer;
-      if (gameContainer) gameContainer.registerGameObject({ data: this });
+      if (gameContainer) gameContainer.registerGameObject(this);
     }, 100);
   }
 

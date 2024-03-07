@@ -248,7 +248,7 @@ import GameObject, {
   FastObjectBehaviour,
   bounceCategory,
 } from '@/components/shared/atoms/game/GameObject.vue';
-import { SpaceObject } from '@/types/game/SpaceObject';
+import { SpaceObject } from '@/types/game/sprite/SpaceObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
@@ -409,7 +409,7 @@ export default class GameContainer extends Vue {
   regionBodyList: CollisionRegionData[] = [];
 
   gameObjects: GameObject[] = [];
-  customObjects: SpaceObject[] = [];
+  spaceObjects: SpaceObject[] = [];
   activeObject: GameObject | null = null;
   activeComposition: Matter.Composite | null = null;
 
@@ -1028,8 +1028,8 @@ export default class GameContainer extends Vue {
       this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
     this.notifyCurrentOffset();
     this.$emit('backgroundSizeChanged', this.backgroundTextureSize);
-    for (const customObject of this.customObjects) {
-      customObject.calculateRelativePosition();
+    for (const spaceObject of this.spaceObjects) {
+      spaceObject.calculateRelativePosition();
     }
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground) {
@@ -1123,28 +1123,7 @@ export default class GameContainer extends Vue {
   //#endregion load / unload
 
   //#region register object
-  registerObject(data: GameObject | SpaceObject): void {
-    //todo check data type
-    /*if (data instanceof GameObject) {
-      this.registerGameObject({ data: data });
-    } else { //if (data instanceof SpaceObject) {
-      this.registerCustomObject({ data: data });
-    }*/
-    this.registerCustomObject({ data: data });
-  }
-
-  deregisterObject(data: GameObject | SpaceObject): void {
-    //todo check data type
-    /*if (data instanceof GameObject) {
-      this.deregisterGameObject(data);
-    } else { //if (data instanceof SpaceObject) {
-      this.deregisterCustomObject(data);
-    }*/
-    this.deregisterCustomObject(data as any);
-  }
-
-  registerGameObject(e: any): void {
-    const gameObject = e.data as GameObject;
+  registerGameObject(gameObject: GameObject): void {
     if (this.gameObjects.includes(gameObject)) return;
     if (gameObject.moveWithBackground) {
       if (gameObject.objectSpace === ObjectSpace.RelativeToBackground)
@@ -1201,17 +1180,17 @@ export default class GameContainer extends Vue {
     }
   }
 
-  registerCustomObject(e: any): void {
-    const spaceObject = e.data as SpaceObject;
-    if (this.customObjects.includes(spaceObject)) return;
-    this.customObjects.push(spaceObject);
+  registerSpaceObject(spaceObject: SpaceObject): void {
+    console.log('registerSpaceObject', spaceObject);
+    if (this.spaceObjects.includes(spaceObject)) return;
+    this.spaceObjects.push(spaceObject);
     spaceObject.setGameContainer(this);
   }
 
-  deregisterCustomObject(spaceObject: SpaceObject): void {
-    const index = this.customObjects.indexOf(spaceObject);
+  deregisterSpaceObject(spaceObject: SpaceObject): void {
+    const index = this.spaceObjects.indexOf(spaceObject);
     if (index > -1) {
-      this.customObjects.splice(index, 1);
+      this.spaceObjects.splice(index, 1);
     }
   }
   //#endregion register object

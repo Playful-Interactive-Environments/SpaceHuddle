@@ -1,40 +1,28 @@
-import { SpaceObject } from '@/types/game/SpaceObject';
+import { SpaceObject } from '@/types/game/sprite/SpaceObject';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
-
-export interface SpaceContainer {
-  space: SpaceCalculator;
-}
+import GameContainerObject, {
+  GameContainerObjectType,
+  SpaceContainer,
+} from '@/types/game/GameContainerObject';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class SpaceCalculator implements SpaceObject {
+export default class SpaceCalculator
+  extends GameContainerObject
+  implements SpaceObject
+{
   private readonly defaultSize = 50;
-  pixiObject: PIXI.Container & SpaceContainer;
-
-  private gameContainer!: GameContainer;
 
   constructor(pixiObject: PIXI.Container & SpaceContainer) {
-    this.pixiObject = pixiObject;
-    this.pixiObject.space = this;
-    this.pixiObject.addEventListener('added', this.isAdded);
+    super(pixiObject, GameContainerObjectType.SPACE_OBJECT);
     this.calcDisplayWidth();
     this.calcDisplayHeight();
     this.calcDisplayX();
     this.calcDisplayY();
   }
 
-  destroy(): void {
-    if (this.gameContainer) this.gameContainer.deregisterCustomObject(this);
-    this.pixiObject.removeEventListener('added', this.isAdded);
-  }
-
   //#region properties
-  getRenderer(): PIXI.IRenderer | null {
-    if (this.gameContainer && this.gameContainer.app)
-      return this.gameContainer.app.renderer;
-    return null;
-  }
 
   private _width: number | undefined = undefined;
   get width(): number | undefined {
@@ -98,14 +86,6 @@ export default class SpaceCalculator implements SpaceObject {
   set y(value: number) {
     this._y = value;
     this.calcDisplayY();
-  }
-
-  get parent(): any {
-    return this.pixiObject.parent;
-  }
-
-  get children(): PIXI.DisplayObject[] {
-    return this.pixiObject.children;
   }
   //#endregion properties
 
@@ -198,26 +178,4 @@ export default class SpaceCalculator implements SpaceObject {
     this.calcDisplayY();
   }
   //#endregion calculate
-
-  //#region events
-  isAdded(container: any): void {
-    if (this.gameContainer) return;
-    setTimeout(() => {
-      const source = container.source;
-      if (source && Object.hasOwn(source, 'updatedColliderSize')) {
-        source.updatedColliderSize();
-      }
-      let parent = container;
-      while (parent.parent) {
-        parent = parent.parent;
-        if (Object.hasOwn(parent, 'gameContainer')) break;
-      }
-      const gameContainer = (parent as any).gameContainer as GameContainer;
-      if (gameContainer) {
-        const spaceContainer = this as any as SpaceContainer;
-        gameContainer.registerObject(spaceContainer.space);
-      }
-    }, 100);
-  }
-  //#endregion events
 }

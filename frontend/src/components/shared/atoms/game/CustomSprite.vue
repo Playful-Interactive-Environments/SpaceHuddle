@@ -21,7 +21,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
-import { SpaceObject } from '@/types/game/SpaceObject';
+import { SpaceObject } from '@/types/game/sprite/SpaceObject';
 import { EventType } from '@/types/enum/EventType';
 import {
   OutlineFilter,
@@ -185,7 +185,7 @@ export default class CustomSprite extends Vue implements SpaceObject {
   }
 
   unmounted(): void {
-    this.gameContainer.deregisterCustomObject(this);
+    this.gameContainer.deregisterSpaceObject(this);
   }
 
   setGameContainer(gameContainer: GameContainer): void {

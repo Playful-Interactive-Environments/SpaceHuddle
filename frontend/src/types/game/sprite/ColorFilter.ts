@@ -7,7 +7,7 @@ import {
 } from 'pixi-filters';
 import * as PIXI from 'pixi.js';
 import { until } from '@/utils/wait';
-import { SpriteConverter } from '@/types/game/SpriteConverter';
+import { SpriteConverter } from '@/types/game/sprite/SpriteConverter';
 
 export default class ColorFilter {
   preRenderFilters = true;
