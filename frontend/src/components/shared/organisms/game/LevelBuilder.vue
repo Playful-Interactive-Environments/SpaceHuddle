@@ -274,7 +274,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import LevelSettings from '@/components/shared/organisms/game/LevelSettings.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { ObjectSpaceType } from '@/types/enum/ObjectSpaceType';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import * as themeColors from '@/utils/themeColors';
 import { Idea } from '@/types/api/Idea';
@@ -312,7 +312,7 @@ interface LevelPlaceable extends placeable.Placeable, IGameObjectSource {}
 @Options({
   computed: {
     ObjectSpace() {
-      return ObjectSpace;
+      return ObjectSpaceType;
     },
     BackgroundMovement() {
       return BackgroundMovement;

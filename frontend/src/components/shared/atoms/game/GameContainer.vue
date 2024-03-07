@@ -104,7 +104,7 @@
             {{ region.region.text }}
           </text>
         </container>
-        <slot :itemProps="{ engine: engine, detector: detector }"></slot>
+        <slot :itemProps="{ engine: engine }"></slot>
         <container
           v-if="
             collisionBorders !== CollisionBorderType.None &&
@@ -251,7 +251,7 @@ import GameObject, {
 import { SpaceObject } from '@/types/game/sprite/SpaceObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { ObjectSpaceType } from '@/types/enum/ObjectSpaceType';
 import * as pixiUtil from '@/utils/pixi';
 import * as matterUtil from '@/utils/matter';
 import { getPolygonCenter } from '@/utils/polygon';
@@ -328,7 +328,6 @@ interface CollisionBounds {
   },
   emits: [
     'initEngine',
-    'initDetector',
     'initRenderer',
     'update:width',
     'update:height',
@@ -349,7 +348,6 @@ export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly useGravity!: boolean;
   @Prop({ default: [0, 1, 0] }) readonly gravity!: [number, number, number];
   @Prop({ default: 0 }) readonly windForce!: number;
-  @Prop({ default: false }) readonly useDetector!: boolean;
   @Prop({ default: false }) readonly useObjectPooling!: boolean;
   @Prop({ default: CollisionBorderType.Screen })
   readonly collisionBorders!: CollisionBorderType;
@@ -401,7 +399,6 @@ export default class GameContainer extends Vue {
   canvasPosition: [number, number] = [0, 0];
   engine!: typeof Matter.Engine;
   runner!: typeof Matter.Runner;
-  detector: typeof Matter.Detector | null = null;
   mouseConstraint!: typeof Matter.MouseConstraint;
   hierarchyObserver!: MutationObserver;
   //resizeObserver!: ResizeObserver;
@@ -1034,9 +1031,9 @@ export default class GameContainer extends Vue {
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground) {
         gameObject.initPosition();
-        if (gameObject.objectSpace === ObjectSpace.RelativeToBackground)
+        if (gameObject.objectSpace === ObjectSpaceType.RelativeToBackground)
           gameObject.updateOffset(this.gameObjectOffsetRelativeToBackground);
-        else if (gameObject.objectSpace === ObjectSpace.RelativeToScreen)
+        else if (gameObject.objectSpace === ObjectSpaceType.RelativeToScreen)
           gameObject.updateOffset(this.gameObjectOffsetRelativeToScreen);
       }
     }
@@ -1074,7 +1071,6 @@ export default class GameContainer extends Vue {
         );
         this.addToEngin(body);
         region.body = body;
-        if (this.detector && this.useDetector) this.detector.bodies.push(body);
         region.position = [
           x - this.backgroundPositionOffsetMax[0],
           y - this.backgroundPositionOffsetMax[1],
@@ -1126,9 +1122,9 @@ export default class GameContainer extends Vue {
   registerGameObject(gameObject: GameObject): void {
     if (this.gameObjects.includes(gameObject)) return;
     if (gameObject.moveWithBackground) {
-      if (gameObject.objectSpace === ObjectSpace.RelativeToBackground)
+      if (gameObject.objectSpace === ObjectSpaceType.RelativeToBackground)
         gameObject.initOffset(this.gameObjectOffsetRelativeToBackground);
-      else if (gameObject.objectSpace === ObjectSpace.RelativeToScreen)
+      else if (gameObject.objectSpace === ObjectSpaceType.RelativeToScreen)
         gameObject.initOffset(this.gameObjectOffsetRelativeToScreen);
     }
     this.gameObjects.push(gameObject);
@@ -1167,7 +1163,6 @@ export default class GameContainer extends Vue {
       gameObject.isPartOfEngin = false;
       this.removeFromEngin(gameObject.body);
     }
-    this.removeGameObjectFromDetector(gameObject);
     const index = this.gameObjects.indexOf(gameObject);
     if (index > -1) {
       this.gameObjects.splice(index, 1);
@@ -1181,7 +1176,6 @@ export default class GameContainer extends Vue {
   }
 
   registerSpaceObject(spaceObject: SpaceObject): void {
-    console.log('registerSpaceObject', spaceObject);
     if (this.spaceObjects.includes(spaceObject)) return;
     this.spaceObjects.push(spaceObject);
     spaceObject.setGameContainer(this);
@@ -1764,10 +1758,6 @@ export default class GameContainer extends Vue {
       deltaMax: 1000 / 15,
       deltaMin: 1000 / 90,
     });
-    if (this.useDetector) {
-      this.detector = Matter.Detector.create({ bodies: [] });
-      this.$emit('initDetector', this.detector);
-    }
     Matter.Runner.run(this.runner, this.engine);
     if (this.combinedActiveCollisionToChain) {
       const activeComposition = Matter.Composite.create();
@@ -1843,26 +1833,6 @@ export default class GameContainer extends Vue {
       }
     } catch (e) {
       //
-    }
-  }
-
-  addGameObjectToDetector(gameObject: GameObject): void {
-    if (
-      gameObject.bodyId > -1 &&
-      this.detector &&
-      this.useDetector &&
-      !this.detector.bodies.find((item) => item.id === gameObject.bodyId)
-    ) {
-      this.detector.bodies.push(gameObject.body);
-    }
-  }
-
-  removeGameObjectFromDetector(gameObject: GameObject): void {
-    if (gameObject.bodyId > -1 && this.detector && this.useDetector) {
-      const index = this.detector.bodies.findIndex(
-        (b) => b.id === gameObject.bodyId
-      );
-      if (index > -1) this.detector.bodies.splice(index, 1);
     }
   }
 
@@ -2265,7 +2235,7 @@ export default class GameContainer extends Vue {
     for (const gameObj of this.gameObjects) {
       if (
         gameObj.moveWithBackground &&
-        gameObj.objectSpace === ObjectSpace.RelativeToBackground
+        gameObj.objectSpace === ObjectSpaceType.RelativeToBackground
       )
         gameObj.updateOffset(
           this.gameObjectOffsetRelativeToBackground,
@@ -2275,7 +2245,7 @@ export default class GameContainer extends Vue {
         );
       else if (
         gameObj.moveWithBackground &&
-        gameObj.objectSpace === ObjectSpace.RelativeToScreen
+        gameObj.objectSpace === ObjectSpaceType.RelativeToScreen
       )
         gameObj.updateOffset(
           this.gameObjectOffsetRelativeToScreen,

@@ -489,7 +489,7 @@ import GameContainer, {
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { ObjectSpaceType } from '@/types/enum/ObjectSpaceType';
 import { delay, until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import * as votingService from '@/services/voting-service';
@@ -685,7 +685,7 @@ interface ColorValues {
 @Options({
   computed: {
     ObjectSpace() {
-      return ObjectSpace;
+      return ObjectSpaceType;
     },
     BackgroundPosition() {
       return BackgroundPosition;

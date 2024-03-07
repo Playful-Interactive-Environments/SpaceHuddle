@@ -260,7 +260,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { ObjectSpaceType } from '@/types/enum/ObjectSpaceType';
 import { until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -282,7 +282,7 @@ enum PlayStateType {
 @Options({
   computed: {
     ObjectSpace() {
-      return ObjectSpace;
+      return ObjectSpaceType;
     },
   },
   components: {

@@ -9,7 +9,7 @@ import GameContainer, {
   BackgroundMovement,
   CollisionRegion,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { ObjectSpaceType } from '@/types/enum/ObjectSpaceType';
 import { delay, until } from '@/utils/wait';
 import { GrayscaleFilter } from 'pixi-filters';
 import { toDegrees, toRadians } from '@/utils/angle';
@@ -61,7 +61,7 @@ export default class GameObject extends Vue {
   @Prop({ default: null }) fixSize!: [number, number] | number | null;
   @Prop({ default: 0 }) angle!: number;
   @Prop({ default: 1 }) scale!: number;
-  @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
+  @Prop({ default: ObjectSpaceType.Absolute }) objectSpace!: ObjectSpaceType;
   @Prop({ default: 'rect' }) readonly shape!: 'rect' | 'circle' | 'polygon';
   @Prop({ default: [] }) readonly polygonShape!: [number, number][];
   @Prop({ default: 0 }) readonly colliderDelta!: number;
@@ -137,7 +137,7 @@ export default class GameObject extends Vue {
 
   get possibleSpace(): [number, number] {
     if (
-      this.objectSpace === ObjectSpace.RelativeToScreen &&
+      this.objectSpace === ObjectSpaceType.RelativeToScreen &&
       this.gameContainer
     ) {
       return [
@@ -145,7 +145,7 @@ export default class GameObject extends Vue {
         this.gameContainer.gameDisplayHeight,
       ];
     } else if (
-      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.objectSpace === ObjectSpaceType.RelativeToBackground &&
       this.gameContainer
     ) {
       return [
@@ -245,11 +245,11 @@ export default class GameObject extends Vue {
       'container',
       {
         mask: this.mask,
-        x: this.position[0] - this.offset[0],
-        y: this.position[1] - this.offset[1],
+        x: this.displayX,
+        y: this.displayY,
         rotation: this.rotation,
         scale: this.scale,
-        filter: this.filter,
+        filters: this.filter,
         onRender: this.onRender,
         onAdded: this.isAdded,
         source: this,
@@ -309,8 +309,8 @@ export default class GameObject extends Vue {
             if (!testOffset(offset[0], offsetCircle[1])) {
               if (!testOffset(offsetCircle[0], offsetCircle[1])) {
                 Matter.Body.setPosition(this.body, {
-                  x: this.position[0] - this.offset[0],
-                  y: this.position[1] - this.offset[1],
+                  x: this.displayX,
+                  y: this.displayY,
                 });
               }
             }
@@ -318,8 +318,8 @@ export default class GameObject extends Vue {
         }
       } else {
         Matter.Body.setPosition(this.body, {
-          x: this.position[0] - this.offset[0],
-          y: this.position[1] - this.offset[1],
+          x: this.displayX,
+          y: this.displayY,
         });
       }
       if (this.boundsGraphic) this.drawBorder();
@@ -330,7 +330,6 @@ export default class GameObject extends Vue {
     this.gameContainer = gameContainer;
     this.initPosition();
     //this.manageEngin();
-    this.addBodyToDetector();
   }
 
   kill(): void {
@@ -492,7 +491,6 @@ export default class GameObject extends Vue {
     this.body = body;
     if (this.clickable) {
       this.manageEngin();
-      this.addBodyToDetector();
     }
     this.$emit('initialised', this);
     this.loadingFinished = true;
@@ -542,7 +540,6 @@ export default class GameObject extends Vue {
       this.onScaleChanged();
       if (this.clickable) {
         this.manageEngin();
-        this.addBodyToDetector();
       }
       this.$emit('initialised', this);
     }
@@ -556,12 +553,6 @@ export default class GameObject extends Vue {
       const isVisible = this.isVisible(this.displayWidth * 3);
       this.body.isStatic = !isVisible || this.isStatic;
       //Matter.Sleeping.set(this.body, !isVisible);
-    }
-  }
-
-  addBodyToDetector(): void {
-    if (this.gameContainer && this.gameContainer.detector && this.body) {
-      this.gameContainer.addGameObjectToDetector(this);
     }
   }
   //#endregion engine
@@ -601,7 +592,7 @@ export default class GameObject extends Vue {
     if (x === null) x = this.posX;
     if (y === null) y = this.posY;
     if (
-      this.objectSpace === ObjectSpace.RelativeToScreen &&
+      this.objectSpace === ObjectSpaceType.RelativeToScreen &&
       this.gameContainer
     ) {
       this.position = [
@@ -609,7 +600,7 @@ export default class GameObject extends Vue {
         (y / 100) * this.gameContainer.gameDisplayHeight,
       ];
     } else if (
-      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.objectSpace === ObjectSpaceType.RelativeToBackground &&
       this.gameContainer
     ) {
       this.position = [
@@ -621,21 +612,21 @@ export default class GameObject extends Vue {
     }
     if (this.body) {
       Matter.Body.setPosition(this.body, {
-        x: this.position[0] - this.offset[0],
-        y: this.position[1] - this.offset[1],
+        x: this.displayX,
+        y: this.displayY,
       });
       if (this.boundsGraphic) this.drawBorder();
     }
   }
 
   get inputPosition(): [number, number] {
-    if (this.objectSpace === ObjectSpace.RelativeToScreen && this.gameContainer)
+    if (this.objectSpace === ObjectSpaceType.RelativeToScreen && this.gameContainer)
       return [
         (this.position[0] / this.gameContainer.gameWidth) * 100,
         (this.position[1] / this.gameContainer.gameDisplayHeight) * 100,
       ];
     if (
-      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.objectSpace === ObjectSpaceType.RelativeToBackground &&
       this.gameContainer
     )
       return [
@@ -667,8 +658,8 @@ export default class GameObject extends Vue {
   @Watch('position', { immediate: true, deep: true })
   @Watch('offset', { immediate: true, deep: true })
   onPositionChanged(): void {
-    this.x = this.position[0] - this.offset[0];
-    this.y = this.position[1] - this.offset[1];
+    this.x = this.displayX;
+    this.y = this.displayY;
   }
 
   updatePosition(position: [number, number]): void {

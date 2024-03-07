@@ -214,11 +214,11 @@ export default class ColorFilter {
       }
       const preRenderTimeStamp = Date.now();
       this.preRenderTimeStamp = preRenderTimeStamp;
-      await until(() => this.sprite.space.getRenderer());
+      await until(() => this.sprite.gameContainerObject.getRenderer());
       if (preRenderTimeStamp !== this.preRenderTimeStamp) {
         return;
       }
-      const renderer = this.sprite.space.getRenderer();
+      const renderer = this.sprite.gameContainerObject.getRenderer();
       if (!this.baseTexture) this.baseTexture = this.sprite.texture;
       const sprite = new PIXI.Sprite(this.baseTexture);
       sprite.width = this.baseTexture.orig.width;

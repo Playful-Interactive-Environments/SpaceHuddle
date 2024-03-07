@@ -1,68 +1,79 @@
 import * as PIXI from 'pixi.js';
-import SpaceCalculator, {
-  SpaceContainer,
-} from '@/types/game/sprite/SpaceCalculator';
+import SpaceCalculator from '@/types/game/sprite/SpaceCalculator';
+import { IGameContainerObject } from '@/types/game/GameContainerObject';
 import ColorFilter from '@/types/game/sprite/ColorFilter';
 import { v4 as uuidv4 } from 'uuid';
+import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 
-export class SpriteConverter extends PIXI.Sprite implements SpaceContainer {
+export class SpriteConverter
+  extends PIXI.Sprite
+  implements IGameContainerObject
+{
   uuid: string;
-  space: SpaceCalculator;
+  gameContainerObject: SpaceCalculator;
   colorFilter: ColorFilter;
 
   constructor(texture?: PIXI.Texture) {
     super(texture);
-    this.space = new SpaceCalculator(this);
+    this.gameContainerObject = new SpaceCalculator(this);
     this.colorFilter = new ColorFilter(this);
     this.uuid = uuidv4();
   }
 
+  private _isDestroyed = false;
   destroy(options?) {
-    this.space.destroy();
-    super.destroy(options);
+    if (!this._isDestroyed) {
+      this._isDestroyed = true;
+      this.gameContainerObject.destroy(options);
+      super.destroy(options);
+    }
+  }
+
+  setGameContainer(gameContainer: GameContainer): void {
+    this.gameContainerObject.setGameContainer(gameContainer);
   }
 
   //#region properties
   get spaceX() {
-    return this.space.x;
+    return this.gameContainerObject.x;
   }
   set spaceX(value) {
-    this.space.x = value;
+    this.gameContainerObject.x = value;
   }
 
   get spaceY() {
-    return this.space.y;
+    return this.gameContainerObject.y;
   }
   set spaceY(value) {
-    this.space.y = value;
+    this.gameContainerObject.y = value;
   }
 
   get spaceWidth() {
-    return this.space.width;
+    return this.gameContainerObject.width;
   }
   set spaceWidth(value) {
-    this.space.width = value;
+    this.gameContainerObject.width = value;
   }
 
   get spaceHeight() {
-    return this.space.height;
+    return this.gameContainerObject.height;
   }
   set spaceHeight(value) {
-    this.space.height = value;
+    this.gameContainerObject.height = value;
   }
 
   get objectSpace() {
-    return this.space.objectSpace;
+    return this.gameContainerObject.objectSpace;
   }
   set objectSpace(value) {
-    this.space.objectSpace = value;
+    this.gameContainerObject.objectSpace = value;
   }
 
   get aspectRation() {
-    return this.space.aspectRation;
+    return this.gameContainerObject.aspectRation;
   }
   set aspectRation(value) {
-    this.space.aspectRation = value;
+    this.gameContainerObject.aspectRation = value;
   }
 
   get preRenderFilters() {

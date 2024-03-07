@@ -1,10 +1,10 @@
 import { SpaceObject } from '@/types/game/sprite/SpaceObject';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { ObjectSpaceType } from '@/types/enum/ObjectSpaceType';
 import GameContainerObject, {
   GameContainerObjectType,
-  SpaceContainer,
+  IGameContainerObject,
 } from '@/types/game/GameContainerObject';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -14,7 +14,7 @@ export default class SpaceCalculator
 {
   private readonly defaultSize = 50;
 
-  constructor(pixiObject: PIXI.Container & SpaceContainer) {
+  constructor(pixiObject: PIXI.Container & IGameContainerObject) {
     super(pixiObject, GameContainerObjectType.SPACE_OBJECT);
     this.calcDisplayWidth();
     this.calcDisplayHeight();
@@ -44,12 +44,12 @@ export default class SpaceCalculator
     this.calcDisplayHeight();
   }
 
-  private _objectSpace: ObjectSpace = ObjectSpace.Absolute;
-  get objectSpace(): ObjectSpace {
+  private _objectSpace: ObjectSpaceType = ObjectSpaceType.Absolute;
+  get objectSpace(): ObjectSpaceType {
     return this._objectSpace;
   }
 
-  set objectSpace(value: ObjectSpace) {
+  set objectSpace(value: ObjectSpaceType) {
     this._objectSpace = value;
     this.calcDisplayWidth();
     this.calcDisplayHeight();
@@ -97,12 +97,12 @@ export default class SpaceCalculator
       value = this.height * this.aspectRation;
 
     if (
-      this.objectSpace === ObjectSpace.RelativeToScreen &&
+      this.objectSpace === ObjectSpaceType.RelativeToScreen &&
       this.gameContainer
     ) {
       value = (value / 100) * this.gameContainer.gameWidth;
     } else if (
-      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.objectSpace === ObjectSpaceType.RelativeToBackground &&
       this.gameContainer
     ) {
       value = (value / 100) * this.gameContainer.backgroundTextureSize[0];
@@ -118,12 +118,12 @@ export default class SpaceCalculator
       value = this.width / this.aspectRation;
 
     if (
-      this.objectSpace == ObjectSpace.RelativeToScreen &&
+      this.objectSpace == ObjectSpaceType.RelativeToScreen &&
       this.gameContainer
     ) {
       value = (value / 100) * this.gameContainer.gameWidth;
     } else if (
-      this.objectSpace == ObjectSpace.RelativeToBackground &&
+      this.objectSpace == ObjectSpaceType.RelativeToBackground &&
       this.gameContainer
     ) {
       value = (value / 100) * this.gameContainer.backgroundTextureSize[0];
@@ -135,12 +135,12 @@ export default class SpaceCalculator
   calcDisplayX(): number {
     let value = this.x;
     if (
-      this.objectSpace == ObjectSpace.RelativeToScreen &&
+      this.objectSpace == ObjectSpaceType.RelativeToScreen &&
       this.gameContainer
     ) {
       value = (this.x / 100) * this.gameContainer.gameWidth;
     } else if (
-      this.objectSpace == ObjectSpace.RelativeToBackground &&
+      this.objectSpace == ObjectSpaceType.RelativeToBackground &&
       this.gameContainer
     ) {
       value = (this.x / 100) * this.gameContainer.backgroundTextureSize[0];
@@ -152,12 +152,12 @@ export default class SpaceCalculator
   calcDisplayY(): number {
     let value = this.y;
     if (
-      this.objectSpace === ObjectSpace.RelativeToScreen &&
+      this.objectSpace === ObjectSpaceType.RelativeToScreen &&
       this.gameContainer
     ) {
       value = (this.y / 100) * this.gameContainer.gameWidth;
     } else if (
-      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.objectSpace === ObjectSpaceType.RelativeToBackground &&
       this.gameContainer
     ) {
       value = (this.y / 100) * this.gameContainer.backgroundTextureSize[0];

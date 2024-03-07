@@ -6,28 +6,37 @@ export enum GameContainerObjectType {
   SPACE_OBJECT = 'space_object',
 }
 
-export interface SpaceContainer {
-  space: GameContainerObject;
+export interface IGameContainerObject {
+  gameContainerObject: GameContainerObject;
+  setGameContainer(gameContainer: GameContainer): void;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class GameContainerObject {
-  pixiObject: PIXI.Container & SpaceContainer;
+  pixiObject: PIXI.Container & IGameContainerObject;
 
-  protected gameContainer!: GameContainer;
+  gameContainer!: GameContainer;
   readonly gameContainerObjectType: GameContainerObjectType;
 
+  isAddedCall: (container) => void;
+  isRemovedCall: (container) => void;
+
   constructor(
-    pixiObject: PIXI.Container & SpaceContainer,
+    pixiObject: PIXI.Container & IGameContainerObject,
     gameContainerObjectType: GameContainerObjectType
   ) {
     this.gameContainerObjectType = gameContainerObjectType;
     this.pixiObject = pixiObject;
-    this.pixiObject.space = this;
-    this.pixiObject.addEventListener('added', this.isAdded);
+    this.pixiObject.gameContainerObject = this;
+    const space = this as any;
+    this.isAddedCall = (container) => space.isAdded(container);
+    this.pixiObject.addEventListener('added', this.isAddedCall);
+    this.isRemovedCall = (container) => space.isRemoved(container);
+    this.pixiObject.addEventListener('removed', this.isRemovedCall);
   }
 
-  destroy(): void {
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  destroy(options?): void {
     if (this.gameContainer) {
       switch (this.gameContainerObjectType) {
         case GameContainerObjectType.GAME_OBJECT:
@@ -38,7 +47,8 @@ export default class GameContainerObject {
           break;
       }
     }
-    this.pixiObject.removeEventListener('added', this.isAdded);
+    this.pixiObject.removeEventListener('added', this.isAddedCall);
+    this.pixiObject.removeEventListener('removed', this.isRemovedCall);
   }
 
   //#region properties
@@ -58,7 +68,6 @@ export default class GameContainerObject {
   //#endregion properties
 
   //#region calculate
-
   setGameContainer(gameContainer: GameContainer): void {
     this.gameContainer = gameContainer;
   }
@@ -79,18 +88,23 @@ export default class GameContainerObject {
       }
       const gameContainer = (parent as any).gameContainer as GameContainer;
       if (gameContainer) {
-        const spaceContainer = this as any as SpaceContainer;
-        console.log('isAdded', container, this, spaceContainer, spaceContainer.space.gameContainerObjectType);
-        switch (spaceContainer.space.gameContainerObjectType) {
+        this.pixiObject.setGameContainer(gameContainer);
+        switch (this.gameContainerObjectType) {
           case GameContainerObjectType.GAME_OBJECT:
-            this.gameContainer.registerGameObject(spaceContainer.space as any);
+            gameContainer.registerGameObject(this as any);
             break;
           case GameContainerObjectType.SPACE_OBJECT:
-            this.gameContainer.registerSpaceObject(spaceContainer.space as any);
+            gameContainer.registerSpaceObject(this as any);
             break;
         }
+        this.pixiObject.removeEventListener('added', this.isAddedCall);
       }
     }, 100);
+  }
+
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  isRemoved(container: any): void {
+    this.pixiObject.destroy({ children: true });
   }
   //#endregion events
 }

@@ -147,7 +147,6 @@
                 category: 0b0010,
               },
             }"
-            :render-delay="100"
             @sizeChanged="containerSizeChanged"
           >
             <sprite
