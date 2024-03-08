@@ -518,7 +518,6 @@ import { VoteParameterResult } from '@/types/api/Vote';
 import globalWarmingParticle from '@/modules/playing/coolit/data/globalWarming.json';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import { Doughnut } from 'vue-chartjs';
-import {getDarkBlueLightColor} from "@/utils/themeColors";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 enum DifficultyLevel {

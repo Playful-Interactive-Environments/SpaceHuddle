@@ -359,7 +359,7 @@
         {{ $t('module.playing.moveit.participant.drivingStats.time') }} :
         {{ calculateTime() }}s
       </h2>
-      <el-button type="submit" @click="endGame">Continue</el-button>
+      <el-button native-type="submit" @click="endGame">Continue</el-button>
     </div>
   </div>
   <!--<img v-if="streetMask" :src="streetMask" class="streetMask" />-->

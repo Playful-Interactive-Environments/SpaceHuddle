@@ -28,7 +28,7 @@
             :polygon-shape="placeable.polygonShape"
             :collider-delta="colliderDelta"
             :show-bounds="false"
-            :anchor="placeable.pivot"
+            :objectAnchor="placeable.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
             :posX="placeable.position[0]"
             :posY="placeable.position[1]"
@@ -42,7 +42,8 @@
             }"
             :source="placeable"
             :use-physic="false"
-            @positionChanged="placeablePositionChanged"
+            :zIndex="placeable.zIndex"
+            @position_changed="placeablePositionChanged"
           >
             <SpriteConverter
               :texture="placeable.texture"
@@ -261,7 +262,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import * as PIXI from 'pixi.js';
 import GameObject, {
   IGameObjectSource,
-} from '@/components/shared/atoms/game/GameObject.vue';
+} from '@/types/game/gameObject/GameObject';
 import GameContainer, {
   BackgroundMovement,
   CollisionBorderType,
@@ -464,12 +465,12 @@ export default class LevelBuilder extends Vue {
   }
 
   get selectionMaskX(): number {
-    if (this.selectedObject) return this.selectedObject.displayX;
+    if (this.selectedObject) return this.selectedObject.transformation.displayX;
     return 0;
   }
 
   get selectionMaskY(): number {
-    if (this.selectedObject) return this.selectedObject.displayY;
+    if (this.selectedObject) return this.selectedObject.transformation.displayY;
     return 0;
   }
 
@@ -479,14 +480,14 @@ export default class LevelBuilder extends Vue {
   }
 
   get selectionMaskScale(): number {
-    if (this.selectedObject) return this.selectedObject.scale;
+    if (this.selectedObject) return this.selectedObject.scale.x;
     return 0;
   }
 
   updateSelectionMask(): void {
     if (this.selectedObject && this.selectionMaskGraphic) {
-      const width = this.selectedObject.displayWidth;
-      const height = this.selectedObject.displayHeight;
+      const width = this.selectedObject.transformation.displayWidth;
+      const height = this.selectedObject.transformation.displayHeight;
 
       if (this.selectedObject.shape === 'rect') {
         this.selectionMaskGraphic.clear();
@@ -577,9 +578,9 @@ export default class LevelBuilder extends Vue {
     const sceneItems = this.renderList.map((obj) => {
       const saveObj = placeable.convertToBase(obj);
       if (obj.gameObject) {
-        saveObj.position = obj.gameObject.inputPosition;
-        saveObj.rotation = obj.gameObject.inputAngle;
-        saveObj.scale = obj.gameObject.inputScale;
+        saveObj.position = obj.gameObject.transformation.inputPosition;
+        saveObj.rotation = obj.gameObject.angle;
+        saveObj.scale = obj.gameObject.scale.x;
       }
       return saveObj;
     });
@@ -704,6 +705,7 @@ export default class LevelBuilder extends Vue {
             this.getTexture(item.type, item.name)
           )
         );
+      this.updateZIndex();
       this.loadedLevelType = levelType;
       this.loadedLevel = this.level;
       this.cacheSavedItems();
@@ -720,9 +722,9 @@ export default class LevelBuilder extends Vue {
     const items = this.renderList.map((obj) => {
       const saveObj = placeable.convertToBase(obj);
       if (obj.gameObject) {
-        saveObj.position = obj.gameObject.inputPosition;
-        saveObj.rotation = obj.gameObject.inputAngle;
-        saveObj.scale = obj.gameObject.inputScale;
+        saveObj.position = obj.gameObject.transformation.inputPosition;
+        saveObj.rotation = obj.gameObject.angle;
+        saveObj.scale = obj.gameObject.scale.x;
       }
       return saveObj;
     });
@@ -836,8 +838,10 @@ export default class LevelBuilder extends Vue {
           scale: 1,
           placingRegions: configParameter.placingRegions,
           saturation: 1,
+          zIndex: this.placedObjects.length,
         };
         this.placedObjects.push(placeable);
+        this.updateZIndex();
       }
     }, 100);
   }
@@ -933,6 +937,7 @@ export default class LevelBuilder extends Vue {
   placeablePositionChanged(position: [number, number]): void {
     if (this.selectedObject && this.selectedObject.source) {
       const selectedSource = this.selectedObject.source as LevelPlaceable;
+      selectedSource.position = position;
       const texture = this.getTexture(
         selectedSource.type,
         selectedSource.name
@@ -953,7 +958,7 @@ export default class LevelBuilder extends Vue {
         newPosition[0] !== previousPosition[0] ||
         newPosition[1] !== previousPosition[1]
       ) {
-        this.selectedObject.updatePosition([...newPosition]);
+        this.selectedObject.transformation.updatePosition([...newPosition]);
       }
     }
   }
@@ -1016,11 +1021,6 @@ export default class LevelBuilder extends Vue {
   }
 
   get renderList(): LevelPlaceable[] {
-    const getSortNumber = (placeable: LevelPlaceable): number => {
-      if (this.customSortOrder) return this.customSortOrder(placeable);
-      return this.gameConfig[this.levelType].categories[placeable.type].settings
-        .order;
-    };
     if (this.customScaleFactor || this.customSaturation) {
       for (const placeable of this.placedObjects) {
         if (this.customScaleFactor) {
@@ -1031,12 +1031,24 @@ export default class LevelBuilder extends Vue {
         }
       }
     }
-    if (this.levelType) {
-      return this.placedObjects.sort(
+    this.updateZIndex();
+    return this.placedObjects;
+  }
+
+  updateZIndex(): void {
+    const getSortNumber = (placeable: LevelPlaceable): number => {
+      if (this.customSortOrder) return this.customSortOrder(placeable);
+      return this.gameConfig[this.levelType].categories[placeable.type].settings
+        .order;
+    };
+    if (this.levelType && this.customSortOrder) {
+      const orderedList = [...this.placedObjects].sort(
         (a, b) => getSortNumber(a) - getSortNumber(b)
       );
+      for (let i = 0; i < orderedList.length; i++) {
+        orderedList[i].zIndex = i;
+      }
     }
-    return this.placedObjects;
   }
 
   copyToClipboard(): void {
@@ -1082,6 +1094,7 @@ export default class LevelBuilder extends Vue {
                       this.getTexture(item.type, item.name)
                     )
                   );
+                this.updateZIndex();
               })
               .catch(() => {
                 //

@@ -4,7 +4,7 @@ import {
   patchProp as defuPatchProp,
 } from 'vue3-pixi';
 import * as PIXI from 'pixi.js';
-import { GameObject as GameObjectTest } from '@/types/game/gameObject/GameObject';
+import GameObject from '@/types/game/gameObject/GameObject';
 import { SpriteConverter } from '@/types/game/sprite/SpriteConverter';
 import ParticlePlayer from '@/types/game/ParticlePlayer';
 
@@ -17,9 +17,9 @@ const ContainerRender: RendererOptions = {
 };
 
 const GameObjectRender: RendererOptions = {
-  name: 'GameObjectTest',
+  name: 'GameObject',
   createElement: () => {
-    return new GameObjectTest();
+    return new GameObject();
   },
 };
 

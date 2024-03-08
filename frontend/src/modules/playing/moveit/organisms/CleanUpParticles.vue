@@ -147,7 +147,7 @@
                 category: 0b0010,
               },
             }"
-            @sizeChanged="containerSizeChanged"
+            @size_changed="containerSizeChanged"
           >
             <sprite
               :anchor="0.5"
@@ -186,14 +186,15 @@
             }"
             :keep-inside="false"
             :source="particle"
-            :anchor="0.5"
+            :objectAnchor="0.5"
             :collision-handler="particleCollisionHandler"
             :sleep-if-not-visible="true"
             :pooling-key="particle.name"
-            @notifyCollision="particleCollected"
-            @destroyObject="destroyParticle"
-            @outsideDrawingSpace="outsideDrawingSpace"
-            @isPartOfChainChanged="isPartOfChainChanged"
+            @notify_collision="particleCollected"
+            @destroy_object="destroyParticle"
+            @outside_drawing_space="outsideDrawingSpace"
+            @is_part_of_chain_changed="isPartOfChainChanged"
+            @highlighted_changed="highlightedChanged"
           >
             <!--<SpriteConverter
               v-if="getParticleTexture(particle.name)"
@@ -214,13 +215,13 @@
               :height="particleRadius * 2"
             />
             <sprite
-              v-if="circleOutlineTexture"
+              v-if="circleOutlineTexture && particle.gameObject"
               :texture="circleOutlineTexture"
               :anchor="0.5"
               :width="particleRadius * 2"
               :height="particleRadius * 2"
               :tint="0xff0000"
-              :alpha="particle.gameObject.highlighted ? 1 : 0"
+              :alpha="particle.highlighted ? 1 : 0"
             />
           </GameObject>
         </container>
@@ -237,7 +238,7 @@ import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
 import GameObject, {
   IGameObjectSource,
-} from '@/components/shared/atoms/game/GameObject.vue';
+} from '@/types/game/gameObject/GameObject';
 import { Chart } from 'chart.js';
 import { ParticleCollisionHandler } from '@/modules/playing/moveit/types/ParticleCollisionHandler';
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -267,6 +268,7 @@ interface DrawingParticle extends IGameObjectSource {
   group: number;
   color: string;
   position: [number, number];
+  highlighted: boolean;
 }
 
 interface DatasetData {
@@ -322,6 +324,7 @@ export default class CleanUpParticles extends Vue {
   interval = -1;
   activeValue = 0;
   cleanupParticles: DrawingParticle[] = [];
+  activeParticle: DrawingParticle[] = [];
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleStateExtended } = {};
   renderer!: PIXI.Renderer;
@@ -397,9 +400,9 @@ export default class CleanUpParticles extends Vue {
     return color.toString();
   }
 
-  get activeParticle(): DrawingParticle[] {
-    return this.cleanupParticles.filter(
-      (item) => !item.gameObject || !item.gameObject.isSleeping
+  calculateActiveParticle(): void {
+    this.activeParticle = this.cleanupParticles.filter(
+      (item) => !item.gameObject || !item.gameObject.physcics.isSleeping
     );
   }
 
@@ -555,6 +558,7 @@ export default class CleanUpParticles extends Vue {
 
   updatedLoop(): void {
     if (this.loading) return;
+    this.calculateActiveParticle();
     this.activeValue++;
     if (this.activeValue <= this.normalizedTrackingData.length) {
       this.loadActiveParticle();
@@ -641,7 +645,7 @@ export default class CleanUpParticles extends Vue {
         const poolParticle = this.cleanupParticles.find(
           (item) =>
             item.gameObject &&
-            item.gameObject.readyForReuse() &&
+            item.gameObject.physcics.readyForReuse() &&
             item.name === dataset.name
         );
         if (!poolParticle) {
@@ -657,10 +661,11 @@ export default class CleanUpParticles extends Vue {
               this.particleBorder + this.particleRadius,
             ],
             gameObject: null,
+            highlighted: false,
           };
           this.cleanupParticles.push(particle);
         } else {
-          poolParticle.gameObject?.activateFromPool([
+          poolParticle.gameObject?.physcics.activateFromPool([
             Math.random() * (this.gameWidth - this.particleRadius * 2) +
               this.particleRadius,
             this.particleBorder + this.particleRadius,
@@ -726,22 +731,13 @@ export default class CleanUpParticles extends Vue {
   }
 
   particleCollected(particleObject: GameObject): void {
-    if (particleObject.isSleeping) return;
-    if (particleObject.source) {
-      particleObject.source.gameObject = particleObject;
-      particleObject.moveToPool();
-    }
+    if (particleObject.physcics.isSleeping) return;
+    particleObject.physcics.moveToPool();
     this.particleState[particleObject.options.name as string].collectedCount++;
   }
 
   outsideDrawingSpace(particleObject: GameObject): void {
-    if (particleObject.source) {
-      particleObject.source.gameObject = particleObject;
-      particleObject.moveToPool();
-    }
-    /*const particle = particleObject.source as DrawingParticle;
-    const index = this.cleanupParticles.indexOf(particle);
-    if (index > -1) this.cleanupParticles.splice(index, 1);*/
+    particleObject.physcics.moveToPool();
     this.particleState[particleObject.options.name as string].outsideCount++;
   }
 
@@ -749,11 +745,13 @@ export default class CleanUpParticles extends Vue {
     particleObject: GameObject,
     isPartOfChain: boolean
   ): void {
-    if (particleObject.body) {
+    if (particleObject.physcics.body) {
       if (isPartOfChain)
-        particleObject.body.collisionFilter.mask =
+        particleObject.physcics.body.collisionFilter.mask =
           this.particleCategory | this.boarderDisabledCategory;
-      else particleObject.body.collisionFilter.mask = this.particleCategory;
+      else
+        particleObject.physcics.body.collisionFilter.mask =
+          this.particleCategory;
     }
   }
 
@@ -807,6 +805,11 @@ export default class CleanUpParticles extends Vue {
         this.updateChart();
       }, 1000);
     }
+  }
+
+  highlightedChanged(value: boolean, gameObject: GameObject): void {
+    const drawingParticle = gameObject.source as DrawingParticle;
+    drawingParticle.highlighted = value;
   }
 }
 </script>

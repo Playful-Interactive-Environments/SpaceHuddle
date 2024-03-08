@@ -33,6 +33,7 @@
       :waitForDataLoad="waitForDataLoad"
       :endless-panning="!gameOver"
       :use-pre-calculation="!gameOver"
+      :showRegionText="false"
     >
       <template v-slot:preRender>
         <container v-if="gameWidth && obstacleList.length > 0">
@@ -42,7 +43,7 @@
             :shape="obstacle.shape"
             :polygon-shape="obstacle.polygonShape"
             :show-bounds="false"
-            :anchor="obstacle.pivot"
+            :objectAnchor="obstacle.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
             :posX="obstacle.position[0]"
             :posY="obstacle.position[1]"
@@ -170,8 +171,8 @@
               :keep-inside="false"
               @collision="rayCollision"
               @initialised="rayInitialised"
-              @initError="rayInitError"
-              @outsideDrawingSpace="leaveAtmosphere"
+              @init_error="rayInitError"
+              @outside_drawing_space="leaveAtmosphere"
             >
               <container v-if="!ray.hit">
                 <sprite
@@ -240,9 +241,9 @@
                   return object.position[1] > gameHeight / 3 * 2;
                 }
               }"
-              @click="moleculeClicked"
+              @hold="moleculeClicked"
               @release="moduleReleased"
-              @visibilityChanged="
+              @visibility_changed="
                 (visibility) => (molecule.isVisible = visibility)
               "
             >
@@ -480,7 +481,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import GameObject, {
   FastObjectBehaviour,
   IGameObjectSource,
-} from '@/components/shared/atoms/game/GameObject.vue';
+} from '@/types/game/gameObject/GameObject';
 import GameContainer, {
   BackgroundMovement,
   BackgroundPosition,
@@ -1454,11 +1455,11 @@ export default class PlayLevel extends Vue {
     if (reactiveMolecule) {
       this.updatedMolecule(reactiveMolecule, moleculeName);
       const gameObject = reactiveMolecule.gameObject;
-      if (gameObject && gameObject.body) {
-        matterUtil.resetBody(gameObject.body);
-        gameObject.body.collisionFilter.category =
+      if (gameObject && gameObject.physcics.body) {
+        matterUtil.resetBody(gameObject.physcics.body);
+        gameObject.physcics.body.collisionFilter.category =
           this.getMoleculeCategory(moleculeName);
-        gameObject.body.collisionFilter.mask =
+        gameObject.physcics.body.collisionFilter.mask =
           this.getMoleculeMask(moleculeName);
       }
       reactiveMolecule.position = position;
@@ -1551,6 +1552,7 @@ export default class PlayLevel extends Vue {
       emits: configParameter.emits,
       options: this.getObstacleTypeOptions(result.type, result.name),
       hits: [],
+      zIndex: 0,
     };
   }
 
@@ -1942,7 +1944,9 @@ export default class PlayLevel extends Vue {
   ): void {
     const poolRay = this.rayList.find(
       (item) =>
-        item.gameObject && item.gameObject.readyForReuse() && item.initialised
+        item.gameObject &&
+        item.gameObject.physcics.readyForReuse() &&
+        item.initialised
     );
     if (poolRay) {
       if (!checkInit || poolRay.type !== rayType) {
@@ -1960,14 +1964,14 @@ export default class PlayLevel extends Vue {
           poolRay.displayPoints[i].y = 0;
         }
         poolRay.hit = false;
-        if (poolRay.gameObject?.body) {
+        if (poolRay.gameObject?.physcics.body) {
           const options = this.getRayTypeOptions(poolRay.type);
-          (poolRay.gameObject.body as any).name = options.name;
-          poolRay.gameObject.body.collisionFilter.mask =
+          (poolRay.gameObject.physcics.body as any).name = options.name;
+          poolRay.gameObject.physcics.body.collisionFilter.mask =
             options.collisionFilter.mask;
-          poolRay.gameObject.body.collisionFilter.category =
+          poolRay.gameObject.physcics.body.collisionFilter.category =
             options.collisionFilter.category;
-          Matter.Body.setInertia(poolRay.gameObject.body, Infinity);
+          Matter.Body.setInertia(poolRay.gameObject.physcics.body, Infinity);
         }
       }
       poolRay.angle = rayAngle;
@@ -1975,7 +1979,7 @@ export default class PlayLevel extends Vue {
       poolRay.direction = movingDirection;
       poolRay.startTime = Date.now();
       if (poolRay.gameObject)
-        poolRay.gameObject.activateFromPool(rayBodyPosition);
+        poolRay.gameObject.physcics.activateFromPool(rayBodyPosition);
       this.calculateRayVelocity(poolRay);
     }
   }
@@ -1999,8 +2003,8 @@ export default class PlayLevel extends Vue {
   async rayInitialised(item: GameObject): Promise<void> {
     const ray = item.source as Ray;
     ray.initialised = true;
-    if (item.body) {
-      item.moveToPool(0);
+    if (item.physcics.body) {
+      item.physcics.moveToPool(0);
     }
     const waitForDataLoad = !!this.rayList.find((item) => !item.initialised);
     if (!waitForDataLoad) {
@@ -2015,17 +2019,17 @@ export default class PlayLevel extends Vue {
   }
 
   calculateRayVelocity(ray: Ray): void {
-    if (ray.gameObject?.body) {
+    if (ray.gameObject?.physcics.body) {
       const force = Matter.Vector.create(ray.direction[0], ray.direction[1]);
-      Matter.Body.setVelocity(ray.gameObject.body, force);
+      Matter.Body.setVelocity(ray.gameObject.physcics.body, force);
       this.setConstRaySpeed(ray);
     }
   }
 
   setConstRaySpeed(ray: Ray): void {
-    if (ray.gameObject?.body) {
+    if (ray.gameObject?.physcics.body) {
       (Matter.Body as any).setSpeed(
-        ray.gameObject.body,
+        ray.gameObject.physcics.body,
         this.autoPanSpeed * 10
       );
     }
@@ -2046,11 +2050,11 @@ export default class PlayLevel extends Vue {
     const ray = rayObject.source as Ray;
     if (ray.type === RayType.heat && out.top) {
       setTimeout(() => {
-        rayObject.moveToPool();
+        rayObject.physcics.moveToPool();
       }, 3000);
     }
     if (ray.type === RayType.heatReadonly && (out.top || out.bottom)) {
-      rayObject.moveToPool();
+      rayObject.physcics.moveToPool();
     }
   }
   //#endregion rays
@@ -2078,10 +2082,10 @@ export default class PlayLevel extends Vue {
     }
     if (this.lightCollisionCount > 0) this.playTime += updateDelta;
     const activeRays = this.rayList.filter(
-      (item) => item.gameObject && !item.gameObject.isSleeping
+      (item) => item.gameObject && !item.gameObject.physcics.isSleeping
     );
     for (const ray of activeRays) {
-      if (ray.initialised && ray.gameObject?.body?.speed) {
+      if (ray.initialised && ray.gameObject?.physcics.body?.speed) {
         ray.animationIndex++;
         if (ray.hit) {
           if (ray.displayPointsCount > ray.displayPoints.length)
@@ -2411,12 +2415,12 @@ export default class PlayLevel extends Vue {
           hitObstacle.heatAbsorptionCoefficientLight;
         ray.hit = true;
         await delay(100);
-        if (!rayObject.body) return;
+        if (!rayObject.physcics.body) return;
         const rayVelocity = [
-          rayObject.body.velocity.x,
-          rayObject.body.velocity.y,
+          rayObject.physcics.body.velocity.x,
+          rayObject.physcics.body.velocity.y,
         ];
-        rayObject.body.isStatic = true;
+        rayObject.physcics.body.isStatic = true;
         if (hitObstacle) {
           const hitPointScreen = matterUtil.calculateVisibleHitPoint(
             obstacleBody,
@@ -2483,7 +2487,7 @@ export default class PlayLevel extends Vue {
           }
         }
         await delay(1000);
-        if (!rayObject.body) return;
+        if (!rayObject.physcics.body) return;
         ray.displayPointsCount = 0;
         for (let i = 0; i < ray.displayPoints.length; i++) {
           ray.displayPoints[i].x = 0;
@@ -2494,12 +2498,13 @@ export default class PlayLevel extends Vue {
         ray.intensity = heatAbsorptionCoefficientObstacle;
         ray.animationIndex = 0;
         const force = Matter.Vector.create(rayVelocity[0], rayVelocity[1] * -1);
-        rayObject.body.isStatic = false;
-        Matter.Body.setVelocity(rayObject.body, force);
+        rayObject.physcics.body.isStatic = false;
+        Matter.Body.setVelocity(rayObject.physcics.body, force);
         const options = this.getRayTypeOptions(ray.type);
-        rayObject.body.name = options.name;
-        rayObject.body.collisionFilter.mask = options.collisionFilter.mask;
-        rayObject.body.collisionFilter.category =
+        rayObject.physcics.body.name = options.name;
+        rayObject.physcics.body.collisionFilter.mask =
+          options.collisionFilter.mask;
+        rayObject.physcics.body.collisionFilter.category =
           options.collisionFilter.category;
         const points = this.calculateInitRayPoints(
           ray.type,
@@ -2516,10 +2521,10 @@ export default class PlayLevel extends Vue {
       } else if (ray.type === RayType.heat && !ray.hit) {
         ray.hit = true;
         const rayIntensity = ray.intensity;
-        const hitPosition = rayObject.inputPosition;
+        const hitPosition = rayObject.transformation.inputPosition;
         const hitPositionBody = [
-          rayObject.body.position.x,
-          rayObject.body.position.y,
+          rayObject.physcics.body.position.x,
+          rayObject.physcics.body.position.y,
         ] as [number, number];
         hitObstacle.hitCount++;
         this.moleculeState[hitObstacle.name].hitCount++;
@@ -2538,7 +2543,7 @@ export default class PlayLevel extends Vue {
             0
           )
         );
-        rayObject.moveToPool();
+        rayObject.physcics.moveToPool();
         for (const obstacle of this.obstacleList) {
           obstacle.temperature += this.calculateObstacleTemperatureRiseHeat(
             obstacle.heatAbsorptionCoefficientHeat,
@@ -2610,9 +2615,9 @@ export default class PlayLevel extends Vue {
       this.moleculeState[molecule.name].decreaseCount++;
       const moleculeName = 'oxygen';
       this.updatedMolecule(molecule, moleculeName);
-      moleculeObject.body.collisionFilter.category =
+      moleculeObject.physcics.body.collisionFilter.category =
         this.getMoleculeCategory(moleculeName);
-      moleculeObject.body.collisionFilter.mask =
+      moleculeObject.physcics.body.collisionFilter.mask =
         this.getMoleculeMask(moleculeName);
     }
   }

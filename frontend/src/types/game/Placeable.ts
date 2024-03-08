@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { v4 as uuidv4 } from 'uuid';
-import { IGameObjectSource } from '@/components/shared/atoms/game/GameObject.vue';
+import { IGameObjectSource } from '@/types/game/gameObject/GameObject';
 
 export enum BoundingBoxShape {
   rect = 'rect',
@@ -26,6 +26,7 @@ export interface Placeable extends PlaceableBase {
   shape: BoundingBoxShape;
   polygonShape: [number, number][] | undefined;
   placingRegions: [number, number][][] | undefined;
+  zIndex: number;
 }
 
 export interface PlaceableItemConfig {
@@ -107,6 +108,7 @@ export function convertToDetailData(
       scale: value.scale,
       placingRegions: undefined,
       saturation: 1,
+      zIndex: 0,
     };
   }
   return {
@@ -123,6 +125,7 @@ export function convertToDetailData(
     scale: value.scale,
     placingRegions: configParameter.placingRegions,
     saturation: value.saturation ?? 1,
+    zIndex: 0,
   };
 }
 

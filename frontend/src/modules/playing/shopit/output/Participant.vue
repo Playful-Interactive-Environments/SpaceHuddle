@@ -55,7 +55,6 @@
       </el-button>
     </div>
     <el-button
-      type="secondary"
       v-if="gameStep === GameStep.Join && gameState === GameState.Game"
       class="tutorialButton"
       @click="gameState = GameState.Info"

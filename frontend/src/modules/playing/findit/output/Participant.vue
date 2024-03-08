@@ -36,7 +36,6 @@
       @replayFinished="replayFinished"
     />
     <el-button
-      type="secondary"
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       class="tutorialButton"
       @click="gameState = GameState.Info"

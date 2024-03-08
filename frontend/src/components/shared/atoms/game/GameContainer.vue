@@ -95,7 +95,7 @@
             :filters="region.region.filter"
           ></Graphics>
           <text
-            v-if="region.region.text"
+            v-if="region.region.text && showRegionText"
             :anchor="[region.anchor, 0]"
             :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
             :scale="textScaleFactor"
@@ -246,8 +246,8 @@ import { Application } from 'vue3-pixi';
 import { EventType } from '@/types/enum/EventType';
 import GameObject, {
   FastObjectBehaviour,
-  bounceCategory,
-} from '@/components/shared/atoms/game/GameObject.vue';
+} from '@/types/game/gameObject/GameObject';
+import { bounceCategory } from '@/types/game/gameObject/ObjectPhysics';
 import { SpaceObject } from '@/types/game/sprite/SpaceObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -385,6 +385,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly enableSleeping!: boolean;
   @Prop({ default: false }) readonly waitForDataLoad!: boolean;
   @Prop({ default: true }) readonly usePreCalculation!: boolean;
+  @Prop({ default: true }) readonly showRegionText!: boolean;
   //#endregion props
 
   //#region variables
@@ -514,7 +515,7 @@ export default class GameContainer extends Vue {
   getGameObjectForBody(body: Matter.Body): GameObject | null {
     if (body) {
       const obj = this.gameObjects.find(
-        (obj) => obj.body && obj.bodyId === body.id
+        (obj) => obj.physcics.body && obj.physcics.bodyId === body.id
       );
       if (obj) return obj;
     }
@@ -753,24 +754,24 @@ export default class GameContainer extends Vue {
       const isMouseObject =
         this.mouseConstraint &&
         this.mouseConstraint.body &&
-        this.mouseConstraint.body.id === gameObject.bodyId;
-      const body = matterUtil.copyBody(gameObject.body);
-      this.removeFromEngin(gameObject.body);
+        this.mouseConstraint.body.id === gameObject.physcics.bodyId;
+      const body = matterUtil.copyBody(gameObject.physcics.body);
+      this.removeFromEngin(gameObject.physcics.body);
       Matter.Composite.add(this.activeComposition, body);
-      gameObject.body = body;
+      gameObject.physcics.body = body;
       if (isMouseObject) this.mouseConstraint.body = body;
     }
     gameObject.highlighted = true;
-    gameObject.$emit('isPartOfChainChanged', gameObject, true);
+    gameObject.emit('is_part_of_chain_changed', gameObject, true);
   }
 
   private removeChainObject(gameObject: GameObject, reAddObject = true): void {
     gameObject.highlighted = false;
-    gameObject.$emit('isPartOfChainChanged', gameObject, false);
+    gameObject.emit('is_part_of_chain_changed', gameObject, false);
     if (reAddObject) {
-      const body = matterUtil.copyBody(gameObject.body);
-      this.addToEngin(body).then(() => (gameObject.body = body));
-      gameObject.updatePivot(100, true);
+      const body = matterUtil.copyBody(gameObject.physcics.body);
+      this.addToEngin(body).then(() => (gameObject.physcics.body = body));
+      gameObject.physcics.updatePivot(100, true);
     }
   }
 
@@ -794,7 +795,7 @@ export default class GameContainer extends Vue {
       } else {
         this.addChainObject(this.activeObject);
         if (this.mouseConstraint && this.mouseConstraint.body === null) {
-          this.mouseConstraint.body = this.activeObject.body;
+          this.mouseConstraint.body = this.activeObject.physcics.body;
         }
       }
     }
@@ -929,7 +930,7 @@ export default class GameContainer extends Vue {
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
     Matter.Events.off(this.engine, 'afterUpdate', this.afterPhysicUpdate);
     Matter.Events.off(this.engine, 'beforeUpdate', this.beforePhysicUpdate);
-    Matter.Events.off(this.engine.world, 'afterAdd', this.bodyAdded);
+    Matter.Events.off(this.engine.world, 'afterAdd', this.sortBodies);
     this.eventBus.off(
       EventType.TEXTURES_LOADING_START,
       this.texturesLoadingStart
@@ -1032,9 +1033,13 @@ export default class GameContainer extends Vue {
       if (gameObject.moveWithBackground) {
         gameObject.initPosition();
         if (gameObject.objectSpace === ObjectSpaceType.RelativeToBackground)
-          gameObject.updateOffset(this.gameObjectOffsetRelativeToBackground);
+          gameObject.physcics.updateOffset(
+            this.gameObjectOffsetRelativeToBackground
+          );
         else if (gameObject.objectSpace === ObjectSpaceType.RelativeToScreen)
-          gameObject.updateOffset(this.gameObjectOffsetRelativeToScreen);
+          gameObject.physcics.updateOffset(
+            this.gameObjectOffsetRelativeToScreen
+          );
       }
     }
 
@@ -1123,9 +1128,13 @@ export default class GameContainer extends Vue {
     if (this.gameObjects.includes(gameObject)) return;
     if (gameObject.moveWithBackground) {
       if (gameObject.objectSpace === ObjectSpaceType.RelativeToBackground)
-        gameObject.initOffset(this.gameObjectOffsetRelativeToBackground);
+        gameObject.transformation.initOffset(
+          this.gameObjectOffsetRelativeToBackground
+        );
       else if (gameObject.objectSpace === ObjectSpaceType.RelativeToScreen)
-        gameObject.initOffset(this.gameObjectOffsetRelativeToScreen);
+        gameObject.transformation.initOffset(
+          this.gameObjectOffsetRelativeToScreen
+        );
     }
     this.gameObjects.push(gameObject);
     this.setupGameObjectBody(gameObject);
@@ -1135,10 +1144,10 @@ export default class GameContainer extends Vue {
         this.freePoolBody[gameObject.poolingKey] = [];
       } else if (
         this.freePoolBody[gameObject.poolingKey].length > 0 &&
-        gameObject.bodyId === -1
+        gameObject.physcics.bodyId === -1
       ) {
         const poolBody = this.freePoolBody[gameObject.poolingKey].pop();
-        gameObject.assignPoolBody(poolBody);
+        gameObject.physcics.assignPoolBody(poolBody);
       }
     }
     if (this.activatedObjectOnRegister) {
@@ -1148,7 +1157,7 @@ export default class GameContainer extends Vue {
       if (this.isMouseDown) {
         gameObject.highlighted = true;
         this.activeObject = gameObject;
-      } else gameObject.gameObjectReleased();
+      } else gameObject.physcics.gameObjectReleased();
     }
     if (
       gameObject.fastObjectBehaviour === FastObjectBehaviour.bounce &&
@@ -1159,19 +1168,31 @@ export default class GameContainer extends Vue {
   }
 
   deregisterGameObject(gameObject: GameObject): void {
-    if (gameObject.bodyId > -1 && this.engine && gameObject.isPartOfEngin) {
+    if (
+      gameObject.physcics.bodyId > -1 &&
+      this.engine &&
+      gameObject.isPartOfEngin
+    ) {
       gameObject.isPartOfEngin = false;
-      this.removeFromEngin(gameObject.body);
+      this.removeFromEngin(gameObject.physcics.body);
     }
     const index = this.gameObjects.indexOf(gameObject);
     if (index > -1) {
       this.gameObjects.splice(index, 1);
     }
     if (this.useObjectPooling) {
-      matterUtil.resetBody(gameObject.body, this.mouseConstraint);
-      Matter.Body.setPosition(gameObject.body, { x: -10000, y: -10000 });
-      matterUtil.updatePivot(gameObject.body, gameObject.anchor, 100, true);
-      this.freePoolBody[gameObject.poolingKey].push(gameObject.body);
+      matterUtil.resetBody(gameObject.physcics.body, this.mouseConstraint);
+      Matter.Body.setPosition(gameObject.physcics.body, {
+        x: -10000,
+        y: -10000,
+      });
+      matterUtil.updatePivot(
+        gameObject.physcics.body,
+        gameObject.objectAnchor,
+        100,
+        true
+      );
+      this.freePoolBody[gameObject.poolingKey].push(gameObject.physcics.body);
     }
   }
 
@@ -1191,9 +1212,7 @@ export default class GameContainer extends Vue {
 
   //#region game object bodies
   async setupGameObjectBody(gameObject: GameObject): Promise<void> {
-    await until(() => !!gameObject.gameObjectContainer);
     await delay(100);
-    if (!gameObject.gameObjectContainer) return;
     let body: Matter.Body | null = null;
     switch (gameObject.shape) {
       case 'rect':
@@ -1209,56 +1228,47 @@ export default class GameContainer extends Vue {
     if (body) {
       (body as any).zIndex = gameObject.zIndex;
       await this.addToEngin(body);
-      gameObject.body = body;
+      gameObject.physcics.body = body;
       gameObject.isPartOfEngin = true;
     }
   }
 
   addRect(gameObject: GameObject): Matter.Body {
-    if (gameObject.gameObjectContainer) {
-      gameObject.options.isStatic = gameObject.isStatic;
-      const colliderWidth =
-        gameObject.displayWidth + gameObject.colliderDelta * 2;
-      const colliderHeight =
-        gameObject.displayHeight + gameObject.colliderDelta * 2;
-      return Matter.Bodies.rectangle(
-        gameObject.gameObjectContainer.x,
-        gameObject.gameObjectContainer.y,
-        colliderWidth,
-        colliderHeight,
-        { ...gameObject.options }
-      );
-    }
+    gameObject.options.isStatic = gameObject.isStatic;
+    const colliderWidth =
+      gameObject.transformation.displayWidth + gameObject.colliderDelta * 2;
+    const colliderHeight =
+      gameObject.transformation.displayHeight + gameObject.colliderDelta * 2;
+    return Matter.Bodies.rectangle(
+      gameObject.x,
+      gameObject.y,
+      colliderWidth,
+      colliderHeight,
+      { ...gameObject.options }
+    );
   }
 
   addCircle(gameObject: GameObject): Matter.Body {
-    if (gameObject.gameObjectContainer) {
-      gameObject.options.isStatic = gameObject.isStatic;
-      const width = gameObject.displayWidth;
-      const height = gameObject.displayHeight;
-      const radius =
-        (width > height ? width / 2 : height / 2) + gameObject.colliderDelta;
-      return Matter.Bodies.circle(
-        gameObject.gameObjectContainer.x,
-        gameObject.gameObjectContainer.y,
-        radius,
-        { ...gameObject.options }
-      );
-    }
+    gameObject.options.isStatic = gameObject.isStatic;
+    const width = gameObject.transformation.displayWidth;
+    const height = gameObject.transformation.displayHeight;
+    const radius =
+      (width > height ? width / 2 : height / 2) + gameObject.colliderDelta;
+    return Matter.Bodies.circle(gameObject.x, gameObject.y, radius, {
+      ...gameObject.options,
+    });
   }
 
   addPolygon(gameObject: GameObject): Matter.Body {
-    if (gameObject.gameObjectContainer) {
-      gameObject.options.isStatic = gameObject.isStatic;
-      return matterUtil.createPolygonBody(
-        { ...gameObject.options },
-        gameObject.gameObjectContainer.x,
-        gameObject.gameObjectContainer.y,
-        gameObject.displayWidth,
-        gameObject.displayHeight,
-        [...gameObject.polygonShape]
-      );
-    }
+    gameObject.options.isStatic = gameObject.isStatic;
+    return matterUtil.createPolygonBody(
+      { ...gameObject.options },
+      gameObject.x,
+      gameObject.y,
+      gameObject.transformation.displayWidth,
+      gameObject.transformation.displayHeight,
+      [...gameObject.polygonShape]
+    );
   }
   //#endregion game object bodies
 
@@ -1275,12 +1285,12 @@ export default class GameContainer extends Vue {
 
     for (const gameObject of this.gameObjects) {
       if (
-        gameObject.bodyId > -1 &&
+        gameObject.physcics.bodyId > -1 &&
         gameObject.affectedByForce &&
         !gameObject.isStatic &&
-        gameObject.isVisible()
+        gameObject.physcics.isVisible()
       ) {
-        const body = this.getBodyForId(gameObject.bodyId); //gameObject.body;
+        const body = this.getBodyForId(gameObject.physcics.bodyId); //gameObject.body;
         const newVelocity = {
           x: body.velocity.x + calcForce(body),
           y: body.velocity.y + calcForce(body),
@@ -1298,8 +1308,8 @@ export default class GameContainer extends Vue {
     const mousePosition = { x: event.offsetX, y: event.offsetY };
     const clickedBodies = Matter.Query.point(
       this.gameObjects
-        .filter((gameObj) => gameObj.body)
-        .map((gameObj) => gameObj.body),
+        .filter((gameObj) => gameObj.physcics.body)
+        .map((gameObj) => gameObj.physcics.body),
       mousePosition
     );
     if (clickedBodies.length > 0) {
@@ -1307,7 +1317,7 @@ export default class GameContainer extends Vue {
         return this.getGameObjectForBody(body);
       });
       for (const obj of clickedGameObjects) {
-        obj.gameObjectClicked();
+        obj.physcics.gameObjectClicked();
       }
       this.$emit('gameObjectClick', clickedGameObjects, event);
     } else {
@@ -1348,7 +1358,7 @@ export default class GameContainer extends Vue {
   gameContainerReleased(): void {
     this.isMouseDown = false;
     if (this.activeObject) {
-      this.activeObject.gameObjectReleased();
+      this.activeObject.physcics.gameObjectReleased();
     }
   }
 
@@ -1751,7 +1761,7 @@ export default class GameContainer extends Vue {
       Matter.Events.on(this.engine, 'collisionStart', this.collisionStart);
     Matter.Events.on(this.engine, 'afterUpdate', this.afterPhysicUpdate);
     Matter.Events.on(this.engine, 'beforeUpdate', this.beforePhysicUpdate);
-    Matter.Events.on(this.engine.world, 'afterAdd', this.bodyAdded);
+    Matter.Events.on(this.engine.world, 'afterAdd', this.sortBodies);
     this.$emit('initEngine', this.engine);
     this.setGravity();
     this.runner = Matter.Runner.create({
@@ -1804,7 +1814,8 @@ export default class GameContainer extends Vue {
     }
   }
 
-  bodyAdded(): void {
+  sortBodies(): void {
+    this.gameObjects.sort((a, b) => a.zIndex - b.zIndex);
     this.engine.world.bodies.sort((a, b) => a.zIndex - b.zIndex);
   }
 
@@ -1853,11 +1864,11 @@ export default class GameContainer extends Vue {
     ): void => {
       const gameObjectIsPartOfChain =
         this.combinedActiveCollisionToChain &&
-        !!this.chainObjects.find((item) => item.bodyId === gameObject.bodyId);
+        this.chainObjects.includes(gameObject);
       if (gameObjectIsPartOfChain) {
         this.clearChain(
           (item) =>
-            !item.handleCollision(
+            !item.physcics.handleCollision(
               collisionObject,
               hitPoint,
               hitPointScreen,
@@ -1867,7 +1878,7 @@ export default class GameContainer extends Vue {
         );
       } else if (gameObject) {
         gameObject.highlighted = false;
-        gameObject.handleCollision(
+        gameObject.physcics.handleCollision(
           collisionObject,
           hitPoint,
           hitPointScreen,
@@ -1935,7 +1946,7 @@ export default class GameContainer extends Vue {
 
   checkChainCollision(collisions: Matter.Collision[]): void {
     if (this.activeObject && this.combinedActiveCollisionToChain) {
-      const activeId = this.activeObject.bodyId;
+      const activeId = this.activeObject.physcics.bodyId;
       const group = (this.activeObject.options.collisionFilter as any).group;
       const collisionWithActiveObject = collisions.filter(
         (collision) =>
@@ -1953,7 +1964,9 @@ export default class GameContainer extends Vue {
               : collisionObject.bodyA;
           if (
             group === collidingObj.collisionFilter.group &&
-            !this.chainObjects.find((item) => item.bodyId === collidingObj.id)
+            !this.chainObjects.find(
+              (item) => item.physcics.bodyId === collidingObj.id
+            )
           ) {
             const gameObject = this.getGameObjectForBody(collidingObj);
             if (gameObject) {
@@ -2026,7 +2039,7 @@ export default class GameContainer extends Vue {
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground && !this.isBackgroundLoaded) continue;
       gameObject.checkTrigger();
-      gameObject.afterPhysicUpdate();
+      gameObject.physcics.afterPhysicUpdate();
       if (
         this.showAllEnginColliders &&
         this.nextDrawUpdateTime < this.loopTime
@@ -2060,7 +2073,7 @@ export default class GameContainer extends Vue {
     //  velocityIterations > 0 ? velocityIterations : 1;
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground && !this.isBackgroundLoaded) continue;
-      gameObject.beforePhysicUpdate();
+      gameObject.physcics.beforePhysicUpdate();
     }
 
     if (this.windForce > 0 && this.nextWindUpdateTime < this.loopTime) {
@@ -2237,7 +2250,7 @@ export default class GameContainer extends Vue {
         gameObj.moveWithBackground &&
         gameObj.objectSpace === ObjectSpaceType.RelativeToBackground
       )
-        gameObj.updateOffset(
+        gameObj.physcics.updateOffset(
           this.gameObjectOffsetRelativeToBackground,
           this.endlessPanning
             ? this.gameObjectOffsetRelativeToBackgroundCircle
@@ -2247,7 +2260,7 @@ export default class GameContainer extends Vue {
         gameObj.moveWithBackground &&
         gameObj.objectSpace === ObjectSpaceType.RelativeToScreen
       )
-        gameObj.updateOffset(
+        gameObj.physcics.updateOffset(
           this.gameObjectOffsetRelativeToScreen,
           this.endlessPanning
             ? this.gameObjectOffsetRelativeToScreenCircle

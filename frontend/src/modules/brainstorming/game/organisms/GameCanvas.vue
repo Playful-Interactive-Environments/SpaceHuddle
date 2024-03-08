@@ -17,11 +17,11 @@
           :posX="body.position.x"
           :posY="body.position.y"
           :fix-size="body.size * 2"
-          :anchor="0.5"
+          :objectAnchor="0.5"
           shape="circle"
           :source="body"
           :move-with-background="false"
-          @click="click"
+          @hold="click"
           @release="release"
         >
           <sprite
@@ -75,8 +75,7 @@ import {
 } from '@/modules/brainstorming/game/types/AnimationTimeline';
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
-import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
-import GameObject from '@/components/shared/atoms/game/GameObject.vue';
+import GameObject from '@/types/game/gameObject/GameObject';
 import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.vue';
 import * as Matter from 'matter-js/build/matter';
 
@@ -91,10 +90,7 @@ interface BodyData {
 }
 
 @Options({
-  components: {
-    GameObject,
-    GameContainer,
-  },
+  components: {},
   emits: [],
 })
 
@@ -174,15 +170,19 @@ export default class PixiCanvas extends Vue {
 
   private readonly pressFactor = 3;
   click(gameObject: GameObject): void {
-    if (gameObject && gameObject.body) {
-      Matter.Body.scale(gameObject.body, this.pressFactor, this.pressFactor);
+    if (gameObject && gameObject.physcics.body) {
+      Matter.Body.scale(
+        gameObject.physcics.body,
+        this.pressFactor,
+        this.pressFactor
+      );
     }
   }
 
   release(gameObject: GameObject): void {
-    if (gameObject && gameObject.body) {
+    if (gameObject && gameObject.physcics.body) {
       Matter.Body.scale(
-        gameObject.body,
+        gameObject.physcics.body,
         1 / this.pressFactor,
         1 / this.pressFactor
       );

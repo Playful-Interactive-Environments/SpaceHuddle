@@ -11,7 +11,7 @@
         <container
           v-if="circleGradientTexture && bodyList.length > 0 && showBodies"
         >
-          <GameObjectTest
+          <GameObject
             v-for="body of bodyList"
             :key="body.id"
             :x="body.position.x"
@@ -33,7 +33,7 @@
             >
               {{ body.text }}
             </text>
-          </GameObjectTest>
+          </GameObject>
           <!--<container
             v-for="body of bodyList"
             :key="body.id"

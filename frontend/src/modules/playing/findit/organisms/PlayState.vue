@@ -49,7 +49,7 @@
                 : null
             "
             :trigger-delay-pause="showToolbox"
-            @handleTrigger="handleEscalation(placeable)"
+            @handle_trigger="handleEscalation(placeable)"
           >
             <SpriteConverter
               :texture="placeable.texture"
@@ -68,6 +68,7 @@
           <Graphics ref="searchMask" @render="drawSearchMask" />
           <GameObject
             v-if="gameWidth > 0"
+            ref="searchObj"
             :moveWithBackground="false"
             :posX="gameWidth / 2"
             :posY="gameHeight / 2"
@@ -79,7 +80,7 @@
                 group: -1,
               },
             }"
-            @positionChanged="onSearchPositionChanged"
+            @position_changed="onSearchPositionChanged"
           >
             <Graphics @render="drawSearchObject" />
           </GameObject>
@@ -140,7 +141,7 @@ import * as PIXIParticles from '@pixi/particle-emitter';
 import { Prop, Watch } from 'vue-property-decorator';
 import GameObject, {
   IGameObjectSource,
-} from '@/components/shared/atoms/game/GameObject.vue';
+} from '@/types/game/gameObject/GameObject';
 import GameContainer, {
   BackgroundPosition,
   BackgroundMovement,
@@ -223,6 +224,7 @@ function convertToFindItPlaceable(
     escalationStepIndex: 0,
     placingRegions: result.placingRegions,
     saturation: result.saturation ?? 1,
+    zIndex: 0,
   };
 }
 

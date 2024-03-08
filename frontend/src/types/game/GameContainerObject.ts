@@ -1,5 +1,6 @@
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
+import GameObject from '@/types/game/gameObject/GameObject';
 
 export enum GameContainerObjectType {
   GAME_OBJECT = 'game_object',
@@ -40,7 +41,7 @@ export default class GameContainerObject {
     if (this.gameContainer) {
       switch (this.gameContainerObjectType) {
         case GameContainerObjectType.GAME_OBJECT:
-          this.gameContainer.deregisterGameObject(this as any);
+          this.gameContainer.deregisterGameObject(this.pixiObject as any);
           break;
         case GameContainerObjectType.SPACE_OBJECT:
           this.gameContainer.deregisterSpaceObject(this as any);
@@ -77,9 +78,9 @@ export default class GameContainerObject {
   isAdded(container: any): void {
     if (this.gameContainer) return;
     setTimeout(() => {
-      const source = container.source;
-      if (source && Object.hasOwn(source, 'updatedColliderSize')) {
-        source.updatedColliderSize();
+      if (container instanceof GameObject) {
+        const gameObject = container as GameObject;
+        gameObject.physcics.updatedColliderSize();
       }
       let parent = container;
       while (parent.parent) {
@@ -91,7 +92,7 @@ export default class GameContainerObject {
         this.pixiObject.setGameContainer(gameContainer);
         switch (this.gameContainerObjectType) {
           case GameContainerObjectType.GAME_OBJECT:
-            gameContainer.registerGameObject(this as any);
+            gameContainer.registerGameObject(this.pixiObject as any);
             break;
           case GameContainerObjectType.SPACE_OBJECT:
             gameContainer.registerSpaceObject(this as any);
