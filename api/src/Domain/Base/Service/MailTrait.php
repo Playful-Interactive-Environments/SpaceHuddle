@@ -3,6 +3,10 @@
 
 namespace App\Domain\Base\Service;
 
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mime\Email;
+
 /**
  * Trait that send mails.
  */
@@ -16,12 +20,28 @@ trait MailTrait
         return require __DIR__ . "/../../../../config/settings.php";
     }
 
+    private function getMailFrom(): string {
+        $applicationSettings = (object)$this->settings()["application"];
+        $from = $applicationSettings->email;
+        if (!isset($from)) $from = 'info@spacehuddle.io';
+
+        return $from;
+    }
+
+    private function getApplicationName(): string {
+        $applicationSettings = (object)$this->settings()["application"];
+        $name = $applicationSettings->name;
+        if (!isset($name)) $name = 'spacehuddle.io';
+
+        return $name;
+    }
+
     /**
      * Calculated the mail header
      * @return string Mail Header
      */
     private function getMailHeader(): string {
-        $from = 'info@spacehuddle.io';
+        $from = $this->getMailFrom();
 
         // To send HTML mail, the Content-type header must be set
         $headers  = 'MIME-Version: 1.0' . "\r\n";
@@ -31,6 +51,29 @@ trait MailTrait
         $headers .= 'From: '.$from."\r\n".
             'Reply-To: '.$from."\r\n";
         return $headers;
+    }
+
+    protected function smtpMail($email, $mailHeader, $message, $mailBody): void {
+        $application = $this->getApplicationName();
+        $smptSettings = (object)$this->settings()["smtp"];
+        $dsn = sprintf(
+            "%s://%s:%s@%s:%s",
+            $smptSettings->type,
+            $smptSettings->username,
+            $smptSettings->password,
+            $smptSettings->host,
+            $smptSettings->port
+        );
+        $mailer = new Mailer(Transport::fromDsn($dsn));
+        $from = $this->getMailFrom();
+        $email = (new Email())
+            ->from($from)
+            ->to($email)
+            ->subject(str_replace("#application", $application, $mailHeader))
+            ->text(str_replace("#application", $application, $mailBody))
+            ->html(str_replace("#application", $application, $message));
+
+        $mailer->send($email);
     }
 
     /**
@@ -48,7 +91,9 @@ trait MailTrait
             <h1>$mailHeader</h1>
             <div>$mailBody</div>";
 
-        mail($email, $mailHeader, $message, $this->getMailHeader());
+        $this->smtpMail($email, $mailHeader, $message, $mailBody);
+
+        //mail($email, $mailHeader, $message, $this->getMailHeader());
     }
 
     /**
@@ -85,7 +130,9 @@ trait MailTrait
                 $resetUrl$linkParameter
             </div>";
 
-        mail($email, $mailHeader, $message, $this->getMailHeader());
+        $this->smtpMail($email, $mailHeader, $message, $mailBody);
+
+        //mail($email, $mailHeader, $message, $this->getMailHeader());
     }
 
     /**
@@ -129,6 +176,8 @@ trait MailTrait
                 $resetUrl$jwt
             </div>";
 
-        mail($email, $mailHeader, $message, $this->getMailHeader());
+        $this->smtpMail($email, $mailHeader, $message, $mailBody);
+
+        //mail($email, $mailHeader, $message, $this->getMailHeader());
     }
 }

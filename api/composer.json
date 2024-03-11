@@ -49,6 +49,8 @@
         "slim/php-view": "^3.2",
         "slim/slim": "^4.11",
         "symfony/console": "^5",
+        "symfony/event-dispatcher": "^7.0",
+        "symfony/mailer": "^7.0",
         "symfony/polyfill-uuid": "^1.27",
         "zircote/swagger-php": "^4.6"
     },

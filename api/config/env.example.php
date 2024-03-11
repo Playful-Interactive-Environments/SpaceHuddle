@@ -16,8 +16,6 @@
  * a security breach, and production values will never have to be
  * shared with all project collaborators.
  */
-require __DIR__ . "/local.dev.php";
-require __DIR__ . "/local.all.php";
 
 $settings["jwt"]["private_key"] = file_get_contents(__DIR__ . "/../resources/keys/private.pem");
 $settings["jwt"]["public_key"] = file_get_contents(__DIR__ . "/../resources/keys/public.pem");
@@ -25,3 +23,29 @@ $settings["jwt"]["public_key"] = file_get_contents(__DIR__ . "/../resources/keys
 // Authorization
 $settings['auth']['model'] = __DIR__ . "/../resources/auth/model.conf";
 $settings['auth']['policy'] = __DIR__ . "/../resources/auth/policy.csv";
+
+// Error reporting
+$settings["error"]["display_error_details"] = true;
+
+// Database
+$settings["db"]["database"] = "spacehuddle";
+$settings["db"]["host"] = "localhost";
+$settings["db"]["username"] = "root";
+$settings["db"]["password"] = "";
+
+// Application
+$settings["application"]["baseUrl"] = "http://localhost:8080";
+$settings["application"]["forgetPassword"] = "/forget-password/";
+$settings["application"]["session"] = "/session/";
+$settings["application"]["confirm"] = "/confirm-email/";
+$settings["application"]["name"] = "spacehuddle.io";
+
+// EMail
+$settings["application"]["email"] = "info@spacehuddle.io";
+$settings["smtp"] = [
+    "type" => "smtp",
+    "host" => "smtp.mailtrap.io',",
+    "port" => "25",
+    "username" => "my-username",
+    "password" => "my-username-password",
+];

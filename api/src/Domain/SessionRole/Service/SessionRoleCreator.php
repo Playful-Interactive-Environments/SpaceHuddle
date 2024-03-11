@@ -34,7 +34,7 @@ class SessionRoleCreator
 
         $this->sendMailWithUrl(
             $email,
-            "You have been activated as co-moderator for a new session on spacehuddle.io",
+            "You have been activated as co-moderator for a new session on #application",
             "Log in to join the session.",
             $sessionName,
             "session",

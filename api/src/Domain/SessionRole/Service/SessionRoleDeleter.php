@@ -48,7 +48,7 @@ class SessionRoleDeleter
 
         $this->sendMail(
             $email,
-            "You have been removed as co-moderator for the session $sessionName on spacehuddle.io",
+            "You have been removed as co-moderator for the session $sessionName on #application",
             ""
         );
         return $result;

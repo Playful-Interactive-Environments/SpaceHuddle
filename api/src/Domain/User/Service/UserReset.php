@@ -42,7 +42,7 @@ final class UserReset
 
         $this->sendMailWithTokenUrl(
             $result->username,
-            "Forget password for spacehuddle.io",
+            "Forget password for #application",
             "Click this link to reset your password.",
             "reset password",
             "forgetPassword",

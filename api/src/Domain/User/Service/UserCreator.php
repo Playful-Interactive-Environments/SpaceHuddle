@@ -29,7 +29,7 @@ final class UserCreator
 
         $this->sendMailWithTokenUrl(
             $result->username,
-            "Confirm your email for spacehuddle.io",
+            "Confirm your email for #application",
             "Click this link to confirm your email.",
             "confirm email",
             "confirm",

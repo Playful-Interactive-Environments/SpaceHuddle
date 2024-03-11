@@ -28,6 +28,8 @@ public/.env
 
 env.php
 config/env.php
+config/local.dev.php
+config/local.all.php
 config/local.prod.php
 config/local.prod.ecopolis.php
 
