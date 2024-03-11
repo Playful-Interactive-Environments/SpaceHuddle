@@ -34,6 +34,8 @@
       :endless-panning="!gameOver"
       :use-pre-calculation="!gameOver"
       :showRegionText="false"
+      :pixi-filter-list="[...collisionAnimation, ...hitAnimation]"
+      :pixi-filter-list-background="[colorFilter]"
     >
       <template v-slot:preRender>
         <container v-if="gameWidth && obstacleList.length > 0">
@@ -108,20 +110,19 @@
                 {{ Math.round(averageTemperature) }}°C
               </text>
             </container>
-            <!--<animated-sprite
+            <animated-sprite
               ref="vehicle"
               v-if="vehicleStylesheets && randomVehicleName && active"
               :textures="vehicleStylesheets.animations[randomVehicleName]"
               :animation-speed="0.1"
               :width="vehicleWidth"
-              :height="vehicleWidth / getVehicleAspect(randomVehicleName)"
+              :height="vehicleHeight"
               :x="vehicleXPosition"
               :y="vehicleYPosition"
               :anchor="[0.5, 1]"
               playing
               :loop="vehicleIsActive && !gameOver"
-              @frame-change="animationFrameChanged"
-            />-->
+            />
             <ParticlePlayer
               v-if="weatherStylesheets"
               :config="snow"
@@ -1270,6 +1271,10 @@ export default class PlayLevel extends Vue {
     return 100;
   }
 
+  get vehicleHeight(): number {
+    return this.vehicleWidth / this.getVehicleAspect(this.randomVehicleName);
+  }
+
   get vehicleYPosition(): number {
     return this.gameHeight * 0.975;
   }
@@ -2222,6 +2227,10 @@ export default class PlayLevel extends Vue {
     );
     for (const item of inactiveMolecules) {
       item.isActive = false;
+    }
+
+    if (this.vehicleSprite?.playing) {
+      this.animationFrameChanged();
     }
   }
 
