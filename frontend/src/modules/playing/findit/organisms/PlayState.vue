@@ -411,11 +411,9 @@ export default class PlayState extends Vue {
 
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
-
-    /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
-    this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
-      this.updateTutorial(steps as Tutorial[]);
-    });*/
+    setTimeout(() => {
+      this.calculateRelativeSearchPosition();
+    }, 1000);
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -481,6 +479,10 @@ export default class PlayState extends Vue {
         this.searchGraphics.endFill();
       }
     }
+    this.updateZoomFilter();
+  }
+
+  updateZoomFilter(): void {
     this.zoomFilter.center = [
       this.searchPosition[0] / this.gameWidth,
       this.searchPosition[1] / this.gameHeight,
@@ -512,6 +514,7 @@ export default class PlayState extends Vue {
   }
 
   offsetChanged(): void {
+    this.updateZoomFilter();
     this.calculateRelativeSearchPosition();
   }
 
