@@ -232,14 +232,16 @@
               :sleep-if-not-visible="true"
               :angle="molecule.rotation"
               :conditional-velocity="{
-                velocity: {x: 0, y: -3},
-                condition: (object: GameObject) => {
-                  if (molecule.rise) {
-                    molecule.rise = false;
+                velocity: { x: 0, y: -3 },
+                condition: (object) => {
+                  if (object.source.rise) {
+                    object.source.rise = false;
                     return true;
                   }
-                  return object.position[1] > gameHeight / 3 * 2;
-                }
+                  return (
+                    object.transformation.position[1] > (gameHeight / 3) * 2
+                  );
+                },
               }"
               @hold="moleculeClicked"
               @release="moduleReleased"
@@ -1640,6 +1642,12 @@ export default class PlayLevel extends Vue {
         emitCount: 0,
         decreaseCount: 0,
       };
+    }
+    const distance = 100 / this.moleculeList.length;
+    this.moleculeList.sort((a, b) => a.position[0] - b.position[0]);
+    for (let i = 0; i < this.moleculeList.length; i++) {
+      this.moleculeList[i].position[0] =
+        Math.random() * distance + i * distance;
     }
   }
 
