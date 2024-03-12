@@ -1049,12 +1049,13 @@ export default class GameContainer extends Vue {
   }
 
   setupRegions(): void {
+    //const x = this.backgroundTextureSize[0] / 2;
+    //const y = this.backgroundTextureSize[1] / 2;
+    const width = this.backgroundTextureSize[0];
+    const height = this.backgroundTextureSize[1];
+    if (!width || !height) return;
     for (const region of this.regionBodyList) {
       const collisionRegion = region.region;
-      //const x = this.backgroundTextureSize[0] / 2;
-      //const y = this.backgroundTextureSize[1] / 2;
-      const width = this.backgroundTextureSize[0];
-      const height = this.backgroundTextureSize[1];
       const center = getPolygonCenter(collisionRegion.path);
       const x =
         this.backgroundTextureSize[0] * (center[0] / 100) +
