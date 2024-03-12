@@ -504,8 +504,8 @@ export default class PublicBase extends Vue {
       );
       newPublicQuestion = publicQuestion ? publicQuestion : null;
     } else if (
-      this.activeQuestionIndex >= 0 &&
-      this.activeQuestionIndex < this.questions.length
+      this.questions.length > this.activeQuestionIndex &&
+      this.activeQuestionIndex >= 0
     ) {
       newPublicQuestion = this.questions[this.activeQuestionIndex];
     }

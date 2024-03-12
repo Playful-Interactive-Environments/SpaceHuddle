@@ -210,34 +210,36 @@ export class TrackingManager {
     );
   }
 
-  setFinishedState(
+  async setFinishedState(
     module: Module | null,
     contentChanges: any | null = null
-  ): void {
+  ): Promise<void> {
     if (
       this.state &&
       module &&
       'replayabel' in module.parameter &&
       !module.parameter.replayabel
     ) {
-      this.setManualFinishedState(contentChanges);
+      await this.setManualFinishedState(contentChanges);
     } else if (contentChanges) {
-      this.saveState(contentChanges);
+      await this.saveState(contentChanges);
     }
   }
 
-  setManualFinishedState(contentChanges: any | null = null): void {
+  async setManualFinishedState(
+    contentChanges: any | null = null
+  ): Promise<void> {
     if (this.state) {
-      this.saveState(contentChanges, TaskParticipantStatesType.FINISHED);
+      await this.saveState(contentChanges, TaskParticipantStatesType.FINISHED);
     } else if (contentChanges) {
-      this.saveState(contentChanges);
+      await this.saveState(contentChanges);
     }
   }
 
-  saveState(
+  async saveState(
     contentChanges: any | null = null,
     changedState: TaskParticipantStatesType | null = null
-  ): void {
+  ): Promise<void> {
     if (this.state) {
       if (changedState) this.state.state = changedState;
       if (contentChanges) {
@@ -245,23 +247,20 @@ export class TrackingManager {
           this.state.parameter[key] = contentChanges[key];
         }
       }
-      taskParticipantService.putParticipantState(this.taskId, this.state);
+      await taskParticipantService.putParticipantState(this.taskId, this.state);
     }
   }
 
-  saveStatePointsFromIterations(): void {
+  async saveStatePointsFromIterations(): Promise<void> {
     if (this.state) {
       this.state.parameter.gameplayResult = this.getGameplayResultFromChild(
         this.iterationList,
         true
       );
-      taskParticipantService
-        .putParticipantState(this.taskId, this.state)
-        .then(() => {
-          if (this.task) {
-            taskParticipantService.refreshPoints(this.task.sessionId);
-          }
-        });
+      await taskParticipantService.putParticipantState(this.taskId, this.state);
+      if (this.task) {
+        taskParticipantService.refreshPoints(this.task.sessionId);
+      }
     }
   }
 
@@ -538,12 +537,12 @@ export class TrackingManager {
     }
   }
 
-  saveIterationStepPoints(
+  async saveIterationStepPoints(
     stars: number,
     starLimitRule:
       | ((step: TaskParticipantIterationStep) => boolean)
       | null = null
-  ): void {
+  ): Promise<void> {
     if (this.iterationStep) {
       this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
         stars,
@@ -553,15 +552,15 @@ export class TrackingManager {
           starLimitRule
         )
       );
-      taskParticipantService
-        .putParticipantIterationStep(this.taskId, this.iterationStep)
-        .then(() => {
-          this._refreshSteps();
-        });
+      await taskParticipantService.putParticipantIterationStep(
+        this.taskId,
+        this.iterationStep
+      );
+      await this._refreshSteps();
     }
   }
 
-  saveIterationStepPointsSpent(points: number): void {
+  async saveIterationStepPointsSpent(points: number): Promise<void> {
     if (this.iterationStep) {
       if (this.iterationStep.parameter.gameplayResult)
         this.iterationStep.parameter.gameplayResult.pointsSpent += points;
@@ -573,11 +572,11 @@ export class TrackingManager {
           null,
           points
         );
-      taskParticipantService
-        .putParticipantIterationStep(this.taskId, this.iterationStep)
-        .then(() => {
-          this._refreshSteps();
-        });
+      await taskParticipantService.putParticipantIterationStep(
+        this.taskId,
+        this.iterationStep
+      );
+      await this._refreshSteps();
     }
   }
 }

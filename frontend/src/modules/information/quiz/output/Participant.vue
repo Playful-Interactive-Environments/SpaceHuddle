@@ -628,14 +628,14 @@ export default class Participant extends Vue {
     }
   }
 
-  logInfo(): void {
+  async logInfo(): Promise<void> {
     if (this.activeQuestionType === QuestionType.INFO) {
       if (
         !this.trackingManager.stepList.find(
           (item) => item.ideaId === this.activeQuestionId
         )
       ) {
-        this.trackingManager.createInstanceStepPoints(
+        await this.trackingManager.createInstanceStepPoints(
           this.activeQuestionId,
           TaskParticipantIterationStepStatesType.NEUTRAL,
           {},
@@ -645,8 +645,11 @@ export default class Participant extends Vue {
     }
   }
 
-  goToNextQuestion(event: PointerEvent | null, initData = false): void {
-    this.logInfo();
+  async goToNextQuestion(
+    event: PointerEvent | null,
+    initData = false
+  ): Promise<void> {
+    await this.logInfo();
     this.initData = initData;
     this.checkScore();
     if (this.submitScreen) {
@@ -656,11 +659,11 @@ export default class Participant extends Vue {
       if (!this.savedQuestions.includes(this.activeQuestionId))
         this.savedQuestions.push(this.activeQuestionId);
       this.activeQuestionIndex++;
-    } else this.goToSubmitScreen();
+    } else await this.goToSubmitScreen();
   }
 
   async goToSubmitScreen(): Promise<void> {
-    this.logInfo();
+    await this.logInfo();
     this.checkScore();
     if (!this.savedQuestions.includes(this.activeQuestionId))
       this.savedQuestions.push(this.activeQuestionId);
@@ -680,7 +683,7 @@ export default class Participant extends Vue {
     }
     this.activeQuestionIndex++;
     if (this.trackingManager) {
-      this.trackingManager.saveState(
+      await this.trackingManager.saveState(
         {
           score: this.score,
           answeredQuizQuestionCount: this.quizQuestionCount,
@@ -1006,7 +1009,7 @@ export default class Participant extends Vue {
     this.votes = votes;
     if (this.publicAnswerList.length === 0) await delay(500);
     if (this.hasVotesForActiveQuestion) this.loadSavedOrder();
-    this.skipAnswerQuestions();
+    await this.skipAnswerQuestions();
     this.activeQuestionLoaded = true;
   }
 
@@ -1060,7 +1063,7 @@ export default class Participant extends Vue {
   }
 
   storedActiveAnswer!: Hierarchy | undefined;
-  updateAnswers(answers: Hierarchy[]): void {
+  async updateAnswers(answers: Hierarchy[]): Promise<void> {
     const answer = answers.find((item) => item.isOwn);
     if (
       answer &&
@@ -1089,7 +1092,7 @@ export default class Participant extends Vue {
       this.activeAnswer.textValue = null;
       this.activeAnswer.numValue = null;
     }
-    this.skipAnswerQuestions();
+    await this.skipAnswerQuestions();
     this.activeQuestionLoaded = true;
   }
 
@@ -1201,14 +1204,14 @@ export default class Participant extends Vue {
     return false;
   }
 
-  skipAnswerQuestions(): void {
+  async skipAnswerQuestions(): Promise<void> {
     this.questionAnswered = this.getQuestionAnswered();
     if (!this.moderatedQuestionFlow && this.initData) {
       if (
         this.questionAnswered &&
         this.activeQuestionType !== QuestionType.INFO
       )
-        this.goToNextQuestion(null, true);
+        await this.goToNextQuestion(null, true);
       else this.initData = false;
     }
   }
