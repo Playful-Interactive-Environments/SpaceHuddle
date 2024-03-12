@@ -189,7 +189,7 @@ getRoutes().then((moduleRoutes) => {
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes: routes,
-  scrollBehavior(to, from, savedPosition): Promise<any | false | void> {
+  /*scrollBehavior(to, from, savedPosition): Promise<any | false | void> {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (savedPosition) {
@@ -199,7 +199,7 @@ const router = createRouter({
         }
       }, 100);
     });
-  },
+  },*/
 });
 
 router.beforeEach((to, from, next) => {

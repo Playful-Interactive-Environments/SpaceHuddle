@@ -383,7 +383,8 @@ export const getModulesForTaskType = async (
     for (const moduleName in moduleConfig[taskTypeName]) {
       const moduleParameter = moduleConfig[taskTypeName][moduleName];
       const usable =
-        !Object.hasOwn(moduleParameter, 'usable') || moduleParameter.usable;
+        !!moduleParameter &&
+        (!Object.hasOwn(moduleParameter, 'usable') || moduleParameter.usable);
       const searchName = `${taskType.toLowerCase()}:${moduleName}`;
       const active = !hiddenModuleList.includes(searchName);
       if (usable && active) {

@@ -511,7 +511,6 @@ export default class ParticipantOverview extends Vue {
   async saveLang(locale): Promise<void> {
     authService.setLocale(locale);
     this.$i18n.locale = locale;
-    console.log(locale);
     await participantService.changeParameter({
       locale: locale,
     });
