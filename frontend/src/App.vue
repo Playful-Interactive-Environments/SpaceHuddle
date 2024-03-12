@@ -14,6 +14,10 @@ export default class App extends Vue {
     const htmlElement = document.documentElement;
     localStorage.setItem('theme', process.env.VUE_APP_THEME);
     htmlElement.setAttribute('theme', process.env.VUE_APP_THEME);
+    this.$nextTick(() => {
+      window.scrollTo(0, 1);
+      window.scrollTo(0, 0);
+    });
   }
 }
 </script>

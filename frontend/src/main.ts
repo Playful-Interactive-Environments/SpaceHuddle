@@ -161,5 +161,6 @@ console.warn = (...data: any[]): void => {
 app.mount('#app');
 
 setViewportVariables();
+window.history.scrollRestoration = 'manual';
 
 export default app;

@@ -189,6 +189,17 @@ getRoutes().then((moduleRoutes) => {
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes: routes,
+  scrollBehavior(to, from, savedPosition): Promise<any | false | void> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (savedPosition) {
+          resolve(savedPosition);
+        } else {
+          resolve({ x: 0, y: 0 });
+        }
+      }, 100);
+    });
+  },
 });
 
 router.beforeEach((to, from, next) => {
