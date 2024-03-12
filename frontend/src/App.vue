@@ -11,6 +11,10 @@ import { Vue, Options } from 'vue-class-component';
 })
 export default class App extends Vue {
   mounted(): void {
+    if (!Object.hasOwn) {
+      Object.hasOwn = (obj, prop) =>
+        Object.prototype.hasOwnProperty.call(obj, prop);
+    }
     const htmlElement = document.documentElement;
     localStorage.setItem('theme', process.env.VUE_APP_THEME);
     htmlElement.setAttribute('theme', process.env.VUE_APP_THEME);

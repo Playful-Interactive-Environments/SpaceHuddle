@@ -1,3 +1,8 @@
+if (!Object.hasOwn) {
+  Object.hasOwn = (obj, prop) =>
+    Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
 import { createApp } from 'vue';
 import VueCookies from 'vue3-cookies';
 import setViewportVariables from '@/vunit';
