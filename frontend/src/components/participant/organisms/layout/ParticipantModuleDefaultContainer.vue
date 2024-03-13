@@ -1,5 +1,5 @@
 <template>
-  <el-container class="module-content">
+  <el-container class="module-content" v-loading="showLoadingState">
     <el-header v-if="$slots.header" class="slotsHeader moduleHeader">
       <slot name="header"></slot>
       <TaskInfo
@@ -88,6 +88,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   @Prop({ default: 'default' }) module!: string;
   @Prop({ default: false }) useScrollContent!: boolean;
   @Prop({ default: 0 }) scrollOverlay!: number;
+  @Prop({ default: false }) readonly showLoadingState!: boolean;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
   scrollHeight = 100;

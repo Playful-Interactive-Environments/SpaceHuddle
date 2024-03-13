@@ -531,6 +531,7 @@ export default class PublicBase extends Vue {
       }, 5 * 1000);
     }
     this.$emit('changePublicQuestion', this.activeQuestion);
+    this.emitPublicAnswers();
   }
 
   deregisterGetAnswers(questions: string[] | null = null): void {
@@ -556,7 +557,11 @@ export default class PublicBase extends Vue {
         const questionResultStorage: QuestionResultStorage =
           getQuestionResultStorageFromQuestionType(question.questionType);
         if (questionResultStorage === QuestionResultStorage.VOTING) {
+          const hasChanged = question.answers.length !== answers.length;
           question.answers = answers;
+          if (hasChanged) {
+            this.emitPublicAnswers();
+          }
         }
       }
     }
@@ -734,12 +739,17 @@ export default class PublicBase extends Vue {
       this.$emit('changePublicQuestion', this.activeQuestion);
     }
 
+    this.emitPublicAnswers();
+  }
+
+  emitPublicAnswers(): void {
     const isVotingQuestion =
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
       QuestionResultStorage.VOTING;
     if (
       this.publicQuestion &&
-      (!isVotingQuestion || this.publicAnswers.length > 0)
+      (!isVotingQuestion || this.publicAnswers.length > 0) &&
+      this.emitedPublicQuestionId !== this.publicQuestion.question.id
     ) {
       this.emitedPublicQuestionId = this.publicQuestion.question.id;
       if (isVotingQuestion) {

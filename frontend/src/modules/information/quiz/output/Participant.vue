@@ -4,6 +4,7 @@
     :module="moduleName"
     :module-theme="theme"
     :class="{ PMDC: hasImage }"
+    :showLoadingState="showSavingState"
   >
     <div id="preloader"></div>
     <div id="loadingScreen">
@@ -645,10 +646,12 @@ export default class Participant extends Vue {
     }
   }
 
+  showSavingState = false;
   async goToNextQuestion(
     event: PointerEvent | null,
     initData = false
   ): Promise<void> {
+    this.showSavingState = true;
     await this.logInfo();
     this.initData = initData;
     this.checkScore();
@@ -656,13 +659,16 @@ export default class Participant extends Vue {
       this.submitScreen = false;
     }
     if (this.hasNextQuestion) {
+      await until(() => this.dataSaved);
       if (!this.savedQuestions.includes(this.activeQuestionId))
         this.savedQuestions.push(this.activeQuestionId);
       this.activeQuestionIndex++;
     } else await this.goToSubmitScreen();
+    this.showSavingState = false;
   }
 
   async goToSubmitScreen(): Promise<void> {
+    this.showSavingState = true;
     await this.logInfo();
     this.checkScore();
     if (!this.savedQuestions.includes(this.activeQuestionId))
@@ -692,19 +698,25 @@ export default class Participant extends Vue {
         TaskParticipantStatesType.FINISHED
       );
     }
+    this.showSavingState = false;
   }
 
   get hasPreviousQuestion(): boolean {
     return this.activeQuestionIndex > 0;
   }
 
-  goToPreviousQuestion(): void {
+  async goToPreviousQuestion(): Promise<void> {
+    this.showSavingState = true;
     this.initData = false;
     this.checkScore();
     if (this.submitScreen) {
       this.submitScreen = false;
     }
-    if (this.hasPreviousQuestion) this.activeQuestionIndex--;
+    if (this.hasPreviousQuestion) {
+      await until(() => this.dataSaved);
+      this.activeQuestionIndex--;
+    }
+    this.showSavingState = false;
   }
 
   isAnswerSelected(answerId: string): boolean {
@@ -719,23 +731,26 @@ export default class Participant extends Vue {
   lastInputCharacterTime = Date.now();
   dataSaved = true;
   dataSaveStart = -1;
-  onInputTextChanged(immediate = false): void {
+  async onInputTextChanged(immediate = false): Promise<void> {
     this.dataSaveStart = Date.now();
     this.dataSaved = false;
     if (!this.activeQuestionLoaded || !this.activeAnswer.textValue) {
+      this.dataSaved = true;
       return;
     } else {
       const answer = this.storedActiveAnswer;
-      if (answer && this.activeAnswer.textValue === answer.description) return;
+      if (answer && this.activeAnswer.textValue === answer.description) {
+        this.dataSaved = true;
+        return;
+      }
     }
     const inputTime = Date.now();
     this.lastInputCharacterTime = inputTime;
-    if (immediate) this.onAnswerValueChanged();
+    if (immediate) await this.onAnswerValueChanged();
     else {
-      setTimeout(() => {
-        if (inputTime === this.lastInputCharacterTime)
-          this.onAnswerValueChanged();
-      }, 2000);
+      await delay(2000);
+      if (inputTime === this.lastInputCharacterTime)
+        await this.onAnswerValueChanged();
     }
   }
 
@@ -744,20 +759,22 @@ export default class Participant extends Vue {
     this.dataSaved = false;
     if (!immediate) await delay(100);
     if (!this.activeQuestionLoaded || this.activeAnswer.numValue === null) {
+      this.dataSaved = true;
       return;
     } else {
       const answer = this.storedActiveAnswer;
-      if (answer && this.activeAnswer.numValue.toString() === answer.keywords)
+      if (answer && this.activeAnswer.numValue.toString() === answer.keywords) {
+        this.dataSaved = true;
         return;
+      }
     }
     const inputTime = Date.now();
     this.lastInputCharacterTime = inputTime;
-    if (immediate) this.onAnswerValueChanged();
+    if (immediate) await this.onAnswerValueChanged();
     else {
-      setTimeout(() => {
-        if (inputTime === this.lastInputCharacterTime)
-          this.onAnswerValueChanged();
-      }, 1000);
+      await delay(1000);
+      if (inputTime === this.lastInputCharacterTime)
+        await this.onAnswerValueChanged();
     }
   }
 
@@ -797,7 +814,7 @@ export default class Participant extends Vue {
       }
       const answer = this.storedActiveAnswer;
       if (answer && answer.id) {
-        if (answerValue) {
+        if (answerValue !== null) {
           answer.keywords = answerValue.toString();
           answer.description = answerValue.toString();
           answer.link = answerLink;
@@ -995,6 +1012,34 @@ export default class Participant extends Vue {
     }
   }
 
+  @Watch('publicAnswerList', { immediate: false })
+  async publicAnswerListChanged(): Promise<void> {
+    if (this.activeQuestionType === QuestionType.ORDER) {
+      if (
+        this.orderAnswers.length !== this.publicAnswerList.length ||
+        (this.publicAnswerList.length > 0 &&
+          !this.orderAnswers.find(
+            (answer) => this.publicAnswerList[0].answer.id === answer.answer.id
+          ))
+      ) {
+        if (!this.savedQuestions.includes(this.activeQuestionId))
+          this.loadSavedOrder();
+      }
+    }
+  }
+
+  get votesQuestionId(): string | null {
+    if (this.hasVotesForActiveQuestion) {
+      const votedAnswer = this.publicAnswerList.find(
+        (item) => item.answer.id === this.votes[0].ideaId
+      );
+      if (votedAnswer) {
+        return votedAnswer.answer.parentId;
+      }
+    }
+    return null;
+  }
+
   get hasVotesForActiveQuestion(): boolean {
     return (
       this.votes.length > 0 &&
@@ -1007,10 +1052,21 @@ export default class Participant extends Vue {
 
   async updateVotes(votes: Vote[]): Promise<void> {
     this.votes = votes;
+    if (
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+      QuestionResultStorage.VOTING
+    ) {
+      await until(() => this.publicAnswerList.length > 0);
+    }
     if (this.publicAnswerList.length === 0) await delay(500);
-    if (this.hasVotesForActiveQuestion) this.loadSavedOrder();
-    await this.skipAnswerQuestions();
-    this.activeQuestionLoaded = true;
+    if (
+      this.votes.length === votes.length &&
+      (votes.length === 0 || votes[0].id === this.votes[0].id)
+    ) {
+      if (this.hasVotesForActiveQuestion) this.loadSavedOrder();
+      await this.skipAnswerQuestions();
+      this.activeQuestionLoaded = true;
+    }
   }
 
   loadSavedOrder(): void {
@@ -1055,9 +1111,9 @@ export default class Participant extends Vue {
         this.orderAnswers = sortedVotes;
       } else {
         this.orderAnswers = randomSort(orderAnswers);
-        this.handleOrderChange().then(
-          () => (this.questionAnswered = this.getQuestionAnswered())
-        );
+        this.handleOrderChange().then(() => {
+          this.questionAnswered = this.getQuestionAnswered();
+        });
       }
     }
   }
@@ -1069,8 +1125,11 @@ export default class Participant extends Vue {
       answer &&
       this.storedActiveAnswer &&
       answer.id === this.storedActiveAnswer.id
-    )
+    ) {
+      this.activeQuestionLoaded = true;
+      this.questionAnswered = this.getQuestionAnswered();
       return;
+    }
     this.storedActiveAnswer = answer;
     if (answer) {
       if (this.activeQuestionType === QuestionType.TEXT) {
@@ -1184,7 +1243,9 @@ export default class Participant extends Vue {
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
       QuestionResultStorage.VOTING
     ) {
-      return this.votes.length > 0;
+      if (this.hasVotesForActiveQuestion) {
+        return this.votesQuestionId === this.activeQuestionId;
+      }
     } else {
       if (this.activeQuestionType === QuestionType.TEXT) {
         return !!this.activeAnswer.textValue;
@@ -1227,22 +1288,6 @@ export default class Participant extends Vue {
   unmounted(): void {
     this.deregisterAll();
     if (this.trackingManager) this.trackingManager.deregisterAll();
-  }
-
-  @Watch('publicAnswerList', { immediate: false })
-  async publicAnswerListChanged(): Promise<void> {
-    if (this.activeQuestionType === QuestionType.ORDER) {
-      if (
-        this.orderAnswers.length !== this.publicAnswerList.length ||
-        (this.publicAnswerList.length > 0 &&
-          !this.orderAnswers.find(
-            (answer) => this.publicAnswerList[0].answer.id === answer.answer.id
-          ))
-      ) {
-        if (!this.savedQuestions.includes(this.activeQuestionId))
-          this.loadSavedOrder();
-      }
-    }
   }
 }
 </script>
