@@ -26,6 +26,7 @@
             :src="convertToEmbed(link)"
             height="100%"
             width="100%"
+            allow="fullscreen"
           ></iframe>
         </figure>
         <el-image

@@ -30,6 +30,7 @@
         :src="convertToEmbed(idea.link)"
         height="100%"
         width="100%"
+        allow="fullscreen"
       ></iframe>
     </figure>
     <img
