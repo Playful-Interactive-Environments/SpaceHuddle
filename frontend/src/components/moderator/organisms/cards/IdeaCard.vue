@@ -25,6 +25,13 @@
     }"
   >
     <img v-if="idea.image" :src="idea.image" class="card__image" alt="" />
+    <figure class="media video" v-else-if="isLinkVideo(idea.link)">
+      <iframe
+        :src="convertToEmbed(idea.link)"
+        height="100%"
+        width="100%"
+      ></iframe>
+    </figure>
     <img
       v-else-if="idea.link && !idea.image"
       :src="idea.link"
@@ -424,6 +431,28 @@ export default class IdeaCard extends Vue {
   collapseChanged(): void {
     this.limitedTextLength = !this.limitedTextLength;
     this.$emit('update:collapseIdeas', CollapseIdeas.custom);
+  }
+
+  convertToEmbed(link: string | null) {
+    if (link) {
+      if (link.includes('youtube')) {
+        link = link.replace('watch?v=', 'embed/');
+      } else if (link.includes('vimeo')) {
+        const vid = link.split('/');
+        const vidNr = vid[vid.length - 1];
+        link = 'https://player.vimeo.com/video/' + vidNr;
+      }
+    }
+    return link;
+  }
+
+  isLinkVideo(link: string | null): boolean {
+    if (link) {
+      if (link.includes('youtube') || link.includes('vimeo')) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 </script>

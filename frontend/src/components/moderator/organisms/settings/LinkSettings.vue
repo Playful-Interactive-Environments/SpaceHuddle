@@ -63,6 +63,7 @@ export default class LinkSettings extends Vue {
 
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ default: null }) link!: string;
+  @Prop({ default: false }) isVideo!: boolean;
 
   formData: ValidationData = {
     editLink: '',
@@ -82,6 +83,7 @@ export default class LinkSettings extends Vue {
 
   reset(): void {
     this.formData.editLink = this.link;
+    this.formData.isVideo = this.isVideo;
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 

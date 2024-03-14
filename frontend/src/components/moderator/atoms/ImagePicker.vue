@@ -21,8 +21,20 @@
           <font-awesome-icon icon="plus" />
           <span>{{ $t('moderator.atom.imagePicker.add') }}</span>
         </div>
+        <figure class="media video" v-if="isLinkVideo(link)">
+          <iframe
+            :src="convertToEmbed(link)"
+            height="100%"
+            width="100%"
+          ></iframe>
+        </figure>
+        <el-image
+          fit="contain"
+          :src="link"
+          alt=""
+          v-if="link && !image && !isLinkVideo(link)"
+        />
         <el-image fit="contain" :src="image" alt="" v-if="image" />
-        <el-image fit="contain" :src="link" alt="" v-if="link && !image" />
       </div>
       <div
         v-if="useEditOverlay"
@@ -89,6 +101,28 @@ export default class ImagePicker extends Vue {
   @Watch('link', { immediate: true, deep: true })
   async onLinkChanged(link: string | null): Promise<void> {
     this.editLink = link;
+  }
+
+  convertToEmbed(link: string | null) {
+    if (link) {
+      if (link.includes('youtube')) {
+        link = link.replace('watch?v=', 'embed/');
+      } else if (link.includes('vimeo')) {
+        const vid = link.split('/');
+        const vidNr = vid[vid.length - 1];
+        link = 'https://player.vimeo.com/video/' + vidNr;
+      }
+    }
+    return link;
+  }
+
+  isLinkVideo(link: string | null): boolean {
+    if (link) {
+      if (link.includes('youtube') || link.includes('vimeo')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Watch('editLink', { immediate: true, deep: true })
@@ -175,6 +209,14 @@ export default class ImagePicker extends Vue {
   align-items: center;
   gap: 0.5rem;
   color: var(--color-dark-contrast-light);
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  iframe {
+    object-fit: contain;
+  }
 }
 
 .edit {
