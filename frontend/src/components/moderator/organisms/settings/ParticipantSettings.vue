@@ -236,6 +236,7 @@ export default class ParticipantSettings extends Vue {
   }
 
   handleClose(done: { (): void }): void {
+    this.viewDetailsForParticipant = null;
     done();
     this.$emit('update:showModal', false);
   }
