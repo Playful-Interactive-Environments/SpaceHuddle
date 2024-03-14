@@ -196,16 +196,6 @@
             @is_part_of_chain_changed="isPartOfChainChanged"
             @highlighted_changed="highlightedChanged"
           >
-            <!--<SpriteConverter
-              v-if="getParticleTexture(particle.name)"
-              :texture="getParticleTexture(particle.name)"
-              :anchor="0.5"
-              :pre-tint="particle.color"
-              :space-width="particleRadius * 2"
-              :space-height="particleRadius * 2"
-              :outline="particle.gameObject.highlighted ? 0xff0000 : null"
-              :preRenderFilters="false"
-            />-->
             <sprite
               v-if="getParticleTexture(particle.name)"
               :texture="getParticleTexture(particle.name)"
