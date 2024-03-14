@@ -98,7 +98,7 @@ export interface SessionFilterData {
 
 export const defaultFilterData: SessionFilterData = {
   orderType: DefaultSessionSortOrder,
-  orderAsc: true,
+  orderAsc: false,
   textFilter: '',
   subjects: null,
 };
