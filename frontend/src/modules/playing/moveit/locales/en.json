@@ -21,7 +21,8 @@
     "drivingStats": {
       "maxSpeed": "Maximum speed",
       "avgSpeed": "Average speed",
-      "time": "Time driven"
+      "time": "Time driven",
+      "goal": "Goal reached!"
     },
     "vehicle-parameter": {
       "fuel": "fuel",

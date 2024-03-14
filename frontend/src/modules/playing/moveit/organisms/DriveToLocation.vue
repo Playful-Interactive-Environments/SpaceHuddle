@@ -346,7 +346,7 @@
 
     <div id="overlayEndGoal">
       <div class="overlayEndGoalBackground"></div>
-      <h1 class="heading heading--big">Goal reached!</h1>
+      <h1 class="heading heading--big">{{ $t('module.playing.moveit.participant.drivingStats.goal') }}</h1>
       <h2 class="heading heading--regular">
         {{ $t('module.playing.moveit.participant.drivingStats.avgSpeed') }} :
         {{ Math.round(calculateSpeed('average')) }}
