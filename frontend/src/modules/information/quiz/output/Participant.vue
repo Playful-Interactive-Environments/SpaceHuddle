@@ -291,6 +291,13 @@ import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIter
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { delay, until } from '@/utils/wait';
 
+interface AnswerValue {
+  numValue: number | null;
+  textValue: string | null;
+  link: string | null;
+  image: string | null;
+}
+
 @Options({
   components: {
     ImagePicker,
@@ -324,12 +331,7 @@ export default class Participant extends Vue {
 
   trackingManager!: TrackingManager;
 
-  activeAnswer: {
-    numValue: number | null;
-    textValue: string | null;
-    link: string | null;
-    image: string | null;
-  } = {
+  activeAnswer: AnswerValue = {
     numValue: null,
     textValue: null,
     link: null,
@@ -660,9 +662,11 @@ export default class Participant extends Vue {
     }
     if (this.hasNextQuestion) {
       await until(() => this.dataSaved);
+      this.resetQuestion();
       if (!this.savedQuestions.includes(this.activeQuestionId))
         this.savedQuestions.push(this.activeQuestionId);
       this.activeQuestionIndex++;
+      this.reloadAnswers();
     } else await this.goToSubmitScreen();
     this.showSavingState = false;
   }
@@ -675,6 +679,7 @@ export default class Participant extends Vue {
       this.savedQuestions.push(this.activeQuestionId);
     this.submitScreen = true;
     await until(() => this.dataSaved);
+    this.resetQuestion();
     if (this.trackingManager) {
       await this.trackingManager.saveIteration(
         null,
@@ -688,6 +693,7 @@ export default class Participant extends Vue {
       );
     }
     this.activeQuestionIndex++;
+    this.reloadAnswers();
     if (this.trackingManager) {
       await this.trackingManager.saveState(
         {
@@ -714,7 +720,9 @@ export default class Participant extends Vue {
     }
     if (this.hasPreviousQuestion) {
       await until(() => this.dataSaved);
+      this.resetQuestion();
       this.activeQuestionIndex--;
+      this.reloadAnswers();
     }
     this.showSavingState = false;
   }
@@ -734,18 +742,24 @@ export default class Participant extends Vue {
   async onInputTextChanged(immediate = false): Promise<void> {
     this.dataSaveStart = Date.now();
     this.dataSaved = false;
-    if (!this.activeQuestionLoaded || !this.activeAnswer.textValue) {
+    await delay(200);
+    const textChanged =
+      !this.storedActiveAnswer ||
+      this.activeAnswer.textValue !== this.storedActiveAnswer.description;
+    if (
+      !this.activeQuestionLoaded ||
+      !this.activeAnswer.textValue ||
+      !textChanged
+    ) {
+      if (textChanged) {
+        this.questionAnswered = this.getQuestionAnswered();
+      }
       this.dataSaved = true;
       return;
-    } else {
-      const answer = this.storedActiveAnswer;
-      if (answer && this.activeAnswer.textValue === answer.description) {
-        this.dataSaved = true;
-        return;
-      }
     }
     const inputTime = Date.now();
     this.lastInputCharacterTime = inputTime;
+    this.questionAnswered = this.getQuestionAnswered();
     if (immediate) await this.onAnswerValueChanged();
     else {
       await delay(2000);
@@ -757,19 +771,25 @@ export default class Participant extends Vue {
   async onInputNumberChanged(immediate = false): Promise<void> {
     this.dataSaveStart = Date.now();
     this.dataSaved = false;
-    if (!immediate) await delay(100);
-    if (!this.activeQuestionLoaded || this.activeAnswer.numValue === null) {
+    await delay(200);
+    const numberChanged =
+      !this.storedActiveAnswer ||
+      this.activeAnswer.numValue?.toString() !==
+        this.storedActiveAnswer.keywords;
+    if (
+      !this.activeQuestionLoaded ||
+      this.activeAnswer.numValue === null ||
+      !numberChanged
+    ) {
+      if (numberChanged) {
+        this.questionAnswered = this.getQuestionAnswered();
+      }
       this.dataSaved = true;
       return;
-    } else {
-      const answer = this.storedActiveAnswer;
-      if (answer && this.activeAnswer.numValue.toString() === answer.keywords) {
-        this.dataSaved = true;
-        return;
-      }
     }
     const inputTime = Date.now();
     this.lastInputCharacterTime = inputTime;
+    this.questionAnswered = this.getQuestionAnswered();
     if (immediate) await this.onAnswerValueChanged();
     else {
       await delay(1000);
@@ -778,6 +798,7 @@ export default class Participant extends Vue {
     }
   }
 
+  savingActive = false;
   async onAnswerValueChanged(): Promise<void> {
     const dataSaveStart = Date.now();
     this.dataSaveStart = dataSaveStart;
@@ -812,17 +833,21 @@ export default class Participant extends Vue {
         answerImage = this.activeAnswer.image;
         if (!answerValue) answerValue = '...';
       }
+      const hasAnswer = answerValue !== null && answerValue.toString() !== '';
+      await until(() => !this.savingActive);
+      this.savingActive = true;
       const answer = this.storedActiveAnswer;
       if (answer && answer.id) {
-        if (answerValue !== null) {
-          answer.keywords = answerValue.toString();
-          answer.description = answerValue.toString();
+        if (hasAnswer) {
+          answer.keywords = answerValue?.toString();
+          answer.description = answerValue?.toString();
           answer.link = answerLink;
           answer.image = answerImage;
           await hierarchyService.putHierarchy(
             answer,
             EndpointAuthorisationType.PARTICIPANT
           );
+          hierarchyService.refreshCash(this.taskId, this.activeQuestionId);
         } else {
           deleteAnswer(answer.id);
           answer.id = null;
@@ -831,18 +856,20 @@ export default class Participant extends Vue {
           this.activeAnswer.link = null;
           this.activeAnswer.image = null;
         }
-      } else if (answerValue) {
+      } else if (hasAnswer) {
         this.storedActiveAnswer = await hierarchyService.postHierarchy(
           this.taskId,
           {
             parentId: this.activeQuestionId,
-            keywords: answerValue.toString(),
-            description: answerValue.toString(),
+            keywords: answerValue?.toString(),
+            description: answerValue?.toString(),
             order: 0,
           },
           EndpointAuthorisationType.PARTICIPANT
         );
+        hierarchyService.refreshCash(this.taskId, this.activeQuestionId);
       }
+      this.savingActive = false;
       this.questionAnswered = this.getQuestionAnswered();
       await this.trackState();
     }
@@ -980,6 +1007,7 @@ export default class Participant extends Vue {
     newValue: Hierarchy | null,
     oldValue: Hierarchy | null
   ): Promise<void> {
+    if (!newValue) return;
     this.activeQuestionLoaded = false;
     const newQuestionResultStorage =
       getQuestionResultStorageFromHierarchy(newValue);
@@ -1118,9 +1146,41 @@ export default class Participant extends Vue {
     }
   }
 
-  storedActiveAnswer!: Hierarchy | undefined;
+  storedAnswerList: { [key: number]: AnswerValue } = {};
+  resetQuestion(resetPublicBaseInput = true): void {
+    if (resetPublicBaseInput) {
+      this.activeQuestion = null;
+      this.publicAnswerList = [];
+      this.storedAnswerList[this.activeQuestionIndex] = {
+        ...this.activeAnswer,
+      };
+    }
+    this.storedActiveAnswer = undefined;
+    this.activeAnswer.textValue = null;
+    this.activeAnswer.numValue = null;
+    this.activeAnswer.link = null;
+    this.activeAnswer.image = null;
+    this.activeQuestionLoaded = false;
+    this.questionAnswered = false;
+    this.votes = [];
+  }
+
+  reloadAnswers(): void {
+    if (this.storedAnswerList[this.activeQuestionIndex]) {
+      const answer = this.storedAnswerList[this.activeQuestionIndex];
+      this.activeAnswer.textValue = answer.textValue;
+      this.activeAnswer.numValue = answer.numValue;
+      this.activeAnswer.link = answer.link;
+      this.activeAnswer.image = answer.image;
+    }
+  }
+
+  storedActiveAnswer: Hierarchy | undefined = undefined;
   async updateAnswers(answers: Hierarchy[]): Promise<void> {
     const answer = answers.find((item) => item.isOwn);
+    if (answers.length > 0 && answers[0].parentId !== this.activeQuestionId) {
+      return;
+    }
     if (
       answer &&
       this.storedActiveAnswer &&
@@ -1141,7 +1201,10 @@ export default class Participant extends Vue {
         this.activeQuestionType === QuestionType.RATING ||
         this.activeQuestionType === QuestionType.SLIDER
       ) {
-        this.activeAnswer.numValue = parseInt(answer.keywords);
+        if (answer.keywords) {
+          const numValue = parseInt(answer.keywords);
+          this.activeAnswer.numValue = !isNaN(numValue) ? numValue : null;
+        } else this.activeAnswer.numValue = null;
       } else if (this.activeQuestionType === QuestionType.IMAGE) {
         this.activeAnswer.textValue = answer.keywords;
         this.activeAnswer.link = answer.link;
@@ -1150,6 +1213,8 @@ export default class Participant extends Vue {
     } else {
       this.activeAnswer.textValue = null;
       this.activeAnswer.numValue = null;
+      this.activeAnswer.link = null;
+      this.activeAnswer.image = null;
     }
     await this.skipAnswerQuestions();
     this.activeQuestionLoaded = true;
@@ -1248,7 +1313,10 @@ export default class Participant extends Vue {
       }
     } else {
       if (this.activeQuestionType === QuestionType.TEXT) {
-        return !!this.activeAnswer.textValue;
+        return (
+          !!this.activeAnswer.textValue &&
+          this.activeAnswer.textValue.length > 0
+        );
       } else if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||

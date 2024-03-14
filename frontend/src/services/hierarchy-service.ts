@@ -129,6 +129,15 @@ export const registerGetList = (
   );
 };
 
+export const refreshCash = (
+  taskId: string,
+  parentHierarchyId: string | null
+): void => {
+  cashService.refreshCash(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.HIERARCHIES}/${parentHierarchyId}`
+  );
+};
+
 export const deregisterGetList = (
   taskId: string,
   parentHierarchyId: string | null,
