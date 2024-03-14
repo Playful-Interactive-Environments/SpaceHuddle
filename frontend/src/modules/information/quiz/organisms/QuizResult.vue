@@ -10,6 +10,7 @@
       :key="index"
       :idea="item.idea"
       :is-editable="false"
+      :show-keyword="false"
     />
   </div>
   <div v-else class="chartContainer" :style="{ height: `${chartHeight}rem` }">

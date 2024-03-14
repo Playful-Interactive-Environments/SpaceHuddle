@@ -52,7 +52,11 @@
           <span v-if="idea.count > 1" class="idea-count">
             {{ idea.count }}x
           </span>
-          {{ hasKeywords ? idea.keywords : idea.description }}
+          {{
+            hasKeywords && (showKeyword || !idea.description)
+              ? idea.keywords
+              : idea.description
+          }}
         </span>
         <span class="actions">
           <slot name="action"></slot>
@@ -155,7 +159,7 @@
       <slot></slot>
       <div
         ref="description"
-        v-if="hasKeywords && idea.description"
+        v-if="hasKeywords && idea.description && showKeyword"
         class="card__content line-break"
         :class="{
           threeLineText:
@@ -233,6 +237,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false }) ignoreLimitedDescriptionLength!: boolean;
   @Prop({ default: CollapseIdeas.custom }) collapseIdeas!: CollapseIdeas;
   @Prop({ default: true }) portrait!: boolean;
+  @Prop({ default: true }) showKeyword!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
