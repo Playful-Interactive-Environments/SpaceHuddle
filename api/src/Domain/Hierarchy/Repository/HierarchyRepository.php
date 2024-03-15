@@ -134,12 +134,15 @@ class HierarchyRepository implements RepositoryInterface
             "idea.order",
             "idea.parameter",
             "idea.participant_id",
+            "participant.symbol",
+            "participant.color",
             "idea.state",
             "idea.task_id",
             "idea.timestamp",
             "hierarchy.category_idea_id AS parent_id",
             "child_count" => $subQueryChildCount
         ])
+            ->leftJoin("participant", "participant.id = idea.participant_id")
             ->innerJoin("task", "task.id = idea.task_id")
             ->leftJoin("hierarchy", [
                 "hierarchy.sub_idea_id = idea.id",
