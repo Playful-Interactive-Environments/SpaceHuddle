@@ -17,6 +17,7 @@ import {
 import * as ideaService from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
 import { deleteIdeaImage, itemImageChanged } from '@/services/idea-service';
+import { Avatar } from '@/types/api/Participant';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -208,9 +209,10 @@ export const getHierarchyResult = (
       a.keywords < b.keywords ? -1 : a.keywords > b.keywords ? 1 : 0
     );
   votes = result.map((item) => {
-    const count = answers.filter(
+    const duplicates = answers.filter(
       (answer) => item.keywords === answer.keywords
-    ).length;
+    );
+    const count = duplicates.length;
     if (correctValue)
       item.parameter.isCorrect = item.keywords === correctValue.toString();
     return {
@@ -218,6 +220,9 @@ export const getHierarchyResult = (
       ratingSum: count,
       detailRatingSum: count,
       countParticipant: count,
+      avatarList: duplicates
+        .filter((answer) => answer.avatar)
+        .map((answer) => answer.avatar as Avatar),
     };
   });
   return votes;
@@ -248,6 +253,7 @@ export const getParentResult = (
             ratingSum: question.childCount,
             detailRatingSum: question.childCount,
             countParticipant: question.childCount,
+            avatarList: question.avatar ? [question.avatar] : [],
           });
         }
       }

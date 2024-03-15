@@ -18,6 +18,7 @@ export interface VoteResult {
   ratingSum: number;
   detailRatingSum: number;
   countParticipant: number;
+  avatarList: Avatar[];
 }
 
 export interface VoteResultDetail extends VoteResult {

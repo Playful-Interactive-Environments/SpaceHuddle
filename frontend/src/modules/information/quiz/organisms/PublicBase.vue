@@ -471,6 +471,7 @@ export default class PublicBase extends Vue {
               ratingSum: 1,
               detailRatingSum: 1,
               countParticipant: 1,
+              avatarList: [],
             });
           }
         }

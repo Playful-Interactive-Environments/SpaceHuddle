@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
+import { Avatar } from '@/types/api/Participant';
+
 export interface Hierarchy {
   id: string | null;
   parentId: string | null;
@@ -13,4 +15,5 @@ export interface Hierarchy {
   order: number | null;
   isOwn: boolean;
   childCount: number;
+  avatar: Avatar | null;
 }

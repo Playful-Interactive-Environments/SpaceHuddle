@@ -907,6 +907,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
               ratingSum: 1,
               detailRatingSum: 1,
               countParticipant: 1,
+              avatarList: [],
             });
           }
         }
@@ -1034,6 +1035,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       order: order,
       isOwn: false,
       childCount: 0,
+      avatar: null,
     };
   }
 

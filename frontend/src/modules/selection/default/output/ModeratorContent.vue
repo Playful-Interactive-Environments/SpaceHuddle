@@ -178,10 +178,11 @@ import { reloadCollapseTabs } from '@/utils/collapse';
 import IdeaSortOrder, { DefaultDisplayCount } from '@/types/enum/IdeaSortOrder';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
-import IdeaFilter, {
+import {
   defaultFilterData,
   FilterData,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
 import { View } from '@/types/api/View';
 
 const SELECTION_KEY = 'selection';

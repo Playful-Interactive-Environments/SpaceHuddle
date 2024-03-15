@@ -263,10 +263,11 @@ import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import * as themeColors from '@/utils/themeColors';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import IdeaFilter, {
+import {
   defaultFilterData,
   FilterData,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
 import { reloadCollapseTabs } from '@/utils/collapse';
 import { setEmptyParameterIfNotExists } from '@/modules/brainstorming/missionmap/utils/parameter';
 import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';

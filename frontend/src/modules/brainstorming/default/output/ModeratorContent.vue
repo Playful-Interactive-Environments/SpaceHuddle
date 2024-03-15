@@ -99,10 +99,11 @@ import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
-import IdeaFilter, {
+import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
+import {
   defaultFilterData,
   FilterData,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
 import * as cashService from '@/services/cash-service';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 

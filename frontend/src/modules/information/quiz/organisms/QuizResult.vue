@@ -3,15 +3,35 @@
     v-if="
       questionType === QuestionType.TEXT || questionType === QuestionType.IMAGE
     "
-    class="layout__columns"
   >
-    <IdeaCard
-      v-for="(item, index) in voteResult"
-      :key="index"
-      :idea="item.idea"
-      :is-editable="false"
-      :show-keyword="false"
+    <IdeaFilterBase
+      :sort-order-options="ideaSortOrderOptions"
+      v-model="filter"
     />
+    <div class="layout__columns">
+      <IdeaCard
+        v-for="(item, index) in filteredVoteResult"
+        :key="index"
+        :idea="item"
+        :canBeChanged="false"
+        :show-keyword="false"
+        :isSharable="false"
+        v-model:collapseIdeas="filter.collapseIdeas"
+      >
+        <div
+          class="participant-info"
+          v-if="filter.orderType === IdeaSortOrder.PARTICIPANT"
+        >
+          <span
+            v-for="avatar in item.avatar"
+            :key="avatar.symbol"
+            :style="{ color: avatar.color }"
+          >
+            <font-awesome-icon :icon="avatar.symbol" />&nbsp;
+          </span>
+        </div>
+      </IdeaCard>
+    </div>
   </div>
   <div v-else class="chartContainer" :style="{ height: `${chartHeight}rem` }">
     <Bar
@@ -69,6 +89,14 @@ import { delay } from '@/utils/wait';
 import * as themeColors from '@/utils/themeColors';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import { Idea } from '@/types/api/Idea';
+import IdeaFilterBase, {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import * as ideaService from '@/services/idea-service';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import { SortOrderOption } from '@/types/api/OrderGroup';
+import { convertAvatarToString } from '@/types/api/Participant';
 
 interface ChartLegend {
   color: string;
@@ -79,6 +107,7 @@ interface ChartLegend {
 
 @Options({
   components: {
+    IdeaFilterBase,
     Bar,
     IdeaCard,
   },
@@ -97,12 +126,22 @@ export default class QuizResult extends Vue {
 
   QuestionType = QuestionType;
   QuestionnaireType = QuestionnaireType;
+  IdeaSortOrder = IdeaSortOrder;
 
   chartData: any = {
     labels: [],
     datasets: [],
   };
   labelLineLimit = 2;
+  filter: FilterData = { ...defaultFilterData };
+
+  get ideaSortOrderOptions(): SortOrderOption[] {
+    return ['TIMESTAMP', 'ALPHABETICAL', 'PARTICIPANT', 'COUNT', 'STATE'].map(
+      (orderType) => {
+        return { orderType: orderType.toLowerCase(), ref: null };
+      }
+    );
+  }
 
   get contrastColor(): string {
     return themeColors.getContrastColor();
@@ -201,7 +240,46 @@ export default class QuizResult extends Vue {
     return legend;
   }
 
+  get filteredVoteResult(): Idea[] {
+    let list = ideaService.filterIdeas(
+      this.voteResult.map((item) => {
+        const idea = item.idea as Idea;
+        idea.count = item.countParticipant;
+        idea.avatar = item.avatarList;
+        return idea;
+      }),
+      this.filter.stateFilter,
+      this.filter.textFilter
+    );
+    switch (this.filter.orderType) {
+      case IdeaSortOrder.TIMESTAMP:
+        list = list.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        break;
+      case IdeaSortOrder.ALPHABETICAL:
+        list = list.sort((a, b) => a.keywords.localeCompare(b.keywords));
+        break;
+      case IdeaSortOrder.PARTICIPANT:
+        list = list.sort((a, b) =>
+          convertAvatarToString(a.avatar[0]).localeCompare(
+            convertAvatarToString(b.avatar[0])
+          )
+        );
+        break;
+      case IdeaSortOrder.COUNT:
+        list = list.sort((a, b) => a.count - b.count);
+        break;
+      case IdeaSortOrder.STATE:
+        list = list.sort((a, b) => a.state.localeCompare(b.state));
+        break;
+    }
+    if (!this.filter.orderAsc) {
+      return list.reverse();
+    }
+    return list;
+  }
+
   async mounted(): Promise<void> {
+    this.filter.orderType = IdeaSortOrder.ALPHABETICAL;
     if (this.resultData) {
       this.chartData.labels = this.resultData.labels;
       this.chartData.datasets = this.resultData.datasets;
@@ -355,5 +433,9 @@ export default class QuizResult extends Vue {
 <style lang="scss" scoped>
 .chartContainer {
   width: 100%;
+}
+
+.participant-info {
+  margin-top: 1rem;
 }
 </style>

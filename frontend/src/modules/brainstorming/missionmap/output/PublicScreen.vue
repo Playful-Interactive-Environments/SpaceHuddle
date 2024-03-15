@@ -100,8 +100,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import {
   defaultFilterData,
   FilterData,
-  getFilterForTask,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import { getFilterForTask } from '@/components/moderator/molecules/IdeaFilter.vue';
 import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';

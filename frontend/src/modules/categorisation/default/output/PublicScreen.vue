@@ -68,8 +68,8 @@ import * as categorisationService from '@/services/categorisation-service';
 import {
   defaultFilterData,
   FilterData,
-  getFilterForTask,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import { getFilterForTask } from '@/components/moderator/molecules/IdeaFilter.vue';
 import * as cashService from '@/services/cash-service';
 import { View } from '@/types/api/View';
 import * as ideaService from '@/services/idea-service';

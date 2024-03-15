@@ -1,93 +1,13 @@
 <template>
-  <div class="level filter_options">
-    <div class="level-left">
-      <div class="level-item">
-        <el-input
-          v-model="modelValue.textFilter"
-          :placeholder="$t('moderator.molecule.ideaFilter.filterPlaceholder')"
-          @change="change"
-          clearable
-        >
-          <template #prefix>
-            <font-awesome-icon icon="filter" />
-          </template>
-        </el-input>
-      </div>
-      <div class="level-item" v-if="useStateFilter">
-        <el-select
-          v-model="modelValue.stateFilter"
-          class="select--fullwidth"
-          multiple
-          @change="change"
-        >
-          <template v-slot:prefix>
-            <font-awesome-icon icon="filter" class="el-icon" />
-          </template>
-          <el-option
-            v-for="state in IdeaStateKeys"
-            :key="state"
-            :value="state"
-            :label="$t(`enum.ideaState.${IdeaStates[state]}`)"
-          >
-          </el-option>
-        </el-select>
-      </div>
-      <div class="level-item">
-        <el-select v-model="modelValue.orderType" @change="change">
-          <template v-slot:prefix>
-            <font-awesome-icon icon="sort" class="el-icon" />
-          </template>
-          <el-option
-            v-for="type in sortOrderOptions"
-            :key="type.orderType"
-            :value="
-              type.ref
-                ? `${type.orderType}&refId=${type.ref.id}`
-                : type.orderType
-            "
-            :label="
-              $t(`enum.ideaSortOrder.${type.orderType}`) +
-              (type.ref ? ` - ${type.ref.name}` : '')
-            "
-          >
-            <span>
-              {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
-            </span>
-            <span v-if="type.ref"> - {{ type.ref.name }} </span>
-          </el-option>
-        </el-select>
-      </div>
-    </div>
-    <div class="level-right">
-      <div class="level-item link" @click="changeOrderAsc">
-        <ToolTip
-          :text="
-            modelValue.orderAsc
-              ? $t('moderator.molecule.ideaFilter.sortAscending')
-              : $t('moderator.molecule.ideaFilter.sortDescending')
-          "
-        >
-          <font-awesome-icon
-            :icon="
-              modelValue.orderAsc
-                ? 'arrow-down-short-wide'
-                : 'arrow-up-short-wide'
-            "
-          />
-        </ToolTip>
-      </div>
-      <div class="level-item link" @click="collapseChanged(!collapse)">
-        <ToolTip
-          :text="
-            collapse
-              ? $t('moderator.molecule.ideaFilter.maximizeText')
-              : $t('moderator.molecule.ideaFilter.minimizeText')
-          "
-        >
-          <font-awesome-icon v-if="!collapse" icon="window-minimize" />
-          <font-awesome-icon v-else icon="window-maximize" />
-        </ToolTip>
-      </div>
+  <IdeaFilterBase
+    v-model="modelValue"
+    :use-state-filter="useStateFilter"
+    :sort-order-options="sortOrderOptions"
+    custom-class="filter_options"
+    @update="() => $emit('update', modelValue)"
+    @change="() => $emit('change', modelValue)"
+  >
+    <template #right>
       <div
         class="level-item link"
         :class="{ disabled: !syncToPublicScreen }"
@@ -104,17 +24,14 @@
           <font-awesome-icon icon="link-slash" v-else />
         </ToolTip>
       </div>
-    </div>
-  </div>
+    </template>
+  </IdeaFilterBase>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { SortOrderOption } from '@/types/api/OrderGroup';
-import IdeaSortOrder, {
-  DefaultIdeaSortOrder,
-} from '@/types/enum/IdeaSortOrder';
-import IdeaStates from '@/types/enum/IdeaStates';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as taskService from '@/services/task-service';
 import ViewType from '@/types/enum/ViewType';
@@ -130,22 +47,10 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { SessionRole } from '@/types/api/SessionRole';
 import * as cashService from '@/services/cash-service';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
-
-export interface FilterData {
-  orderType: string;
-  orderAsc: boolean;
-  stateFilter: string[];
-  textFilter: string;
-  collapseIdeas: CollapseIdeas;
-}
-
-export const defaultFilterData: FilterData = {
-  orderType: DefaultIdeaSortOrder,
-  orderAsc: true,
-  stateFilter: Object.keys(IdeaStates),
-  textFilter: '',
-  collapseIdeas: CollapseIdeas.custom,
-};
+import IdeaFilterBase, {
+  FilterData,
+  defaultFilterData,
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
 
 export const getFilterForTask = (task: Task): FilterData => {
   const filter = { ...defaultFilterData };
@@ -165,7 +70,7 @@ export const getFilterForTask = (task: Task): FilterData => {
 };
 
 @Options({
-  components: { ToolTip },
+  components: { IdeaFilterBase, ToolTip },
   emits: ['change', 'update'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -181,10 +86,7 @@ export default class IdeaFilter extends Vue {
   ownUserId = '';
 
   sortOrderOptions: SortOrderOption[] = [];
-  IdeaStates = IdeaStates;
-  IdeaStateKeys = Object.keys(IdeaStates);
   sessionId = '';
-  collapse = true;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -380,24 +282,6 @@ export default class IdeaFilter extends Vue {
       center: true,
       showClose: true,
     });
-  }
-
-  change(): void {
-    this.$emit('update', this.modelValue);
-    this.$emit('change', this.modelValue);
-    if (this.syncToPublicScreen) this.saveParameterChanges();
-  }
-
-  changeOrderAsc(): void {
-    this.modelValue.orderAsc = !this.modelValue.orderAsc;
-    this.change();
-  }
-
-  collapseChanged(collapse: boolean): void {
-    this.collapse = collapse;
-    if (collapse) this.modelValue.collapseIdeas = CollapseIdeas.collapseAll;
-    else this.modelValue.collapseIdeas = CollapseIdeas.expandAll;
-    this.change();
   }
 }
 </script>

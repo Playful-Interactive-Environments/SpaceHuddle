@@ -362,10 +362,11 @@ import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
-import IdeaFilter, {
+import {
   defaultFilterData,
   FilterData,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';

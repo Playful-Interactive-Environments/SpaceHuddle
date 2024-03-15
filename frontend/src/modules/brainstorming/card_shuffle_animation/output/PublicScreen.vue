@@ -34,11 +34,11 @@ import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { getFilterForTask } from '@/components/moderator/molecules/IdeaFilter.vue';
 import {
   defaultFilterData,
   FilterData,
-  getFilterForTask,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';

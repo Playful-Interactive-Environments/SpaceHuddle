@@ -184,10 +184,11 @@ import {
 } from '@/types/api/CategoryContent';
 import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
-import IdeaFilter, {
+import {
   defaultFilterData,
   FilterData,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
 import * as cashService from '@/services/cash-service';
 import { View } from '@/types/api/View';
 import * as ideaService from '@/services/idea-service';

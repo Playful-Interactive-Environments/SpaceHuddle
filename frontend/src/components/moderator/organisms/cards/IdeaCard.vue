@@ -75,7 +75,7 @@
             />
           </span>
           <el-dropdown
-            v-if="isEditable"
+            v-if="isEditable && (canChangeState || isSharable || canBeChanged)"
             class="card__menu"
             v-on:command="menuItemSelected($event)"
             trigger="click"
@@ -109,7 +109,7 @@
                     />
                   </ToolTip>
                 </el-dropdown-item>
-                <el-dropdown-item command="edit">
+                <el-dropdown-item v-if="canBeChanged" command="edit">
                   <ToolTip
                     :placement="'right'"
                     :text="$t('moderator.organism.settings.ideaSettings.edit')"
@@ -117,7 +117,7 @@
                     <font-awesome-icon icon="pen" />
                   </ToolTip>
                 </el-dropdown-item>
-                <el-dropdown-item command="delete">
+                <el-dropdown-item v-if="canBeChanged" command="delete">
                   <ToolTip
                     :placement="'right'"
                     :text="
@@ -230,6 +230,7 @@ export enum CollapseIdeas {
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isEditable!: boolean;
+  @Prop({ default: true }) canBeChanged!: boolean;
   @Prop({ default: true }) handleEditable!: boolean;
   @Prop({ default: true }) canChangeState!: boolean;
   @Prop({ default: true }) isSharable!: boolean;

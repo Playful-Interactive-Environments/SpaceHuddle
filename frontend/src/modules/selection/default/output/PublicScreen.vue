@@ -26,8 +26,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import {
   defaultFilterData,
   FilterData,
-  getFilterForTask,
-} from '@/components/moderator/molecules/IdeaFilter.vue';
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
+import { getFilterForTask } from '@/components/moderator/molecules/IdeaFilter.vue';
 import * as cashService from '@/services/cash-service';
 
 @Options({
