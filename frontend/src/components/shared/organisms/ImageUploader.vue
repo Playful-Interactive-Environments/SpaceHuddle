@@ -15,7 +15,7 @@
       drag
       :before-upload="beforeUpload"
       :http-request="uploadFile"
-      accept="image/png, image/jpeg, image/jpg"
+      accept="image/png, image/jpeg, image/jpg, image/gif"
       class="el-upload"
     >
       <font-awesome-icon icon="upload" />
@@ -43,7 +43,7 @@
       <div class="image-upload__cropper-wrapper">
         <cropper
           ref="cropper"
-          :src="uploadData.url"
+          :src="uploadData?.url"
           class="image-upload__cropper"
           check-orientation
           :canvas="{
@@ -60,7 +60,7 @@
         >
           <font-awesome-icon icon="rotate-right" />
         </div>
-        <div class="image-upload__file-type" v-if="uploadData.type">
+        <div class="image-upload__file-type" v-if="uploadData?.type">
           {{ uploadData.type }}
         </div>
       </div>

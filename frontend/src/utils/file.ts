@@ -42,6 +42,7 @@ export enum FileTypeImage {
   PNG = 'png',
   JPG = 'jpg',
   JPEG = 'jpeg',
+  GIF = 'gif',
 }
 
 export const getFileType = (filename: string): FileTypeImage => {
@@ -49,7 +50,7 @@ export const getFileType = (filename: string): FileTypeImage => {
   if (fileNameParts.length > 1) {
     if (
       Object.values(FileTypeImage).includes(
-        fileNameParts[1].toLowerCase() as FileTypeImage
+        fileNameParts[fileNameParts.length - 1].toLowerCase() as FileTypeImage
       )
     ) {
       const fileType = fileNameParts[1];

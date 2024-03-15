@@ -24,7 +24,13 @@
       '--background-color': backgroundColor,
     }"
   >
-    <img v-if="idea.image" :src="idea.image" class="card__image" alt="" />
+    <el-image
+      v-if="idea.image"
+      :src="idea.image"
+      class="card__image"
+      alt=""
+      :preview-src-list="[idea.image]"
+    />
     <figure class="media video" v-else-if="isLinkVideo(idea.link)">
       <iframe
         :src="convertToEmbed(idea.link)"
@@ -33,11 +39,12 @@
         allow="fullscreen"
       ></iframe>
     </figure>
-    <img
+    <el-image
       v-else-if="idea.link && !idea.image"
       :src="idea.link"
       class="card__image"
       alt=""
+      :preview-src-list="[idea.link]"
     />
     <div v-else class="card__image">
       <slot name="icon"></slot>
@@ -249,6 +256,8 @@ export default class IdeaCard extends Vue {
   preventClosing = false;
 
   IdeaStates = IdeaStates;
+
+  imgPreview = false;
 
   levelSharedChanged() {
     this.$emit('sharedStatusChanged', this.sharedStatus);
