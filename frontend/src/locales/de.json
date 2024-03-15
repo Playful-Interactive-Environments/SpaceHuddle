@@ -488,7 +488,7 @@
       "imageUploader": {
         "header": "Bild hochladen",
         "uploadText": "Datei hier ablegen oder zum Hochladen anklicken",
-        "uploadTip": "jpg/png-Dateien",
+        "uploadTip": "jpg/png/gif-Dateien",
         "save": "Erledigt"
       },
       "drawingUploader": {

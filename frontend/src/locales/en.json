@@ -487,7 +487,7 @@
       "imageUploader": {
         "header": "upload and crop image",
         "uploadText": "Drop file here or click to upload",
-        "uploadTip": "jpg/png files",
+        "uploadTip": "jpg/png/gif files",
         "save": "Done"
       },
       "drawingUploader": {
