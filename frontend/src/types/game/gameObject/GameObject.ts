@@ -273,6 +273,14 @@ export default class GameObject
     this._highlighted = value;
     this.emit('highlighted_changed', value, this);
   }
+
+  get colliderScaleFactor(): number {
+    return this.physcics.colliderScaleFactor;
+  }
+
+  set colliderScaleFactor(value: number) {
+    this.physcics.colliderScaleFactor = value;
+  }
   //#endregion props
 
   //#region events

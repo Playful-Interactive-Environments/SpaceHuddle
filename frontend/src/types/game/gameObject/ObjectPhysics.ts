@@ -48,6 +48,16 @@ export default class ObjectPhysics {
   }
 
   //#region props
+  private _colliderScaleFactor = 1;
+  get colliderScaleFactor(): number {
+    return this._colliderScaleFactor;
+  }
+
+  set colliderScaleFactor(value: number) {
+    this._colliderScaleFactor = value;
+    this.updateScale();
+  }
+
   private get gameContainer(): GameContainer {
     return this.transform.gameContainer;
   }
@@ -128,7 +138,7 @@ export default class ObjectPhysics {
 
   _appliedScaleFactor = 1;
   updateScale(): void {
-    const scaleFactor = this.pixiObject.scale.x;
+    const scaleFactor = this.pixiObject.scale.x * this._colliderScaleFactor;
     if (this.body && scaleFactor !== this._appliedScaleFactor) {
       const scale = (1 / this._appliedScaleFactor) * scaleFactor;
       Matter.Body.scale(this.body, scale, scale);

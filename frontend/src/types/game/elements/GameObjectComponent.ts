@@ -46,6 +46,7 @@ interface GameObjectProps {
   mask: PIXI.Container<PIXI.DisplayObject> | PIXI.MaskData | null;
   poolingKey: string;
   highlighted: boolean;
+  colliderScaleFactor: number;
 }
 
 export interface GameObjectEvents extends ContainerEvents {

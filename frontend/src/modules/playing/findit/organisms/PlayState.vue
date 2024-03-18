@@ -31,6 +31,7 @@
             :object-space="ObjectSpace.RelativeToBackground"
             :posX="getDisplayPosition(placeable)[0]"
             :posY="getDisplayPosition(placeable)[1]"
+            :colliderScaleFactor="getDisplayColliderScaleFactor(placeable)"
             :angle="placeable.rotation"
             :scale="placeable.scale"
             :options="{
@@ -91,12 +92,13 @@
     <DrawerBottomOverlay
       v-if="
         clickedPlaceableConfig &&
-        hasTexture(clickedPlaceable.type, clickedPlaceable.name)
+        infoPlaceableList.length > 0 &&
+        hasTexture(infoPlaceableList[0].type, infoPlaceableList[0].name)
       "
       v-model="showToolbox"
       :title="
         $t(
-          `${clickedPlaceableConfigSettings.explanationText}.${clickedPlaceable.type}.${clickedPlaceableConfig.explanationKey}.name`
+          `${clickedPlaceableConfigSettings.explanationText}.${infoPlaceableList[0].type}.${clickedPlaceableConfig.explanationKey}.name`
         )
       "
     >
@@ -112,11 +114,17 @@
       <div class="clickedPlaceable">
         <img
           v-if="
-            levelTypeImages[clickedPlaceable.type] &&
-            levelTypeImages[clickedPlaceable.type][clickedPlaceable.name]
+            levelTypeImages[infoPlaceableList[0].type] &&
+            levelTypeImages[infoPlaceableList[0].type][
+              infoPlaceableList[0].name
+            ]
           "
-          :src="levelTypeImages[clickedPlaceable.type][clickedPlaceable.name]"
-          :alt="clickedPlaceable.name"
+          :src="
+            levelTypeImages[infoPlaceableList[0].type][
+              infoPlaceableList[0].name
+            ]
+          "
+          :alt="infoPlaceableList[0].name"
           :style="{
             'max-width': `calc(${gameWidth}px - 6rem)`,
             'max-height': `${(gameHeight / 10) * 4}px`,
@@ -126,7 +134,7 @@
       <div>
         {{
           $t(
-            `${clickedPlaceableConfigSettings.explanationText}.${clickedPlaceable.type}.${clickedPlaceableConfig.explanationKey}.description`
+            `${clickedPlaceableConfigSettings.explanationText}.${infoPlaceableList[0].type}.${clickedPlaceableConfig.explanationKey}.description`
           )
         }}
       </div>
@@ -256,7 +264,6 @@ export default class PlayState extends Vue {
   gameHeight = 0;
   showToolbox = false;
   tutorialSteps: Tutorial[] = [];
-  clickedPlaceable: FindItPlaceable | null = null;
   levelType = '';
   gameConfig = gameConfig;
 
@@ -281,7 +288,7 @@ export default class PlayState extends Vue {
   CollisionBorderType = CollisionBorderType;
 
   clearPlayState(): void {
-    this.clickedPlaceable = null;
+    this.infoPlaceableList = [];
     this.levelType = '';
     this.placedObjects = [];
     this.collectedObjects = [];
@@ -322,6 +329,29 @@ export default class PlayState extends Vue {
 
   get zoomSize(): number {
     return this.searchSize; // (this.searchSize / 5) * 4;
+  }
+
+  getDisplayColliderScaleFactor(placeable: FindItPlaceable): number {
+    const gameContainer = this.$refs.gameContainer as GameContainer;
+    const config =
+      gameConfig[this.levelType].categories[placeable.type].settings;
+    if (gameContainer && config.explanationText) {
+      const absolutePosition = [
+        (placeable.position[0] / 100) * gameContainer.backgroundTextureSize[0],
+        (placeable.position[1] / 100) * gameContainer.backgroundTextureSize[1],
+      ];
+      const delta = [
+        absolutePosition[0] - this.absoluteSearchPosition[0],
+        absolutePosition[1] - this.absoluteSearchPosition[1],
+      ];
+      if (
+        Math.abs(delta[0]) < this.searchSize &&
+        Math.abs(delta[1]) < this.searchSize
+      ) {
+        return 2;
+      }
+    }
+    return 1;
   }
 
   getDisplayPosition(placeable: FindItPlaceable): [number, number] {
@@ -567,7 +597,7 @@ export default class PlayState extends Vue {
       this.collectedObjects = [];
       this.collectedRedHerrings = [];
       this.collectedCount = 0;
-      this.clickedPlaceable = null;
+      this.infoPlaceableList = [];
       this.startTime = Date.now();
       this.playStateType = PlayStateType.play;
       this.isReadyForPlay = true;
@@ -673,17 +703,19 @@ export default class PlayState extends Vue {
   }
 
   get clickedPlaceableConfigSettings(): any {
-    if (this.clickedPlaceable) {
-      return gameConfig[this.levelType].categories[this.clickedPlaceable.type]
-        .settings;
+    if (this.infoPlaceableList.length > 0) {
+      return gameConfig[this.levelType].categories[
+        this.infoPlaceableList[0].type
+      ].settings;
     }
     return null;
   }
 
   get clickedPlaceableConfig(): any {
-    if (this.clickedPlaceable) {
-      return gameConfig[this.levelType].categories[this.clickedPlaceable.type]
-        .items[this.clickedPlaceable.name];
+    if (this.infoPlaceableList.length > 0) {
+      return gameConfig[this.levelType].categories[
+        this.infoPlaceableList[0].type
+      ].items[this.infoPlaceableList[0].name];
     }
     return null;
   }
@@ -694,9 +726,21 @@ export default class PlayState extends Vue {
     return config.collectable;
   }
 
-  destroyPlaceable(value: FindItPlaceable, event: PointerEvent): void {
+  saveTutorialStep = false;
+  infoPlaceableList: FindItPlaceable[] = [];
+  async destroyPlaceable(
+    value: FindItPlaceable,
+    event: PointerEvent
+  ): Promise<void> {
     const config = gameConfig[this.levelType].categories[value.type].settings;
-    if (config.explanationText) this.clickedPlaceable = value;
+    if (config.explanationText) {
+      if (
+        !this.infoPlaceableList.find(
+          (item) => item.type === value.type && item.name === value.name
+        )
+      )
+        this.infoPlaceableList.push(value);
+    }
     const placeableConfig =
       gameConfig[this.levelType].categories[value.type].items[value.name];
     const index = this.placedObjects.indexOf(value);
@@ -716,22 +760,34 @@ export default class PlayState extends Vue {
       const tutorialStepName = `${value.type}-${placeableConfig.explanationKey}`;
       event.preventDefault();
       this.showToolbox = true;
+      await until(() => !this.saveTutorialStep);
+      this.saveTutorialStep = true;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
         const tutorialItem: Tutorial = {
           step: tutorialStepName,
           type: tutorialType,
           order: 0,
         };
-        tutorialService.addTutorialStep(
+        await tutorialService.addTutorialStep(
           tutorialItem,
           this.authHeaderTyp,
           this.eventBus
         );
-      } else {
+        this.saveTutorialStep = false;
+      } /*else {
+        this.saveTutorialStep = false;
         setTimeout(() => {
           this.showToolbox = false;
-        }, 5000);
-      }
+        }, 2000);
+      }*/
+    }
+  }
+
+  @Watch('showToolbox', { immediate: true })
+  onShowToolboxChanged(): void {
+    if (!this.showToolbox) {
+      this.infoPlaceableList.splice(0, 1);
+      if (this.infoPlaceableList.length > 0) this.showToolbox = true;
     }
   }
 
