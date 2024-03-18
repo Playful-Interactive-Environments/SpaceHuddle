@@ -21,6 +21,7 @@
       :taskId="taskId"
       :level-type="selectedLevelType"
       :gameConfig="gameConfig"
+      :show-min-map="true"
       @editFinished="editFinished"
     />
     <PlayState

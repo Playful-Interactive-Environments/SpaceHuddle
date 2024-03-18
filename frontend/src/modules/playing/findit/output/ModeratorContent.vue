@@ -36,6 +36,7 @@
             :can-approve="true"
             :can-export="true"
             :collider-delta="20"
+            :show-min-map="true"
             @approved="approved"
           ></LevelBuilder>
         </div>

@@ -10,7 +10,7 @@
       v-model:width="gameWidth"
       v-model:height="gameHeight"
       :background-texture="gameConfig[levelType].settings.background"
-      :background-movement="BackgroundMovement.Pan"
+      :background-movement="backgroundMovement"
       :detect-collision="false"
       :use-gravity="false"
       :collision-borders="CollisionBorderType.None"
@@ -342,6 +342,7 @@ export default class LevelBuilder extends Vue {
   @Prop({ default: false }) readonly canChangeLayer!: boolean;
   @Prop({ default: false }) readonly canApprove!: boolean;
   @Prop({ default: false }) readonly canExport!: boolean;
+  @Prop({ default: false }) readonly showMinMap!: boolean;
   @Prop() readonly gameConfig!: placeable.PlaceableConfig;
   @Prop({ default: 0 }) readonly colliderDelta!: number;
   @Prop({ default: null }) readonly customSortOrder!:
@@ -386,6 +387,11 @@ export default class LevelBuilder extends Vue {
 
   get backgroundColor(): string {
     return themeColors.getBackgroundColor();
+  }
+
+  get backgroundMovement(): BackgroundMovement {
+    if (this.showMinMap) return BackgroundMovement.Map;
+    return BackgroundMovement.Pan;
   }
 
   get buildResult(): BuildStateResult {
@@ -705,6 +711,9 @@ export default class LevelBuilder extends Vue {
             this.getTexture(item.type, item.name)
           )
         );
+      for (const item of this.placedObjects) {
+        this.placementState[item.name].currentCount++;
+      }
       this.updateZIndex();
       this.loadedLevelType = levelType;
       this.loadedLevel = this.level;
