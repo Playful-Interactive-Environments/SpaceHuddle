@@ -30,6 +30,7 @@
       class="card__image"
       alt=""
       :preview-src-list="[idea.image]"
+      :hide-on-click-modal="true"
     />
     <figure class="media video" v-else-if="isLinkVideo(idea.link)">
       <iframe
@@ -45,6 +46,7 @@
       class="card__image"
       alt=""
       :preview-src-list="[idea.link]"
+      :hide-on-click-modal="true"
     />
     <div v-else class="card__image">
       <slot name="icon"></slot>
