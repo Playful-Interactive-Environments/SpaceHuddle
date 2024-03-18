@@ -231,7 +231,6 @@ import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import { ElMessageBox } from 'element-plus';
 import { getModuleConfig } from '@/modules';
-import * as userService from '@/services/user-service';
 
 @Options({
   components: {
