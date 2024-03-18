@@ -325,35 +325,12 @@
       </h1>
     </template>
     <div>
-      <el-radio-group v-model="movingType">
-        <el-radio-button
-          v-for="level in MovingType"
-          :key="level"
-          :label="level"
-        >
-          <span class="icon">
-            <font-awesome-icon :icon="['fac', getMovingIcon(level)]" />
-          </span>
-          <!--{{
-            $t(`module.playing.moveit.participant.movingType.${level}.title`)
-          }}-->
-        </el-radio-button>
-      </el-radio-group>
-    </div>
-    <div class="info">
-      {{
-        $t(
-          `module.playing.moveit.participant.movingType.${movingType}.description`
-        )
-      }}
-    </div>
-    <div>
       <el-radio-group v-model="navigationType">
+        <!-- :disabled="hasNavigationType(level)" -->
         <el-radio-button
-          v-for="level in NavigationType"
+          v-for="level in NavigationTypeList"
           :key="level"
           :label="level"
-          :disabled="hasNavigationType(level)"
         >
           <span class="icon">
             <font-awesome-icon
@@ -374,6 +351,29 @@
       {{
         $t(
           `module.playing.moveit.participant.navigationType.${navigationType}.description`
+        )
+      }}
+    </div>
+    <div v-if="freeStylePossible">
+      <el-radio-group v-model="movingType">
+        <el-radio-button
+          v-for="level in MovingType"
+          :key="level"
+          :label="level"
+        >
+          <span class="icon">
+            <font-awesome-icon :icon="['fac', getMovingIcon(level)]" />
+          </span>
+          <!--{{
+            $t(`module.playing.moveit.participant.movingType.${level}.title`)
+          }}-->
+        </el-radio-button>
+      </el-radio-group>
+    </div>
+    <div v-if="freeStylePossible" class="info">
+      {{
+        $t(
+          `module.playing.moveit.participant.movingType.${movingType}.description`
         )
       }}
     </div>
@@ -462,7 +462,11 @@ export default class SelectChallenge extends Vue {
   showInfo = false;
   showPlayDialog = false;
   navigationType = NavigationType.speed;
-  NavigationType = NavigationType;
+  NavigationTypeList = [
+    NavigationType.speed,
+    NavigationType.speedDirection,
+    NavigationType.joystick,
+  ];
   movingType = MovingType.path;
   MovingType = MovingType;
   textureToken = pixiUtil.createLoadingToken();
@@ -523,6 +527,13 @@ export default class SelectChallenge extends Vue {
         return false;
     }
     return false;
+  }
+
+  get freeStylePossible(): boolean {
+    return (
+      this.navigationType !== NavigationType.speed &&
+      this.navigationType !== NavigationType.acceleration
+    );
   }
 
   getStarsForVehicle(vehicle: vehicleCalculation.Vehicle): number {
