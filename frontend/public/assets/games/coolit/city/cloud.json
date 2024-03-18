@@ -1,0 +1,58 @@
+{
+"frames": {
+	"Cloud1.png": {
+		"frame": {"x":0, "y":3246, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud2.png": {
+		"frame": {"x":0, "y":2705, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud3.png": {
+		"frame": {"x":2001, "y":541, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud4.png": {
+		"frame": {"x":0, "y":1623, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud5.png": {
+		"frame": {"x":0, "y":1082, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud6.png": {
+		"frame": {"x":0, "y":541, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud7.png": {
+		"frame": {"x":0, "y":0, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud8.png": {
+		"frame": {"x":0, "y":2164, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	},
+	"Cloud0.png": {
+		"frame": {"x":2001, "y":0, "w":2000, "h":540},
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":540},
+		"sourceSize": {"w":2000,"h":540}
+	}
+
+},
+"meta": {
+	"image": "cloud.png",
+	"size": {"w": 4002, "h": 3787},
+	"scale": "1"
+},
+"animations": {
+	"cloud": ["Cloud0.png", "Cloud1.png", "Cloud2.png", "Cloud3.png", "Cloud4.png", "Cloud5.png", "Cloud6.png", "Cloud7.png", "Cloud8.png"]
+}
+}

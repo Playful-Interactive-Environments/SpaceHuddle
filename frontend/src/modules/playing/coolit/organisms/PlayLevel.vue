@@ -74,6 +74,50 @@
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
           <container v-if="!gameOver">
+            <ParticlePlayer
+              v-if="weatherStylesheets"
+              :config="snow"
+              :frequency="snow.frequency"
+              :default-texture="[
+                weatherStylesheets.textures['snow_01.png'],
+                weatherStylesheets.textures['snow_02.png'],
+                weatherStylesheets.textures['snow_03.png'],
+                weatherStylesheets.textures['snow_04.png'],
+                weatherStylesheets.textures['snow_05.png'],
+                weatherStylesheets.textures['snow_06.png'],
+                weatherStylesheets.textures['snow_07.png'],
+                weatherStylesheets.textures['snow_08.png'],
+              ]"
+              :deep-clone-config="true"
+              :disabled="
+                !snow.frequency &&
+                snow.startTime + minExtremeWeatherTime < Date.now()
+              "
+            />
+            <ParticlePlayer
+              v-if="weatherStylesheets"
+              :config="hail"
+              :frequency="hail.frequency"
+              :default-texture="weatherStylesheets.textures['hail.png']"
+              :deep-clone-config="true"
+              :disabled="
+                !hail.frequency &&
+                hail.startTime + minExtremeWeatherTime < Date.now()
+              "
+            />
+            <animated-sprite
+              ref="cloud"
+              v-if="cloudStylesheets"
+              :textures="cloudStylesheets.animations['cloud']"
+              :animation-speed="0.02"
+              :scale="0.7"
+              :x="cloudX"
+              :y="cloudY"
+              :width="cloudWidth"
+              :anchor="[0.5, 1]"
+              playing
+              :loop="true"
+            />
             <container>
               <sprite
                 v-if="temperatureScaleTexture"
@@ -122,37 +166,6 @@
               :anchor="[0.5, 1]"
               playing
               :loop="vehicleIsActive && !gameOver"
-            />
-            <ParticlePlayer
-              v-if="weatherStylesheets"
-              :config="snow"
-              :frequency="snow.frequency"
-              :default-texture="[
-                weatherStylesheets.textures['snow_01.png'],
-                weatherStylesheets.textures['snow_02.png'],
-                weatherStylesheets.textures['snow_03.png'],
-                weatherStylesheets.textures['snow_04.png'],
-                weatherStylesheets.textures['snow_05.png'],
-                weatherStylesheets.textures['snow_06.png'],
-                weatherStylesheets.textures['snow_07.png'],
-                weatherStylesheets.textures['snow_08.png'],
-              ]"
-              :deep-clone-config="true"
-              :disabled="
-                !snow.frequency &&
-                snow.startTime + minExtremeWeatherTime < Date.now()
-              "
-            />
-            <ParticlePlayer
-              v-if="weatherStylesheets"
-              :config="hail"
-              :frequency="hail.frequency"
-              :default-texture="weatherStylesheets.textures['hail.png']"
-              :deep-clone-config="true"
-              :disabled="
-                !hail.frequency &&
-                hail.startTime + minExtremeWeatherTime < Date.now()
-              "
             />
             <GameObject
               v-for="ray in rayList"
@@ -733,6 +746,7 @@ export default class PlayLevel extends Vue {
   moleculeStylesheets: PIXI.Spritesheet | null = null;
   vehicleStylesheets: PIXI.Spritesheet | null = null;
   weatherStylesheets: PIXI.Spritesheet | null = null;
+  cloudStylesheets: PIXI.Spritesheet | null = null;
   sunStylesheets: PIXI.Spritesheet | null = null;
   startTime = Date.now();
   playTime = 0;
@@ -1275,6 +1289,11 @@ export default class PlayLevel extends Vue {
     return this.vehicleWidth / this.getVehicleAspect(this.randomVehicleName);
   }
 
+  get cloudWidth(): number {
+    if (this.gameWidth > 0) return this.gameWidth / 2;
+    return 100;
+  }
+
   get vehicleYPosition(): number {
     return this.gameHeight * 0.975;
   }
@@ -1391,6 +1410,11 @@ export default class PlayLevel extends Vue {
       .loadTexture('/assets/games/coolit/city/sun.json', this.textureToken)
       .then((sheet) => {
         this.sunStylesheets = sheet;
+      });
+    pixiUtil
+      .loadTexture('/assets/games/coolit/city/cloud.json', this.textureToken)
+      .then((sheet) => {
+        this.cloudStylesheets = sheet;
       });
 
     for (
@@ -2079,8 +2103,23 @@ export default class PlayLevel extends Vue {
   hypothermia = false;
   overheating = false;
   emitObstacleList: string[] = [];
+  cloudX = 0;
+  cloudY = 0;
   updateLoop(): void {
     if (!this.$refs.gameContainer) return;
+    if (
+      (this.hail.frequency || this.snow.frequency) &&
+      this.cloudY < this.gameHeight / 5
+    ) {
+      this.cloudY += 5;
+    } else if (
+      !this.hail.frequency &&
+      !this.snow.frequency &&
+      this.cloudY > 0
+    ) {
+      this.cloudY -= 15;
+    }
+    this.cloudX = this.gameWidth / 2;
     this.windForce = this.getWindForce();
     const updateTimeStamp = Date.now();
     const playTime = updateTimeStamp - this.startTime;
