@@ -82,11 +82,17 @@
             class="personContainer"
             :style="{ '--persons': boardingPersons }"
           >
+            <font-awesome-icon
+              v-if="carLoading"
+              icon="car"
+              class="previewImage"
+            />
             <img
               class="divingVehicle"
               :src="`/assets/games/moveit/vehicle/${vehicleParameter.imageTop}`"
               alt="car"
               :width="30"
+              @load="() => (carLoading = false)"
             />
             <font-awesome-icon
               v-if="boardingPersons > 0"
@@ -346,7 +352,9 @@
 
     <div id="overlayEndGoal">
       <div class="overlayEndGoalBackground"></div>
-      <h1 class="heading heading--big">{{ $t('module.playing.moveit.participant.drivingStats.goal') }}</h1>
+      <h1 class="heading heading--big">
+        {{ $t('module.playing.moveit.participant.drivingStats.goal') }}
+      </h1>
       <h2 class="heading heading--regular">
         {{ $t('module.playing.moveit.participant.drivingStats.avgSpeed') }} :
         {{ Math.round(calculateSpeed('average')) }}
@@ -521,6 +529,7 @@ export default class DriveToLocation extends Vue {
   animationPoints: [number, number][][] = [];
   map!: Map;
   ready = false;
+  carLoading = true;
 
   speed = 0;
   maxSpeed = 0;
@@ -2259,6 +2268,10 @@ export default class DriveToLocation extends Vue {
     font-size: 0;
     right: -20%;
     top: 0;
+  }
+
+  .previewImage {
+    font-size: var(--font-size-xxxlarge);
   }
 }
 
