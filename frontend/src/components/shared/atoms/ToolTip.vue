@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/

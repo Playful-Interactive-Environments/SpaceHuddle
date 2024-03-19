@@ -84,10 +84,10 @@ import { Session } from '@/types/api/Session';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import SidebarHeader from '@/components/moderator/organisms/layout/SidebarHeader.vue';
-import ToolTip from "@/components/shared/atoms/ToolTip.vue";
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 @Options({
-  components: {ToolTip, SidebarHeader, SessionCode, TutorialStep },
+  components: { ToolTip, SidebarHeader, SessionCode, TutorialStep },
   emits: ['openSettings', 'delete'],
 })
 export default class Sidebar extends Vue {

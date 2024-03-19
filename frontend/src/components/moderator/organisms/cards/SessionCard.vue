@@ -11,10 +11,14 @@
               v-on:command="menuItemSelected"
               trigger="click"
             >
-              <span class="el-dropdown-link"  @click="stopPropagation">
-                <ToolTip :text="$t('moderator.organism.settings.sessionSettings.settings')">
-                <font-awesome-icon icon="ellipsis-h" />
-                  </ToolTip>
+              <span class="el-dropdown-link" @click="stopPropagation">
+                <ToolTip
+                  :text="
+                    $t('moderator.organism.settings.sessionSettings.settings')
+                  "
+                >
+                  <font-awesome-icon icon="ellipsis-h" />
+                </ToolTip>
               </span>
               <template #dropdown>
                 <el-dropdown-item command="edit">
@@ -79,7 +83,7 @@ import * as sessionRoleService from '@/services/session-role-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { SessionRole } from '@/types/api/SessionRole';
 import UserType from '@/types/enum/UserType';
-import ToolTip from "@/components/shared/atoms/ToolTip.vue";
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 @Options({
   components: {

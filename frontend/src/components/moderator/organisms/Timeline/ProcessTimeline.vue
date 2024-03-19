@@ -367,7 +367,6 @@ import { TimerEntity } from '@/types/enum/TimerEntity';
 import TaskStates from '@/types/enum/TaskStates';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
-import { TaskCategoryType } from '@/types/enum/TaskCategory';
 
 export enum TimelineArea {
   left = 'left',

@@ -184,7 +184,7 @@ import { Task } from '@/types/api/Task';
 import { SessionRole } from '@/types/api/SessionRole';
 import { reactivateTutorial } from '@/services/tutorial-service';
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
-import ToolTip from "@/components/shared/atoms/ToolTip.vue";
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 @Options({
   components: {

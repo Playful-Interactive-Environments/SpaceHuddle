@@ -191,8 +191,8 @@
                             "
                           >
                             <font-awesome-icon icon="users" />
-                            </ToolTip>
-                            {{ task.participantCount }}
+                          </ToolTip>
+                          {{ task.participantCount }}
                         </span>
                         <span class="separator"> | </span>
                       </template>

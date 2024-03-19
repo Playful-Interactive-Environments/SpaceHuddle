@@ -177,7 +177,6 @@ export default class PixiCanvas extends Vue {
     this.animationTimeline.addAnimationUpdatedCallback(() =>
       this.updateFrame()
     );
-    console.log(this.$refs.pixi);
   }
 
   async unmounted(): Promise<void> {
