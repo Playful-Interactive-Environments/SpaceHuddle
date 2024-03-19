@@ -647,7 +647,6 @@ export default class ProcessTimeline extends Vue {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   itemClicked(item: any): void {
     const result = this.getContentItem(this.getKey(item));
-    console.log(result);
     this.$emit('update:activeItem', result);
     this.$emit('changeActiveElement', result);
     if (
