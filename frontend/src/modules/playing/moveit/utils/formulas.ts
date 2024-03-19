@@ -38,7 +38,67 @@ const airResistance = (
   );
 };
 
+export const tireWareRate01 = (
+  speed: number,
+  distance: number,
+  vehicle: config.VehicleParameter
+): number => {
+  let speedCorrectionFactor = 1;
+  if (speed < 40) speedCorrectionFactor = 1.39;
+  else if (speed > 90) speedCorrectionFactor = 0.902;
+  else speedCorrectionFactor = -0.00974 * speed + 1.78;
+  const fractions = 0.1;
+  return (
+    distance *
+    fractions *
+    vehicle.tireWareEmissionFactors *
+    speedCorrectionFactor
+  );
+};
+
+export const tireWareRate02 = (
+  speed: number,
+  distance: number,
+  vehicle: config.VehicleParameter
+): number => {
+  const airResistanceValue = airResistance(vehicle, speed);
+  const rollingResistanceValue = rollingResistance(vehicle);
+  const curveRadius = 25000;
+  const centrifugalResistanceValue =
+    (vehicle.weight * Math.pow(speed / 3.6, 2)) / curveRadius;
+  const longitudinalForceValue = rollingResistanceValue + airResistanceValue;
+  const crossSlopeStreet = 0.015;
+  const shearForceValue = crossSlopeStreet * vehicle.weight * g;
+  const shearEqualForceValue = centrifugalResistanceValue + shearForceValue;
+  const shearCounterForceValue = centrifugalResistanceValue - shearForceValue;
+  const exponent = 2;
+  const calibrationFactor = 0.05;
+  const lateralLongitudinalFactor = 7;
+  let wearIntensity = 1;
+  if (speed < 60)
+    wearIntensity =
+      calibrationFactor * Math.pow(longitudinalForceValue, exponent) +
+      lateralLongitudinalFactor *
+        0.5 *
+        (Math.pow(shearEqualForceValue, exponent) +
+          Math.pow(shearCounterForceValue, exponent));
+  else
+    wearIntensity =
+      calibrationFactor * Math.pow(longitudinalForceValue, exponent) +
+      lateralLongitudinalFactor * Math.pow(shearCounterForceValue, exponent);
+  const weighting = 0.0001;
+  return wearIntensity * distance * weighting;
+};
+
 export const tireWareRate = (
+  speed: number,
+  distance: number,
+  vehicle: config.VehicleParameter
+): number => {
+  return tireWareRate01(speed, distance, vehicle);
+};
+
+export const tireWareRateSimple = (
   speed: number,
   distance: number,
   vehicle: config.VehicleParameter

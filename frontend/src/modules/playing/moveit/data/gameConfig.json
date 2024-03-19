@@ -44,7 +44,8 @@
           "efficiency": 0.3,
           "treadwear": 200,
           "tireDiameter": 0.5,
-          "tireWidth": 0.2
+          "tireWidth": 0.2,
+          "tireWareEmissionFactors": 14
         },
         {
           "name": "suv",
@@ -64,7 +65,8 @@
           "efficiency": 0.3,
           "treadwear": 200,
           "tireDiameter": 0.5,
-          "tireWidth": 0.2
+          "tireWidth": 0.2,
+          "tireWareEmissionFactors": 17
         },
         {
           "name": "compact",
@@ -84,7 +86,8 @@
           "efficiency": 0.25,
           "treadwear": 200,
           "tireDiameter": 0.5,
-          "tireWidth": 0.2
+          "tireWidth": 0.2,
+          "tireWareEmissionFactors": 8
         },
         {
           "name": "e-car",
@@ -104,7 +107,8 @@
           "efficiency": 0.99,
           "treadwear": 200,
           "tireDiameter": 0.5,
-          "tireWidth": 0.2
+          "tireWidth": 0.2,
+          "tireWareEmissionFactors": 12
         }
       ]
     },
@@ -130,7 +134,8 @@
           "efficiency": 0.25,
           "treadwear": 200,
           "tireDiameter": 0.6,
-          "tireWidth": 0.1
+          "tireWidth": 0.1,
+          "tireWareEmissionFactors": 4
         }
       ]
     },
@@ -156,7 +161,8 @@
           "efficiency": 0.3,
           "treadwear": 200,
           "tireDiameter": 0.7,
-          "tireWidth": 0.3
+          "tireWidth": 0.3,
+          "tireWareEmissionFactors": 30
         }
       ]
     }

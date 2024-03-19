@@ -30,6 +30,7 @@ export interface VehicleParameter {
   treadwear: number;
   tireDiameter: number;
   tireWidth: number;
+  tireWareEmissionFactors: number;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
