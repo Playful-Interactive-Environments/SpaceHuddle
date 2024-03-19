@@ -38,7 +38,7 @@ class ExportData
             $this->downloadLink = $url;*/
             $this->base64 = $this->convertToBase64($downloadLink);
             $extensionPos = strpos($downloadLink, '.', -10) + 1;
-            $this->filetype = substr($downloadLink, $extensionPos);
+            $this->filetype = mb_substr($downloadLink, $extensionPos);
 
 
             $files = glob($path . DIRECTORY_SEPARATOR . "*", GLOB_MARK);

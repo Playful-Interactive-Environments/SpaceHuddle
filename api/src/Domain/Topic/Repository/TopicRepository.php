@@ -149,7 +149,7 @@ class TopicRepository implements RepositoryInterface
                 $taskType = $reader->findString("task_type");
                 if ($name) {
                     $name = preg_replace('/[^a-zA-Z0-9]/', ' ', $name);
-                    $sheet->setTitle(substr($name, 0, 31));
+                    $sheet->setTitle(mb_substr($name, 0, 31));
                 }
 
                 $detailRows = false;

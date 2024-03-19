@@ -453,10 +453,10 @@ class IdeaRepository implements RepositoryInterface
 
                 switch (strtolower($orderType)) {
                     case IdeaSortOrder::TIMESTAMP:
-                        $orderContent = substr($orderContent, 0, strlen($orderContent) - 3);
+                        $orderContent = mb_substr($orderContent, 0, strlen($orderContent) - 3);
                         break;
                     case IdeaSortOrder::ALPHABETICAL:
-                        $orderContent = substr($orderContent, 0, 1);
+                        $orderContent = mb_substr($orderContent, 0, 1);
                         break;
                 }
 
