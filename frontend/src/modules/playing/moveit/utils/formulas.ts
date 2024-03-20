@@ -47,7 +47,7 @@ export const tireWareRate01 = (
   if (speed < 40) speedCorrectionFactor = 1.39;
   else if (speed > 90) speedCorrectionFactor = 0.902;
   else speedCorrectionFactor = -0.00974 * speed + 1.78;
-  const fractions = 0.1;
+  const fractions = 0.2;
   return (
     distance *
     fractions *
@@ -135,6 +135,7 @@ export const consumption = (
   vehicle: config.VehicleParameter
 ): number => {
   const fuel = config.fuelUnits(vehicle.fuel);
+  if (!fuel.kwh) return 0;
   const vehicleEfficiency = vehicle.efficiency
     ? vehicle.efficiency
     : fuel.efficiency;

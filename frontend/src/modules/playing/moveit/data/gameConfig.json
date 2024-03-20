@@ -45,7 +45,7 @@
           "treadwear": 200,
           "tireDiameter": 0.5,
           "tireWidth": 0.2,
-          "tireWareEmissionFactors": 14
+          "tireWareEmissionFactors": 13
         },
         {
           "name": "suv",
@@ -66,7 +66,7 @@
           "treadwear": 200,
           "tireDiameter": 0.5,
           "tireWidth": 0.2,
-          "tireWareEmissionFactors": 17
+          "tireWareEmissionFactors": 18
         },
         {
           "name": "compact",
@@ -108,7 +108,7 @@
           "treadwear": 200,
           "tireDiameter": 0.5,
           "tireWidth": 0.2,
-          "tireWareEmissionFactors": 12
+          "tireWareEmissionFactors": 15
         }
       ]
     },
@@ -139,6 +139,49 @@
         }
       ]
     },
+    "bike": {
+      "icon": "bicycle",
+      "tires": 2,
+      "types": [
+        {
+          "name": "city",
+          "image": "bike.png",
+          "imageTop": "bike-top.png",
+          "fuel": "none",
+          "speed": 40,
+          "persons": 1,
+          "flowResistance": 0.8,
+          "profileArea": 0.6,
+          "weight": 17,
+          "rollingResistanceCoefficient": 0.01,
+          "tireAbrasion": 0.006,
+          "efficiency": 0.99,
+          "treadwear": 200,
+          "tireDiameter": 0.8,
+          "tireWidth": 0.05,
+          "tireWareEmissionFactors": 1
+        },
+        {
+          "name": "e-bike",
+          "image": "bike.png",
+          "imageTop": "bike-top.png",
+          "fuel": "electricity",
+          "speed": 50,
+          "mpg": 0.5,
+          "persons": 1,
+          "flowResistance": 0.8,
+          "profileArea": 0.6,
+          "weight": 50,
+          "rollingResistanceCoefficient": 0.01,
+          "tireAbrasion": 0.006,
+          "efficiency": 0.99,
+          "treadwear": 200,
+          "tireDiameter": 0.8,
+          "tireWidth": 0.05,
+          "tireWareEmissionFactors": 1
+        }
+      ]
+    },
     "bus": {
       "icon": "bus",
       "tires": 4,
@@ -162,7 +205,7 @@
           "treadwear": 200,
           "tireDiameter": 0.7,
           "tireWidth": 0.3,
-          "tireWareEmissionFactors": 30
+          "tireWareEmissionFactors": 70
         }
       ]
     }
@@ -303,6 +346,19 @@
     "electricity": {
       "perUnit": {
         "efficiency": 0.99
+      }
+    },
+    "none": {
+      "perUnit": {
+        "carbonDioxideEquivalent": 0,
+        "carbonDioxide": 0,
+        "methane": 0,
+        "dust": 0,
+        "microplastic": 0,
+        "kwh": 0,
+        "weight": 0,
+        "calorific": 0,
+        "efficiency": 1
       }
     }
   }

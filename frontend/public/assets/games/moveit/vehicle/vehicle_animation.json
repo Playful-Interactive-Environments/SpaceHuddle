@@ -1,138 +1,159 @@
 {
-"frames": {
-	"bus_01.png": {
-		"frame": {"x":1025, "y":668, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"bus_02.png": {
-		"frame": {"x":2050, "y":1002, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"bus_03.png": {
-		"frame": {"x":2050, "y":668, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"bus_04.png": {
-		"frame": {"x":2050, "y":334, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"compact-car_01.png": {
-		"frame": {"x":2050, "y":0, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"compact-car_02.png": {
-		"frame": {"x":1025, "y":2672, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"compact-car_03.png": {
-		"frame": {"x":1025, "y":2338, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"compact-car_04.png": {
-		"frame": {"x":1025, "y":2004, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"e-car_01.png": {
-		"frame": {"x":1025, "y":1670, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"e-car_02.png": {
-		"frame": {"x":1025, "y":1336, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"e-car_03.png": {
-		"frame": {"x":1025, "y":1670, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"e-car_04.png": {
-		"frame": {"x":1025, "y":1002, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"motorcycle_01.png": {
-		"frame": {"x":2050, "y":1336, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"motorcycle_02.png": {
-		"frame": {"x":1025, "y":334, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"motorcycle_03.png": {
-		"frame": {"x":1025, "y":0, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"motorcycle_04.png": {
-		"frame": {"x":0, "y":2672, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"sport-car_01.png": {
-		"frame": {"x":0, "y":2338, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"sport-car_02.png": {
-		"frame": {"x":0, "y":2004, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"sport-car_03.png": {
-		"frame": {"x":0, "y":1670, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"sport-car_04.png": {
-		"frame": {"x":0, "y":1336, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"suv_01.png": {
-		"frame": {"x":0, "y":1002, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"suv_02.png": {
-		"frame": {"x":0, "y":668, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"suv_03.png": {
-		"frame": {"x":0, "y":334, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	},
-	"suv_04.png": {
-		"frame": {"x":0, "y":0, "w":1024, "h":333},
-		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
-		"sourceSize": {"w":1024,"h":333}
-	}
+	"frames": {
+		"bike_01.png": {
+			"frame": {"x":2050, "y":0, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"bike_02.png": {
+			"frame": {"x":1025, "y":2672, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"bike_03.png": {
+			"frame": {"x":1025, "y":2338, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"bike_04.png": {
+			"frame": {"x":1025, "y":2004, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"bus_01.png": {
+			"frame": {"x":1025, "y":1670, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"bus_02.png": {
+			"frame": {"x":2050, "y":2672, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"bus_03.png": {
+			"frame": {"x":1025, "y":1002, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"bus_04.png": {
+			"frame": {"x":1025, "y":668, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"compact-car_01.png": {
+			"frame": {"x":1025, "y":334, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"compact-car_02.png": {
+			"frame": {"x":1025, "y":0, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"compact-car_03.png": {
+			"frame": {"x":0, "y":2672, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"compact-car_04.png": {
+			"frame": {"x":0, "y":2338, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"e-car_01.png": {
+			"frame": {"x":0, "y":2004, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"e-car_02.png": {
+			"frame": {"x":0, "y":1670, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"e-car_03.png": {
+			"frame": {"x":0, "y":2004, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"e-car_04.png": {
+			"frame": {"x":0, "y":1336, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"motorcycle_01.png": {
+			"frame": {"x":0, "y":1002, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"motorcycle_02.png": {
+			"frame": {"x":0, "y":668, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"motorcycle_03.png": {
+			"frame": {"x":0, "y":334, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"motorcycle_04.png": {
+			"frame": {"x":0, "y":0, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"sport-car_01.png": {
+			"frame": {"x":1025, "y":1336, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"sport-car_02.png": {
+			"frame": {"x":2050, "y":2338, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"sport-car_03.png": {
+			"frame": {"x":2050, "y":2004, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"sport-car_04.png": {
+			"frame": {"x":2050, "y":1670, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"suv_01.png": {
+			"frame": {"x":2050, "y":1336, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"suv_02.png": {
+			"frame": {"x":2050, "y":1002, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"suv_03.png": {
+			"frame": {"x":2050, "y":668, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		},
+		"suv_04.png": {
+			"frame": {"x":2050, "y":334, "w":1024, "h":333},
+			"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+			"sourceSize": {"w":1024,"h":333}
+		}
 
-},
-"meta": {
-	"image": "vehicle_animation.png",
-	"size": {"w": 3075, "h": 3006},
-	"scale": "1"
-},
-"animations": {
-	"bus": ["bus_01.png", "bus_02.png", "bus_03.png", "bus_04.png"],
-	"compact-car": ["compact-car_01.png", "compact-car_02.png", "compact-car_03.png", "compact-car_04.png"],
-	"e-car": ["e-car_01.png", "e-car_02.png", "e-car_03.png", "e-car_04.png"],
-	"motorcycle": ["motorcycle_01.png", "motorcycle_02.png", "motorcycle_03.png", "motorcycle_04.png"],
-	"sport-car": ["sport-car_01.png", "sport-car_02.png", "sport-car_03.png", "sport-car_04.png"],
-	"suv": ["suv_01.png", "suv_02.png", "suv_03.png", "suv_04.png"]
-}
+	},
+	"meta": {
+		"image": "vehicle_animation.png",
+		"size": {"w": 3075, "h": 3006},
+		"scale": "1"
+	},
+	"animations": {
+		"bus": ["bus_01.png", "bus_02.png", "bus_03.png", "bus_04.png"],
+		"compact-car": ["compact-car_01.png", "compact-car_02.png", "compact-car_03.png", "compact-car_04.png"],
+		"e-car": ["e-car_01.png", "e-car_02.png", "e-car_03.png", "e-car_04.png"],
+		"motorcycle": ["motorcycle_01.png", "motorcycle_02.png", "motorcycle_03.png", "motorcycle_04.png"],
+		"sport-car": ["sport-car_01.png", "sport-car_02.png", "sport-car_03.png", "sport-car_04.png"],
+		"suv": ["suv_01.png", "suv_02.png", "suv_03.png", "suv_04.png"],
+		"bike": ["bike_01.png", "bike_02.png", "bike_03.png", "bike_04.png"]
+	}
 }

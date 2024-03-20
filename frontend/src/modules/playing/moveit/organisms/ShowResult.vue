@@ -310,6 +310,37 @@ interface DatasetData {
   fill: any;
 }
 
+const emptyParticleState = {
+  carbonDioxide: {
+    collectedCount: 0,
+    totalCount: 0,
+    timelineOutside: [],
+    timelineCollected: [],
+    timelineInput: [],
+  },
+  dust: {
+    collectedCount: 0,
+    totalCount: 0,
+    timelineOutside: [],
+    timelineCollected: [],
+    timelineInput: [],
+  },
+  methane: {
+    collectedCount: 0,
+    totalCount: 0,
+    timelineOutside: [],
+    timelineCollected: [],
+    timelineInput: [],
+  },
+  microplastic: {
+    collectedCount: 0,
+    totalCount: 0,
+    timelineOutside: [],
+    timelineCollected: [],
+    timelineInput: [],
+  },
+};
+
 @Options({
   components: {
     Line,
@@ -322,38 +353,7 @@ export default class ShowResult extends Vue {
   readonly vehicle!: vehicleCalculation.Vehicle;
   @Prop({ default: [] })
   readonly trackingData!: TrackingData[];
-  @Prop({
-    default: {
-      carbonDioxide: {
-        collectedCount: 0,
-        totalCount: 0,
-        timelineOutside: [],
-        timelineCollected: [],
-        timelineInput: [],
-      },
-      dust: {
-        collectedCount: 0,
-        totalCount: 0,
-        timelineOutside: [],
-        timelineCollected: [],
-        timelineInput: [],
-      },
-      methane: {
-        collectedCount: 0,
-        totalCount: 0,
-        timelineOutside: [],
-        timelineCollected: [],
-        timelineInput: [],
-      },
-      microplastic: {
-        collectedCount: 0,
-        totalCount: 0,
-        timelineOutside: [],
-        timelineCollected: [],
-        timelineInput: [],
-      },
-    },
-  })
+  @Prop({ default: emptyParticleState })
   readonly particleState!: {
     [key: string]: ParticleState;
   };
@@ -638,6 +638,11 @@ export default class ShowResult extends Vue {
   maxChartValue = 0;
   @Watch('particleState', { immediate: true })
   onParticleStateChanged(): void {
+    for (const particleType of Object.keys(emptyParticleState)) {
+      if (!Object.hasOwn(this.particleState, particleType)) {
+        this.particleState[particleType] = emptyParticleState[particleType];
+      }
+    }
     let totalValue = 0;
     const normalizedData = normalizedTrackingData(this.trackingData);
     const labels = normalizedData.map((data) =>
