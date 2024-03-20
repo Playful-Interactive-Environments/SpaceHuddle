@@ -1,6 +1,5 @@
 <template>
   <GameContainer
-    v-if="canvasMode === CanvasMode.GameEngine"
     v-model:width="gameWidth"
     v-model:height="gameHeight"
     :backgroundAlpha="0"
@@ -76,7 +75,6 @@ import {
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
 import GameObject from '@/types/game/gameObject/GameObject';
-import { CanvasMode } from '@/modules/brainstorming/game/output/ModeratorConfig.vue';
 import * as Matter from 'matter-js/build/matter';
 
 interface BodyData {
@@ -96,7 +94,6 @@ interface BodyData {
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PixiCanvas extends Vue {
-  @Prop({ default: CanvasMode.None }) readonly canvasMode!: CanvasMode;
   @Prop() readonly animationTimeline!: AnimationTimeline;
   @Prop({ default: [0, -1, 0] }) readonly gravity!: [number, number, number];
   circleGradientTexture: PIXI.Texture | null = null;
@@ -106,7 +103,6 @@ export default class PixiCanvas extends Vue {
   bodyList: BodyData[] = [];
   showBodies = true;
   windForce = 0;
-  CanvasMode = CanvasMode;
 
   updateCallback = () => this.updateFrame();
   async mounted(): Promise<void> {

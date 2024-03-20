@@ -1,26 +1,7 @@
 <template>
   <div class="canvas-container" ref="container">
-    <PhysicsContainer
-      v-if="
-        (mode === CanvasMode.Canvas ||
-          mode === CanvasMode.Pixi ||
-          mode === CanvasMode.PixiVue ||
-          mode === CanvasMode.PixiVueWrapped) &&
-        animationTimeline
-      "
-      :canvas-mode="mode"
-      :animation-timeline="animationTimeline"
-      :gravity="gravity"
-    />
     <GameCanvas
-      v-if="
-        (mode === CanvasMode.GameEngineLite ||
-          mode === CanvasMode.GameEngineLite2 ||
-          mode === CanvasMode.GameEngineLite3 ||
-          mode === CanvasMode.GameEngine) &&
-        animationTimeline
-      "
-      :canvas-mode="mode"
+      v-if="animationTimeline"
       :animation-timeline="animationTimeline"
       :gravity="gravity"
     />
@@ -89,7 +70,6 @@ import { Idea } from '@/types/api/Idea';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { AnimationTimeline } from '@/modules/brainstorming/game/types/AnimationTimeline';
-import Canvas from '@/modules/brainstorming/game/organisms/Canvas.vue';
 import NoSleep from 'nosleep.js';
 import * as viewService from '@/services/view-service';
 import * as taskService from '@/services/task-service';
@@ -98,9 +78,7 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import * as ideaService from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
-import { CanvasMode } from './ModeratorConfig.vue';
 import { isMobile } from '@/utils/dom';
-import PhysicsContainer from '@/modules/brainstorming/game/organisms/PhysicsContainer.vue';
 import GameCanvas from '@/modules/brainstorming/game/organisms/GameCanvas.vue';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -125,9 +103,7 @@ export enum TextType {
 @Options({
   components: {
     GameCanvas,
-    PhysicsContainer,
     ParticipantModuleDefaultContainer,
-    Canvas,
   },
   emits: ['update:useFullSize', 'update:backgroundClass'],
 })
@@ -142,9 +118,6 @@ export default class Participant extends Vue {
   module: Module | null = null;
 
   randomIdea: Idea | null = null;
-
-  mode: CanvasMode = CanvasMode.None;
-  CanvasMode = CanvasMode;
 
   animationTimeline: AnimationTimeline | null = null;
   gravity: [number, number, number] = [0, 1, 0];
@@ -220,7 +193,7 @@ export default class Participant extends Vue {
     //eslint-disable-next-line @typescript-eslint/no-unused-vars
     textSize = 48
   ): void {
-    /*const top = textSpan.parentNode.getBoundingClientRect().top;
+    const top = textSpan.parentNode.getBoundingClientRect().top;
     if (textSpan && this.animationTimeline) {
       this.animationTimeline.clearTexts(textId);
       const textAnimation = textSpan as any;
@@ -240,7 +213,7 @@ export default class Participant extends Vue {
           );
         }
       }
-    }*/
+    }
   }
 
   containerWidth = 100;
@@ -405,7 +378,6 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
-    if (module.parameter.mode) this.mode = module.parameter.mode;
   }
 
   deregisterAll(): void {

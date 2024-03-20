@@ -29,7 +29,6 @@
        },  
        "game": {  
            "participant": "output/Participant",  
-           "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
              "icon": "bowling-ball",  "type": "addOn",  "input": "optional",  "syncPublicParticipant": false,  
            "path": "brainstorming/game"  
