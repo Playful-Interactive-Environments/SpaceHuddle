@@ -35,12 +35,12 @@
     "result": {
       "carbonDioxideExplanation": "CO2 macht mit nur etwa 0,038 Prozent einen geringen Teil der Luft aus. Es hat aber in seiner Funktion als Treibhausgas eine entscheidende Rolle für unser Klima: CO2 absorbiert einen Teil der von der Erde in das Weltall abgegebenen Wärme und strahlt diese zurück auf die Erde. Durch diesen natürlichen Treibhauseffekt entsteht auf der Erde das uns bekannte gemäßigte Klima, welches Flora und Fauna gedeihen lässt. ",
       "dustExplanation": "Feinstaub kann beim Menschen in die Nasenhöhle, in die Lunge und sogar in den Blutkreislauf eindringen. Je nach Größe und  Eindringtiefe der Teilchen sind die gesundheitlichen Wirkungen von Feinstaub verschieden.",
-      "methaneExplanation": "Methan ist rund 80-mal klimaschädlicher als CO2. Methan-Emissionen haben bereits mit 0,5 Grad zur Erderwärmung beigetragen laut Weltklimarat. In der EU fällt viel Methan vor allem in der Lieferkette von Erdgas an, welches zum Großteil aus Methan besteht.",
+      "methaneExplanation": "Methan ist rund 80-mal klimaschädlicher als CO2. Laut Weltklimarat hat die Freisetzung von Methan bereits zu einer Erderwärmung um 0,5 Grad beigetragen. In der EU fällt viel Methan vor allem in der Lieferkette von Erdgas an, welches zum Großteil aus Methan besteht.",
       "microplasticExplanation": "Mikroplastik sind sehr kleine Kunststoffteile, die die Umwelt verschmutzen. Bei Mikroplastik handelt es sich nicht um eine bestimmte Art von Kunststoff, sondern um jede Art von Kunststofffragmenten, die weniger als fünf Millimeter lang sind.",
-      "veryGood": "Gratulation du bist ja schon einrichtiger Profi beim aufräumen deiner Emissionen.",
-      "good": "Das war schon richtig gut. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du auch noch die letzten Prozent",
-      "notBad": "Das war gar nicht schlecht, aber da geht noch mehr. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr",
-      "improvable": "Das geht besser. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr",
+      "veryGood": "Gratulation du bist ja schon ein richtiger Profi beim Aufräumen deiner Emissionen.",
+      "good": "Das war schon richtig gut. Versuche durch geschicktes Fahrverhalten dir nächstes Mal noch mehr Luft beim Aufräumen zu lassen. Dann schaffst du auch noch den Rest.",
+      "notBad": "Das war gar nicht schlecht, aber da geht noch mehr. Versuche durch geschicktes Fahrverhalten dir nächstes Mal noch mehr Luft beim Aufräumen zu lassen. Dann schaffst du nächstes Mal sicher mehr.",
+      "improvable": "Das geht besser. Versuche durch geschicktes Fahrverhalten dir nächstes Mal noch mehr Luft beim Aufräumen zu lassen. Dann schaffst du nächstes Mal sicher mehr.",
       "collected": "eingesammelt",
       "notCollected": "nicht eingesammelt"
     },
@@ -137,7 +137,7 @@
     },
     "tutorial": {
       "select": "Der Verkehr ist für 30% der Treibhausgasemissionen verantwortlich.\nVersuche herauszufinden, welche Auswirkungen verschiedene Fahrzeugtypen haben.",
-      "statistics": "Die Statistik oben zeigt, wie viele Treibhausgase in einer kWh Kraftstoff stecken.\nWährend dies für Kraftstoffe wie Diesel und Benzin konstant ist, hängen die Werte für Strom vom Strommix ab. Der Strommix gibt an, wie sich der Strom aus unterschiedlichen Quellen (wie z.B. Wasserkraft, Windenergie oder Erdgas) zusammensetzt.",
+      "statistics": "Das Diagramm oben zeigt, wie viele Treibhausgase in einer kWh Kraftstoff stecken.\nFür Treibstoffe wie Diesel und Benzin ist das konstant. Bei Elektroautos allerdings hängt es vom Strommix ab. Unter Strommix versteht man, aus welchen Quellen (z.B. Wasserkraft, Windenergie oder Erdgas) sich der Strom zusammensetzt.",
       "drive": "Neben der Wahl des Fahrzeugs spielt auch das Fahrverhalten eine entscheidende Rolle. Je schneller du fährst, desto mehr Kraftstoff benötigst du.",
       "statsGame": "In der Statistik oberhalb der Karte kannst du sehen, wie viele Emissionen freigesetzt werden. Alle Emissionen im rot markierten Bereich gehen direkt in die Umwelt. Für alle darunter hast du die Chance, sie im nächsten Schritt zu bereinigen.",
       "speed": "Mit den Pedalen unten rechts kannst du beschleunigen und bremsen. Das Auto lenkt selbstständig.",
