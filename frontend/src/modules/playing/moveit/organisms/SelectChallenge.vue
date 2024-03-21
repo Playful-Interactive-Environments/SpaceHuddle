@@ -72,108 +72,112 @@
       >
       </el-carousel-item>
     </el-carousel>
-    <el-card class="vehicle-card">
-      <template #header>
-        <div class="card-header media is-mobile">
-          <div class="media-content">
-            {{
-              $t(
-                `module.playing.moveit.enums.vehicles.${activeVehicle.category}.${activeVehicle.vehicle.name}`
-              )
-            }}
+    <div class="vehicle-info">
+      <el-card class="vehicle-card">
+        <template #header>
+          <div class="card-header media is-mobile">
+            <div class="media-content">
+              {{
+                $t(
+                  `module.playing.moveit.enums.vehicles.${activeVehicle.category}.${activeVehicle.vehicle.name}`
+                )
+              }}
+            </div>
+            <div class="media-right">
+              {{ $t('module.playing.moveit.participant.earned') + ': ' }}
+              <font-awesome-icon icon="coins" />
+              {{
+                getPointsForVehicle({
+                  category: activeVehicle.category,
+                  type: activeVehicle.vehicle.name,
+                })
+              }}
+              / {{ maxVehiclePoints }}
+            </div>
           </div>
-          <div class="media-right">
-            {{ $t('module.playing.moveit.participant.earned') + ': ' }}
-            <font-awesome-icon icon="coins" />
-            {{
-              getPointsForVehicle({
-                category: activeVehicle.category,
-                type: activeVehicle.vehicle.name,
-              })
-            }}
-            / {{ maxVehiclePoints }}
+        </template>
+        <div class="vehicle-image">
+          <div ref="vehicleSpace" class="spritesheet-container">
+            <SpriteCanvas
+              v-if="vehicleWidth && activeVehicle.animation.length > 0"
+              :texture="activeVehicle.animation"
+              :width="vehicleWidth"
+              :height="vehicleHeight"
+              background-color="#ffffff"
+            >
+            </SpriteCanvas>
+          </div>
+          <div>
+            <el-rate
+              :max="3"
+              :model-value="
+                getStarsForVehicle({
+                  category: activeVehicle.category,
+                  type: activeVehicle.vehicle.name,
+                })
+              "
+              disabled
+            />
           </div>
         </div>
-      </template>
-      <div class="vehicle-image">
-        <div ref="vehicleSpace" class="spritesheet-container">
-          <SpriteCanvas
-            v-if="vehicleWidth && activeVehicle.animation.length > 0"
-            :texture="activeVehicle.animation"
-            :width="vehicleWidth"
-            :height="vehicleHeight"
-            background-color="#ffffff"
-          >
-          </SpriteCanvas>
+        <!--          <img
+          class="vehicle-image"
+          :src="`/assets/games/moveit/vehicle/${activeVehicle.vehicle.image}`"
+          :alt="activeVehicle.vehicle.name"
+        />-->
+        <div v-if="activeVehicle.vehicle.fuel">
+          {{ $t('module.playing.moveit.participant.vehicle-parameter.fuel') }}:
+          {{
+            $t(`module.playing.moveit.enums.fuel.${activeVehicle.vehicle.fuel}`)
+          }}
+        </div>
+        <div v-if="activeVehicle.vehicle.mpg">
+          {{ $t('module.playing.moveit.participant.vehicle-parameter.mpg') }}:
+          {{ activeVehicle.vehicle.mpg }}
+          <span v-if="activeVehicle.vehicle.fuel === 'electricity'">
+            {{ $t('module.playing.moveit.enums.units.kw') }}
+          </span>
+          <span v-else>
+            {{ $t('module.playing.moveit.enums.units.liters') }}
+          </span>
+        </div>
+        <div v-if="activeVehicle.vehicle.power">
+          {{ $t('module.playing.moveit.participant.vehicle-parameter.power') }}:
+          {{ activeVehicle.vehicle.power }}
+          {{ $t('module.playing.moveit.enums.units.ps') }}
+        </div>
+        <div v-if="activeVehicle.vehicle.speed">
+          {{ $t('module.playing.moveit.participant.vehicle-parameter.speed') }}:
+          {{ activeVehicle.vehicle.speed }}
+          {{ $t('module.playing.moveit.enums.units.km/h') }}
+        </div>
+        <div v-if="activeVehicle.vehicle.acceleration">
+          {{
+            $t(
+              'module.playing.moveit.participant.vehicle-parameter.acceleration'
+            )
+          }}:
+          {{ activeVehicle.vehicle.acceleration }}
+          {{ $t('module.playing.moveit.enums.units.seconds') }}
+        </div>
+        <div v-if="activeVehicle.vehicle.persons">
+          {{
+            $t('module.playing.moveit.participant.vehicle-parameter.persons')
+          }}:
+          {{ activeVehicle.vehicle.persons }}
         </div>
         <div>
-          <el-rate
-            :max="3"
-            :model-value="
-              getStarsForVehicle({
-                category: activeVehicle.category,
-                type: activeVehicle.vehicle.name,
-              })
+          <el-button
+            type="primary"
+            @click="
+              selectVehicle(activeVehicle.category, activeVehicle.vehicle.name)
             "
-            disabled
-          />
+          >
+            {{ $t('module.playing.moveit.participant.select') }}
+          </el-button>
         </div>
-      </div>
-      <!--          <img
-        class="vehicle-image"
-        :src="`/assets/games/moveit/vehicle/${activeVehicle.vehicle.image}`"
-        :alt="activeVehicle.vehicle.name"
-      />-->
-      <div v-if="activeVehicle.vehicle.fuel">
-        {{ $t('module.playing.moveit.participant.vehicle-parameter.fuel') }}:
-        {{
-          $t(`module.playing.moveit.enums.fuel.${activeVehicle.vehicle.fuel}`)
-        }}
-      </div>
-      <div v-if="activeVehicle.vehicle.mpg">
-        {{ $t('module.playing.moveit.participant.vehicle-parameter.mpg') }}:
-        {{ activeVehicle.vehicle.mpg }}
-        <span v-if="activeVehicle.vehicle.fuel === 'electricity'">
-          {{ $t('module.playing.moveit.enums.units.kw') }}
-        </span>
-        <span v-else>
-          {{ $t('module.playing.moveit.enums.units.liters') }}
-        </span>
-      </div>
-      <div v-if="activeVehicle.vehicle.power">
-        {{ $t('module.playing.moveit.participant.vehicle-parameter.power') }}:
-        {{ activeVehicle.vehicle.power }}
-        {{ $t('module.playing.moveit.enums.units.ps') }}
-      </div>
-      <div v-if="activeVehicle.vehicle.speed">
-        {{ $t('module.playing.moveit.participant.vehicle-parameter.speed') }}:
-        {{ activeVehicle.vehicle.speed }}
-        {{ $t('module.playing.moveit.enums.units.km/h') }}
-      </div>
-      <div v-if="activeVehicle.vehicle.acceleration">
-        {{
-          $t(
-            'module.playing.moveit.participant.vehicle-parameter.acceleration'
-          )
-        }}:
-        {{ activeVehicle.vehicle.acceleration }}
-        {{ $t('module.playing.moveit.enums.units.seconds') }}
-      </div>
-      <div v-if="activeVehicle.vehicle.persons">
-        {{ $t('module.playing.moveit.participant.vehicle-parameter.persons') }}:
-        {{ activeVehicle.vehicle.persons }}
-      </div>
-      <div>
-        <el-button
-          type="primary"
-          @click="
-            selectVehicle(activeVehicle.category, activeVehicle.vehicle.name)
-          "
-        >
-          {{ $t('module.playing.moveit.participant.select') }}
-        </el-button>
-      </div>
-    </el-card>
+      </el-card>
+    </div>
   </div>
   <DrawerBottomOverlay
     v-model="showInfo"
@@ -628,7 +632,6 @@ export default class SelectChallenge extends Vue {
         await delay(100);
         const dom = this.$refs.vehicleSpace as HTMLElement;
         if (dom) {
-          console.log(dom);
           this.domKeys.push(
             registerDomElement(
               dom,
@@ -840,8 +843,16 @@ export default class SelectChallenge extends Vue {
   }
 }
 
+.vehicle-info {
+  position: absolute;
+  top: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .vehicle-card {
-  margin: 0 1rem;
+  margin: 0 auto;
   width: calc(100% - 2rem);
   max-width: 30rem;
   text-align: center;
@@ -850,9 +861,6 @@ export default class SelectChallenge extends Vue {
   //aspect-ratio: 0.7;
   height: calc(100% - 0.5rem);
   max-height: calc(30rem / 0.7);
-  position: absolute;
-  top: 0;
-  z-index: 0;
 
   .card-header {
     font-weight: var(--font-weight-bold);
