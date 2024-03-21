@@ -170,6 +170,7 @@
       "car": {
         "sport": "sports car",
         "suv": "SUV",
+        "e-suv": "E-SUV",
         "compact": "compact car",
         "e-car": "E-car"
       },
@@ -178,7 +179,9 @@
         "city": "city bike"
       },
       "motorcycle": {
-        "moped": "moped"
+        "moped": "moped",
+        "e-moped": "E-moped",
+        "motorcycle": "motorcycle"
       },
       "scooter":  {
         "e-scooter": "e-scooter"

@@ -2383,6 +2383,7 @@ export default class DriveToLocation extends Vue {
   }
   h2 {
     z-index: 1;
+    text-align: center;
   }
   .el-button {
     position: absolute;
