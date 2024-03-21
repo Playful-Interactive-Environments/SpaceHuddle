@@ -855,6 +855,7 @@ export default class GameContainer extends Vue {
 
   domKey = '';
   async mounted(): Promise<void> {
+    document.body.style.touchAction = 'none';
     this.eventBus.on(
       EventType.TEXTURES_LOADING_START,
       this.texturesLoadingStart
@@ -923,6 +924,7 @@ export default class GameContainer extends Vue {
   }*/
 
   unmounted(): void {
+    document.body.style.removeProperty('touch-action');
     this.hierarchyObserver.disconnect();
     //this.resizeObserver.disconnect();
     clearInterval(this.intervalPan);
