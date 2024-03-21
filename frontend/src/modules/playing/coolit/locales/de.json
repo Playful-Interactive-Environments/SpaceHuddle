@@ -196,35 +196,35 @@
     },
     "playResult": {
       "0": {
-        "title": "Leider perfekte Bedingungen für Starkwetter!",
+        "title": "Oje!",
         "message": {
-          "1": "Schwere Stürme treten vermehrt auf und beschädigen Gebäude, Autos und Felder.",
-          "2": "Österreich verzeichnet ab heute offiziell weniger Gletscher als im Vorjahr.",
-          "3": "Durch die extreme Trockenheit gibt es viel mehr Waldbrände rund um Linz."
+          "1": "Die Treibhausgaskonzentration in der gesamten Atmosphäre führt dazu, dass weniger Wärme von unserer Erde entweichen kann. Wäre es sinnvoll alle Treibhausgase zu entfernen? Könnten wir so das Problem lösen? Was meinst du?",
+          "2": "Leider wird zu viel von der Wärmestrahlung erneut in Richtung Erde von den Treibhausgasen abgegeben. Wenn man nur die Treibhausgaskonzentration irgendwie senken könnte … dann würde vielleicht nicht so viel Wärmestrahlung zurück auf die Erde geschickt werden.",
+          "3": "Es ist nicht leicht sich für das Klima einzusetzen. Doch für eine schöne Zukunft ist es das sicher Wert! Gemeinsam schaffen wir das – versuche es einfach nochmal!"
         }
       },
       "1": {
-        "title": "Etwas Abkühlung, aber trotzdem noch zu warm!",
+        "title": "Weiter so!",
         "message": {
-          "1": "Dieses Jahr keine signifikante Erhöhung der durchschnittlichen Temperatur. Angenehme Winde an heißen Tagen sorgen für Wohlbefinden.",
-          "2": "Es sind heuer wenig Hagelschäden verzeichnet worden.",
-          "3": "Die Bäume im Park schauen heuer etwas grüner aus und haben mehr Blätter."
+          "1": "Vielleicht ist dir aufgefallen, dass die Treibhausgase nicht auf jede Strahlungsart reagiert. Versuche es nochmals und beobachte, auf was die Treibhausgase reagieren.",
+          "2": "Vielleicht ist dir aufgefallen, dass nicht alle Teilchen in der Atmosphäre auf die Wärmestrahlung reagieren. Kannst du herausfinden, welche keinen Beitrag zum Treibhauseffekt liefern?",
+          "3": "Unsere Kohlenstoffspeicher sind einfach überfordert. Aber was ist das eigentlich? Schau doch einmal im Internet nach."
         }
       },
       "2": {
-        "title": "Am Weg zum stabileren Klima!",
+        "title": "Super!",
         "message": {
-          "1": "Diesen Winter wird deutlich mehr Schneefall erwartet, was auch mehr Wasser für die Zeit nach dem Winter bedeutet.",
-          "2": "Die Luft ist auch im Sommer erträglicher und ",
-          "3": "Eis essen macht mehr Spass, wenn das Eis nicht gleich wegschmilzt!"
+          "1": "Du schaffst das sicher auch ein zweites Mal so gut!\nAchte auf die Umgebung – was sind denn richtige Wärmestrahler und Treibhausgas-Produzenten? Kannst du ein paar entdecken?",
+          "2": "Gibt es in deiner Schule Projekte, die dem Klima helfen? Was wäre deiner Meinung nach ein tolles Gruppenprojekt für dich und deine Freunde?",
+          "3": "Wenn du und deine Freunde sich weiterhin bemühen Energie zu sparen, dann können wir es gemeinsam schaffen!"
         }
       },
       "3": {
-        "title": "Wir schaffen doch eine Klimawende!",
+        "title": "Fabelhaft!",
         "message": {
-          "1": "Hitzestaus in großen Städten werden aktiv bekämpft und beseitigt. Der Boden ist KEINE Lava mehr!",
-          "2": "Regelmäßiger Regen und weniger Trockenperioden haben das Ökosystem belebt. Österreich sieht bereits viel grüner aus!",
-          "3": "Nach jahrelangem Anstieg ist die Gletschergrenze dieses Jahr erstmals wieder gesunken. Natürliche Wasserreserven scheinen sich wieder zu stabilisieren."
+          "1": "Du hast den Weg für die Wärmestrahlung frei machen können!\nNatürlich geht das alles etwas leichter, wenn insgesamt weniger Treibhausgase in der Atmosphäre vorkommen. Welche Treibhausgase kennst du denn eigentlich und woher kommen sie? Schau doch einmal in deinem Teilchen-Dex nach.",
+          "2": "Du hast die Temperatur nicht zu stark ansteigen lassen!\nVielleicht ist dir schon einmal aufgefallen, dass es in einer stark bebauten Stadt im Sommer sehr heiß werden kann. Hast du dir dafür schon einmal die Gebäude angesehen? Was könnte man an Gebäuden verändern, um weniger Wärmestrahlung zu verursachen?\n",
+          "3": "Dir ist es gelungen das 2-Grad-Ziel einzuhalten. Doch … was ist das eigentlich?"
         }
       }
     },
