@@ -74,6 +74,19 @@
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
           <container v-if="!gameOver">
+            <animated-sprite
+              ref="vehicle"
+              v-if="vehicleStylesheets && randomVehicleName && active"
+              :textures="vehicleStylesheets.animations[randomVehicleName]"
+              :animation-speed="0.1"
+              :width="vehicleWidth"
+              :height="vehicleHeight"
+              :x="vehicleXPosition"
+              :y="vehicleYPosition"
+              :anchor="[0.5, 1]"
+              playing
+              :loop="vehicleIsActive && !gameOver"
+            />
             <ParticlePlayer
               v-if="weatherStylesheets"
               :config="snow"
@@ -154,19 +167,6 @@
                 {{ Math.round(averageTemperature) }}°C
               </text>
             </container>
-            <animated-sprite
-              ref="vehicle"
-              v-if="vehicleStylesheets && randomVehicleName && active"
-              :textures="vehicleStylesheets.animations[randomVehicleName]"
-              :animation-speed="0.1"
-              :width="vehicleWidth"
-              :height="vehicleHeight"
-              :x="vehicleXPosition"
-              :y="vehicleYPosition"
-              :anchor="[0.5, 1]"
-              playing
-              :loop="vehicleIsActive && !gameOver"
-            />
             <GameObject
               v-for="ray in rayList"
               :key="ray.uuid"
