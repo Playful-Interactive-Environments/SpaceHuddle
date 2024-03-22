@@ -421,7 +421,7 @@
           </div>
         </div>
       </div>
-      <div>
+      <div class="info-text">
         {{
           $t(
             `module.playing.coolit.participant.playResult.${stars}.message.${randomMessageNo}`
@@ -2968,6 +2968,11 @@ export default class PlayLevel extends Vue {
   background-color: #ffffff77;
   border-radius: 2rem 2rem 2rem 0;
   padding: 1rem;
+  text-align: center;
+
+  .info-text {
+    text-align: left;
+  }
 
   .el-button {
     pointer-events: auto;
