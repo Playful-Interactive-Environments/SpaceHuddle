@@ -220,7 +220,9 @@ export async function apiExecuteDelete<T = any>(
   return false;
 }
 
-const deleteConfirmDialog = async (confirmCheck = true): Promise<boolean> => {
+export const deleteConfirmDialog = async (
+  confirmCheck = true
+): Promise<boolean> => {
   if (!confirmCheck) return true;
 
   let confirmClicked = false;

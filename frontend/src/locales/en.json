@@ -239,6 +239,7 @@
           "ideaCount": "number of ideas submitted",
           "voteCount": "number of votes submitted",
           "add": "create a new participant",
+          "removeSelected": "remove selected participants",
           "export": "export connection pdf",
           "connectionInfo": "You have been invited to a interactive participation activity. To join the activity please enter your individual key.",
           "connectionSubject": "Your individual spacehuddle invitation",

@@ -108,7 +108,9 @@
   </el-form-item>
   <el-form-item
     :label="
-      $t('module.brainstorming.missionmap.moderatorConfig.allowParticipationMeasures')
+      $t(
+        'module.brainstorming.missionmap.moderatorConfig.allowParticipationMeasures'
+      )
     "
     :prop="`${rulePropPath}.allowParticipationMeasures`"
   >

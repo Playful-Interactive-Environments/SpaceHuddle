@@ -27,6 +27,14 @@
         max-height="250"
         v-on:row-click="participantDetails"
       >
+        <el-table-column width="50">
+          <template #default="scope">
+            <el-checkbox
+              v-if="isDeletable(scope.row)"
+              v-model="scope.row.selected"
+            />
+          </template>
+        </el-table-column>
         <el-table-column
           :label="$t('moderator.organism.settings.participantSettings.avatar')"
           width="80"
@@ -56,7 +64,7 @@
             $t('moderator.organism.settings.participantSettings.voteCount')
           "
         />
-        <el-table-column width="120">
+        <el-table-column width="150">
           <template #default="scope">
             <span v-on:click="mailParticipant(scope.$index)">
               <font-awesome-icon class="icon link" icon="at" />
@@ -66,7 +74,7 @@
             </span>
             <span
               v-on:click="deleteParticipant(scope.$index)"
-              v-if="scope.row.ideaCount === 0 && scope.row.voteCount === 0"
+              v-if="isDeletable(scope.row)"
             >
               <font-awesome-icon class="icon link" icon="trash" />
             </span>
@@ -75,16 +83,19 @@
       </el-table>
       <br />
       <br />
-      <el-button
-        type="primary"
-        class="fullwidth"
-        v-on:click="add"
-        :disabled="!dataLoaded"
-      >
-        <template #icon>
-          <font-awesome-icon icon="circle-plus" />
-        </template>
-        {{ $t('moderator.organism.settings.participantSettings.add') }}
+      <div class="fullwidth">
+        <el-input-number v-model="addCount" :min="1" :max="100" />
+        <el-button type="primary" v-on:click="add" :disabled="!dataLoaded">
+          <template #icon>
+            <font-awesome-icon icon="circle-plus" />
+          </template>
+          {{ $t('moderator.organism.settings.participantSettings.add') }}
+        </el-button>
+      </div>
+      <el-button type="primary" class="fullwidth" v-on:click="deleteSelected">
+        {{
+          $t('moderator.organism.settings.participantSettings.removeSelected')
+        }}
       </el-button>
       <PDFConverter
         v-if="session"
@@ -196,6 +207,7 @@ import QrcodeVue from 'qrcode.vue';
 import * as themeColors from '@/utils/themeColors';
 import { copyToClipboard } from '@/utils/date';
 import PDFConverter from '@/components/shared/atoms/PDFConverter.vue';
+import { deleteConfirmDialog } from '@/services/api';
 
 @Options({
   components: {
@@ -216,6 +228,7 @@ export default class ParticipantSettings extends Vue {
   participants: ParticipantInfo[] = [];
   viewDetailsForParticipant: ParticipantInfo | null = null;
   everyoneCanJoin = true;
+  addCount = 1;
 
   showSettings = false;
 
@@ -297,6 +310,9 @@ export default class ParticipantSettings extends Vue {
 
   updateParticipants(participants: ParticipantInfo[]): void {
     this.participants = participants;
+    for (const participant of this.participants) {
+      (participant as any).selected = false;
+    }
   }
 
   deregisterAll(): void {
@@ -312,9 +328,29 @@ export default class ParticipantSettings extends Vue {
   async add(): Promise<void> {
     if (this.session) {
       participantService
-        .addParticipant(this.session.connectionKey)
+        .addParticipant(this.session.connectionKey, this.addCount)
         .then(() => this.participantCash.refreshData());
     }
+  }
+
+  async deleteSelected(): Promise<void> {
+    const list: Promise<boolean>[] = [];
+    let hasConfirmed = false;
+    for (const participant of this.participants) {
+      if ((participant as any).selected && this.isDeletable(participant)) {
+        if (!hasConfirmed) {
+          hasConfirmed = await deleteConfirmDialog();
+          if (!hasConfirmed) return;
+        }
+        list.push(participantService.remove(participant.id, false));
+      }
+    }
+    await Promise.all(list);
+    this.participantCash.refreshData();
+  }
+
+  isDeletable(participant: ParticipantInfo) {
+    return participant.ideaCount === 0 && participant.voteCount === 0;
   }
 
   async mailParticipant(index: number): Promise<void> {
@@ -443,6 +479,14 @@ ${this.$t('moderator.organism.settings.participantSettings.link')}: ${link}`;
 
   p {
     font-size: 1rem;
+  }
+}
+
+.fullwidth {
+  display: flex;
+  .el-button {
+    flex-grow: 1;
+    margin-left: 0.5rem;
   }
 }
 </style>

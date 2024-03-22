@@ -24,15 +24,22 @@ export const connect = async (
 };
 
 export const addParticipant = async (
-  sessionKey: string
-): Promise<Participant | Partial<Participant>> => {
-  return await apiExecutePost<Participant>(
-    `/${EndpointType.PARTICIPANT_CONNECT}/`,
-    {
-      sessionKey,
-    },
-    EndpointAuthorisationType.MODERATOR
-  );
+  sessionKey: string,
+  count = 1
+): Promise<Participant | Partial<Participant>[]> => {
+  const list: Promise<Participant | Partial<Participant>>[] = [];
+  for (let i = 0; i < count; i++) {
+    list.push(
+      apiExecutePost<Participant>(
+        `/${EndpointType.PARTICIPANT_CONNECT}/`,
+        {
+          sessionKey,
+        },
+        EndpointAuthorisationType.MODERATOR
+      )
+    );
+  }
+  return await Promise.all(list);
 };
 
 export const reconnect = async (browserKey: string): Promise<Participant> => {
@@ -67,12 +74,15 @@ export const deregisterGetTopicList = (
   );
 };
 
-export const remove = async (id: string): Promise<boolean> => {
+export const remove = async (
+  id: string,
+  confirmCheck = true
+): Promise<boolean> => {
   return await apiExecuteDelete<boolean>(
     `/${EndpointType.PARTICIPANT}/${id}/`,
     null,
     EndpointAuthorisationType.MODERATOR,
-    true
+    confirmCheck
   );
 };
 

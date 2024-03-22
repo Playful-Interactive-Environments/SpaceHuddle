@@ -239,6 +239,7 @@
           "ideaCount": "Anzahl der eingereichten Ideen",
           "voteCount": "Anzahl der abgegebenen Stimmen",
           "add": "Neue Teilnehmer*innen anlegen",
+          "removeSelected": "Ausgewählte Teilnehmer löschen",
           "export": "Export Verbindungs-PDF",
           "connectionInfo": "Du wurdest zu einer interaktiven Aktivität eingeladen worden. Um der Aktivität teilzunehmen, gib bitte deinen individuellen Schlüssels ein.",
           "connectionSubject": "Deine individuelle Spacehuddle-Einladung",
