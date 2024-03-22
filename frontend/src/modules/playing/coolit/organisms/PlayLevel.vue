@@ -2963,11 +2963,11 @@ export default class PlayLevel extends Vue {
   top: 3rem;
   right: 1rem;
   left: 1rem;
-  text-align: center;
   font-size: var(--font-size-large);
   color: var(--color-dark-contrast);
   background-color: #ffffff77;
   border-radius: 2rem 2rem 2rem 0;
+  padding: 1rem;
 
   .el-button {
     pointer-events: auto;
