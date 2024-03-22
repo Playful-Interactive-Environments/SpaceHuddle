@@ -34,6 +34,7 @@
   "moderatorConfig": {
     "mapSection": "Kartenausschnitt",
     "effectElectricity": "Beeinflusst den Strommix",
+    "allowParticipationMeasures": "Teilnehmer dürfen ihre eigenen Maßnahmen vorschlagen",
     "minParticipants": "mindestens erforderliche Teilnehmer",
     "minPoints": "erforderliche Mindestpunktzahl pro Teilnehmer",
     "maxPoints": "maximal zu vergebende Punkte pro Teilnehmer",

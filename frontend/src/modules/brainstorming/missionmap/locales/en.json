@@ -34,6 +34,7 @@
   "moderatorConfig": {
     "mapSection": "map section",
     "effectElectricity": "effect electricity",
+    "allowParticipationMeasures": "participants can submit their own measures",
     "minParticipants": "minimum required participants",
     "minPoints": "minimum required points per participant",
     "maxPoints": "maximum points to be spent per participant",

@@ -143,6 +143,7 @@
       </template>
       <template v-slot:footer>
         <AddItem
+          v-if="module && module.parameter.allowParticipationMeasures"
           :text="$t('module.brainstorming.missionmap.participant.add')"
           :is-column="true"
           @addNew="editNewImage"

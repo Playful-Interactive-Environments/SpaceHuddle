@@ -107,6 +107,17 @@
     </el-input>
   </el-form-item>
   <el-form-item
+    :label="
+      $t('module.brainstorming.missionmap.moderatorConfig.allowParticipationMeasures')
+    "
+    :prop="`${rulePropPath}.allowParticipationMeasures`"
+  >
+    <el-switch
+      class="level-item"
+      v-model="modelValue.allowParticipationMeasures"
+    />
+  </el-form-item>
+  <el-form-item
     :label="$t('module.brainstorming.missionmap.moderatorConfig.theme')"
     :prop="`${rulePropPath}.theme`"
   >
@@ -192,6 +203,9 @@ export default class ModeratorConfig extends Vue {
       }*/
       if (!('effectElectricity' in this.modelValue)) {
         this.modelValue.effectElectricity = false;
+      }
+      if (!('allowParticipationMeasures' in this.modelValue)) {
+        this.modelValue.allowParticipationMeasures = false;
       }
       if (!('maxRatingStars' in this.modelValue)) {
         this.modelValue.maxRatingStars = 3;
