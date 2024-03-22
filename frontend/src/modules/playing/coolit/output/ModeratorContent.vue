@@ -388,12 +388,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   customScale(placeable: placeable.Placeable): number {
     //(placeable) => placeable.position[1] / 100
-    const placingRegions =
-      gameConfig.obstacles[this.selectedLevelType].categories[placeable.type]
-        .settings.placingRegions;
-    const min = placingRegions[0][0][1];
-    const max = placingRegions[0][2][1];
-    return ((placeable.position[1] - min) / (max - min)) * 0.75 + 0.5;
+    if (gameConfig.obstacles[this.selectedLevelType]) {
+      const placingRegions =
+        gameConfig.obstacles[this.selectedLevelType].categories[placeable.type]
+          .settings.placingRegions;
+      const min = placingRegions[0][0][1];
+      const max = placingRegions[0][2][1];
+      return ((placeable.position[1] - min) / (max - min)) * 0.75 + 0.5;
+    }
+    return 1;
   }
 
   unmounted(): void {

@@ -595,10 +595,13 @@ export default class LevelBuilder extends Vue {
       for (let i = 0; i < sceneItems.length; i++) {
         if (
           sceneItems[i].name !== this.savedItems[i].name ||
-          sceneItems[i].position[0] !== this.savedItems[i].position[0] ||
-          sceneItems[i].position[1] !== this.savedItems[i].position[1] ||
-          sceneItems[i].rotation !== this.savedItems[i].rotation ||
-          sceneItems[i].scale !== this.savedItems[i].scale
+          Math.abs(sceneItems[i].position[0] - this.savedItems[i].position[0]) >
+            0.01 ||
+          Math.abs(sceneItems[i].position[1] - this.savedItems[i].position[1]) >
+            0.01 ||
+          Math.abs(sceneItems[i].rotation - this.savedItems[i].rotation) >
+            0.01 ||
+          Math.abs(sceneItems[i].scale - this.savedItems[i].scale) > 0.01
         ) {
           hasChanges = true;
           break;
@@ -711,6 +714,9 @@ export default class LevelBuilder extends Vue {
             this.getTexture(item.type, item.name)
           )
         );
+      for (const state of Object.values(this.placementState)) {
+        state.currentCount = 0;
+      }
       for (const item of this.placedObjects) {
         this.placementState[item.name].currentCount++;
       }
