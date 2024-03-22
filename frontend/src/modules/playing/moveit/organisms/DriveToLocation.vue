@@ -847,6 +847,7 @@ export default class DriveToLocation extends Vue {
       });
       setTimeout(() => {
         this.zoomReady = true;
+        this.calculateRouteInfoPoint();
       }, 1000);
       /*setTimeout(() => {
         this.createVisibleStreetMask();
@@ -1460,43 +1461,51 @@ export default class DriveToLocation extends Vue {
       ]);
       const lineGoal = turf.lineString([this.mapDrivingPoint, this.mapEnd]);
       const intersectionPoint = turf.lineIntersect(lineBorder, lineGoal);
-      this.showDirectionInfo = intersectionPoint.features.length > 0;
+      const coordinates =
+        intersectionPoint.features.length > 0
+          ? intersectionPoint.features[0].geometry.coordinates
+          : [...this.mapEnd];
+      this.showDirectionInfo = true; //intersectionPoint.features.length > 0;
       if (this.showDirectionInfo) {
-        const coordinates = intersectionPoint.features[0].geometry.coordinates;
+        //const coordinates = intersectionPoint.features[0].geometry.coordinates;
         this.infoRotation =
           turf.bearing(this.mapDrivingPoint, this.mapEnd) - 90;
-        const boundsWidth = bounds.getEast() - bounds.getWest();
-        const boundsHeight = bounds.getNorth() - bounds.getSouth();
-        const mapSize = mapUtils.getMapSize(this.map);
-        const deltaHorizontal = (boundsWidth / mapSize[0]) * 40;
-        const deltaVertical = (boundsHeight / mapSize[1]) * 30;
-        const lineNorth = turf.lineString([
-          [bounds.getWest(), bounds.getNorth() - deltaVertical],
-          [bounds.getEast(), bounds.getNorth() - deltaVertical],
-        ]);
-        const lineEast = turf.lineString([
-          [bounds.getEast() - deltaHorizontal, bounds.getNorth()],
-          [bounds.getEast() - deltaHorizontal, bounds.getSouth()],
-        ]);
-        const lineSouth = turf.lineString([
-          [bounds.getEast(), bounds.getSouth() + deltaVertical],
-          [bounds.getWest(), bounds.getSouth() + deltaVertical],
-        ]);
-        const lineWest = turf.lineString([
-          [bounds.getWest() + deltaHorizontal, bounds.getSouth()],
-          [bounds.getWest() + deltaHorizontal, bounds.getNorth()],
-        ]);
-        if (turf.lineIntersect(lineNorth, lineGoal).features.length > 0) {
-          coordinates[1] -= deltaVertical;
-        } else if (
-          turf.lineIntersect(lineSouth, lineGoal).features.length > 0
-        ) {
-          coordinates[1] += deltaVertical;
-        }
-        if (turf.lineIntersect(lineEast, lineGoal).features.length > 0) {
-          coordinates[0] -= deltaHorizontal;
-        } else if (turf.lineIntersect(lineWest, lineGoal).features.length > 0) {
-          coordinates[0] += deltaHorizontal;
+        if (intersectionPoint.features.length > 0) {
+          const boundsWidth = bounds.getEast() - bounds.getWest();
+          const boundsHeight = bounds.getNorth() - bounds.getSouth();
+          const mapSize = mapUtils.getMapSize(this.map);
+          const deltaHorizontal = (boundsWidth / mapSize[0]) * 40;
+          const deltaVertical = (boundsHeight / mapSize[1]) * 30;
+          const lineNorth = turf.lineString([
+            [bounds.getWest(), bounds.getNorth() - deltaVertical],
+            [bounds.getEast(), bounds.getNorth() - deltaVertical],
+          ]);
+          const lineEast = turf.lineString([
+            [bounds.getEast() - deltaHorizontal, bounds.getNorth()],
+            [bounds.getEast() - deltaHorizontal, bounds.getSouth()],
+          ]);
+          const lineSouth = turf.lineString([
+            [bounds.getEast(), bounds.getSouth() + deltaVertical],
+            [bounds.getWest(), bounds.getSouth() + deltaVertical],
+          ]);
+          const lineWest = turf.lineString([
+            [bounds.getWest() + deltaHorizontal, bounds.getSouth()],
+            [bounds.getWest() + deltaHorizontal, bounds.getNorth()],
+          ]);
+          if (turf.lineIntersect(lineNorth, lineGoal).features.length > 0) {
+            coordinates[1] -= deltaVertical;
+          } else if (
+            turf.lineIntersect(lineSouth, lineGoal).features.length > 0
+          ) {
+            coordinates[1] += deltaVertical;
+          }
+          if (turf.lineIntersect(lineEast, lineGoal).features.length > 0) {
+            coordinates[0] -= deltaHorizontal;
+          } else if (
+            turf.lineIntersect(lineWest, lineGoal).features.length > 0
+          ) {
+            coordinates[0] += deltaHorizontal;
+          }
         }
         this.mapEndInfo = coordinates as [number, number];
       }
@@ -2198,14 +2207,14 @@ export default class DriveToLocation extends Vue {
 }
 
 .pin {
-  --pin-color: var(--color-primary);
+  --pin-color: var(--color-red);
   font-size: var(--font-size-xxxlarge);
   color: var(--pin-color);
 }
 
 .noEntry {
   font-size: var(--font-size-xlarge);
-  color: var(--color-evaluation);
+  color: var(--color-red);
   pointer-events: none;
 }
 
