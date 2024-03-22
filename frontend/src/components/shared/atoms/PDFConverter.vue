@@ -46,9 +46,9 @@ export default class PDFConverter extends Vue {
   hasAlreadyParsed = false;
   pdfFile = null;
 
-  generatePdf(): void {
+  async generatePdf(): Promise<void> {
     this.createPaginationOfElements();
-    this.downloadPdf();
+    await this.downloadPdf();
   }
 
   createPaginationOfElements(): void {

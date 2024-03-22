@@ -87,6 +87,7 @@
         {{ $t('moderator.organism.settings.participantSettings.add') }}
       </el-button>
       <PDFConverter
+        v-if="session"
         :enable-download="false"
         :preview-modal="true"
         :paginate-elements-by-height="600"
@@ -137,7 +138,12 @@
           </div>
         </template>
       </PDFConverter>
-      <el-button type="primary" class="fullwidth" v-on:click="generateReport">
+      <el-button
+        type="primary"
+        class="fullwidth"
+        v-on:click="generateReport"
+        :loading="reportInProgress"
+      >
         {{ $t('moderator.organism.settings.participantSettings.export') }}
       </el-button>
     </div>
@@ -206,7 +212,7 @@ export default class ParticipantSettings extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ default: '' }) sessionId!: string;
 
-  session!: Session;
+  session: Session | null = null;
   participants: ParticipantInfo[] = [];
   viewDetailsForParticipant: ParticipantInfo | null = null;
   everyoneCanJoin = true;
@@ -304,9 +310,11 @@ export default class ParticipantSettings extends Vue {
   dataLoaded = false;
 
   async add(): Promise<void> {
-    participantService
-      .addParticipant(this.session.connectionKey)
-      .then(() => this.participantCash.refreshData());
+    if (this.session) {
+      participantService
+        .addParticipant(this.session.connectionKey)
+        .then(() => this.participantCash.refreshData());
+    }
   }
 
   async mailParticipant(index: number): Promise<void> {
@@ -354,8 +362,17 @@ ${this.$t('moderator.organism.settings.participantSettings.link')}: ${link}`;
     }
   }
 
+  reportInProgress = false;
   generateReport(): void {
-    (this.$refs as any).html2Pdf.generatePdf();
+    this.reportInProgress = true;
+    (this.$refs as any).html2Pdf
+      .generatePdf()
+      .then(() => {
+        this.reportInProgress = false;
+      })
+      .catch(() => {
+        this.reportInProgress = false;
+      });
   }
 }
 </script>
