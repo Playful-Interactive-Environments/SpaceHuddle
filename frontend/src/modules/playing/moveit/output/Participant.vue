@@ -12,6 +12,7 @@
     <select-challenge
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       :tracking-manager="trackingManager"
+      :task-id="taskId"
       @play="startGame"
     />
     <drive-to-location

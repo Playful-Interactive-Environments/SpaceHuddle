@@ -18,6 +18,7 @@
     "separate": "separate",
     "electricity": "electricity ratio in %",
     "earned": "earned",
+    "history": "statistics",
     "drivingStats": {
       "maxSpeed": "Maximum speed",
       "avgSpeed": "Average speed",

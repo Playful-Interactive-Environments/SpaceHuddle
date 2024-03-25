@@ -27,6 +27,14 @@
       <el-button
         type="primary"
         size="large"
+        @click="showHistory = true"
+        class="level-item"
+      >
+        <font-awesome-icon icon="chart-line" />
+      </el-button>
+      <el-button
+        type="primary"
+        size="large"
         @click="showInfo = true"
         class="level-item"
       >
@@ -315,6 +323,12 @@
       </div>
     </div>
   </DrawerBottomOverlay>
+  <DrawerBottomOverlay
+    v-model="showHistory"
+    :title="$t(`module.playing.moveit.participant.history`)"
+  >
+    <ParticipantHistory :task-id="taskId" />
+  </DrawerBottomOverlay>
   <el-dialog v-model="showPlayDialog">
     <template #header>
       <h1 v-if="selectedVehicle">
@@ -405,6 +419,7 @@ import * as PIXI from 'pixi.js';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { delay } from '@/utils/wait';
 import { remToPx } from '@/modules/playing/moveit/utils/consts';
+import ParticipantHistory from '@/modules/playing/moveit/organisms/ParticipantHistory.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export enum NavigationType {
@@ -437,6 +452,7 @@ interface VehicleData {
 
 @Options({
   components: {
+    ParticipantHistory,
     SpriteCanvas,
     FontAwesomeIcon,
     Doughnut,
@@ -446,6 +462,7 @@ interface VehicleData {
   emits: ['play'],
 })
 export default class SelectChallenge extends Vue {
+  @Prop() readonly taskId!: string;
   @Prop() readonly trackingManager!: TrackingManager;
   chartDataElectricityMix: ChartData = {
     labels: [],
@@ -467,6 +484,7 @@ export default class SelectChallenge extends Vue {
     type: 'sport',
   };
   showInfo = false;
+  showHistory = false;
   showPlayDialog = false;
   navigationType = NavigationType.speed;
   NavigationTypeList = [
