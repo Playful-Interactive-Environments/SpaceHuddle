@@ -44,7 +44,7 @@
           v-on:timerEnds="goToOverview"
         ></Timer>
       </div>
-      <div class="right" v-if="points">
+      <div class="right" v-if="points && showCoins">
         <div class="uppercase">
           <font-awesome-icon icon="coins" />
         </div>
@@ -118,6 +118,10 @@ export default class ParticipantModuleContent extends Vue {
   backClicked = false;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
+
+  get showCoins(): boolean {
+    return JSON.parse(process.env.VUE_APP_SHOW_COINS);
+  }
 
   stateCash!: cashService.SimplifiedCashEntry<TaskParticipantState[]>;
   @Watch('taskId', { immediate: true })
