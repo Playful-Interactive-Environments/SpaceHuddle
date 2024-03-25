@@ -117,13 +117,16 @@ export default class ParticipantJoin extends Vue {
           } else {
             this.setDefaultKey();
           }
+          if (this.connectionKey) this.connectToSession();
         },
         () => {
           this.setDefaultKey();
+          if (this.connectionKey) this.connectToSession();
         }
       );
     } else {
       this.setDefaultKey();
+      if (this.connectionKey) this.connectToSession();
     }
   }
 
