@@ -110,6 +110,14 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item
+        v-if="!sessionId"
+        prop="customKey"
+        :label="$t('moderator.organism.settings.sessionSettings.customKey')"
+      >
+        <el-switch v-model="hasAutoKey" />
+        <el-input v-if="!hasAutoKey" v-model="formData.connectionKey" />
+      </el-form-item>
       <template #footer>
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
@@ -149,6 +157,7 @@ import * as cashService from '@/services/cash-service';
     'update:subject',
   ],
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SessionSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop({ default: false }) showModal!: boolean;
@@ -159,12 +168,14 @@ export default class SessionSettings extends Vue {
   subjectState = false;
   sessionCash!: cashService.SimplifiedCashEntry<Session>;
   subjectCash!: cashService.SimplifiedCashEntry<string[]>;
+  hasAutoKey = true;
 
   formData: ValidationData = {
     title: '',
     description: '',
     subject: '',
     theme: '',
+    connectionKey: null,
     expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
   };
 
@@ -233,14 +244,17 @@ export default class SessionSettings extends Vue {
 
   handleClose(done: { (): void }): void {
     done();
+    this.reset();
     this.$emit('update:showModal', false);
   }
 
   reset(): void {
+    this.hasAutoKey = true;
     this.formData.title = '';
     this.formData.description = '';
     this.formData.subject = null;
     this.formData.theme = null;
+    this.formData.connectionKey = null;
     this.formData.expirationDate = new Date(
       this.today.setMonth(this.today.getMonth() + 1)
     );
@@ -266,31 +280,31 @@ export default class SessionSettings extends Vue {
       } else {
         this.subjectState = true;
       }
-      await sessionService
-        .post({
-          title: this.formData.title,
-          description: this.formData.description,
-          subject: this.formData.subject,
-          theme: this.formData.theme,
-          expirationDate: this.isoExpirationDate,
-        })
-        .then(
-          (session) => {
-            this.$emit('update:showModal', false);
-            this.$emit('update:subject', this.subjectState);
-            this.$emit('sessionUpdated');
-            this.reset();
-            this.$router.push({
-              name: 'moderator-session-details',
-              params: {
-                sessionId: session.id,
-              },
-            });
-          },
-          (error) => {
-            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
-          }
-        );
+      const data: any = {
+        title: this.formData.title,
+        description: this.formData.description,
+        subject: this.formData.subject,
+        theme: this.formData.theme,
+        expirationDate: this.isoExpirationDate,
+      };
+      if (!this.hasAutoKey) data.connectionKey = this.formData.connectionKey;
+      await sessionService.post(data).then(
+        (session) => {
+          this.$emit('update:showModal', false);
+          this.$emit('update:subject', this.subjectState);
+          this.$emit('sessionUpdated');
+          this.reset();
+          this.$router.push({
+            name: 'moderator-session-details',
+            params: {
+              sessionId: session.id,
+            },
+          });
+        },
+        (error) => {
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
+        }
+      );
     } else {
       if (
         this.formData.subject === '' ||

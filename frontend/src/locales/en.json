@@ -73,6 +73,13 @@
           }
         }
       },
+      "session": {
+        "post": {
+          "connectionKey": {
+            "NotValid": "Connection key is already assigned."
+          }
+        }
+      },
       "idea": {
         "post": {
           "idea": {
@@ -302,7 +309,8 @@
           "theme": "theme",
           "default": "default",
           "calendar": "calendar",
-          "submit": "Save session"
+          "submit": "Save session",
+          "customKey": "Automatic key generation"
         },
         "topicSettings": {
           "header": "Create Topic",

@@ -73,6 +73,13 @@
           }
         }
       },
+      "session": {
+        "post": {
+          "connectionKey": {
+            "NotValid": "Der Verbindungsschlüssel ist bereits vergeben."
+          }
+        }
+      },
       "idea": {
         "post": {
           "idea": {
@@ -303,7 +310,8 @@
           "theme": "Thema",
           "default": "Standard",
           "calendar": "Kalender",
-          "submit": "Sitzung speichern"
+          "submit": "Sitzung speichern",
+          "customKey": "Automatische Schlüsselgenerierung"
         },
         "topicSettings": {
           "header": "Thema erstellen",
