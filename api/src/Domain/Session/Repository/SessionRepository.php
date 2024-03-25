@@ -415,7 +415,7 @@ class SessionRepository implements RepositoryInterface
      */
     public function insert(object $data, bool $insertDependencies = true): ?object
     {
-        if (!$data->connectionKey)
+        if (!isset($data->connectionKey))
             $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         $data->creationDate = date("Y-m-d");
         return $this->genericInsert($data, $insertDependencies);
