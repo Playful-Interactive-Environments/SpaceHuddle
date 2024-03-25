@@ -187,7 +187,8 @@
         "e-scooter": "E-Scooter"
       },
       "bus": {
-        "bus": "Bus"
+        "bus": "Bus",
+        "e-bus": "Elektrobus"
       }
     },
     "fuel": {
