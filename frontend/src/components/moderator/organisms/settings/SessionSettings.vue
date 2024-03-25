@@ -287,7 +287,8 @@ export default class SessionSettings extends Vue {
         theme: this.formData.theme,
         expirationDate: this.isoExpirationDate,
       };
-      if (!this.hasAutoKey) data.connectionKey = this.formData.connectionKey;
+      if (!this.hasAutoKey && this.formData.connectionKey)
+        data.connectionKey = this.formData.connectionKey;
       await sessionService.post(data).then(
         (session) => {
           this.$emit('update:showModal', false);
