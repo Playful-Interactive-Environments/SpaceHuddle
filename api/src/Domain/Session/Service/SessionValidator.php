@@ -40,7 +40,16 @@ final class SessionValidator
             ->notEmptyString("id", "Empty: This field cannot be left empty")
             ->requirePresence("id", "update", "Required: This field is required")
             ->notEmptyString("title", "Empty: This field cannot be left empty")
-            ->requirePresence("title", "create", "Required: This field is required");
+            ->requirePresence("title", "create", "Required: This field is required")
+            ->add("connectionKey", "custom", [
+                "rule" => function ($value) {
+                    if (isset($value)) {
+                        return $this->repository->isConnectionKeyFree($value);
+                    }
+                    return true;
+                },
+                "message" => "NotValid: Connection key is already assigned."
+            ]);
     }
 
     /**

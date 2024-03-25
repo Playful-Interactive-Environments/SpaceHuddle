@@ -415,7 +415,8 @@ class SessionRepository implements RepositoryInterface
      */
     public function insert(object $data, bool $insertDependencies = true): ?object
     {
-        $data->connectionKey = $this->generateNewConnectionKey("connection_key");
+        if (!$data->connectionKey)
+            $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         $data->creationDate = date("Y-m-d");
         return $this->genericInsert($data, $insertDependencies);
     }
@@ -552,6 +553,21 @@ class SessionRepository implements RepositoryInterface
             return $result["id"];
         }
         return null;
+    }
+
+    /**
+     * Check custom connection key.
+     * @param string $connectionKey custom connection key
+     * @return bool key is usable
+     */
+    public function isConnectionKeyFree(string $connectionKey): bool
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select("id")->andWhere(["connection_key" => $connectionKey]);
+        if ($query->execute()->fetch("assoc")) {
+            return false;
+        }
+        return true;
     }
 
     /**
