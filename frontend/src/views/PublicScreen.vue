@@ -16,7 +16,10 @@
             {{ session.description }}
           </span>
         </div>
-        <div class="media-right">
+        <div
+          class="media-right"
+          :style="{ '--connection-key-length': session.connectionKey.length }"
+        >
           {{ session.connectionKey }}
           <QrcodeVue
             :foreground="contrastColor"
@@ -555,7 +558,7 @@ h3 {
 
       .media-right {
         margin-left: var(--side-padding);
-        font-size: 2.9rem;
+        font-size: calc(23.2rem / var(--connection-key-length));
         font-family: monospace;
         svg {
           display: flex;
