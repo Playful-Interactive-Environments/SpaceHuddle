@@ -32,6 +32,7 @@
           v-if="module"
           :ideas="ideas"
           :parameter="module?.parameter"
+          :calculateSize="false"
           :canChangePosition="() => true"
           v-model:selected-idea="selectedLevel"
           v-on:ideaPositionChanged="saveIdea"
@@ -72,6 +73,7 @@
                   :handleEditable="false"
                   :showState="false"
                   :portrait="false"
+                  :isSharable="true"
                   :is-selected="
                     selectedLevel && selectedLevel.id === element.id
                   "
@@ -132,6 +134,7 @@
                 :handleEditable="false"
                 :showState="false"
                 :portrait="false"
+                :isSharable="true"
                 :is-selected="selectedLevel && selectedLevel.id === idea.id"
                 :background-color="getLevelColor(idea)"
                 @ideaDeleted="refreshIdeas()"
@@ -580,6 +583,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 </script>
 
 <style scoped>
+.el-collapse {
+  margin-bottom: 0;
+}
+
 .level-icon {
   font-size: 2rem;
   margin: 0.8rem;

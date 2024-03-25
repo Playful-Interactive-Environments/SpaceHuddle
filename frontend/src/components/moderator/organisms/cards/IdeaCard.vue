@@ -235,7 +235,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) canBeChanged!: boolean;
   @Prop({ default: true }) handleEditable!: boolean;
   @Prop({ default: true }) canChangeState!: boolean;
-  @Prop({ default: true }) isSharable!: boolean;
+  @Prop({ default: false }) isSharable!: boolean;
   @Prop({ default: true }) showState!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: '#0192d0' }) selectionColor!: string;

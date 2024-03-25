@@ -76,6 +76,7 @@
                   :handleEditable="false"
                   :showState="false"
                   :portrait="false"
+                  :isSharable="true"
                   :is-selected="
                     selectedLevel && selectedLevel.id === element.id
                   "
@@ -133,6 +134,7 @@
                 :handleEditable="false"
                 :showState="false"
                 :portrait="false"
+                :isSharable="true"
                 :is-selected="selectedLevel && selectedLevel.id === idea.id"
                 :background-color="getLevelColor(idea)"
                 @ideaDeleted="refreshIdeas()"
