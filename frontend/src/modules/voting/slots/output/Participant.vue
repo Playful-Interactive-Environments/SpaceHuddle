@@ -195,6 +195,10 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import * as cashService from '@/services/cash-service';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 
 @Options({
   components: {
@@ -214,6 +218,7 @@ export default class Participant extends Vue {
   votes: Vote[] = [];
   seats: (Idea | null)[] = [];
   ideaPointer = 0;
+  trackingManager!: TrackingManager;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -232,7 +237,7 @@ export default class Participant extends Vue {
     //Changes Paul Start
     if (this.ideas.length > 0 || this.votes.length > 0) {
       const element = document.getElementById('loadingScreen');
-      if (element != null && !element.classList.contains('zeroOpacity')) {
+      if (element !== null && !element.classList.contains('zeroOpacity')) {
         this.replaceIdeaArray();
 
         const preload = document.getElementById('preloader');
@@ -252,6 +257,9 @@ export default class Participant extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {}, true);
+    }
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -361,7 +369,7 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
-    if (this.seats.length != this.module.parameter.slotCount) this.getVotes();
+    if (this.seats.length !== this.module.parameter.slotCount) this.getVotes();
   }
 
   async getVotes(): Promise<void> {
@@ -374,17 +382,14 @@ export default class Participant extends Vue {
   async vote(slot: number): Promise<void> {
     if (this.ideaPointer < this.ideas.length) {
       const idea = this.ideas[this.ideaPointer];
-      const vote = this.votes.find((vote) => vote.ideaId === idea.id);
+      let vote = this.votes.find((vote) => vote.ideaId === idea.id);
       if (!vote) {
-        votingService
-          .postVote(this.taskId, {
-            ideaId: idea.id,
-            rating: slot,
-            detailRating: slot > 0 ? 1 : 0,
-          })
-          .then((vote) => {
-            this.votes.push(vote);
-          });
+        vote = await votingService.postVote(this.taskId, {
+          ideaId: idea.id,
+          rating: slot,
+          detailRating: slot > 0 ? 1 : 0,
+        });
+        this.votes.push(vote);
       } else {
         vote.rating = slot;
         vote.detailRating = slot > 0 ? 1 : 0;
@@ -407,6 +412,44 @@ export default class Participant extends Vue {
           }
         }
         this.seats[slot - 1] = idea;
+      }
+      if (this.trackingManager && vote) {
+        if (
+          !this.trackingManager.iterationStep ||
+          this.trackingManager.iterationStep.ideaId !== vote.ideaId ||
+          this.trackingManager.iterationStep.iteration !==
+            this.trackingManager.iteration?.iteration
+        ) {
+          await this.trackingManager.createInstanceStepPoints(
+            vote.ideaId,
+            TaskParticipantIterationStepStatesType.NEUTRAL,
+            {
+              rating: vote.rating,
+              detailRating: vote.detailRating,
+              parameter: vote.parameter,
+            },
+            5,
+            null,
+            true,
+            false,
+            () => true
+          );
+        } else {
+          await this.trackingManager.saveIterationStep(
+            {
+              rating: vote.rating,
+              detailRating: vote.detailRating,
+              parameter: vote.parameter,
+            },
+            TaskParticipantIterationStepStatesType.NEUTRAL,
+            null,
+            5,
+            true,
+            null,
+            false,
+            () => true
+          );
+        }
       }
       this.ideaPointer++;
     }
@@ -444,30 +487,45 @@ export default class Participant extends Vue {
     }
   }
 
-  scrollRocketToBottom(): void {
+  async scrollRocketToBottom(): Promise<void> {
     const rocket = document.getElementById('rocketColumn');
     const fire = document.getElementById('fire');
     this.finishedAndLaunched = true;
-    if (rocket != null && fire != null && this.finished) {
+    if (rocket !== null && fire !== null && this.finished) {
       rocket.scrollTo({ top: rocket.scrollHeight, behavior: 'smooth' });
       rocket.classList.add('rocketAnimateMove');
       fire.classList.add('rocketAnimateSprite');
       const endCard = document.getElementById('endOfIdeas');
-      if (endCard != null) {
+      if (endCard !== null) {
         endCard.classList.add('hidden');
       }
       const thanksText = document.getElementById('thanksText');
-      if (thanksText != null) {
+      if (thanksText !== null) {
         thanksText.classList.add('notHidden');
         setTimeout(() => thanksText?.classList.add('fullOpacity'), 2000);
       }
+    }
+
+    if (this.finished) {
+      await this.trackingManager.saveIteration(
+        null,
+        TaskParticipantIterationStatesType.PARTICIPATED,
+        null,
+        true
+      );
+      await this.trackingManager.saveState(
+        {
+          voteCount: this.votes.length,
+        },
+        TaskParticipantStatesType.FINISHED
+      );
     }
   }
 
   heightCheck(): boolean {
     const element = document.getElementById('backgroundImage');
 
-    if (element != null) {
+    if (element !== null) {
       this.smallHeight = element.scrollHeight * 0.9 < element.scrollWidth;
       this.enoughHeight = element.scrollHeight * 0.7 > element.scrollWidth;
     }

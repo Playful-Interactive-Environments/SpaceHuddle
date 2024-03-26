@@ -70,6 +70,27 @@
            "path": "categorisation/settings"  
        }  
    },  
+   "common": {  
+       "default": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "locales": "de,en,",  
+             "icon": "gamepad",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  "finishManuel": true,  
+           "path": "common/default"  
+       },  
+       "visualisation_master": {  
+           "publicScreen": "output/PublicScreen",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
+           "path": "common/visualisation_master"  
+       },  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "common/settings"  
+       }  
+   },  
    "information": {  
        "default": {  
            "publicScreen": "output/PublicScreen",  

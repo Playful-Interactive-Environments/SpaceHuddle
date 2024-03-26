@@ -122,6 +122,11 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as cashService from '@/services/cash-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import { delay } from '@/utils/wait';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 
 @Options({
   components: {
@@ -145,12 +150,16 @@ export default class Participant extends Vue {
   maxRate = 5;
   starOpacity = 0;
   initIdeaNumber = 0;
+  trackingManager!: TrackingManager;
 
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {}, true);
+    }
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -295,29 +304,77 @@ export default class Participant extends Vue {
   }
 
   async saveVoting(rate: number, vote: Vote | null = null): Promise<void> {
-    setTimeout(() => {
-      if (!vote) {
-        if (this.ideaPointer < this.ideas.length) {
-          const idea = this.ideas[this.ideaPointer];
-          votingService
-            .postVote(this.taskId, {
-              ideaId: idea.id,
-              rating: rate,
-              detailRating: rate,
-            })
-            .then((vote) => {
-              this.votes.push(vote);
-            });
-          this.rate = 0;
-          this.ideaPointer++;
-          this.scrollToTop(0);
-        }
-      } else {
-        vote.rating = rate;
-        vote.detailRating = rate;
-        votingService.putVote(vote);
+    await delay(1000);
+    if (!vote) {
+      if (this.ideaPointer < this.ideas.length) {
+        const idea = this.ideas[this.ideaPointer];
+        vote = await votingService.postVote(this.taskId, {
+          ideaId: idea.id,
+          rating: rate,
+          detailRating: rate,
+        });
+        this.votes.push(vote);
+        this.rate = 0;
+        this.ideaPointer++;
+        this.scrollToTop(0);
       }
-    }, 1000);
+    } else {
+      vote.rating = rate;
+      vote.detailRating = rate;
+      await votingService.putVote(vote);
+    }
+    if (this.trackingManager && vote) {
+      if (
+        !this.trackingManager.iterationStep ||
+        this.trackingManager.iterationStep.ideaId !== vote.ideaId ||
+        this.trackingManager.iterationStep.iteration !==
+          this.trackingManager.iteration?.iteration
+      ) {
+        await this.trackingManager.createInstanceStepPoints(
+          vote.ideaId,
+          TaskParticipantIterationStepStatesType.NEUTRAL,
+          {
+            rating: vote.rating,
+            detailRating: vote.detailRating,
+            parameter: vote.parameter,
+          },
+          5,
+          null,
+          true,
+          false,
+          () => true
+        );
+      } else {
+        await this.trackingManager.saveIterationStep(
+          {
+            rating: vote.rating,
+            detailRating: vote.detailRating,
+            parameter: vote.parameter,
+          },
+          TaskParticipantIterationStepStatesType.NEUTRAL,
+          null,
+          5,
+          true,
+          null,
+          false,
+          () => true
+        );
+      }
+      if (this.finished) {
+        await this.trackingManager.saveIteration(
+          null,
+          TaskParticipantIterationStatesType.PARTICIPATED,
+          null,
+          true
+        );
+        await this.trackingManager.saveState(
+          {
+            voteCount: this.votes.length,
+          },
+          TaskParticipantStatesType.FINISHED
+        );
+      }
+    }
   }
 
   showIdeaOverlay = false;

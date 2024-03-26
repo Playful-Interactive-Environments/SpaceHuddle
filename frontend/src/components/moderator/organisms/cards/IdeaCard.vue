@@ -207,7 +207,6 @@ import IdeaStates from '@/types/enum/IdeaStates';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as themeColors from '@/utils/themeColors';
-import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 export enum CollapseIdeas {
