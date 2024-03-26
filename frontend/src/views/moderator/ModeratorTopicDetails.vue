@@ -21,8 +21,14 @@
               :text="$t('moderator.organism.settings.sidebarSettings.download')"
             >
               <font-awesome-icon
+                v-if="!isDownloading"
                 class="awesome-icon"
                 icon="download"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                v-else
+                class="awesome-icon fa-spin"
+                icon="spinner"
               ></font-awesome-icon>
             </ToolTip>
           </span>
@@ -883,7 +889,10 @@ export default class ModeratorTopicDetails extends Vue {
     this.activeTask = null;
   }
 
+  isDownloading = false;
   download(): void {
+    if (this.isDownloading) return;
+    this.isDownloading = true;
     topicService.exportTopic(this.topicId, 'XLSX').then((result) => {
       const blob = this.convertBase64toBlob(
         result.base64,
@@ -891,6 +900,7 @@ export default class ModeratorTopicDetails extends Vue {
       );
       const blobURL = URL.createObjectURL(blob);
       window.open(blobURL, '_self');
+      this.isDownloading = false;
     });
   }
 
