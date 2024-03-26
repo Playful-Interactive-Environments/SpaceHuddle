@@ -142,14 +142,12 @@ class TopicRepository implements RepositoryInterface
         $rows = $query->execute()->fetchAll("assoc");
         if (is_array($rows) and sizeof($rows) > 0) {
             foreach ($rows as $index => $taskItem) {
-                $sheet = $spreadsheet->createSheet($index);
                 $reader = new ArrayReader($taskItem);
                 $detailId = $reader->findString("id");
                 $name = $reader->findString("name");
                 $taskType = $reader->findString("task_type");
                 if ($name) {
                     $name = preg_replace('/[^a-zA-Z0-9]/', ' ', $name);
-                    $sheet->setTitle(mb_substr($name, 0, 31));
                 }
 
                 $detailRows = false;
@@ -201,7 +199,7 @@ class TopicRepository implements RepositoryInterface
                         "idea.timestamp",
                         "category.keywords as category_keywords",
                         "category.description as category_description",
-                        "category.image as category_image",
+                        "category.id as category_image_id",
                         "category.link as category_link",
                         "category.id as category_id"
                     ])
@@ -227,7 +225,10 @@ class TopicRepository implements RepositoryInterface
                         "image",
                         "link"
                     ];
-                } else {
+                } elseif (
+                    strtolower($taskType) == TaskType::BRAINSTORMING ||
+                    strtolower($taskType) == TaskType::SELECTION
+                ) {
                     $detailQuery->select([
                         "idea.id",
                         "idea.keywords",
@@ -245,111 +246,189 @@ class TopicRepository implements RepositoryInterface
                         ->order("selection_view_idea.order");
                     $detailRows = $detailQuery->execute()->fetchAll("assoc");
                     $exportColumns = ["keywords", "description", "image", "link"];
+                } elseif (strtolower($taskType) == TaskType::INFORMATION) {
+                    $moduleQuery = $this->queryFactory->newSelect("module")
+                        ->select(["module_name"])
+                        ->andWhere(["task_id" => $detailId, "module_name IN" => ["quiz", "survey", "talk"]]);
+                    $isQuiz = $moduleQuery->execute()->rowCount() > 0;
+                    if ($isQuiz) {
+                        $detailQuery->select([
+                            "idea.id",
+                            "idea.keywords",
+                            "idea.description",
+                            "idea.image_timestamp",
+                            "idea.id AS image_id",
+                            "idea.link",
+                            "idea.order",
+                            "idea.parameter",
+                            "idea.participant_id",
+                            "idea.state",
+                            "idea.task_id",
+                            "idea.timestamp",
+                            "category.keywords as question_keywords",
+                            "category.description as question_description",
+                            "category.id as question_image_id",
+                            "category.link as question_link",
+                            "category.id as question_id",
+                            "vote_result.count_rating as count",
+                            "vote_result.sum_detail_rating as sum"
+                        ])
+                            ->join([
+                                "category" => [
+                                    "table" => "idea",
+                                    "type" => "INNER",
+                                    "conditions" => [
+                                        "selection_view_idea.parent_id = category.id",
+                                        "selection_view_idea.type" => strtoupper(ViewType::HIERARCHY)
+                                    ]
+                                ]
+                            ])
+                            ->leftJoin("vote_result", "vote_result.idea_id = idea.id")
+                            ->order(["category.order", "selection_view_idea.order"]);
+                        $detailRows = $detailQuery->execute()->fetchAll("assoc");
+                        $exportColumns = [
+                            "question_keywords",
+                            "question_description",
+                            "question_image",
+                            "question_link",
+                            "keywords",
+                            "description",
+                            "image",
+                            "link",
+                            "count",
+                            "sum"
+                        ];
+                    } else {
+                        $detailQuery->select([
+                            "idea.id",
+                            "idea.keywords",
+                            "idea.description",
+                            "idea.image_timestamp",
+                            "idea.id AS image_id",
+                            "idea.link",
+                            "idea.order",
+                            "idea.parameter",
+                            "idea.participant_id",
+                            "idea.state",
+                            "idea.task_id",
+                            "idea.timestamp"
+                        ])
+                            ->order("selection_view_idea.order");
+                        $detailRows = $detailQuery->execute()->fetchAll("assoc");
+                        $exportColumns = ["keywords", "description", "image", "link"];
+                    }
                 }
 
-                $alphas = range('A', 'Z');
-                foreach ($exportColumns as $columnIndex => $columnName) {
-                    $sheet->setCellValue("$alphas[$columnIndex]1", $columnName);
-                    $styleArray = [
-                        'font' => [
-                            'bold' => true,
-                        ],
-                        'alignment' => [
-                            'horizontal' => Alignment::HORIZONTAL_LEFT,
-                        ],
-                        'borders' => [
-                            'bottom' => [
-                                'borderStyle' => Border::BORDER_THIN,
+                if (sizeof($exportColumns) > 0) {
+                    $sheet = $spreadsheet->createSheet($index);
+                    if ($name) {
+                        $sheet->setTitle(mb_substr($name, 0, 31));
+                    }
+
+                    $alphas = range('A', 'Z');
+                    foreach ($exportColumns as $columnIndex => $columnName) {
+                        $sheet->setCellValue("$alphas[$columnIndex]1", $columnName);
+                        $styleArray = [
+                            'font' => [
+                                'bold' => true,
                             ],
-                        ],
-                        'fill' => [
-                            'fillType' => Fill::FILL_SOLID,
-                            'color' => [
-                                'argb' => 'FFA0A0A0',
+                            'alignment' => [
+                                'horizontal' => Alignment::HORIZONTAL_LEFT,
                             ],
-                        ],
-                    ];
-                    $sheet->getStyle("$alphas[$columnIndex]1")->applyFromArray($styleArray);
-                }
-                $rowNumber = 1;
-                if (is_array($detailRows) and sizeof($detailRows) > 0) {
-                    foreach ($detailRows as $detailIndex => $detailItem) {
-                        $rowNumber = $detailIndex + 2;
-                        $detailReader = new ArrayReader($detailItem);
-                        foreach ($exportColumns as $columnIndex => $columnName) {
-                            $columnLetter = $alphas[$columnIndex];
-                            $detailValue = $detailReader->findString($columnName);
-                            $hasImage = false;
-                            if (strpos($columnName, "image") !== false) {
-                                $imageId = $detailReader->findString("image_id");
-                                $queryImage = $this->queryFactory->newSelect("idea");
-                                $queryImage->select(["image"])
-                                    ->andWhere(["id" => $imageId]);
-                                $imageRows = $queryImage->execute()->fetchAll("assoc");
-                                if (is_array($rows) and sizeof($rows) > 0) {
-                                    $imageReader = new ArrayReader($imageRows[0]);
-                                    $detailValue = $imageReader->findString($columnName);
-                                }
-                                if ($detailValue) {
-                                    $imageName = $detailReader->findString("category_id");
-                                    if (!$imageName || $columnName == "image") {
-                                        $imageName = $detailReader->findString("id");
+                            'borders' => [
+                                'bottom' => [
+                                    'borderStyle' => Border::BORDER_THIN,
+                                ],
+                            ],
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'color' => [
+                                    'argb' => 'FFA0A0A0',
+                                ],
+                            ],
+                        ];
+                        $sheet->getStyle("$alphas[$columnIndex]1")->applyFromArray($styleArray);
+                    }
+                    $rowNumber = 1;
+                    if (is_array($detailRows) and sizeof($detailRows) > 0) {
+                        foreach ($detailRows as $detailIndex => $detailItem) {
+                            $rowNumber = $detailIndex + 2;
+                            $detailReader = new ArrayReader($detailItem);
+                            foreach ($exportColumns as $columnIndex => $columnName) {
+                                $columnLetter = $alphas[$columnIndex];
+                                $detailValue = $detailReader->findString($columnName);
+                                $hasImage = false;
+                                if (str_contains($columnName, "image") !== false) {
+                                    $imageId = $detailReader->findString($columnName . "_id");
+                                    $queryImage = $this->queryFactory->newSelect("idea");
+                                    $queryImage->select(["image"])
+                                        ->andWhere(["id" => $imageId]);
+                                    $imageRows = $queryImage->execute()->fetchAll("assoc");
+                                    if (is_array($rows) and sizeof($rows) > 0) {
+                                        $imageReader = new ArrayReader($imageRows[0]);
+                                        $detailValue = $imageReader->findString("image");
                                     }
-                                    $imageDescription = $detailReader->findString("keywords");
-                                    $imagePath = $this->convertBase64ToImage(
-                                        $detailValue,
-                                        $path . DIRECTORY_SEPARATOR,
-                                        $imageName
-                                    );
-
-                                    if ($imagePath != "") {
-                                        $drawing = new Drawing();
-                                        $drawing->setName($imageName);
-                                        $drawing->setDescription($imageDescription);
-                                        $drawing->setPath($imagePath);
-                                        $drawing->setCoordinates("$columnLetter$rowNumber");
-                                        $drawing->setWidth(200);
-                                        $drawing->setWorksheet($sheet);
-                                        $actualRowHeight = $sheet->getRowDimension($rowNumber)->getRowHeight("px");
-                                        if ($actualRowHeight < $drawing->getHeight()) {
-                                            $sheet->getRowDimension($rowNumber)
-                                                ->setRowHeight($drawing->getHeight(), "px");
+                                    if ($detailValue) {
+                                        $imageName = $detailReader->findString("category_id");
+                                        if (!$imageName || $columnName == "image") {
+                                            $imageName = $detailReader->findString("id");
                                         }
-                                        $hasImage = true;
+                                        $imageDescription = $detailReader->findString("keywords");
+                                        $imagePath = $this->convertBase64ToImage(
+                                            $detailValue,
+                                            $path . DIRECTORY_SEPARATOR,
+                                            $imageName
+                                        );
+
+                                        if ($imagePath != "") {
+                                            $drawing = new Drawing();
+                                            $drawing->setName($imageName);
+                                            $drawing->setDescription($imageDescription);
+                                            $drawing->setPath($imagePath);
+                                            $drawing->setCoordinates("$columnLetter$rowNumber");
+                                            $drawing->setWidth(200);
+                                            $drawing->setWorksheet($sheet);
+                                            $actualRowHeight = $sheet->getRowDimension($rowNumber)->getRowHeight("px");
+                                            if ($actualRowHeight < $drawing->getHeight()) {
+                                                $sheet->getRowDimension($rowNumber)
+                                                    ->setRowHeight($drawing->getHeight(), "px");
+                                            }
+                                            $hasImage = true;
+                                        }
                                     }
                                 }
-                            }
 
-                            if (!$hasImage) {
-                                $sheet->setCellValue("$columnLetter$rowNumber", $detailValue);
-                                if (strpos($columnName, "link") !== false && $detailValue) {
-                                    $sheet->getCell("$columnLetter$rowNumber")->getHyperlink()->setUrl($detailValue);
+                                if (!$hasImage) {
+                                    $sheet->setCellValue("$columnLetter$rowNumber", $detailValue);
+                                    if (strpos($columnName, "link") !== false && $detailValue) {
+                                        $sheet->getCell("$columnLetter$rowNumber")->getHyperlink()->setUrl($detailValue);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                foreach ($exportColumns as $columnIndex => $columnName) {
-                    $columnLetter = $alphas[$columnIndex];
-                    if (strpos($columnName, "image") !== false) {
-                        $sheet->getColumnDimension($columnLetter)->setWidth(200, "px");
-                    } elseif (strpos($columnName, "description") !== false) {
-                        $sheet->getColumnDimension($columnLetter)->setWidth(300, "px");
-                        $sheet->getStyle($columnLetter."1:".$columnLetter.$rowNumber)
-                            ->getAlignment()->setWrapText(true);
-                        $sheet->setSelectedCell("A1");
-                    } elseif (strpos($columnName, "link") !== false) {
-                        $sheet->getColumnDimension($columnLetter)->setWidth(300, "px");
-                        $sheet->getStyle($columnLetter."1:".$columnLetter.$rowNumber)
-                            ->getAlignment()->setWrapText(true);
-                        if ($rowNumber > 1) {
-                            $sheet->getStyle($columnLetter."2:".$columnLetter.$rowNumber)
-                                ->getFont()->getColor()->setARGB("FF0000FF");
+                    foreach ($exportColumns as $columnIndex => $columnName) {
+                        $columnLetter = $alphas[$columnIndex];
+                        if (strpos($columnName, "image") !== false) {
+                            $sheet->getColumnDimension($columnLetter)->setWidth(200, "px");
+                        } elseif (strpos($columnName, "description") !== false) {
+                            $sheet->getColumnDimension($columnLetter)->setWidth(300, "px");
+                            $sheet->getStyle($columnLetter."1:".$columnLetter.$rowNumber)
+                                ->getAlignment()->setWrapText(true);
+                            $sheet->setSelectedCell("A1");
+                        } elseif (strpos($columnName, "link") !== false) {
+                            $sheet->getColumnDimension($columnLetter)->setWidth(300, "px");
+                            $sheet->getStyle($columnLetter."1:".$columnLetter.$rowNumber)
+                                ->getAlignment()->setWrapText(true);
+                            if ($rowNumber > 1) {
+                                $sheet->getStyle($columnLetter."2:".$columnLetter.$rowNumber)
+                                    ->getFont()->getColor()->setARGB("FF0000FF");
+                            }
+                            $sheet->setSelectedCell("A1");
+                        } else {
+                            $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
                         }
-                        $sheet->setSelectedCell("A1");
-                    } else {
-                        $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
                     }
                 }
             }
