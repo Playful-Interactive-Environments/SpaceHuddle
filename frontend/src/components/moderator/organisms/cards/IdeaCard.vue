@@ -96,17 +96,17 @@
                   <ToolTip
                     :placement="'right'"
                     :text="
-                      sharedStatus
+                      shareStateValue
                         ? $t(
-                            'moderator.organism.taskTimeline.deactivateParticipant'
+                            'moderator.organism.processTimeline.deactivateParticipant'
                           )
                         : $t(
-                            'moderator.organism.taskTimeline.activateParticipant'
+                            'moderator.organism.processTimeline.activateParticipant'
                           )
                     "
                   >
                     <el-switch
-                      v-model="sharedStatus"
+                      v-model="shareStateValue"
                       @click="levelSharedChanged"
                     />
                   </ToolTip>
@@ -248,6 +248,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: CollapseIdeas.custom }) collapseIdeas!: CollapseIdeas;
   @Prop({ default: true }) portrait!: boolean;
   @Prop({ default: true }) showKeyword!: boolean;
+  @Prop({ default: false }) shareState!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
@@ -255,7 +256,7 @@ export default class IdeaCard extends Vue {
   isLongText = false;
   ideaHeight = '50px';
 
-  sharedStatus = false;
+  shareStateValue = false;
   preventClosing = false;
 
   IdeaStates = IdeaStates;
@@ -263,7 +264,7 @@ export default class IdeaCard extends Vue {
   imgPreview = false;
 
   levelSharedChanged() {
-    this.$emit('sharedStatusChanged', this.sharedStatus);
+    this.$emit('sharedStatusChanged', this.shareStateValue);
   }
 
   stopPropagation(event: Event) {
@@ -279,12 +280,16 @@ export default class IdeaCard extends Vue {
 
   mounted(): void {
     window.addEventListener('imageLoaded', this.imageLoaded, false);
-    this.sharedStatus =
-      this.idea.parameter.state === LevelWorkflowType.approved;
+    this.shareStateValue = this.shareState;
   }
 
   unmounted(): void {
     window.removeEventListener('imageLoaded', this.imageLoaded);
+  }
+
+  @Watch('shareState', { immediate: true })
+  onShareStateChanged(): void {
+    this.shareStateValue = this.shareState;
   }
 
   @Watch('fadeIn', { immediate: true })

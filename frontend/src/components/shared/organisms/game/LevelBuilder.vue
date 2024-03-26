@@ -144,7 +144,8 @@
           level &&
           showOptions &&
           authHeaderTyp === EndpointAuthorisationType.MODERATOR &&
-          canApprove
+          canApprove &&
+          level.parameter.state !== LevelWorkflowType.approved
         "
         @click="approveLevel"
       >
@@ -376,6 +377,7 @@ export default class LevelBuilder extends Vue {
 
   EndpointAuthorisationType = EndpointAuthorisationType;
   CollisionBorderType = CollisionBorderType;
+  LevelWorkflowType = LevelWorkflowType;
 
   get isReadyForSave(): boolean {
     return this.placedObjects.length > 5;

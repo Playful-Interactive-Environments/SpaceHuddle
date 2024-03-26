@@ -54,6 +54,8 @@
     "mapLocation": "Standort",
     "share": "für alle sichtbar machen",
     "evaluation": "Bewertung",
+    "reason": "Begründung für die Ablehnung",
+    "save": "speichern",
     "reasonsForRejection": "Begründe deine Ablehnung",
     "electricityValidationErrors": "Stromsumme muss 0 sein, bitte die Werte so anpassen, dass die Summe wieder 0 ist anstelle von "
   },

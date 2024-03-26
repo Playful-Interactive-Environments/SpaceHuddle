@@ -68,13 +68,16 @@
             :is-editable="this.inputManager.isCurrentIdea(element.id)"
             :isDraggable="true"
             :handleEditable="false"
+            :is-sharable="true"
             :isSelected="element.id === selectedIdea?.id"
             :selectionColor="selectionColor"
             :background-color="getIdeaColor(element)"
+            :share-state="element.parameter.shareData"
             v-model:collapseIdeas="filter.collapseIdeas"
             @ideaDeleted="reloadIdeas()"
             @ideaStartEdit="editIdea(element)"
             v-on:click="selectedIdea = element"
+            @sharedStatusChanged="sharedStatusChanged(element, $event)"
           >
             <div>
               <font-awesome-icon icon="coins" />
@@ -123,12 +126,15 @@
           :isSelected="idea.id === selectedIdea?.id"
           :is-editable="this.inputManager.isCurrentIdea(idea.id)"
           :handleEditable="false"
+          :is-sharable="true"
           :selectionColor="selectionColor"
           :background-color="getIdeaColor(idea)"
+          :share-state="idea.parameter.shareData"
           v-model:collapseIdeas="filter.collapseIdeas"
           @ideaDeleted="reloadIdeas()"
           @ideaStartEdit="editIdea(idea)"
           v-on:click="selectedIdea = idea"
+          @sharedStatusChanged="sharedStatusChanged(idea, $event)"
         >
           <div>
             <font-awesome-icon icon="coins" />
@@ -302,7 +308,7 @@
         class="link"
         :class="{
           'is-active':
-            settingsIdea.state.toLowerCase() === IdeaStates.THUMBS_UP,
+            settingsIdea.state?.toLowerCase() === IdeaStates.THUMBS_UP,
         }"
         @click="
           () => {
@@ -317,7 +323,7 @@
         class="link"
         :class="{
           'is-active':
-            settingsIdea.state.toLowerCase() === IdeaStates.THUMBS_DOWN,
+            settingsIdea.state?.toLowerCase() === IdeaStates.THUMBS_DOWN,
         }"
         @click="
           () => {
@@ -328,7 +334,7 @@
       >
         <font-awesome-icon icon="thumbs-down" />
       </span>
-      <div v-if="settingsIdea.state.toLowerCase() === IdeaStates.THUMBS_DOWN">
+      <div v-if="settingsIdea.state?.toLowerCase() === IdeaStates.THUMBS_DOWN">
         <el-input
           v-model="settingsIdea.parameter.reasonsForRejection"
           :rows="3"
@@ -342,6 +348,24 @@
       </div>
     </el-form-item>
   </IdeaSettings>
+  <el-dialog v-model="showReason" :before-close="resetReason">
+    <template #header>
+      {{ $t('module.brainstorming.missionmap.moderatorContent.reason') }}
+    </template>
+    <el-input
+      v-model="settingsIdea.parameter.reasonsForRejection"
+      :rows="3"
+      type="textarea"
+      :placeholder="
+        $t(
+          'module.brainstorming.missionmap.moderatorContent.reasonsForRejection'
+        )
+      "
+    />
+    <el-button @click="saveReason">
+      {{ $t('module.brainstorming.missionmap.moderatorContent.save') }}
+    </el-button>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -435,6 +459,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   };
   settingsIdea = this.addIdea;
   showSettings = false;
+  showReason = false;
   missionInput!: MissionInputData;
   inputManager!: CombinedInputManager;
   activeProgressTab = MissionProgressParameter.influenceAreas;
@@ -603,6 +628,19 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.calculateDecidedIdeas();
   }
 
+  sharedStatusChanged(idea: Idea, value: boolean) {
+    if (value) {
+      idea.parameter.shareData = true;
+      idea.state = IdeaStates.THUMBS_UP;
+    } else {
+      idea.parameter.shareData = false;
+      idea.state = IdeaStates.THUMBS_DOWN;
+      this.settingsIdea = idea;
+      this.showReason = true;
+    }
+    this.saveIdea(idea);
+  }
+
   calculateDecidedIdeas(): void {
     this.decidedIdeas = progress.calculateDecidedIdeasFromVotes(
       this.votes,
@@ -649,6 +687,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR).then(() => {
       this.refreshIdeas();
     });
+  }
+
+  saveReason(): void {
+    this.saveIdea(this.settingsIdea);
+    this.settingsIdea = this.addIdea;
+    this.showReason = false;
+  }
+
+  resetReason(): void {
+    this.settingsIdea = this.addIdea;
+    this.showReason = false;
   }
 
   refreshIdeas(): void {

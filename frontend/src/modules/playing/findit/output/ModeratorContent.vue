@@ -77,6 +77,9 @@
                   :showState="false"
                   :portrait="false"
                   :isSharable="true"
+                  :share-state="
+                    element.parameter.state === LevelWorkflowType.approved
+                  "
                   :is-selected="
                     selectedLevel && selectedLevel.id === element.id
                   "
@@ -135,6 +138,9 @@
                 :showState="false"
                 :portrait="false"
                 :isSharable="true"
+                :share-state="
+                  idea.parameter.state === LevelWorkflowType.approved
+                "
                 :is-selected="selectedLevel && selectedLevel.id === idea.id"
                 :background-color="getLevelColor(idea)"
                 @ideaDeleted="refreshIdeas()"
@@ -358,6 +364,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   sharedStatusChanged(level: Idea, value: boolean) {
+    if (this.selectedLevel && this.selectedLevel.id === level.id) {
+      level = this.selectedLevel;
+    }
     if (value) level.parameter.state = LevelWorkflowType.approved;
     else level.parameter.state = LevelWorkflowType.created;
     this.saveIdea(level);
@@ -524,6 +533,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   addData(newIdea: Idea): void {
     if (!this.settingsIdea.id) {
       this.ideas.push(newIdea);
+    } else {
+      const index = this.ideas.findIndex((item) => item.id === newIdea.id);
+      if (index > -1) {
+        this.ideas[index].keywords = newIdea.keywords;
+        this.ideas[index].description = newIdea.description;
+        this.ideas[index].link = newIdea.link;
+        this.ideas[index].image = newIdea.image;
+      }
     }
     this.resetAddIdea();
   }
@@ -549,6 +566,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   editIdea(idea: Idea): void {
+    if (this.selectedLevel && this.selectedLevel.id === idea.id) {
+      idea = this.selectedLevel;
+    }
     this.settingsIdea = idea;
     this.showSettings = true;
   }

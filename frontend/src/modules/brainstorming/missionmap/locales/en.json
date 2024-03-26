@@ -54,6 +54,8 @@
     "mapLocation": "location",
     "share": "make it visible to all",
     "evaluation": "evaluation",
+    "reason": "reason for rejection",
+    "save": "save",
     "reasonsForRejection": "Give reasons for your rejection",
     "electricityValidationErrors": "electricity sum must be 0 please adjust the values so that the sum is again 0 instead of "
   },
