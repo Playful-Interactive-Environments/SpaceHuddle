@@ -2,11 +2,13 @@
   "visModules": {
     "gallery": {
       "id": "gallery",
-      "image": "gallery/path"
+      "image": "gallery/path",
+      "icon": "image"
     },
     "cardShuffle": {
       "id": "cardShuffle",
-      "image": "cardShuffle/path"
+      "image": "cardShuffle/path",
+      "icon": "layer-group"
     }
   }
 }

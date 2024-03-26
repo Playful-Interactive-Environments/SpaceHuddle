@@ -21,6 +21,18 @@
           )
         }}
       </h2>
+      <div class="awesome-icon">
+        <font-awesome-icon :icon="visModule.icon" v-if="visModule.icon" />
+      </div>
+      <p>
+        {{
+          $t(
+            'module.common.visualisation_master.visModules.' +
+              getVisModuleID(visModule) +
+              '.description.description'
+          )
+        }}
+      </p>
     </el-card>
   </div>
 </template>
@@ -37,9 +49,6 @@ import * as taskService from '@/services/task-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task } from '@/types/api/Task';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
-import {getColorOfType} from "@/types/enum/TaskCategory";
-import TaskType from "@/types/enum/TaskType";
-import {ModuleTask} from "@/modules";
 
 @Options({
   components: { ModuleCard, IdeaCard },
@@ -98,6 +107,7 @@ export default class ModeratorConfig extends Vue {
 
 .visModule {
   width: 23.75%;
+  min-width: 15em;
   margin: 0.625%;
 
   border-width: 2px;
@@ -106,17 +116,33 @@ export default class ModeratorConfig extends Vue {
   word-break: break-word;
   background-color: white;
   border-style: dashed;
+  text-align: center;
+  font-size: var(--font-size-default);
+}
+
+.awesome-icon {
+  text-align: center;
+  width: 100%;
+  font-size: 40pt;
 }
 
 h2 {
-  text-align: center;
+  margin: 0;
+}
+p {
+  margin: 0;
 }
 
 .selectedModule {
   background-color: var(--color-dark-contrast-light);
   h2 {
     color: white;
-    text-align: center;
+  }
+  p {
+    color: white;
+  }
+  .awesome-icon {
+    color: white;
   }
 }
 </style>
