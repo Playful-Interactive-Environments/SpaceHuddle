@@ -1,0 +1,20 @@
+{
+  "description": {
+    "title": "Visualisierung",
+    "description": "Visualisiere Ideen"
+  },
+  "visModules": {
+    "gallery": {
+      "description": {
+        "title": "Galerie",
+        "description": "Zeige Ideen als Galerie"
+      }
+    },
+    "cardShuffle": {
+      "description": {
+        "title": "Karten mischen",
+        "description": "Animiere Ideen"
+      }
+    }
+  }
+}

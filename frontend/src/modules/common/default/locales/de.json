@@ -1,0 +1,18 @@
+{
+  "description": {
+    "title": "Standardspiel",
+    "description": "Standardspiel"
+  },
+  "publicScreen": {
+    "header": "Entschuldigung. Hier ist nichts.",
+    "info": "Stelle sicher, dass ein Modul für die geteilte Sicht aktiviert ist."
+  },
+  "moderatorContent": {
+    "header": "Keine Aufgabe ausgewählt.",
+    "info": "Stelle sicher, dass eine Aufgabe ausgewählt ist, um ihre Details anzuzeigen."
+  },
+  "participant": {
+    "header": "Keine Aufgabe ausgewählt.",
+    "info": "Stelle sicher, dass eine Aufgabe ausgewählt ist, um ihren Inhalt anzuzeigen."
+  }
+}

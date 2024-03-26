@@ -1,0 +1,12 @@
+{
+  "visModules": {
+    "gallery": {
+      "id": "gallery",
+      "image": "gallery/path"
+    },
+    "cardShuffle": {
+      "id": "cardShuffle",
+      "image": "cardShuffle/path"
+    }
+  }
+}

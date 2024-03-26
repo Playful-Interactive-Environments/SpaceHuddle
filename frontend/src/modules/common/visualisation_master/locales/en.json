@@ -1,0 +1,20 @@
+{
+  "description": {
+    "title": "Visualisation",
+    "description": "Visualize Ideas"
+  },
+  "visModules": {
+    "gallery": {
+      "description": {
+        "title": "Gallery",
+        "description": "Show items as gallery"
+      }
+    },
+    "cardShuffle": {
+      "description": {
+        "title": "Card shuffle",
+        "description": "animate ideas"
+      }
+    }
+  }
+}

@@ -11,6 +11,7 @@ $config = array(
     'information' => array(),
     'selection' => array(),
     'voting' => array(),
+    'common' => array(),
     'none' => array(),
 );
 
@@ -55,7 +56,6 @@ function createDetailConfig($path) {
     $settingFiles = scandir($path);
     if (in_array("TaskParameter.vue", $settingFiles))
         $detailConfig['parameter'] = "TaskParameter";
-
     return $detailConfig;
 }
 
@@ -75,9 +75,14 @@ createConfig('categorisation');
 createConfig('information');
 createConfig('selection');
 createConfig('voting');
+createConfig('common');
+
+//Add common modules to categories
+$config['brainstorming']['visualisation_master'] = ($config['common']['visualisation_master']);
+$config['information']['visualisation_master'] = ($config['common']['visualisation_master']);
+
 $config['none'] = createDetailConfig('none');
 $config['none']['settings'] = createDetailConfig('none/settings');
 
 echo json_encode($config);
-
 ?>
