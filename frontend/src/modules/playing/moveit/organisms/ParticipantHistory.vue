@@ -1,164 +1,148 @@
 <template>
-  <div class="category-selection">
-    <el-button
-      v-for="vehicle of Object.keys(gameConfig.vehicles)"
-      :key="vehicle"
-      type="primary"
-      size="large"
-      :disabled="!hasVehicleHistory(vehicle)"
-      @click="vehicleTypeClicked(vehicle)"
-      class="level-item"
-      :class="{
-        active: vehicle === activeVehicleType,
-      }"
+  <div v-if="!hasVehicleHistory">
+    {{ $t('module.playing.moveit.participant.historyEmpty') }}
+  </div>
+  <div v-else>
+    <el-carousel
+      :autoplay="false"
+      indicator-position="none"
+      arrow="always"
+      class="history-carousel"
+      @change="historyPageChanged"
     >
-      <font-awesome-icon
-        v-if="!gameConfig.vehicles[vehicle].iconPrefix"
-        :icon="gameConfig.vehicles[vehicle].icon"
-      />
-      <font-awesome-icon
-        v-else
-        :icon="[
-          gameConfig.vehicles[vehicle].iconPrefix,
-          gameConfig.vehicles[vehicle].icon,
-        ]"
-      />
-    </el-button>
-  </div>
-  <el-carousel
-    :autoplay="false"
-    indicator-position="none"
-    arrow="always"
-    class="history-carousel"
-    @change="historyPageChanged"
-  >
-    <el-carousel-item v-for="step of activeStepsList" :key="step.id">
-      <h1>
-        {{
-          $t(
-            `module.playing.moveit.enums.vehicles.${step.parameter.vehicle.category}.${step.parameter.vehicle.type}`
-          )
-        }}
-      </h1>
-    </el-carousel-item>
-  </el-carousel>
-  <h2>
-    {{ $t('module.playing.moveit.participant.info.speed.title') }}
-  </h2>
-  <div class="chartArea">
-    <Line
-      ref="chartSpeed"
-      :data="chartDataSpeed"
-      :options="{
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            title: {
-              text: $t('module.playing.moveit.participant.info.speed.scale.x'),
-              display: true,
+      <el-carousel-item v-for="(step, index) of activeStepsList" :key="step.id">
+        <h1>
+          {{
+            $t(
+              `module.playing.moveit.enums.vehicles.${step.parameter.vehicle.category}.${step.parameter.vehicle.type}`
+            )
+          }}
+          {{ index + 1 }} / {{ activeStepsList.length }}
+        </h1>
+      </el-carousel-item>
+    </el-carousel>
+    <h2>
+      {{ $t('module.playing.moveit.participant.info.speed.title') }}
+    </h2>
+    <div class="chartArea">
+      <Line
+        ref="chartSpeed"
+        :data="chartDataSpeed"
+        :options="{
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.speed.scale.x'
+                ),
+                display: true,
+              },
             },
-          },
-          y: {
-            stacked: true,
-            title: {
-              text: $t('module.playing.moveit.participant.info.speed.scale.y'),
-              display: true,
-            },
-          },
-        },
-      }"
-    />
-  </div>
-  <h2
-    v-if="
-      activeHistoryStep &&
-      activeHistoryStep.parameter.vehicle.category === 'bus'
-    "
-  >
-    {{ $t('module.playing.moveit.participant.info.persons.title') }}
-  </h2>
-  <div
-    class="chartArea"
-    v-if="
-      activeHistoryStep &&
-      activeHistoryStep.parameter.vehicle.category === 'bus'
-    "
-  >
-    <Line
-      ref="chartPersons"
-      :data="chartDataPersons"
-      :options="{
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            title: {
-              text: $t(
-                'module.playing.moveit.participant.info.persons.scale.x'
-              ),
-              display: true,
-            },
-          },
-          y: {
-            stacked: true,
-            title: {
-              text: $t(
-                'module.playing.moveit.participant.info.persons.scale.y'
-              ),
-              display: true,
-            },
-          },
-        },
-      }"
-    />
-  </div>
-  <h2>
-    {{ $t('module.playing.moveit.participant.info.emissions.input') }}
-  </h2>
-  <div class="chartArea">
-    <Line
-      ref="chartInput"
-      :data="chartDataInput"
-      :options="{
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            title: {
-              text: $t(
-                'module.playing.moveit.participant.info.emissions.scale.x'
-              ),
-              display: true,
-            },
-          },
-          y: {
-            stacked: true,
-            title: {
-              text: $t(
-                'module.playing.moveit.participant.info.emissions.scale.y'
-              ),
-              display: true,
-            },
-          },
-        },
-        plugins: {
-          annotation: {
-            annotations: {
-              box1: {
-                type: 'box',
-                xMin: 0,
-                xMax: chartDataInput.labels.length,
-                yMin: maxCleanupThreshold,
-                yMax: calcChartHeight(maxChartValue),
-                backgroundColor: highlightColorTransparent,
-                borderColor: highlightColor,
+            y: {
+              stacked: true,
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.speed.scale.y'
+                ),
+                display: true,
               },
             },
           },
-        },
-      }"
-    />
+        }"
+      />
+    </div>
+    <h2
+      v-if="
+        activeHistoryStep &&
+        activeHistoryStep.parameter.vehicle.category === 'bus'
+      "
+    >
+      {{ $t('module.playing.moveit.participant.info.persons.title') }}
+    </h2>
+    <div
+      class="chartArea"
+      v-if="
+        activeHistoryStep &&
+        activeHistoryStep.parameter.vehicle.category === 'bus'
+      "
+    >
+      <Line
+        ref="chartPersons"
+        :data="chartDataPersons"
+        :options="{
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.persons.scale.x'
+                ),
+                display: true,
+              },
+            },
+            y: {
+              stacked: true,
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.persons.scale.y'
+                ),
+                display: true,
+              },
+            },
+          },
+        }"
+      />
+    </div>
+    <h2>
+      {{ $t('module.playing.moveit.participant.info.emissions.input') }}
+    </h2>
+    <div class="chartArea">
+      <Line
+        ref="chartInput"
+        :data="chartDataInput"
+        :options="{
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.emissions.scale.x'
+                ),
+                display: true,
+              },
+            },
+            y: {
+              stacked: true,
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.emissions.scale.y'
+                ),
+                display: true,
+              },
+            },
+          },
+          plugins: {
+            annotation: {
+              annotations: {
+                box1: {
+                  type: 'box',
+                  xMin: 0,
+                  xMax: chartDataInput.labels.length,
+                  yMin: maxCleanupThreshold,
+                  yMax: calcChartHeight(maxChartValue),
+                  backgroundColor: highlightColorTransparent,
+                  borderColor: highlightColor,
+                },
+              },
+            },
+          },
+        }"
+      />
+    </div>
   </div>
 </template>
 
@@ -198,6 +182,7 @@ interface VehicleData {
 })
 export default class ParticipantHistory extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly vehicle!: VehicleData;
   steps: TaskParticipantIterationStep[] = [];
 
   chartDataInput: {
@@ -258,14 +243,23 @@ export default class ParticipantHistory extends Vue {
 
   get activeStepsList(): TaskParticipantIterationStep[] {
     return this.steps.filter(
-      (item) => item.parameter.vehicle.category === this.activeVehicleType
+      (item) =>
+        item.parameter.vehicle.category === this.vehicle.category &&
+        item.parameter.vehicle.type === this.vehicle.vehicle.name
     );
   }
 
-  hasVehicleHistory(category: string): boolean {
+  mounted(): void {
+    console.log('mounted history');
+  }
+
+  get hasVehicleHistory(): boolean {
     return (
-      this.steps.filter((item) => item.parameter.vehicle.category === category)
-        .length > 0
+      this.steps.filter(
+        (item) =>
+          item.parameter.vehicle.category === this.vehicle.category &&
+          item.parameter.vehicle.type === this.vehicle.vehicle.name
+      ).length > 0
     );
   }
 
@@ -287,13 +281,12 @@ export default class ParticipantHistory extends Vue {
         item.parameter.drive.trackingData &&
         item.parameter.drive.trackingData.length > 0
     );
-    if (this.steps.length > 0)
-      this.activeVehicleType = this.steps[0].parameter.vehicle.category;
     this.historyPageChanged(this.activeHistoryIndex);
   }
 
   activeHistoryIndex = 0;
   historyPageChanged(index: number): void {
+    if (this.activeStepsList.length <= index) return;
     this.activeHistoryIndex = index;
     let distanceTraveled = 0;
     for (const data of this.activeStepsList[index].parameter.drive
@@ -379,20 +372,6 @@ export default class ParticipantHistory extends Vue {
 
   getVehicleParameter(vehicle: any): any {
     return configCalculation.getVehicleParameter(vehicle);
-  }
-
-  activeVehicleType: 'motorcycle' | 'bus' | 'car' | 'scooter' | 'bike' = 'car';
-  vehicleTypeClicked(
-    vehicle: 'motorcycle' | 'bus' | 'car' | 'scooter' | 'bike'
-  ): void {
-    const index = this.vehicleList.findIndex(
-      (value) => value.category === vehicle
-    );
-    if (index > -1 && this.$refs.carousel) {
-      (this.$refs.carousel as any).setActiveItem(index);
-    }
-    this.activeVehicleType = vehicle;
-    this.historyPageChanged(0);
   }
 }
 </script>

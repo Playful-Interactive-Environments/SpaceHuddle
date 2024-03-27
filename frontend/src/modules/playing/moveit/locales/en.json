@@ -19,6 +19,7 @@
     "electricity": "electricity ratio in %",
     "earned": "earned",
     "history": "statistics",
+    "historyEmpty": "This vehicle has not yet been driven",
     "drivingStats": {
       "maxSpeed": "Maximum speed",
       "avgSpeed": "Average speed",

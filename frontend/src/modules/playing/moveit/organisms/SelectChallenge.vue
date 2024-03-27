@@ -27,14 +27,6 @@
       <el-button
         type="primary"
         size="large"
-        @click="showHistory = true"
-        class="level-item"
-      >
-        <font-awesome-icon icon="chart-line" />
-      </el-button>
-      <el-button
-        type="primary"
-        size="large"
         @click="showInfo = true"
         class="level-item"
       >
@@ -42,28 +34,6 @@
       </el-button>
     </div>
   </nav>
-  <!--<el-space wrap>
-    <el-button
-      v-for="vehicle of Object.keys(gameConfig.vehicles)"
-      :key="vehicle"
-      type="primary"
-      size="large"
-      @click="vehicleTypeClicked(vehicle)"
-      :class="{ active: vehicle === activeVehicleType }"
-    >
-      <font-awesome-icon
-        v-if="!gameConfig.vehicles[vehicle].iconPrefix"
-        :icon="gameConfig.vehicles[vehicle].icon"
-      />
-      <font-awesome-icon
-        v-else
-        :icon="[
-          gameConfig.vehicles[vehicle].iconPrefix,
-          gameConfig.vehicles[vehicle].icon,
-        ]"
-      />
-    </el-button>
-  </el-space>-->
   <div ref="gameContainer" class="gameContainer">
     <el-carousel
       v-if="ready"
@@ -102,6 +72,14 @@
               }}
               / {{ maxVehiclePoints }}
             </div>
+            <el-button
+              type="primary"
+              size="large"
+              @click="showHistory = true"
+              class="level-item"
+            >
+              <font-awesome-icon icon="chart-line" />
+            </el-button>
           </div>
         </template>
         <div class="vehicle-image">
@@ -324,10 +302,14 @@
     </div>
   </DrawerBottomOverlay>
   <DrawerBottomOverlay
+    v-if="activeVehicle"
     v-model="showHistory"
     :title="$t(`module.playing.moveit.participant.history`)"
   >
-    <ParticipantHistory :task-id="taskId" />
+    <ParticipantHistory
+      :task-id="taskId"
+      :vehicle="activeVehicle"
+    />
   </DrawerBottomOverlay>
   <el-dialog v-model="showPlayDialog">
     <template #header>
@@ -880,6 +862,10 @@ export default class SelectChallenge extends Vue {
   height: calc(100% - 0.5rem);
   max-height: calc(30rem / 0.7);
 
+  .el-button {
+    margin-top: 1rem;
+  }
+
   .card-header {
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-large);
@@ -893,10 +879,16 @@ export default class SelectChallenge extends Vue {
     .media-content {
       text-align: left;
     }
-  }
 
-  .el-button {
-    margin-top: 1rem;
+    .el-button {
+      margin: 0;
+      padding: 0;
+      background-color: transparent;
+      height: unset;
+      min-height: unset;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-large);
+    }
   }
 }
 

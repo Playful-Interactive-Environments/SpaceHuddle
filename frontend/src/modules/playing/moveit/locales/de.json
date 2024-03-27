@@ -19,6 +19,7 @@
     "electricity": "Stromanteil in %",
     "earned": "verdient",
     "history": "Statistik",
+    "historyEmpty": "Dieses Fahrzeug wurde noch nicht gefahren",
     "drivingStats": {
       "maxSpeed": "Höchstgeschwindigkeit",
       "avgSpeed": "Durchschnittsgeschwindigkeit",
