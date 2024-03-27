@@ -76,7 +76,7 @@
                   :handleEditable="false"
                   :showState="false"
                   :portrait="false"
-                  :isSharable="true"
+                  :isSharable="element.parameter.items.length > 5"
                   :share-state="
                     element.parameter.state === LevelWorkflowType.approved
                   "
@@ -137,7 +137,7 @@
                 :handleEditable="false"
                 :showState="false"
                 :portrait="false"
-                :isSharable="true"
+                :isSharable="idea.parameter.items.length > 5"
                 :share-state="
                   idea.parameter.state === LevelWorkflowType.approved
                 "

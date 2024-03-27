@@ -145,7 +145,8 @@
           showOptions &&
           authHeaderTyp === EndpointAuthorisationType.MODERATOR &&
           canApprove &&
-          level.parameter.state !== LevelWorkflowType.approved
+          level.parameter.state !== LevelWorkflowType.approved &&
+          isReadyForSave
         "
         @click="approveLevel"
       >
