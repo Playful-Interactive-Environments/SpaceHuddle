@@ -511,7 +511,11 @@ import {
   hasModule,
   ModuleTask,
 } from '@/modules';
-import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
+import {
+  CustomInit,
+  CustomParameter,
+  CustomSync,
+} from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { Module } from '@/types/api/Module';
@@ -1514,6 +1518,7 @@ export default class TaskSettings extends Vue {
             this.internalTaskId = task.id;
             this.taskUpdated(task);
             this.taskListCash.refreshData();
+            this.initCreationData(task.id);
           },
           (error) => {
             this.previewLoading = false;
@@ -1535,6 +1540,18 @@ export default class TaskSettings extends Vue {
       const params = this.$refs.taskParameter as CustomParameter;
       if ('updateParameterForSaving' in params)
         await params.updateParameterForSaving();
+    }
+  }
+
+  async initCreationData(taskId: string): Promise<void> {
+    for (const component of this.formData.moduleParameterComponents) {
+      if (this.$refs[component.componentName]) {
+        const paramList = this.$refs[component.componentName] as [CustomInit];
+        for (const params of paramList) {
+          if ('initCreationData' in params)
+            await params.initCreationData(taskId);
+        }
+      }
     }
   }
 

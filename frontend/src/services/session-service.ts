@@ -1,6 +1,7 @@
 import { Task } from '@/types/api/Task';
 import {
-  apiExecuteDelete, apiExecuteGetHandled,
+  apiExecuteDelete,
+  apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePostHandled,
   apiExecutePut,
@@ -16,7 +17,7 @@ import {
   SessionSortOrderOption,
 } from '@/types/api/SessionOrderGroup';
 import SessionSortOrder from '@/types/enum/SessionSortOrder';
-import {TopicExport} from "@/types/api/TopicExport";
+import { TopicExport } from '@/types/api/TopicExport';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 

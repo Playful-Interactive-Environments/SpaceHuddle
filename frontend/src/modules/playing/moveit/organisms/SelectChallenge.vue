@@ -306,10 +306,7 @@
     v-model="showHistory"
     :title="$t(`module.playing.moveit.participant.history`)"
   >
-    <ParticipantHistory
-      :task-id="taskId"
-      :vehicle="activeVehicle"
-    />
+    <ParticipantHistory :task-id="taskId" :vehicle="activeVehicle" />
   </DrawerBottomOverlay>
   <el-dialog v-model="showPlayDialog">
     <template #header>

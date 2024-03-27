@@ -303,18 +303,11 @@ export default class IdeaMap extends Vue {
   }
 
   calculateMapBounds(): void {
-    const ideas = this.ideas.filter((idea) => idea.parameter.position);
-    if (ideas.length > 0) {
-      const points = turf.points(ideas.map((idea) => idea.parameter.position));
-      const center: [number, number] = turf.center(points).geometry
-        .coordinates as [number, number];
-
-      const bounds = turf.envelope(points).geometry.coordinates[0] as [
-        number,
-        number
-      ][];
-      const min = bounds[0];
-      const max = bounds[2];
+    const setBounds = (
+      center: [number, number],
+      min: [number, number],
+      max: [number, number]
+    ): void => {
       const delta = 0.02;
       const minLngLat = this.convertCoordinates([
         min[0] - delta,
@@ -328,7 +321,29 @@ export default class IdeaMap extends Vue {
       this.fitZoomToBounds();
       this.mapIdeaCenter = center;
       this.changeSection();
-    } else this.mapBounds = null;
+    };
+
+    const ideas = this.ideas.filter((idea) => idea.parameter.position);
+    if (ideas.length > 0) {
+      const points = turf.points(ideas.map((idea) => idea.parameter.position));
+      const center: [number, number] = turf.center(points).geometry
+        .coordinates as [number, number];
+
+      const bounds = turf.envelope(points).geometry.coordinates[0] as [
+        number,
+        number
+      ][];
+      const min = bounds[0];
+      const max = bounds[2];
+      setBounds(center, min, max);
+    } else {
+      if (this.parameter.mapCenter) {
+        const center = [...this.parameter.mapCenter] as [number, number];
+        const min: [number, number] = [...center];
+        const max: [number, number] = [...center];
+        setBounds(center, min, max);
+      } else this.mapBounds = null;
+    }
   }
 
   selectedIdeaId = '';

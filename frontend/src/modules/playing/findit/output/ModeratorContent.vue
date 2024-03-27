@@ -278,7 +278,6 @@ import {
 } from '@/components/moderator/molecules/IdeaFilterBase.vue';
 import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
 import { reloadCollapseTabs } from '@/utils/collapse';
-import { setEmptyParameterIfNotExists } from '@/modules/brainstorming/missionmap/utils/parameter';
 import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
@@ -413,9 +412,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   updateIdeas(ideas: Idea[]): void {
-    for (const idea of ideas) {
-      setEmptyParameterIfNotExists(idea, () => this.module);
-    }
     const orderType = this.filter.orderType;
     const dataList = ideaService.getOrderGroups(
       ideas,

@@ -48,6 +48,11 @@ import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as mapStyle from '@/utils/mapStyle';
 import { defaultCenter } from '@/utils/map';
+import { CustomInit } from '@/types/ui/CustomParameter';
+import defaultLevelConfig from '@/modules/playing/coolit/data/defaultLevels.json';
+import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
+import * as ideaService from '@/services/idea-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 mapStyle.setMapStyleStreets();
 
@@ -62,7 +67,7 @@ mapStyle.setMapStyleStreets();
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorConfig extends Vue {
+export default class ModeratorConfig extends Vue implements CustomInit {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop() readonly rulePropPath!: string;
 
@@ -123,6 +128,28 @@ export default class ModeratorConfig extends Vue {
   startPositionChanged(marker: any): void {
     const lngLat = marker.target._lngLat;
     this.modelValue.mapStart = [lngLat.lng, lngLat.lat];
+  }
+
+  async initCreationData(taskId: string): Promise<void> {
+    for (const key of Object.keys(defaultLevelConfig)) {
+      const config = defaultLevelConfig[key];
+      const addIdea: any = {
+        keywords: key,
+        description: '',
+        link: null,
+        image: null, // the datebase64 url of created image
+        parameter: {
+          state: LevelWorkflowType.created,
+          type: config.type,
+          items: structuredClone(config.items),
+        },
+      };
+      await ideaService.postIdea(
+        taskId,
+        addIdea,
+        EndpointAuthorisationType.MODERATOR
+      );
+    }
   }
 }
 </script>
