@@ -13,6 +13,23 @@
           {{ formatDate(session.creationDate) }}
         </template>
         <template #settings>
+          <span v-on:click="download">
+            <ToolTip
+              :effect="'light'"
+              :text="$t('moderator.organism.settings.sidebarSettings.download')"
+            >
+              <font-awesome-icon
+                v-if="!isDownloading"
+                class="awesome-icon"
+                icon="download"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                v-else
+                class="awesome-icon fa-spin"
+                icon="spinner"
+              ></font-awesome-icon>
+            </ToolTip>
+          </span>
           <!--          <TutorialStep
             v-if="!isModerator"
             type="sessionDetails"
@@ -395,6 +412,40 @@ export default class ModeratorSessionDetails extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+  }
+
+  isDownloading = false;
+  download(): void {
+    if (this.isDownloading) return;
+    this.isDownloading = true;
+    sessionService.exportSession(this.sessionId, 'XLSX').then((result) => {
+      const blob = this.convertBase64toBlob(
+        result.base64,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+      const blobURL = URL.createObjectURL(blob);
+      window.open(blobURL, '_self');
+      this.isDownloading = false;
+    });
+  }
+
+  convertBase64toBlob(content: string, contentType: string): Blob {
+    contentType = contentType || '';
+    const sliceSize = 512;
+    const byteCharacters = window.atob(content); //method which converts base64 to binary
+    const byteArrays: Uint8Array[] = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+    return new Blob(byteArrays, {
+      type: contentType,
+    }); //statement which creates the blob
   }
 
   disconnect(): void {

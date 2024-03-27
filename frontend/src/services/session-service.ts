@@ -1,6 +1,6 @@
 import { Task } from '@/types/api/Task';
 import {
-  apiExecuteDelete,
+  apiExecuteDelete, apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePostHandled,
   apiExecutePut,
@@ -16,6 +16,7 @@ import {
   SessionSortOrderOption,
 } from '@/types/api/SessionOrderGroup';
 import SessionSortOrder from '@/types/enum/SessionSortOrder';
+import {TopicExport} from "@/types/api/TopicExport";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -200,6 +201,18 @@ export const deregisterGetParticipants = (
   cashService.deregisterGet(
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANTS}/`,
     callback
+  );
+};
+
+export const exportSession = async (
+  sessionId: string,
+  exportType: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<TopicExport> => {
+  return await apiExecuteGetHandled<TopicExport>(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.EXPORT}/${exportType}/`,
+    {},
+    authHeaderType
   );
 };
 
