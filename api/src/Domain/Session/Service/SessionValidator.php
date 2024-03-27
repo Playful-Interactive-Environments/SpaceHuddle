@@ -4,6 +4,7 @@ namespace App\Domain\Session\Service;
 
 use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\Topic\Type\ExportType;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 use Selective\Validation\Exception\ValidationException;
@@ -79,6 +80,35 @@ final class SessionValidator
                 );
                 throw new ValidationException("Please check your input", $result);
             }
+        }
+    }
+
+    /**
+     * Export validator.
+     * @param array $data Data to be verified.
+     * @return void
+     */
+    public function validateExport(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("id", "Empty: This field cannot be left empty")
+                ->requirePresence("id", message: "Required: This field is required")
+                ->notEmptyString("exportType", "Empty: This field cannot be left empty")
+                ->requirePresence("exportType", message: "Required: This field is required")
+                ->add("exportType", "custom", [
+                    "rule" => function ($value) {
+                        return self::isTypeOption($value, ExportType::class);
+                    },
+                    "message" => "Type: Wrong export type."
+                ])
+        );
+
+        if (!$this->getRepository()->hasExportData($data["id"])) {
+            $result = new ValidationResult();
+            $result->addError("id", "NoData: This topic does not contain data to export.");
+            throw new ValidationException("Please check your input", $result);
         }
     }
 }

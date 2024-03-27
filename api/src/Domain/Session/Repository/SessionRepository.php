@@ -14,13 +14,20 @@ use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Data\SessionInfo;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Repository\TaskRepository;
+use App\Domain\Topic\Data\ExportData;
 use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Repository\TopicRepository;
+use App\Domain\Topic\Type\ExportType;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
 use DomainException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Ods;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Selective\ArrayReader\ArrayReader;
 
 /**
@@ -478,6 +485,85 @@ class SessionRepository implements RepositoryInterface
         $this->queryFactory->newDelete("session_role")
             ->andWhere(["session_id" => $id])
             ->execute();
+    }
+
+    /**
+     * Export all session data as spread sheet
+     * @param string $id Id of the session to be exported
+     * @param string $exportType Export output format
+     * @return ExportData | null string converted export data
+     * @throws Exception|\PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function export(string $id, string $exportType): ExportData | null
+    {
+        $path = "export";
+        if (!is_dir($path)) {
+            mkdir($path);
+        }
+        $path = $path . DIRECTORY_SEPARATOR . $id;
+        if (!is_dir($path)) {
+            mkdir($path);
+        } else {
+            $files = glob($path . DIRECTORY_SEPARATOR . "*", GLOB_MARK);
+            foreach ($files as $file) {
+                if (!is_dir($file)) {
+                    unlink($file);
+                }
+            }
+        }
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->removeSheetByIndex(0);
+
+        //get topics
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["*"])
+            ->andWhere(["session_id" => $id])
+            ->order("order");
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            $topic = new TopicRepository($this->queryFactory);
+            foreach ($rows as $index => $topicItem) {
+                $reader = new ArrayReader($topicItem);
+                $detailId = $reader->findString("id");
+                $topic->fillSpreadsheet($spreadsheet, $detailId, $path);
+            }
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $url = null;
+        switch (strtolower($exportType)) {
+            case ExportType::XLSX:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xlsx";
+                $writer = new Xlsx($spreadsheet);
+                $writer->save($url);
+                break;
+            case ExportType::XLS:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xls";
+                $writer = new Xls($spreadsheet);
+                $writer->save($url);
+                break;
+            case ExportType::ODS:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.ods";
+                $writer = new Ods($spreadsheet);
+                $writer->save($url);
+                break;
+        }
+
+        return new ExportData($url, $path);
+    }
+
+    /**
+     * Check if there is something to export
+     * @param string $id Id of the topic to be exported
+     * @return bool If true, export is valid
+     */
+    public function hasExportData(string $id): bool
+    {
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["*"])
+            ->andWhere(["session_id" => $id]);
+        return $query->execute()->count() > 0;
     }
 
     /**

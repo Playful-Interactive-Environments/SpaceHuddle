@@ -62,6 +62,7 @@ use App\Action\Selection\SelectionUpdateAction;
 use App\Action\Session\PublicScreenReadAction;
 use App\Action\Session\PublicScreenUpdateAction;
 use App\Action\Session\SessionDeleteAction;
+use App\Action\Session\SessionExportAction;
 use App\Action\Session\SessionParticipantReadAction;
 use App\Action\Session\SessionReadInfosAction;
 use App\Action\Session\SessionSubjectReadAction;
@@ -251,6 +252,8 @@ return function (App $app) {
             //$app->get("/{id}[/]", SessionReadSingleAction::class);
             $app->put("[/]", SessionUpdateAction::class);
             $app->delete("/{id}[/]", SessionDeleteAction::class);
+
+            $app->get("/{id}/export/{exportType}[/]", SessionExportAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

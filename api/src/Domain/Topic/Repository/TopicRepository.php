@@ -5,12 +5,8 @@ namespace App\Domain\Topic\Repository;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
-use App\Domain\Hierarchy\Repository\HierarchyRepository;
-use App\Domain\Idea\Repository\IdeaRepository;
-use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Repository\SessionRepository;
-use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskType;
 use App\Domain\Topic\Data\ExportData;
@@ -134,6 +130,40 @@ class TopicRepository implements RepositoryInterface
         $spreadsheet = new Spreadsheet();
         $spreadsheet->removeSheetByIndex(0);
 
+        $this->fillSpreadsheet($spreadsheet, $id, $path);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $url = null;
+        switch (strtolower($exportType)) {
+            case ExportType::XLSX:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xlsx";
+                $writer = new Xlsx($spreadsheet);
+                $writer->save($url);
+                break;
+            case ExportType::XLS:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xls";
+                $writer = new Xls($spreadsheet);
+                $writer->save($url);
+                break;
+            case ExportType::ODS:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.ods";
+                $writer = new Ods($spreadsheet);
+                $writer->save($url);
+                break;
+        }
+
+        return new ExportData($url, $path);
+    }
+
+    /**
+     * Fill spreadsheet with export data of all topics
+     * @param Spreadsheet $spreadsheet spreadsheet
+     * @param string $id Id of the topic to be exported
+     * @param string $path Saving path
+     * @throws Exception|\PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function fillSpreadsheet(Spreadsheet $spreadsheet, string $id, string $path): void
+    {
         //get task
         $query = $this->queryFactory->newSelect("task");
         $query->select(["*"])
@@ -320,7 +350,7 @@ class TopicRepository implements RepositoryInterface
                 }
 
                 if (sizeof($exportColumns) > 0) {
-                    $sheet = $spreadsheet->createSheet($index);
+                    $sheet = $spreadsheet->createSheet();
                     if ($name) {
                         $sheet->setTitle(mb_substr($name, 0, 31));
                     }
@@ -433,28 +463,6 @@ class TopicRepository implements RepositoryInterface
                 }
             }
         }
-        $spreadsheet->setActiveSheetIndex(0);
-
-        $url = null;
-        switch (strtolower($exportType)) {
-            case ExportType::XLSX:
-                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xlsx";
-                $writer = new Xlsx($spreadsheet);
-                $writer->save($url);
-                break;
-            case ExportType::XLS:
-                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xls";
-                $writer = new Xls($spreadsheet);
-                $writer->save($url);
-                break;
-            case ExportType::ODS:
-                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.ods";
-                $writer = new Ods($spreadsheet);
-                $writer->save($url);
-                break;
-        }
-
-        return new ExportData($url, $path);
     }
 
     /**
