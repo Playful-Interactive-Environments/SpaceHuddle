@@ -15,6 +15,7 @@ use App\Domain\Participant\Type\ParticipantState;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Topic\Data\TopicData;
+use App\Domain\Topic\Type\TopicState;
 use App\Factory\QueryFactory;
 use Cake\I18n\Time;
 use DomainException;
@@ -312,6 +313,7 @@ class ParticipantRepository implements RepositoryInterface
             ->innerJoin("participant", "participant.session_id = session.id")
             ->andWhere([
                 "participant.id" => $id,
+                "topic.state" => TopicState::ACTIVE,
                 "session.expiration_date >= current_timestamp()"
             ])
             ->order(["topic.order"]);

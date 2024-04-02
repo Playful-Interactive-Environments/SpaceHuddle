@@ -2,26 +2,20 @@
 
 namespace App\Domain\Task\Repository;
 
-use App\Data\AuthorisationData;
 use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Repository\IdeaRepository;
-use App\Domain\Module\Data\ModuleData;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Module\Type\ModuleState;
 use App\Domain\Selection\Repository\SelectionRepository;
-use App\Domain\Session\Type\SessionRoleType;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\TaskParticipantState\Type\TaskParticipantStateType;
-use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Factory\QueryFactory;
-use Cake\Database\Query;
 use App\Domain\Task\Type\TaskType;
-use PhpOffice\PhpSpreadsheet\Writer\Exception;
 use Selective\ArrayReader\ArrayReader;
 
 /**

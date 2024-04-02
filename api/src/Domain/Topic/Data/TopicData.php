@@ -46,6 +46,13 @@ class TopicData
     public ?int $order;
 
     /**
+     * Current status of the topic.
+     * @var string|null
+     * @OA\Property(ref="#/components/schemas/TopicState")
+     */
+    public ?string $state;
+
+    /**
      * Data of the active topic task.
      * @var string|null
      * @OA\Property(example=null)
@@ -64,6 +71,7 @@ class TopicData
         $this->title = $reader->findString("title");
         $this->description = $reader->findString("description");
         $this->order = $reader->findInt("order");
+        $this->state = strtoupper($reader->findString("state"));
         $this->activeTaskId = $reader->findString("active_task_id");
     }
 }

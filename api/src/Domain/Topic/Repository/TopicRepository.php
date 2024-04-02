@@ -8,10 +8,12 @@ use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\Task\Repository\TaskRepository;
+use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Domain\Topic\Data\ExportData;
 use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Type\ExportType;
+use App\Domain\Topic\Type\TopicState;
 use App\Domain\Topic\Type\ViewType;
 use App\Factory\QueryFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -49,6 +51,53 @@ class TopicRepository implements RepositoryInterface
     }
 
     /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @param string|null $detailEntity Detail entity which should be modified
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationRole(
+        ?string $id,
+        string | null $detailEntity = null
+    ): ?string {
+        return $this->getAuthorisationRoleForState(
+            $id,
+            [
+                strtoupper(TopicState::ACTIVE)
+            ],
+            $detailEntity
+        );
+    }
+
+    /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @param array $validStates Valid states
+     * @param string|null $detailEntity Detail entity which should be modified
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    private function getAuthorisationRoleForState(
+        ?string $id,
+        array $validStates,
+        string | null $detailEntity = null
+    ): ?string {
+        $authorisation = $this->getAuthorisation();
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["*"])
+            ->andWhere(["id" => $id]);
+
+        if (
+            $authorisation->isParticipant()
+        ) {
+            $query->whereInList("state", $validStates);
+        }
+
+        return $this->getAuthorisationRoleFromQuery($id, $query);
+    }
+
+    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @param array $sortConditions The ORDER BY conditions.
@@ -60,6 +109,10 @@ class TopicRepository implements RepositoryInterface
         if (count($sortConditions) == 0) {
             $sortConditions = ["order"];
         }
+
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isParticipant())
+            $conditions["state"] = TopicState::ACTIVE;
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
@@ -531,7 +584,8 @@ class TopicRepository implements RepositoryInterface
             "session_id" => $data->sessionId ?? null,
             "title" => $data->title ?? null,
             "description" => $data->description ?? null,
-            "order" => $data->order ?? 0
+            "order" => $data->order ?? 0,
+            "state" => $data->state ?? strtoupper(TopicState::ACTIVE)
         ];
     }
 

@@ -294,6 +294,7 @@ CREATE TABLE `topic` (
                          `title` varchar(255) NOT NULL,
                          `description` text DEFAULT NULL,
                          `order` int(11) NOT NULL DEFAULT 0,
+                         `state` varchar(255) DEFAULT NULL,
                          `active_task_id` char(36) DEFAULT NULL,
                          `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -1018,36 +1019,36 @@ SELECT
     task.id
 FROM
     task
-INNER JOIN topic ON topic.id = task.topic_id
-INNER JOIN session ON session.id = topic.session_id
+        INNER JOIN topic ON topic.id = task.topic_id
+        INNER JOIN session ON session.id = topic.session_id
 WHERE
     (
-        EXISTS(
-            SELECT
-                 1
-            FROM
-                 module
-            WHERE
-                 module.task_id = task.id AND session.public_screen_module_id = module.id
-        ) AND EXISTS(
-            SELECT
-                 1
-            FROM
-                 module
-            WHERE
-                 module.task_id = task.id AND module.sync_public_participant
-        )
-    ) OR (
-        task.state IN('ACTIVE', 'READ_ONLY')
-            AND (task.expiration_time IS NULL OR task.expiration_time >= CURRENT_TIMESTAMP())
-            AND NOT EXISTS(
+            EXISTS(
+                SELECT
+                    1
+                FROM
+                    module
+                WHERE
+                        module.task_id = task.id AND session.public_screen_module_id = module.id
+                ) AND EXISTS(
                 SELECT
                     1
                 FROM
                     module
                 WHERE
                         module.task_id = task.id AND module.sync_public_participant
-            )
+                )
+        ) OR (
+            task.state IN('ACTIVE', 'READ_ONLY')
+        AND (task.expiration_time IS NULL OR task.expiration_time >= CURRENT_TIMESTAMP())
+        AND NOT EXISTS(
+        SELECT
+            1
+        FROM
+            module
+        WHERE
+                module.task_id = task.id AND module.sync_public_participant
+        )
     );
 
 CREATE OR REPLACE VIEW user_module (user_id, task_type, module_name) AS
