@@ -149,7 +149,7 @@
                     >-->
                     <ToolTip
                       :text="
-                        hasParticipantOption(element)
+                        element.taskType
                           ? $t(
                               'module.' +
                                 element.taskType.toLowerCase() +
