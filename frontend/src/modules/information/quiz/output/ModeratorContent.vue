@@ -173,10 +173,10 @@
             ' ' +
             (index + 1)
           "
-          :prop="`answers[${index}].keywords`"
+          :prop="`answers[${index}].description`"
           :rules="[
             defaultFormRules.ruleRequired,
-            defaultFormRules.ruleToLong(255),
+            defaultFormRules.ruleToLong(1000),
           ]"
         >
           <div class="media" v-if="index < formData.answers.length">
@@ -188,7 +188,7 @@
             ></el-checkbox>
             <el-input
               class="media-content"
-              v-model="answer.keywords"
+              v-model="answer.description"
               :placeholder="
                 $t('module.information.quiz.moderatorContent.answerExample')
               "
@@ -225,7 +225,7 @@
               <div class="orderDraggable">
                 <h2 class="media-left">{{ element.order + 1 }}</h2>
                 <el-input
-                  v-model="element.keywords"
+                  v-model="element.description"
                   :placeholder="
                     $t('module.information.quiz.moderatorContent.answerExample')
                   "
@@ -685,7 +685,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             hierarchyService
               .postHierarchy(this.taskId, {
                 parentId: answer.parentId,
-                keywords: answer.keywords,
+                keywords: answer.description
+                  ? answer.description
+                  : answer.keywords,
                 description: answer.description,
                 link: answer.link,
                 image: answer.image,
@@ -740,7 +742,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           answer.parentId = question.id;
           await hierarchyService.postHierarchy(this.taskId, {
             parentId: answer.parentId,
-            keywords: answer.keywords,
+            keywords: answer.description ? answer.description : answer.keywords,
             description: answer.description,
             link: answer.link,
             image: answer.image,
@@ -949,6 +951,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           getQuestionResultStorageFromQuestionType(question.questionType);
         if (questionResultStorage === QuestionResultStorage.VOTING) {
           const changes = question.answers.length !== answers.length;
+          answers.forEach((item) => {
+            if (!item.description) item.description = item.keywords;
+          });
           question.answers = answers;
           if (changes && question === this.editQuestion) {
             this.setFormData(this.editQuestion);
@@ -1024,7 +1029,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       id: null,
       parentId: null,
       keywords: '',
-      description: null,
+      description: '',
       link: null,
       image: null,
       timestamp: null,

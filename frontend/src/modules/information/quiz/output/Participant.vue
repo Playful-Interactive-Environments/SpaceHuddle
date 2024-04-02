@@ -97,7 +97,11 @@
               />
               <font-awesome-icon v-else :icon="['far', 'circle']" />
             </template>
-            {{ answer.answer.keywords }}
+            {{
+              answer.answer.description
+                ? answer.answer.description
+                : answer.answer.keywords
+            }}
             <img
               v-if="answer.answer.image"
               :src="answer.answer.image"
