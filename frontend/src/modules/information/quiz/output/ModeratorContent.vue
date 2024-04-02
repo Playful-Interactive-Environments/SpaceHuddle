@@ -364,6 +364,7 @@ import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import Highscore from '@/modules/information/quiz/organisms/Highscore.vue';
+import { until } from '@/utils/wait';
 
 @Options({
   components: {
@@ -941,7 +942,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     });
   }
 
-  updateAnswers(answers: Hierarchy[], questionId: string | null): void {
+  async updateAnswers(
+    answers: Hierarchy[],
+    questionId: string | null
+  ): Promise<void> {
     if (questionId) {
       const question = this.questions.find(
         (question) => question.question.id === questionId
@@ -954,6 +958,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           answers.forEach((item) => {
             if (!item.description) item.description = item.keywords;
           });
+          await until(
+            () =>
+              answers.filter((item) => item.imageTimestamp && !item.image)
+                .length === 0
+          );
           question.answers = answers;
           if (changes && question === this.editQuestion) {
             this.setFormData(this.editQuestion);

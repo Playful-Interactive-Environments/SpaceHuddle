@@ -19,11 +19,13 @@
         (statePointer >= 0 || !isActive)
       "
     >
-      <img
+      <el-image
         v-if="hasPublicImage"
         :src="publicImage"
         class="question-image"
         alt=""
+        :preview-src-list="[publicImage]"
+        :hide-on-click-modal="true"
       />
       <div class="question">
         {{ publicQuestion.question.keywords }}

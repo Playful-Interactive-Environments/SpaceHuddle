@@ -17,7 +17,13 @@
     </div>
     <div id="QuizImageBackground" v-if="hasImage">
       <div id="QuizImageContainer">
-        <img :src="getImageSrc" alt="quizImage" class="QuizImage" />
+        <el-image
+          :src="getImageSrc"
+          alt="quizImage"
+          class="QuizImage"
+          :preview-src-list="[getImageSrc]"
+          :hide-on-click-modal="true"
+        />
       </div>
     </div>
     <template #footer>
@@ -102,17 +108,21 @@
                 ? answer.answer.description
                 : answer.answer.keywords
             }}
-            <img
+            <el-image
               v-if="answer.answer.image"
               :src="answer.answer.image"
               class="question-image"
               alt=""
+              :preview-src-list="[answer.answer.image]"
+              :hide-on-click-modal="true"
             />
-            <img
+            <el-image
               v-if="answer.answer.link && !answer.answer.image"
               :src="answer.answer.link"
               class="question-image"
               alt=""
+              :preview-src-list="[answer.answer.link]"
+              :hide-on-click-modal="true"
             />
           </el-button>
         </el-space>
@@ -131,17 +141,21 @@
                 {{ publicAnswerList.indexOf(element) + 1 }}
               </h2>
               <p class="media-content">{{ element.answer.keywords }}</p>
-              <img
+              <el-image
                 v-if="element.answer.image"
                 :src="element.answer.image"
                 class="media-right question-image"
                 alt=""
+                :preview-src-list="[element.answer.image]"
+                :hide-on-click-modal="true"
               />
-              <img
+              <el-image
                 v-if="element.answer.link && !element.answer.image"
                 :src="element.answer.link"
                 class="media-right question-image"
                 alt=""
+                :preview-src-list="[element.answer.link]"
+                :hide-on-click-modal="true"
               />
             </div>
           </div>
@@ -165,17 +179,21 @@
                   {{ orderAnswers.indexOf(element) + 1 }}
                 </h2>
                 <p class="media-content">{{ element.answer.keywords }}</p>
-                <img
+                <el-image
                   v-if="element.answer.image"
                   :src="element.answer.image"
                   class="media-right question-image"
                   alt=""
+                  :preview-src-list="[element.answer.image]"
+                  :hide-on-click-modal="true"
                 />
-                <img
+                <el-image
                   v-if="element.answer.link && !element.answer.image"
                   :src="element.answer.link"
                   class="media-right question-image"
                   alt=""
+                  :preview-src-list="[element.answer.link]"
+                  :hide-on-click-modal="true"
                 />
               </div>
             </template>
@@ -1586,12 +1604,18 @@ div#loadingScreen > span#loading::v-deep(.path) {
 }
 
 .question-image {
+  overflow: unset;
+}
+
+.question-image::v-deep(img.el-image__preview) {
   height: 5rem;
   object-fit: contain;
   background-color: var(--color-primary);
   //margin: -0.8rem -2.1rem -0.8rem 0.5rem;
   //border-radius: 0 0.8rem 0.8rem 0;
   border-radius: 0.8rem;
+  max-width: unset;
+  width: unset;
 }
 
 label {
