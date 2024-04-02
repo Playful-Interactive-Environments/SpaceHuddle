@@ -97,6 +97,18 @@
               </el-dropdown-menu>
             </template>
           </el-dropdown>-->
+          <ToolTip
+            :placement="'right'"
+            :text="
+              shareStateValue
+                ? $t(
+                    'moderator.organism.settings.topicSettings.deactivateTopic'
+                  )
+                : $t('moderator.organism.settings.topicSettings.activateTopic')
+            "
+          >
+            <el-switch v-model="shareStateValue" @click="sharedChanged" />
+          </ToolTip>
         </template>
         <template #headerContent>
           <el-collapse accordion v-model="activeTab">
@@ -399,6 +411,8 @@ import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStati
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
 import TopicDependencySettings from '@/components/moderator/organisms/settings/TopicDependencySettings.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import * as themeColors from "@/utils/themeColors";
+import TopicStates from "@/types/enum/TopicStates";
 
 @Options({
   components: {
@@ -445,6 +459,7 @@ export default class ModeratorTopicDetails extends Vue {
   showStatistic = false;
   showParticipants = false;
   showDependencies = false;
+  shareStateValue = true;
   statisticComponentLoadIndex = 0;
 
   TaskType = TaskType;
@@ -505,6 +520,20 @@ export default class ModeratorTopicDetails extends Vue {
     if (brainstormingTask) return brainstormingTask.id;
     if (this.tasks.length > 0) return this.tasks[0].id;
     return '';
+  }
+
+  get backgroundColor(): string {
+    if (!this.shareStateValue) return themeColors.getInformingColor('-light');
+    return 'white';
+  }
+
+  sharedChanged() {
+    if (this.topic) {
+      this.topic.state = this.shareStateValue
+        ? TopicStates.ACTIVE
+        : TopicStates.INACTIVE;
+      topicService.putTopic(this.topic);
+    }
   }
 
   @Watch('sessionId', { immediate: true })
@@ -606,6 +635,7 @@ export default class ModeratorTopicDetails extends Vue {
 
   updateTopic(topic: Topic): void {
     this.topic = topic;
+    this.shareStateValue = this.topic.state === TopicStates.ACTIVE;
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1111,5 +1141,9 @@ p {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+}
+
+.el-switch {
+  --el-switch-on-color: var(--color-dark-contrast-light);
 }
 </style>

@@ -59,7 +59,7 @@ export default class ModeratorConfig extends Vue implements CustomInit {
         link: null,
         image: null, // the datebase64 url of created image
         parameter: {
-          state: LevelWorkflowType.created,
+          state: LevelWorkflowType.approved,
           type: config.type,
           items: structuredClone(config.items),
         },

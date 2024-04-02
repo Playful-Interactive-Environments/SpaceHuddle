@@ -328,7 +328,9 @@
           "delete": "löschen",
           "clonePrompt": "Möchtest du dieses Thema wirklich duplizieren?",
           "statistic": "Statistik",
-          "settings": "Themen-einstellungen"
+          "settings": "Themen-einstellungen",
+          "activateTopic": "Thema aktivieren",
+          "deactivateTopic": "Thema deaktivieren"
         }
       },
       "session": {

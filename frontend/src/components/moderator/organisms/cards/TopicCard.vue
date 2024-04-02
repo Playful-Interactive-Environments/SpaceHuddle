@@ -7,7 +7,14 @@
       :width="450"
       placement="bottom"
     >
-      <el-card class="card" shadow="hover" :body-style="{ padding: '0px' }">
+      <el-card
+        class="card"
+        shadow="hover"
+        :body-style="{ padding: '0px' }"
+        :style="{
+          '--background-color': backgroundColor,
+        }"
+      >
         <span class="level" ref="item">
           <span class="level-left">
             <div class="level-item card__info link" v-on:click="goToDetails">
@@ -35,6 +42,25 @@
 
                 <template #dropdown>
                   <el-dropdown-menu>
+                    <el-dropdown-item>
+                      <ToolTip
+                        :placement="'right'"
+                        :text="
+                          shareStateValue
+                            ? $t(
+                                'moderator.organism.settings.topicSettings.deactivateTopic'
+                              )
+                            : $t(
+                                'moderator.organism.settings.topicSettings.activateTopic'
+                              )
+                        "
+                      >
+                        <el-switch
+                          v-model="shareStateValue"
+                          @click="sharedChanged"
+                        />
+                      </ToolTip>
+                    </el-dropdown-item>
                     <el-dropdown-item command="edit">
                       <ToolTip
                         :placement="'left'"
@@ -133,6 +159,8 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import { ElMessageBox } from 'element-plus';
 import TopicStatistic from '@/components/moderator/organisms/statistics/TopicStatistic.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import TopicStates from '@/types/enum/TopicStates';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: { ToolTip, TopicStatistic, TutorialStep, TopicSettings },
@@ -145,13 +173,27 @@ export default class TopicCard extends Vue {
   showSettings = false;
   editingTopicId = '';
   showStatistic = false;
+  shareStateValue = false;
+
+  get backgroundColor(): string {
+    if (!this.shareStateValue) return themeColors.getInformingColor('-light');
+    return 'white';
+  }
 
   mounted(): void {
     this.editingTopicId = this.topic.id;
+    this.shareStateValue = this.topic.state === TopicStates.ACTIVE;
   }
 
   stopPropagation(event: Event) {
     event.stopPropagation();
+  }
+
+  sharedChanged() {
+    this.topic.state = this.shareStateValue
+      ? TopicStates.ACTIVE
+      : TopicStates.INACTIVE;
+    topicService.putTopic(this.topic);
   }
 
   goToDetails(): void {
@@ -236,6 +278,7 @@ export default class TopicCard extends Vue {
   border-top: unset;
   border-right: unset;
   border-left: unset;
+  background-color: var(--background-color);
 
   &__extension {
     border: 1px solid var(--el-border-color-light);

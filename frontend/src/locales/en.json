@@ -327,7 +327,9 @@
           "clonePrompt": "Do you really want to clone this task?",
           "statistic": "statistics",
           "drag": "drag and drop",
-          "settings": "topic settings"
+          "settings": "topic settings",
+          "activateTopic": "activate topic",
+          "deactivateTopic": "deactivate topic"
         }
       },
       "session": {

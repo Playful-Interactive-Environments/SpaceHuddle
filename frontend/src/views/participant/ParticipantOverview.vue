@@ -319,7 +319,7 @@ export default class ParticipantOverview extends Vue {
     this.topicCash = participantService.registerGetTopicList(
       this.updateTopics,
       EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
+      30
     );
   }
 
@@ -343,6 +343,7 @@ export default class ParticipantOverview extends Vue {
   }
 
   updateTopics(topics: Topic[]): void {
+    if (topics.length === this.topics.length) return;
     const deletedTopics = this.topics
       .filter((tOld) => {
         return !topics.find((tNew) => tNew.id === tOld.id);
