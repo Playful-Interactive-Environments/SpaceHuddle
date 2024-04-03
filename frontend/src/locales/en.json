@@ -293,8 +293,8 @@
         },
         "sessionSettings": {
           "header": "Create Session",
-          "headerEdit": "Edit Session",
           "settings": "Session settings",
+          "headerEdit": "Edit Session",
           "info": "The session is the place that bundles all information belonging to your brainstorming adventure.",
           "title": "Title",
           "titleExample": "e.g. Marketing Meeting",
