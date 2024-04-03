@@ -89,7 +89,7 @@ class CategoryValidator
 
         if (!$this->repository->ideasAgreeWithCategory($categoryId, $ideas, $lookForConnected)) {
             $result = new ValidationResult();
-            $message = "NotValid: Not all ideas are valid idea keys or do not belong to the same topic as the category.";
+            $message = "NotValid: Not all ideas are valid idea keys or do not belong to the same session as the category.";
             if ($lookForConnected) {
                 $message = "NotValid: Not all ideas are linked to the category.";
             }

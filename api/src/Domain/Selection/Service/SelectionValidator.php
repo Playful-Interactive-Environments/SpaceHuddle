@@ -65,7 +65,7 @@ class SelectionValidator
 
         if (!$this->repository->ideasAgreeWithSelection($selectionId, $ideas, $lookForConnected)) {
             $result = new ValidationResult();
-            $message = "NotValid: Not all ideas are valid idea keys or do not belong to the same topic as the selection.";
+            $message = "NotValid: Not all ideas are valid idea keys or do not belong to the same session as the selection.";
             if ($lookForConnected) {
                 $message = "NotValid: Not all ideas are linked to the selection.";
             }

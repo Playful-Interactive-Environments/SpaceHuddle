@@ -228,11 +228,19 @@ class SelectionRepository implements RepositoryInterface
         $query = $this->queryFactory->newSelect("idea");
         $query->select(["idea.id"])
             ->innerJoin("task", "task.id = idea.task_id")
-            ->innerJoin("selection", "selection.topic_id = task.topic_id")
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->innerJoin("selection", ["selection.id" => $selectionId])
+            ->join([
+                "selection_topic" => [
+                    "table" => "topic",
+                    "type" => "INNER",
+                    "conditions" => "selection_topic.id = selection.topic_id"
+                ]
+            ])
             ->whereInList("idea.id", $ideas)
             ->andWhere([
                 //"task.task_type" => $taskTypeIdeas,
-                "selection.id" => $selectionId,
+                "selection_topic.session_id = topic.session_id",
             ]);
 
         if ($lookForConnected) {

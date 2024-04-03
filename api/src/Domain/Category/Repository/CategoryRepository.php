@@ -198,21 +198,31 @@ class CategoryRepository implements RepositoryInterface
                     "type" => "INNER",
                     "conditions" => "idea_task.id = idea.task_id"
                 ],
-                "category_task" => [
-                    "table" => "task",
+                "idea_topic" => [
+                    "table" => "topic",
                     "type" => "INNER",
-                    "conditions" => "category_task.topic_id = idea_task.topic_id"
+                    "conditions" => "idea_topic.id = idea_task.topic_id"
                 ],
                 "category" => [
                     "table" => "idea",
                     "type" => "INNER",
-                    "conditions" => "category.task_id = category_task.id"
+                    "conditions" => ["category.id" => $categoryId]
+                ],
+                "category_task" => [
+                    "table" => "task",
+                    "type" => "INNER",
+                    "conditions" => "category_task.id = category.task_id"
+                ],
+                "category_topic" => [
+                    "table" => "topic",
+                    "type" => "INNER",
+                    "conditions" => "category_topic.id = category_task.topic_id"
                 ]
             ])
             ->whereInList("idea.id", $ideas)
             ->andWhere([
+                "category_topic.session_id = idea_topic.session_id",
                 "category_task.task_type" => $taskTypeCategory,
-                "category.id" => $categoryId,
             ]);
 
         if ($lookForConnected) {

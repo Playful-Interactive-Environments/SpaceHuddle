@@ -104,14 +104,24 @@ class VoteRepository implements RepositoryInterface
                     "type" => "INNER",
                     "conditions" => "idea_task.id = idea.task_id"
                 ],
+                "idea_topic" => [
+                    "table" => "topic",
+                    "type" => "INNER",
+                    "conditions" => "idea_topic.id = idea_task.topic_id"
+                ],
                 "vote_task" => [
                     "table" => "task",
                     "type" => "INNER",
-                    "conditions" => "vote_task.topic_id = idea_task.topic_id"
+                    "conditions" => ["vote_task.id" => $taskId]
+                ],
+                "vote_topic" => [
+                    "table" => "topic",
+                    "type" => "INNER",
+                    "conditions" => "vote_topic.id = vote_task.topic_id"
                 ]
             ])
             ->andWhere([
-                "vote_task.id" => $taskId,
+                "vote_topic.session_id = idea_topic.session_id",
                 "idea.id" => $ideaId,
             ]);
 

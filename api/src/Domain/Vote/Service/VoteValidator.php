@@ -75,7 +75,7 @@ class VoteValidator
             $result = new ValidationResult();
             $result->addError(
                 "ideaId",
-                "NotValid: IdeaId is not a valid idea keys or do not belong to the same topic as the task."
+                "NotValid: IdeaId is not a valid idea keys or do not belong to the same session as the task."
             );
             throw new ValidationException("Please check your input", $result);
         }
