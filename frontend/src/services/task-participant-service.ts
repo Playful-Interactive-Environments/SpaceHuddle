@@ -71,7 +71,8 @@ export const registerGetPoints = (
   sessionId: string,
   callback: (result: any) => void,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
-  maxDelaySeconds = 60 * 5
+  maxDelaySeconds = 60 * 5,
+  startingPoints: number
 ): cashService.SimplifiedCashEntry<TaskParticipantState[]> => {
   return cashService.registerSimplifiedGet<TaskParticipantState[]>(
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANT_STATE}`,
@@ -79,7 +80,8 @@ export const registerGetPoints = (
     [],
     authHeaderType,
     maxDelaySeconds,
-    async (items: TaskParticipantState[]) => calculatePoints(items),
+    async (items: TaskParticipantState[]) =>
+      calculatePoints(items, startingPoints),
     null,
     'points::'
   );
@@ -91,7 +93,10 @@ export const refreshPoints = (sessionId: string): void => {
   );
 };
 
-export const calculatePoints = (items: TaskParticipantState[]): number => {
+export const calculatePoints = (
+  items: TaskParticipantState[],
+  startingPoints: number
+): number => {
   let points = 0;
   for (const item of items) {
     if (item.parameter.gameplayResult) {
@@ -100,7 +105,7 @@ export const calculatePoints = (items: TaskParticipantState[]): number => {
       if (gameplayResult.pointsSpent) points -= gameplayResult.pointsSpent;
     }
   }
-  return points;
+  return points + startingPoints;
 };
 
 export const deregisterGetListFromTopic = (

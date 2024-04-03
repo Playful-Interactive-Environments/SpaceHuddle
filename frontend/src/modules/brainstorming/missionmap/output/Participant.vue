@@ -510,6 +510,8 @@ import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import { until } from '@/utils/wait';
 import IdeaStates from '@/types/enum/IdeaStates';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { Session } from '@/types/api/Session';
+import * as sessionService from '@/services/session-service';
 
 interface ProgressValues {
   origin: number;
@@ -584,6 +586,7 @@ export default class Participant extends Vue {
   theme = '';
   inputManager!: CombinedInputManager;
   activeTab = 'measures';
+  startingPoints = 0;
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -823,13 +826,26 @@ export default class Participant extends Vue {
   updateTask(task: Task): void {
     this.sessionId = task.sessionId;
     this.task = task;
+    cashService.deregisterAllGet(this.updateSession);
+    if (this.sessionId) {
+      sessionService.registerGetById(
+        this.sessionId,
+        this.updateSession,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
+  }
+
+  updateSession(session: Session): void {
     cashService.deregisterAllGet(this.updateStates);
     if (this.sessionId) {
       taskParticipantService.registerGetPoints(
         this.sessionId,
         this.updateStates,
         EndpointAuthorisationType.PARTICIPANT,
-        60 * 60
+        60 * 60,
+        session.parameter?.startingPoints ?? 0
       );
     }
   }
@@ -1072,6 +1088,7 @@ export default class Participant extends Vue {
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateStates);
 
     if (this.inputManager) this.inputManager.deregisterAll();

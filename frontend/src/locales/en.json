@@ -313,7 +313,8 @@
           "calendar": "calendar",
           "submit": "Save session",
           "customKey": "Automatic key generation",
-          "topicActivation": "topic activation"
+          "topicActivation": "topic activation",
+          "startingPoints": "starting points"
         },
         "topicSettings": {
           "header": "Create Topic",

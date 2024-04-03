@@ -1,5 +1,6 @@
 import UserType from '@/types/enum/UserType';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export interface Session {
   connectionKey: string;
   creationDate: string;
@@ -18,6 +19,7 @@ export interface Session {
   topicCount: number;
   taskCount: number;
   allowAnonymous: boolean;
+  parameter: any;
 }
 
 export interface SessionInfo {

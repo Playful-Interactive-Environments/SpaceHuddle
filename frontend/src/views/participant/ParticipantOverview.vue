@@ -20,7 +20,7 @@
           >
             {{ sessionDescription }}
           </span>
-          <div v-if="points">
+          <div v-if="points && showCoins">
             <font-awesome-icon icon="coins" /> {{ points }}
           </div>
         </div>
@@ -260,6 +260,11 @@ export default class ParticipantOverview extends Vue {
   topicDependencyLimit: { [key: string]: number } = {};
   tableTasks: { [key: string]: Task[][] } = {};
   finishManuel: { [key: string]: boolean } = {};
+  startingPoints = 0;
+
+  get showCoins(): boolean {
+    return JSON.parse(process.env.VUE_APP_SHOW_COINS);
+  }
 
   getStateForTask(taskId: string): TaskParticipantState | undefined {
     return this.states.find(
@@ -336,6 +341,8 @@ export default class ParticipantOverview extends Vue {
   }
 
   updateSession(session: Session): void {
+    if (session.parameter?.startingPoints)
+      this.startingPoints = session.parameter.startingPoints;
     this.sessionName = session.title;
     this.sessionDescription = session.description;
     this.sessionId = session.id;
@@ -379,7 +386,10 @@ export default class ParticipantOverview extends Vue {
   }
 
   updateStates(states: TaskParticipantState[]): void {
-    this.points = taskParticipantService.calculatePoints(states);
+    this.points = taskParticipantService.calculatePoints(
+      states,
+      this.startingPoints
+    );
     this.states = states;
     this.calculateDisabledList();
   }

@@ -89,6 +89,7 @@ import Timer from '@/components/shared/atoms/Timer.vue';
 import * as cashService from '@/services/cash-service';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { RouteName } from '@/types/enum/RouteName';
+import { Session } from '@/types/api/Session';
 
 @Options({
   components: {
@@ -193,6 +194,7 @@ export default class ParticipantModuleContent extends Vue {
     cashService.deregisterAllGet(this.updatePublicTask);
     cashService.deregisterAllGet(this.updateState);
     cashService.deregisterAllGet(this.updatePoints);
+    cashService.deregisterAllGet(this.updateSession);
   }
 
   unmounted(): void {
@@ -285,11 +287,11 @@ export default class ParticipantModuleContent extends Vue {
         name: RouteName.PARTICIPANT_OVERVIEW,
       });
 
-    cashService.deregisterAllGet(this.updatePoints);
+    cashService.deregisterAllGet(this.updateSession);
     if (this.task.sessionId) {
-      taskParticipantService.registerGetPoints(
+      sessionService.registerGetById(
         this.task.sessionId,
-        this.updatePoints,
+        this.updateSession,
         EndpointAuthorisationType.PARTICIPANT,
         60 * 60
       );
@@ -305,6 +307,17 @@ export default class ParticipantModuleContent extends Vue {
       }
       this.state = state;
     }
+  }
+
+  updateSession(session: Session): void {
+    cashService.deregisterAllGet(this.updatePoints);
+    taskParticipantService.registerGetPoints(
+      session.id,
+      this.updatePoints,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60,
+      session.parameter?.startingPoints ?? 0
+    );
   }
 
   updatePoints(points: number): void {

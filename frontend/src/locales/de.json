@@ -313,7 +313,8 @@
           "calendar": "Kalender",
           "submit": "Sitzung speichern",
           "customKey": "Automatische Schlüsselgenerierung",
-          "topicActivation": "Themenaktivierung"
+          "topicActivation": "Themenaktivierung",
+          "startingPoints": "Startpunkte"
         },
         "topicSettings": {
           "header": "Thema erstellen",

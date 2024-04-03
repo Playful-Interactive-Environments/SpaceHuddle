@@ -114,7 +114,7 @@
         :label="
           $t('moderator.organism.settings.sessionSettings.topicActivation')
         "
-        prop="theme"
+        prop="topicActivation"
       >
         <el-select v-model="formData.topicActivation">
           <el-option
@@ -124,6 +124,20 @@
             :label="$t(`enum.topicActivation.${key}`)"
           />
         </el-select>
+      </el-form-item>
+      <el-form-item
+        v-if="showCoins"
+        :label="
+          $t('moderator.organism.settings.sessionSettings.startingPoints')
+        "
+        prop="startingPoints"
+      >
+        <el-input-number
+          v-model="formData.startingPoints"
+          :min="0"
+          :max="1000"
+          :step="100"
+        />
       </el-form-item>
       <el-form-item
         v-if="!sessionId"
@@ -192,11 +206,16 @@ export default class SessionSettings extends Vue {
     subject: '',
     theme: '',
     topicActivation: TopicActivation.ALWAYS,
+    startingPoints: 0,
     connectionKey: null,
     expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
   };
 
   TopicActivation = TopicActivation;
+
+  get showCoins(): boolean {
+    return JSON.parse(process.env.VUE_APP_SHOW_COINS);
+  }
 
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
@@ -235,6 +254,7 @@ export default class SessionSettings extends Vue {
     this.formData.subject = session.subject;
     this.formData.theme = session.theme ?? '';
     this.formData.topicActivation = session.topicActivation ?? '';
+    this.formData.startingPoints = session.parameter?.startingPoints ?? 0;
     this.formData.expirationDate = new Date(session.expirationDate);
   }
 
@@ -275,6 +295,7 @@ export default class SessionSettings extends Vue {
     this.formData.subject = null;
     this.formData.theme = null;
     this.formData.topicActivation = TopicActivation.ALWAYS;
+    this.formData.startingPoints = 0;
     this.formData.connectionKey = null;
     this.formData.expirationDate = new Date(
       this.today.setMonth(this.today.getMonth() + 1)
@@ -308,6 +329,9 @@ export default class SessionSettings extends Vue {
         theme: this.formData.theme,
         topicActivation: this.formData.topicActivation,
         expirationDate: this.isoExpirationDate,
+        parameter: this.showCoins
+          ? { startingPoints: this.formData.startingPoints }
+          : {},
       };
       if (!this.hasAutoKey && this.formData.connectionKey)
         data.connectionKey = this.formData.connectionKey;
@@ -348,6 +372,9 @@ export default class SessionSettings extends Vue {
           theme: this.formData.theme,
           topicActivation: this.formData.topicActivation,
           expirationDate: this.isoExpirationDate,
+          parameter: this.showCoins
+            ? { startingPoints: this.formData.startingPoints }
+            : {},
         })
         .then(
           () => {
