@@ -7,6 +7,7 @@
     "points": "Punkte",
     "rate": "Rate",
     "explanation": "Begründung",
+    "freeExplanation": "Freier Text für eigene Erklärung oder Antwortvorschlag",
     "save": "speichern",
     "spentHeader": "weitere Punkte für die Maßnahme ausgeben",
     "spent": "ausgeben",

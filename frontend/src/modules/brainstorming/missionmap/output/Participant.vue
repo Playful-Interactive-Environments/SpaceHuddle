@@ -218,12 +218,19 @@
           </template>
           {{ explanation }}
         </el-button>
-        <el-input v-model="selectedVote.explanation">
-          <template #prefix>
+        <el-input
+          v-model="selectedVote.explanation"
+          type="textarea"
+          :rows="3"
+          :placeholder="
+            $t('module.brainstorming.missionmap.participant.freeExplanation')
+          "
+        >
+          <!--<template #prefix>
             <span style="width: 1.5rem">
               {{ selectedIdea?.parameter.explanationList.length + 1 }}.
             </span>
-          </template>
+          </template>-->
         </el-input>
       </el-form-item>
     </el-dialog>
