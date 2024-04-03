@@ -110,14 +110,18 @@ class TopicRepository implements RepositoryInterface
             $sortConditions = ["order"];
         }
 
-        $authorisation = $this->getAuthorisation();
-        if ($authorisation->isParticipant())
-            $conditions["state"] = TopicState::ACTIVE;
-
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
             ->andWhere($conditions)
             ->order($sortConditions);
+
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isParticipant()) {
+            $query->innerJoin("participant_topic", [
+                "participant_topic.id = topic.id",
+                "participant_topic.participant_id" => $authorisation->id
+            ]);
+        }
 
         return $this->fetchAll($query);
     }

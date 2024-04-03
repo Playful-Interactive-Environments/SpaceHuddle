@@ -46,6 +46,13 @@ class SessionData
     public ?string $theme;
 
     /**
+     * The session topic activation type.
+     * @var string|null
+     * @OA\Property(ref="#/components/schemas/TopicActivation")
+     */
+    public ?string $topicActivation;
+
+    /**
      * The key with which the participants can connect to the session.
      * @var string|null
      * @OA\Property(example="ABCD1234")
@@ -120,6 +127,7 @@ class SessionData
         $this->description = $reader->findString("description");
         $this->subject = $reader->findString("subject");
         $this->theme = $reader->findString("theme");
+        $this->topicActivation = $reader->findString("topic_activation");
         $this->connectionKey = $reader->findString("connection_key");
         $this->maxParticipants = $reader->findInt("max_participants");
         $this->expirationDate = $reader->findString("expiration_date");

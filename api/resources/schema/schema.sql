@@ -187,6 +187,7 @@ CREATE TABLE `session` (
                            `description` text DEFAULT NULL,
                            `subject` varchar(255) DEFAULT NULL,
                            `theme` varchar(255) DEFAULT NULL,
+                           `topic_activation` varchar(255) DEFAULT NULL,
                            `connection_key` varchar(255) NOT NULL,
                            `max_participants` int(11) DEFAULT NULL,
                            `expiration_date` date DEFAULT NULL,
@@ -1050,6 +1051,84 @@ WHERE
                 module.task_id = task.id AND module.sync_public_participant
         )
     );
+
+CREATE OR REPLACE VIEW participant_topic (id, participant_id) AS
+SELECT
+    topic.id,
+    participant.id as participant_id
+FROM
+    topic
+INNER JOIN session ON session.id = topic.session_id
+INNER JOIN participant ON participant.session_id = session.id
+WHERE
+    (
+        topic.state IN('ACTIVE') AND(
+            UPPER(session.topic_activation) = 'ALWAYS' OR(
+                NOT EXISTS(
+                SELECT
+                    1
+                FROM
+                    topic AS previous_topic
+                WHERE
+                    previous_topic.state IN('ACTIVE') AND
+                    previous_topic.session_id = topic.session_id AND previous_topic.order < topic.order
+            ) OR(
+                (
+                    SELECT
+                        COUNT(topic.id)
+                    FROM
+                        topic AS previous_topic
+                    WHERE
+                        previous_topic.state IN('ACTIVE') AND
+                        previous_topic.session_id = topic.session_id AND
+                        previous_topic.order < topic.order
+                    ) =(
+                        SELECT
+                            COUNT(topic.id)
+                        FROM
+                            topic AS previous_topic
+                        WHERE
+                            previous_topic.state IN('ACTIVE') AND
+                            previous_topic.session_id = topic.session_id AND
+                            previous_topic.order < topic.order AND
+                            NOT EXISTS(
+                                SELECT
+                                    1
+                                FROM
+                                    task
+                                INNER JOIN participant_task ON participant_task.id = task.id
+                                WHERE
+                                    task.topic_id = previous_topic.id AND NOT EXISTS(
+                                    SELECT
+                                        1
+                                    FROM
+                                        task_participant_state
+                                    WHERE
+                                        task_participant_state.participant_id = participant.id AND
+                                        task_participant_state.task_id = task.id AND(
+                                            task_participant_state.state = 'FINISHED' OR
+                                            (
+                                                UPPER(session.topic_activation) = 'AFTER_PREVIOUS_STARTED' AND
+                                                EXISTS(
+                                                    SELECT
+                                                        1
+                                                    FROM
+                                                        task_participant_iteration
+                                                    WHERE
+                                                        task_participant_iteration.state != 'IN_PROGRESS' AND
+                                                        task_participant_iteration.participant_id = participant.id AND
+                                                        task_participant_iteration.task_id = task.id
+                                                )
+                                            )
+                                        )
+                                )
+                            )
+                    )
+                )
+            )
+        )
+    );
+
 
 CREATE OR REPLACE VIEW user_module (user_id, task_type, module_name) AS
 SELECT DISTINCT

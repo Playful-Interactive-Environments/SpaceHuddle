@@ -311,9 +311,12 @@ class ParticipantRepository implements RepositoryInterface
         $query->select(["topic.*"])
             ->innerJoin("session", "session.id = topic.session_id")
             ->innerJoin("participant", "participant.session_id = session.id")
+            ->innerJoin("participant_topic", [
+                "participant_topic.id = topic.id",
+                "participant_topic.participant_id = participant.id"
+            ])
             ->andWhere([
                 "participant.id" => $id,
-                "topic.state" => TopicState::ACTIVE,
                 "session.expiration_date >= current_timestamp()"
             ])
             ->order(["topic.order"]);
