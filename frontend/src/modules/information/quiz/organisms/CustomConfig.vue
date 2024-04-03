@@ -144,7 +144,7 @@ export default class CustomConfig
       this.modelValue &&
       this.modelValue.moderatedQuestionFlow === undefined
     ) {
-      this.modelValue.moderatedQuestionFlow = true;
+      this.modelValue.moderatedQuestionFlow = false;
     }
     if (this.modelValue && !this.modelValue.defaultQuestionTime) {
       this.modelValue.defaultQuestionTime = this.defaultTime;

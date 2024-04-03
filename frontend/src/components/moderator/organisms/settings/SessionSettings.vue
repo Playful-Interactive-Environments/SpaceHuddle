@@ -111,6 +111,21 @@
         </el-select>
       </el-form-item>
       <el-form-item
+        :label="
+          $t('moderator.organism.settings.sessionSettings.topicActivation')
+        "
+        prop="theme"
+      >
+        <el-select v-model="formData.topicActivation">
+          <el-option
+            v-for="key in TopicActivation"
+            :key="key"
+            :value="key"
+            :label="$t(`enum.topicActivation.${key}`)"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item
         v-if="!sessionId"
         prop="customKey"
         :label="$t('moderator.organism.settings.sessionSettings.customKey')"
@@ -144,6 +159,7 @@ import { ValidationData } from '@/types/ui/ValidationRule';
 import { Session } from '@/types/api/Session';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
+import { TopicActivation } from '@/types/enum/TopicActivation';
 
 @Options({
   components: {
@@ -175,9 +191,12 @@ export default class SessionSettings extends Vue {
     description: '',
     subject: '',
     theme: '',
+    topicActivation: TopicActivation.ALWAYS,
     connectionKey: null,
     expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
   };
+
+  TopicActivation = TopicActivation;
 
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
@@ -215,6 +234,7 @@ export default class SessionSettings extends Vue {
     this.subjectCash.refreshData();
     this.formData.subject = session.subject;
     this.formData.theme = session.theme ?? '';
+    this.formData.topicActivation = session.topicActivation ?? '';
     this.formData.expirationDate = new Date(session.expirationDate);
   }
 
@@ -254,6 +274,7 @@ export default class SessionSettings extends Vue {
     this.formData.description = '';
     this.formData.subject = null;
     this.formData.theme = null;
+    this.formData.topicActivation = TopicActivation.ALWAYS;
     this.formData.connectionKey = null;
     this.formData.expirationDate = new Date(
       this.today.setMonth(this.today.getMonth() + 1)
@@ -285,6 +306,7 @@ export default class SessionSettings extends Vue {
         description: this.formData.description,
         subject: this.formData.subject,
         theme: this.formData.theme,
+        topicActivation: this.formData.topicActivation,
         expirationDate: this.isoExpirationDate,
       };
       if (!this.hasAutoKey && this.formData.connectionKey)
@@ -324,6 +346,7 @@ export default class SessionSettings extends Vue {
           description: this.formData.description,
           subject: this.formData.subject,
           theme: this.formData.theme,
+          topicActivation: this.formData.topicActivation,
           expirationDate: this.isoExpirationDate,
         })
         .then(

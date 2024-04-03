@@ -312,7 +312,8 @@
           "default": "Standard",
           "calendar": "Kalender",
           "submit": "Sitzung speichern",
-          "customKey": "Automatische Schlüsselgenerierung"
+          "customKey": "Automatische Schlüsselgenerierung",
+          "topicActivation": "Themenaktivierung"
         },
         "topicSettings": {
           "header": "Thema erstellen",
@@ -629,6 +630,11 @@
     "locale": {
       "en": "Englisch",
       "de": "Deutsch"
+    },
+    "topicActivation": {
+      "always": "immer",
+      "after_previous_started": "nachdem alle vorherigen Aufgaben gestartet wurden",
+      "after_previous_finished": "nachdem alle vorherigen Aufgaben abgeschlossen wurden"
     }
   },
   "general": {

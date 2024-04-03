@@ -311,7 +311,8 @@
           "default": "default",
           "calendar": "calendar",
           "submit": "Save session",
-          "customKey": "Automatic key generation"
+          "customKey": "Automatic key generation",
+          "topicActivation": "topic activation"
         },
         "topicSettings": {
           "header": "Create Topic",
@@ -628,6 +629,11 @@
     "locale": {
       "en": "english",
       "de": "german"
+    },
+    "topicActivation": {
+      "always": "always",
+      "after_previous_started": "after all previous tasks started",
+      "after_previous_finished": "after all previous tasks finished"
     }
   },
   "general": {

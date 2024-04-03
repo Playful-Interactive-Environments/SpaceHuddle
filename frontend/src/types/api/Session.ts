@@ -14,6 +14,7 @@ export interface Session {
   title: string;
   subject: string | null;
   theme: string | null;
+  topicActivation: string | null;
   topicCount: number;
   taskCount: number;
   allowAnonymous: boolean;

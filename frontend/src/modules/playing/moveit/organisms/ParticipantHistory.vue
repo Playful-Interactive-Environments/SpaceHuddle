@@ -249,10 +249,6 @@ export default class ParticipantHistory extends Vue {
     );
   }
 
-  mounted(): void {
-    console.log('mounted history');
-  }
-
   get hasVehicleHistory(): boolean {
     return (
       this.steps.filter(
