@@ -584,7 +584,8 @@ class SessionRepository implements RepositoryInterface
             "max_participants" => $data->maxParticipants ?? null,
             "expiration_date" => $data->expirationDate ?? null,
             "public_screen_module_id" => $data->publicScreenModuleId ?? null,
-            "allow_anonymous" => isset($data->allowAnonymous) ? $this->convertBoolToTinyInt($data->allowAnonymous) : null
+            "allow_anonymous" => isset($data->allowAnonymous) ? $this->convertBoolToTinyInt($data->allowAnonymous) : null,
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
 
         if (property_exists($data, "creationDate")) {
@@ -842,7 +843,9 @@ class SessionRepository implements RepositoryInterface
             "max_participants",
             "expiration_date",
             //"public_screen_module_id",
-            "allow_anonymous"
+            "allow_anonymous",
+            "parameter",
+            "topic_activation"
         ];
     }
 }

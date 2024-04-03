@@ -194,7 +194,8 @@ CREATE TABLE `session` (
                            `creation_date` date NOT NULL DEFAULT current_timestamp(),
                            `modification_date` datetime NOT NULL DEFAULT current_timestamp(),
                            `public_screen_module_id` char(36) DEFAULT NULL,
-                           `allow_anonymous` TINYINT(1) DEFAULT 0
+                           `allow_anonymous` TINYINT(1) DEFAULT 0,
+                           `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

@@ -116,6 +116,13 @@ class SessionData
     public bool $allowAnonymous;
 
     /**
+     * Variable json parameters depending on the task type.
+     * @var object|null
+     * @OA\Property(type="object", format="json")
+     */
+    public ?object $parameter;
+
+    /**
      * Creates a new Participant.
      * @param array $data Participant data.
      */
@@ -137,6 +144,10 @@ class SessionData
         $this->topicCount = $reader->findInt("topic_count") ?? 0;
         $this->taskCount = $reader->findInt("task_count") ?? 0;
         $this->allowAnonymous = $reader->findBool("allow_anonymous") ?? false;
+        $parameterString = $reader->findString("parameter");
+        if ($parameterString)
+            $this->parameter = (object)json_decode($parameterString);
+        else $this->parameter = (object)json_decode("{}");
 
         if (isset($this->role)) {
             $this->role = strtoupper($this->role);

@@ -886,7 +886,8 @@ class TopicRepository implements RepositoryInterface
             "title",
             "description",
             "order",
-            //"active_task_id"
+            //"active_task_id",
+            "state"
         ];
     }
 }
