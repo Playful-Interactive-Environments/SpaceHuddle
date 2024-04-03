@@ -266,6 +266,7 @@
           "taskType": "Task type",
           "input": "Input",
           "source": "source",
+          "sourceTopic": "source topic",
           "maxCount": "max count",
           "filter": "filter",
           "order": "order",

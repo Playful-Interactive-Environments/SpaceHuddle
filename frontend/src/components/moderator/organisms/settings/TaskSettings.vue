@@ -170,6 +170,7 @@
             </template>
             <table class="input-table">
               <colgroup>
+                <col v-if="topics && topics.length > 1" style="width: 8rem" />
                 <col />
                 <col style="width: 12rem" />
                 <col style="width: 12rem" />
@@ -178,6 +179,11 @@
               </colgroup>
               <thead>
                 <tr>
+                  <th v-if="topics && topics.length > 1">
+                    {{
+                      $t('moderator.organism.settings.taskSettings.sourceTopic')
+                    }}
+                  </th>
                   <TutorialStep
                     step="inputSource"
                     type="taskSettings"
@@ -229,6 +235,17 @@
               </thead>
               <tbody>
                 <tr v-for="input in formData.input" :key="input.view">
+                  <td v-if="topics && topics.length > 1">
+                    <el-select v-model="inputTopicId" class="select--fullwidth">
+                      <el-option
+                        v-for="topic in topics"
+                        :key="topic.id"
+                        :value="topic.id"
+                        :label="topic.title"
+                      >
+                      </el-option>
+                    </el-select>
+                  </td>
                   <td>
                     <el-select v-model="input.view" class="select--fullwidth">
                       <el-option
@@ -542,6 +559,8 @@ import * as cashService from '@/services/cash-service';
 import { reactivateTutorial } from '@/services/tutorial-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { until } from '@/utils/wait';
+import * as topicService from '@/services/topic-service';
+import { Topic } from '@/types/api/Topic';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -657,6 +676,9 @@ export default class TaskSettings extends Vue {
   //#region Variables
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
+  sessionId = '';
+  topics: Topic[] = [];
+  inputTopicId = '';
   componentLoadIndex = 0;
   usedModuleList: ModuleTaskProperty[] = [];
   userModuleList: ModuleTask[] = [];
@@ -706,18 +728,30 @@ export default class TaskSettings extends Vue {
   viewCash!: cashService.SimplifiedCashEntry<View[]>;
   @Watch('topicId', { immediate: true })
   onTopicIdChanged(): void {
+    this.inputTopicId = this.topicId;
+  }
+
+  @Watch('inputTopicId', { immediate: true })
+  onInputTopicIdChanged(): void {
     cashService.deregisterAllGet(this.updateViews);
     cashService.deregisterAllGet(this.updateTaskCount);
+    cashService.deregisterAllGet(this.updateTopic);
     this.viewCash = viewService.registerGetList(
-      this.topicId,
+      this.inputTopicId,
       this.updateViews,
       EndpointAuthorisationType.MODERATOR,
       60 * 60
     );
     this.sortOrderOptions = ideaService.getSortOrderOptions([]);
     this.taskListCash = taskService.registerGetTaskList(
-      this.topicId,
+      this.inputTopicId,
       this.updateTaskCount,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    topicService.registerGetTopicById(
+      this.inputTopicId,
+      this.updateTopic,
       EndpointAuthorisationType.MODERATOR,
       60 * 60
     );
@@ -752,6 +786,8 @@ export default class TaskSettings extends Vue {
     cashService.deregisterAllGet(this.updateModuleName);
     cashService.deregisterAllGet(this.updateInput);
     cashService.deregisterAllGet(this.updateViews);
+    cashService.deregisterAllGet(this.updateTopic);
+    cashService.deregisterAllGet(this.updateTopics);
   }
 
   unmounted(): void {
@@ -811,6 +847,21 @@ export default class TaskSettings extends Vue {
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTaskCount(tasks: Task[], topicId: string): void {
     this.taskCount = tasks.length;
+  }
+
+  updateTopic(topic: Topic): void {
+    this.sessionId = topic.sessionId;
+    cashService.deregisterAllGet(this.updateTopics);
+    topicService.registerGetTopicsList(
+      this.sessionId,
+      this.updateTopics,
+      EndpointAuthorisationType.MODERATOR,
+      2 * 60
+    );
+  }
+
+  updateTopics(topics: Topic[]): void {
+    this.topics = topics;
   }
 
   reset(): void {

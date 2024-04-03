@@ -266,6 +266,7 @@
           "taskType": "Aufgabentyp",
           "input": "Eingabe",
           "source": "Quelle",
+          "sourceTopic": "Thema Quelle",
           "maxCount": "maximale Anzahl",
           "filter": "Filter",
           "order": "Sortierung",

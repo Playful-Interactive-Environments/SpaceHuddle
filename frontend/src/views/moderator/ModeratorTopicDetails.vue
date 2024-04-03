@@ -411,8 +411,8 @@ import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStati
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
 import TopicDependencySettings from '@/components/moderator/organisms/settings/TopicDependencySettings.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
-import * as themeColors from "@/utils/themeColors";
-import TopicStates from "@/types/enum/TopicStates";
+import * as themeColors from '@/utils/themeColors';
+import TopicStates from '@/types/enum/TopicStates';
 
 @Options({
   components: {
