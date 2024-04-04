@@ -14,6 +14,42 @@ export interface TrackingData {
   tireWareRate: number;
 }
 
+export function averageSpeed(trackingData: TrackingData[]): number {
+  if (trackingData.length > 0) {
+    const sum = trackingData.reduce((a, b) => a + b.speed, 0);
+    return sum / trackingData.length;
+  }
+  return 0;
+}
+
+export function maxSpeed(trackingData: TrackingData[]): number {
+  if (trackingData.length > 0) {
+    return Math.max(...trackingData.map((item) => item.speed));
+  }
+  return 0;
+}
+
+export function consumption(trackingData: TrackingData[]): number {
+  if (trackingData.length > 0) {
+    return trackingData.reduce((a, b) => a + b.consumption, 0);
+  }
+  return 0;
+}
+
+export function distance(trackingData: TrackingData[]): number {
+  if (trackingData.length > 0) {
+    return trackingData.reduce((a, b) => a + b.distance, 0);
+  }
+  return 0;
+}
+
+export function persons(trackingData: TrackingData[]): number {
+  if (trackingData.length > 0) {
+    return Math.max(...trackingData.map((item) => item.persons));
+  }
+  return 0;
+}
+
 export function trackingDataToChartData(
   trackingData: TrackingData[],
   chartData: ChartData,

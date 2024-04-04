@@ -358,10 +358,31 @@
       <h2 class="heading heading--regular">
         {{ $t('module.playing.moveit.participant.drivingStats.avgSpeed') }} :
         {{ Math.round(calculateSpeed('average')) }}
+        {{ $t('module.playing.moveit.enums.units.km/h') }}
       </h2>
       <h2 class="heading heading--regular">
         {{ $t('module.playing.moveit.participant.drivingStats.maxSpeed') }} :
         {{ Math.round(calculateSpeed('max')) }}
+        {{ $t('module.playing.moveit.enums.units.km/h') }}
+      </h2>
+      <h2 class="heading heading--regular">
+        {{ $t('module.playing.moveit.participant.drivingStats.consumption') }} :
+        {{ Math.round(calculateSpeed('consumption') * 1000) / 1000 }}
+        <span v-if="activeVehicle.fuel === 'electricity'">
+          {{ $t('module.playing.moveit.enums.units.kw') }}
+        </span>
+        <span v-else>
+          {{ $t('module.playing.moveit.enums.units.liters') }}
+        </span>
+      </h2>
+      <h2 class="heading heading--regular">
+        {{ $t('module.playing.moveit.participant.drivingStats.distance') }} :
+        {{ Math.round(calculateSpeed('distance') * 100) / 100 }}
+        {{ $t('module.playing.moveit.enums.units.km') }}
+      </h2>
+      <h2 class="heading heading--regular">
+        {{ $t('module.playing.moveit.participant.drivingStats.persons') }} :
+        {{ Math.round(calculateSpeed('persons')) }}
       </h2>
       <h2 class="heading heading--regular">
         {{ $t('module.playing.moveit.participant.drivingStats.time') }} :
@@ -418,6 +439,11 @@ import {
   TrackingData,
   normalizedTrackingData,
   trackingDataToChartData,
+  averageSpeed,
+  maxSpeed,
+  consumption,
+  distance,
+  persons,
 } from '@/modules/playing/moveit/utils/trackingData';
 
 mapStyle.setMapStyleStreets();
@@ -625,6 +651,12 @@ export default class DriveToLocation extends Vue {
     return (
       this.navigation !== NavigationType.speed &&
       this.navigation !== NavigationType.acceleration
+    );
+  }
+
+  get activeVehicle(): any {
+    return gameConfig.vehicles[this.vehicle.category].types.find(
+      (item) => item.name === this.vehicle.type
     );
   }
 
@@ -2079,19 +2111,17 @@ export default class DriveToLocation extends Vue {
   }
   //#endregion animation
   calculateSpeed(type: string): number {
-    const speedList = this.trackingData.map((item) => item.speed);
-    if (type === 'max') {
-      const speedListSorted = speedList.sort((a, b) => b - a);
-      if (speedList.length > 0) {
-        return speedListSorted[0];
-      }
-    }
-    if (type === 'average') {
-      if (speedList.length > 0) {
-        return (
-          speedList.reduce((prev, curr) => prev + curr, 0) / speedList.length
-        );
-      }
+    switch (type) {
+      case 'max':
+        return maxSpeed(this.trackingData);
+      case 'average':
+        return averageSpeed(this.trackingData);
+      case 'consumption':
+        return consumption(this.trackingData);
+      case 'distance':
+        return distance(this.trackingData);
+      case 'persons':
+        return persons(this.trackingData);
     }
     return 0;
   }

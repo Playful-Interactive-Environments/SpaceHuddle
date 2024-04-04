@@ -27,6 +27,14 @@
       <el-button
         type="primary"
         size="large"
+        v-on:click="showHighScore = true"
+        class="level-item"
+      >
+        <font-awesome-icon icon="trophy" />
+      </el-button>
+      <el-button
+        type="primary"
+        size="large"
         @click="showInfo = true"
         class="level-item"
       >
@@ -121,10 +129,10 @@
           {{ $t('module.playing.moveit.participant.vehicle-parameter.mpg') }}:
           {{ activeVehicle.vehicle.mpg }}
           <span v-if="activeVehicle.vehicle.fuel === 'electricity'">
-            {{ $t('module.playing.moveit.enums.units.kw') }}
+            {{ $t('module.playing.moveit.enums.units.kw/100') }}
           </span>
           <span v-else>
-            {{ $t('module.playing.moveit.enums.units.liters') }}
+            {{ $t('module.playing.moveit.enums.units.liters/100') }}
           </span>
         </div>
         <div v-if="activeVehicle.vehicle.power">
@@ -308,6 +316,105 @@
   >
     <ParticipantHistory :task-id="taskId" :vehicle="activeVehicle" />
   </DrawerBottomOverlay>
+  <DrawerBottomOverlay v-model="showHighScore" class="highscore">
+    <template v-slot:header>
+      {{ $t('module.playing.moveit.participant.highScore.header') }}
+    </template>
+    <el-collapse v-model="openHighScoreCategories">
+      <el-collapse-item
+        v-for="(categoryData, category) of highScoreList"
+        :key="category"
+        :title="$t(`module.playing.moveit.enums.vehicles.${category}.category`)"
+        :name="category"
+      >
+        <el-collapse-item
+          v-for="(vehicleData, vehicle) of categoryData"
+          :key="vehicle"
+          :title="
+            $t(`module.playing.moveit.enums.vehicles.${category}.${vehicle}`)
+          "
+          :name="vehicle"
+        >
+          <table class="highscore-table">
+            <tr>
+              <th />
+              <th>
+                {{
+                  $t('module.playing.moveit.participant.drivingStats.collected')
+                }}
+              </th>
+              <th>
+                {{
+                  $t('module.playing.moveit.participant.drivingStats.avgSpeed')
+                }}
+              </th>
+              <th>
+                {{
+                  $t('module.playing.moveit.participant.drivingStats.maxSpeed')
+                }}
+              </th>
+              <th>
+                {{
+                  $t(
+                    'module.playing.moveit.participant.drivingStats.consumption'
+                  )
+                }}
+              </th>
+              <th>
+                {{
+                  $t('module.playing.moveit.participant.drivingStats.persons')
+                }}
+              </th>
+            </tr>
+            <tr v-for="entry of vehicleData" :key="entry.avatar.symbol">
+              <td>
+                <font-awesome-icon
+                  :icon="entry.avatar.symbol"
+                  :style="{ color: entry.avatar.color }"
+                ></font-awesome-icon>
+              </td>
+              <td>
+                {{ entry.value.collectedCount }} / {{ entry.value.totalCount }}
+              </td>
+              <td>
+                {{ Math.round(entry.value.averageSpeed) }}
+                {{ $t('module.playing.moveit.enums.units.km/h') }}
+              </td>
+              <td>
+                {{ Math.round(entry.value.maxSpeed) }}
+                {{ $t('module.playing.moveit.enums.units.km/h') }}
+              </td>
+              <td>
+                {{ Math.round(entry.value.consumption * 1000) / 1000 }}
+                <span v-if="isElectric(category, vehicle)">
+                  {{ $t('module.playing.moveit.enums.units.kw') }}
+                </span>
+                <span v-else>
+                  {{ $t('module.playing.moveit.enums.units.liters') }}
+                </span>
+              </td>
+              <td>
+                {{ Math.round(entry.value.persons) }}
+              </td>
+              <td>
+                <el-rate
+                  v-model="entry.value.rate"
+                  size="large"
+                  :max="3"
+                  :disabled="true"
+                />
+              </td>
+            </tr>
+          </table>
+        </el-collapse-item>
+      </el-collapse-item>
+    </el-collapse>
+    <template v-slot:footer>
+      <el-button type="primary" @click="showHighScore = false">
+        {{ $t('module.playing.moveit.participant.confirm') }}
+      </el-button>
+    </template>
+  </DrawerBottomOverlay>
   <el-dialog v-model="showPlayDialog">
     <template #header>
       <h1 v-if="selectedVehicle">
@@ -399,6 +506,10 @@ import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { delay } from '@/utils/wait';
 import { remToPx } from '@/modules/playing/moveit/utils/consts';
 import ParticipantHistory from '@/modules/playing/moveit/organisms/ParticipantHistory.vue';
+import { VoteParameterResult } from '@/types/api/Vote';
+import * as cashService from '@/services/cash-service';
+import * as votingService from '@/services/voting-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export enum NavigationType {
@@ -429,6 +540,20 @@ interface VehicleData {
   animation: PIXI.Texture[];
 }
 
+interface HighscoreData {
+  [key: string]: {
+    [key: string]: {
+      avatar: { color: string; symbol: string };
+      value: {
+        percentage: number;
+        rate: number;
+        totalCount: number;
+        collectedCount: number;
+      };
+    }[];
+  };
+}
+
 @Options({
   components: {
     ParticipantHistory,
@@ -443,6 +568,7 @@ interface VehicleData {
 export default class SelectChallenge extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly trackingManager!: TrackingManager;
+  @Prop({ default: true }) readonly openHighScore!: boolean;
   chartDataElectricityMix: ChartData = {
     labels: [],
     datasets: [],
@@ -474,6 +600,10 @@ export default class SelectChallenge extends Vue {
   movingType = MovingType.path;
   MovingType = MovingType;
   textureToken = pixiUtil.createLoadingToken();
+  showHighScore = false;
+  highScoreList: HighscoreData = {};
+  openHighScoreCategories: string[] = [];
+  openHighScoreVehicles: string[] = [];
 
   get activeVehicle(): VehicleData | null {
     if (this.vehicleList.length > this.activeVehicleIndex)
@@ -538,6 +668,14 @@ export default class SelectChallenge extends Vue {
       this.navigationType !== NavigationType.speed &&
       this.navigationType !== NavigationType.acceleration
     );
+  }
+
+  isElectric(category: string, type: string): boolean {
+    const vehicle = gameConfig.vehicles[category].types.find(
+      (item) => item.name === type
+    );
+    if (vehicle) return vehicle.fuel === 'electricity';
+    return false;
   }
 
   getStarsForVehicle(vehicle: vehicleCalculation.Vehicle): number {
@@ -613,6 +751,7 @@ export default class SelectChallenge extends Vue {
   ready = false;
   domKeys: string[] = [];
   mounted(): void {
+    this.showHighScore = this.openHighScore;
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/vehicle/vehicle_animation.json',
@@ -752,6 +891,14 @@ export default class SelectChallenge extends Vue {
     setTimeout(() => {
       this.updateChart();
     }, 1000);
+
+    votingService.registerGetParameterResult(
+      this.taskId,
+      '-',
+      this.updateHighScore,
+      EndpointAuthorisationType.PARTICIPANT,
+      5 * 60
+    );
   }
 
   unmounted(): void {
@@ -759,6 +906,37 @@ export default class SelectChallenge extends Vue {
     for (const key of this.domKeys) {
       unregisterDomElement(key);
     }
+    cashService.deregisterAllGet(this.updateHighScore);
+  }
+
+  updateHighScore(list: VoteParameterResult[]): void {
+    const data: HighscoreData = {};
+    for (const level of list) {
+      if (level.details) {
+        for (const detail of level.details) {
+          if (!data[detail.value.vehicle.category])
+            data[detail.value.vehicle.category] = {};
+          if (!data[detail.value.vehicle.category][detail.value.vehicle.type])
+            data[detail.value.vehicle.category][detail.value.vehicle.type] = [];
+          data[detail.value.vehicle.category][detail.value.vehicle.type].push({
+            avatar: detail.avatar,
+            value: detail.value,
+          });
+        }
+      }
+    }
+    for (const category of Object.keys(data)) {
+      if (Object.keys(this.highScoreList).length === 0)
+        this.openHighScoreCategories.push(category);
+      for (const vehicle of Object.keys(data[category])) {
+        if (Object.keys(this.highScoreList).length === 0)
+          this.openHighScoreCategories.push(vehicle);
+        data[category][vehicle].sort(
+          (a, b) => b.value.percentage - a.value.percentage
+        );
+      }
+    }
+    this.highScoreList = data;
   }
 
   activeVehicleChanged(index: number): void {
@@ -998,5 +1176,23 @@ export default class SelectChallenge extends Vue {
 
 .el-radio-button > .el-radio-button__inner {
   padding-top: 1rem;
+}
+
+.highscore-table {
+  color: var(--color-playing);
+  width: 100%;
+
+  /*td {
+    width: 33%;
+  }*/
+}
+
+.highscore::v-deep(.footer) {
+  text-align: center;
+  background-color: unset;
+}
+
+.highscore {
+  --footer-height: 4rem;
 }
 </style>

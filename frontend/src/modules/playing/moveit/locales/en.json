@@ -19,10 +19,15 @@
     "electricity": "electricity ratio in %",
     "earned": "earned",
     "history": "statistics",
+    "confirm": "Continue",
     "historyEmpty": "This vehicle has not yet been driven",
     "drivingStats": {
       "maxSpeed": "Maximum speed",
       "avgSpeed": "Average speed",
+      "consumption": "consumption",
+      "distance": "travel distance",
+      "persons": "persons",
+      "collected": "collected",
       "time": "Time driven",
       "goal": "Goal reached!"
     },
@@ -137,6 +142,9 @@
         "description": "Determine your own path. "
       }
     },
+    "highScore": {
+      "header": "highscore"
+    },
     "tutorial": {
       "select": "Traffic accounts for 30% of greenhouse emissions. Try to figure out what impact different types of vehicles have.",
       "statistics": "The statistic shows you how many greenhouse gases are produced per kWh of fuel.\nWhile this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
@@ -170,6 +178,7 @@
     },
     "vehicles": {
       "car": {
+        "category": "car",
         "sport": "sports car",
         "suv": "SUV",
         "e-suv": "E-SUV",
@@ -177,18 +186,22 @@
         "e-car": "E-car"
       },
       "bike": {
+        "category": "bike",
         "e-bike": "E Bike",
         "city": "city bike"
       },
       "motorcycle": {
+        "category": "motorcycle",
         "moped": "moped",
         "e-moped": "E-moped",
         "motorcycle": "motorcycle"
       },
       "scooter":  {
+        "category": "scooter",
         "e-scooter": "e-scooter"
       },
       "bus": {
+        "category": "bus",
         "bus": "bus",
         "e-bus": "E-bus"
       }
@@ -203,9 +216,12 @@
     "units": {
       "ps": "ps",
       "km/h": "km/h",
-      "liters": "liters per 100 km",
+      "km": "km",
+      "liters/100": "liters per 100 km",
+      "liters": "liters",
       "seconds": "m/s per second",
-      "kw": "kWh per 100 km"
+      "kw/100": "kWh per 100 km",
+      "kw": "kWh"
     }
   },
   "statistic": {

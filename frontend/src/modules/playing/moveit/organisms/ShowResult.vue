@@ -248,6 +248,11 @@
             {{ particleStateSum.totalCount }}
             {{ $t(`module.playing.moveit.participant.result.collected`) }}
           </div>
+          <div class="continue">
+            <el-button type="primary" @click="$emit('finished')">
+              {{ $t('module.playing.moveit.participant.confirm') }}
+            </el-button>
+          </div>
         </el-carousel-item>
         <el-carousel-item
           class="infoGraphic"
@@ -740,6 +745,11 @@ h1 {
   padding-top: 5rem;
   font-size: 3rem;
   font-width: var(--font-weight-bold);
+  text-align: center;
+}
+
+.continue {
+  padding-top: 1rem;
   text-align: center;
 }
 

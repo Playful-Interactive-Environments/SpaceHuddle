@@ -13,6 +13,7 @@
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       :tracking-manager="trackingManager"
       :task-id="taskId"
+      :open-high-score="levelDone"
       @play="startGame"
     />
     <drive-to-location
@@ -42,6 +43,7 @@
       :trackingData="trackingData"
       :tracking-manager="trackingManager"
       :vehicle="vehicle"
+      @finished="resultFinished"
     />
     <el-button
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
@@ -56,7 +58,13 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import DriveToLocation from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
-import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
+import {
+  averageSpeed,
+  consumption,
+  maxSpeed,
+  persons,
+  TrackingData,
+} from '@/modules/playing/moveit/utils/trackingData';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
@@ -72,8 +80,6 @@ import ShowResult from '@/modules/playing/moveit/organisms/ShowResult.vue';
 import ModuleInfo, {
   ModuleInfoEntryData,
 } from '@/components/participant/molecules/ModuleInfo.vue';
-import * as formulas from '@/modules/playing/moveit/utils/formulas';
-import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { MissionProgress } from '@/modules/brainstorming/missionmap/types/MissionProgress';
 import * as taskService from '@/services/task-service';
@@ -85,6 +91,8 @@ import * as turf from '@turf/turf';
 import * as particleStateUtil from '@/modules/playing/moveit/utils/particleState';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
+import * as votingService from '@/services/voting-service';
+import { Vote } from '@/types/api/Vote';
 
 enum GameStep {
   Select = 'select',
@@ -152,6 +160,8 @@ export default class Participant extends Vue {
   inputTaskId = '';
   navigationType: NavigationType = NavigationType.joystick;
   movingType: MovingType = MovingType.free;
+  levelDone = false;
+  myHighScoreList: Vote[] = [];
 
   trackingData: TrackingData[] = [];
   gameStep = GameStep.Select;
@@ -210,6 +220,10 @@ export default class Participant extends Vue {
 
   domKey = '';
   mounted(): void {
+    /*
+    import * as formulas from '@/modules/playing/moveit/utils/formulas';
+    import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
+
     const testData = [
       { speed: 50, persons: 1, distance: 0.02 },
       { speed: 100, persons: 1, distance: 0.04 },
@@ -248,7 +262,7 @@ export default class Participant extends Vue {
           vehicleParameter
         ),
       });
-    }
+    }*/
 
     this.domKey = registerDomElement(
       this.$refs.gameContainer as HTMLElement,
@@ -257,11 +271,19 @@ export default class Participant extends Vue {
       },
       500
     );
+
+    votingService.registerGetVotes(
+      this.taskId,
+      this.updateHighScore,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateHighScore);
     if (this.trackingManager) this.trackingManager.deregisterAll();
     if (this.missionProgress) this.missionProgress.deregisterAll();
   }
@@ -269,6 +291,61 @@ export default class Participant extends Vue {
   unmounted(): void {
     this.deregisterAll();
     unregisterDomElement(this.domKey);
+  }
+
+  reset(): void {
+    if (this.trackingManager) this.trackingManager.deregisterAll();
+    this.trackingManager = new TrackingManager(this.taskId, {
+      gameStep: GameStep.Select,
+      vehicle: this.vehicle,
+      drive: {
+        stops: 0,
+        persons: 1,
+        routePath: null,
+        routePathLength: 0,
+        drivenPath: null,
+        drivenPathLength: 0,
+        trackingData: [],
+      },
+      particleState: {},
+      rate: 0,
+    });
+    this.particleState = {
+      carbonDioxide: {
+        totalCount: 18,
+        collectedCount: 15,
+        timelineOutside: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
+      dust: {
+        totalCount: 10,
+        collectedCount: 9,
+        timelineOutside: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
+      methane: {
+        totalCount: 12,
+        collectedCount: 9,
+        timelineOutside: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
+      microplastic: {
+        totalCount: 5,
+        collectedCount: 1,
+        timelineOutside: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
+    };
+    this.startTime = Date.now();
+    this.stepTime = Date.now();
+    this.trackingData = [];
+
+    this.gameStep = GameStep.Select;
+    this.gameState = GameState.Info;
   }
 
   @Watch('taskId', { immediate: true })
@@ -330,6 +407,10 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+  }
+
+  updateHighScore(votes: Vote[]): void {
+    this.myHighScoreList = votes;
   }
 
   async startGame(
@@ -395,6 +476,9 @@ export default class Participant extends Vue {
           drivenPath: drivenPath,
           drivenPathLength: turf.length(drivenPath),
           trackingData: trackingData,
+          averageSpeed: averageSpeed(trackingData),
+          maxSpeed: maxSpeed(trackingData),
+          consumption: consumption(trackingData),
         },
         driveTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
@@ -454,6 +538,66 @@ export default class Participant extends Vue {
       } else this.trackingManager.setFinishedState(this.module);
     }
     this.stepTime = Date.now();
+    this.saveHighScore();
+  }
+
+  saveHighScore(): void {
+    const particleStateSum = particleStateUtil.particleStateSum(
+      this.particleState
+    );
+    const successStatus = particleStateUtil.successStatus(this.particleState);
+    const successRate = particleStateUtil.successRate(this.particleState);
+    const averageSpeedValue = averageSpeed(this.trackingData);
+    const maxSpeedValue = maxSpeed(this.trackingData);
+    const highScore = this.myHighScoreList.find(
+      (item) =>
+        item.parameter.vehicle.type === this.vehicle.type &&
+        item.parameter.vehicle.category === this.vehicle.category
+    );
+    if (highScore) {
+      if (highScore.parameter.percentage <= successStatus) {
+        highScore.detailRating = successStatus;
+        highScore.parameter.percentage = successStatus;
+        highScore.rating = successRate;
+        highScore.parameter.rate = successRate;
+        if (
+          highScore.parameter.percentage < successStatus ||
+          highScore.parameter.averageSpeed > averageSpeedValue
+        ) {
+          highScore.parameter.totalCount = particleStateSum.totalCount;
+          highScore.parameter.collectedCount = particleStateSum.collectedCount;
+          highScore.parameter.averageSpeed = averageSpeedValue;
+          highScore.parameter.maxSpeed = maxSpeedValue;
+          highScore.parameter.consumption = consumption(this.trackingData);
+          highScore.parameter.persons = persons(this.trackingData);
+        }
+        votingService.putVote(highScore);
+      }
+    } else {
+      const parameter: any = {
+        vehicle: this.vehicle,
+        percentage: successStatus,
+        rate: successRate,
+        totalCount: particleStateSum.totalCount,
+        collectedCount: particleStateSum.collectedCount,
+        averageSpeed: averageSpeedValue,
+        maxSpeed: maxSpeedValue,
+        consumption: consumption(this.trackingData),
+        persons: persons(this.trackingData),
+      };
+      votingService
+        .postVote(this.taskId, {
+          rating: successRate,
+          detailRating: successStatus,
+          parameter: parameter,
+        })
+        .then((vote) => this.myHighScoreList.push(vote));
+    }
+  }
+
+  resultFinished(): void {
+    this.reset();
+    this.levelDone = true;
   }
 }
 </script>

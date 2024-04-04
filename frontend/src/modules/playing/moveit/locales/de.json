@@ -19,10 +19,15 @@
     "electricity": "Stromanteil in %",
     "earned": "verdient",
     "history": "Statistik",
+    "confirm": "Weiter",
     "historyEmpty": "Dieses Fahrzeug wurde noch nicht gefahren",
     "drivingStats": {
       "maxSpeed": "Höchstgeschwindigkeit",
       "avgSpeed": "Durchschnittsgeschwindigkeit",
+      "consumption": "Verbrauch",
+      "distance": "Fahrstreckenlänge",
+      "persons": "Personen",
+      "collected": "eingesammelt",
       "time": "Gefahrene Zeit",
       "goal": "Ziel erreicht!"
     },
@@ -137,6 +142,9 @@
         "description": "Bestimme deinen eigenen Pfad. "
       }
     },
+    "highScore": {
+      "header": "Highscore"
+    },
     "tutorial": {
       "select": "Der Verkehr ist für 30% der Treibhausgasemissionen verantwortlich.\nVersuche herauszufinden, welche Auswirkungen verschiedene Fahrzeugtypen haben.",
       "statistics": "Das Diagramm oben zeigt, wie viele Treibhausgase in einer kWh Kraftstoff stecken.\nFür Treibstoffe wie Diesel und Benzin ist das konstant. Bei Elektroautos allerdings hängt es vom Strommix ab. Unter Strommix versteht man, aus welchen Quellen (z.B. Wasserkraft, Windenergie oder Erdgas) sich der Strom zusammensetzt.",
@@ -170,6 +178,7 @@
     },
     "vehicles": {
       "car": {
+        "category": "Auto",
         "sport": "Sportwagen",
         "suv": "SUV",
         "e-suv": "E-SUV",
@@ -177,18 +186,22 @@
         "e-car": "E-Auto"
       },
       "bike": {
+        "category": "Fahrrad",
         "e-bike": "E Bike",
         "city": "Citybike"
       },
       "motorcycle": {
+        "category": "Motorrad",
         "moped": "Moped",
         "e-moped": "Elektroroller",
         "motorcycle": "Motorrad"
       },
       "scooter":  {
+        "category": "Scooter",
         "e-scooter": "E-Scooter"
       },
       "bus": {
+        "category": "Bus",
         "bus": "Bus",
         "e-bus": "Elektrobus"
       }
@@ -203,9 +216,12 @@
     "units": {
       "ps": "PS",
       "km/h": "km/h",
-      "liters": "Liter pro 100 km",
+      "km": "km",
+      "liters/100": "Liter pro 100 km",
+      "liters": "Liter",
       "seconds": "m/s pro Sekunde",
-      "kw": "kWh pro 100 km"
+      "kw/100": "kWh pro 100 km",
+      "kw": "kWh"
     }
   },
   "statistic": {
