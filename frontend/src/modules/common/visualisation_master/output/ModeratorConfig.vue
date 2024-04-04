@@ -81,7 +81,7 @@ export default class ModeratorConfig extends Vue {
   }
 
   mounted() {
-    if (this.modelValue.visModule.id) {
+    if (this.modelValue.visModule) {
       this.selectedVisModule = this.modelValue.visModule.id;
     } else {
       this.selectedVisModule = null;
