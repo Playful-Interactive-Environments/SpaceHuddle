@@ -311,7 +311,7 @@ CREATE TABLE `vote` (
                         `id` char(36) NOT NULL,
                         `task_id` char(36) NOT NULL,
                         `participant_id` char(36) DEFAULT NULL,
-                        `idea_id` char(36) NOT NULL,
+                        `idea_id` char(36) DEFAULT NULL,
                         `rating` int(11) NOT NULL,
                         `detail_rating` float DEFAULT NULL,
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,

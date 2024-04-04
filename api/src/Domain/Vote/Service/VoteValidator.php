@@ -39,9 +39,9 @@ class VoteValidator
 
         return $validator
             ->notEmptyString("id", "Empty: This field cannot be left empty")
-            ->requirePresence("id", "update", "Required: This field is required")
-            ->notEmptyString("ideaId", "Empty: This field cannot be left empty")
-            ->requirePresence("ideaId", "create", "Required: This field is required");
+            ->requirePresence("id", "update", "Required: This field is required");
+            //->notEmptyString("ideaId", "Empty: This field cannot be left empty")
+            //->requirePresence("ideaId", "create", "Required: This field is required");
     }
 
     /**
@@ -59,19 +59,19 @@ class VoteValidator
             $this->validationFactory->createValidator()
                 ->notEmptyString("id", "Empty: This field cannot be left empty")
                 ->requirePresence("id", "update", "Required: This field is required")
-                ->notEmptyString("ideaId", "Empty: This field cannot be left empty")
-                ->requirePresence("ideaId", message: "Required: This field is required")
+                //->notEmptyString("ideaId", "Empty: This field cannot be left empty")
+                //->requirePresence("ideaId", message: "Required: This field is required")
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
                 ->requirePresence("taskId", message: "Required: This field is required")
         );
 
         $taskId = $data["taskId"];
-        $ideaId = $data["ideaId"];
+        $ideaId = array_key_exists("ideaId", $data) ? $data["ideaId"]  : null;
 
         $this->validateTaskType($taskId);
         $this->validateTaskState($taskId);
 
-        if (!$this->repository->ideaAgreeWithTask($taskId, $ideaId)) {
+        if ($ideaId && !$this->repository->ideaAgreeWithTask($taskId, $ideaId)) {
             $result = new ValidationResult();
             $result->addError(
                 "ideaId",
@@ -80,7 +80,7 @@ class VoteValidator
             throw new ValidationException("Please check your input", $result);
         }
 
-        if (!isset($data["id"])) {
+        if ($ideaId && !isset($data["id"])) {
             $this->votingExists($taskId, $ideaId);
         }
     }
