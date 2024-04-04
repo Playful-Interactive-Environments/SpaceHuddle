@@ -434,6 +434,7 @@
                 :is="component.value.componentName"
                 :key="component.value.componentName"
                 :rulePropPath="`moduleParameterComponents[${component.index}].parameter`"
+                :taskType="this.taskType"
                 @update="updateSyncPublicParticipant"
               ></component>
             </el-collapse-item>

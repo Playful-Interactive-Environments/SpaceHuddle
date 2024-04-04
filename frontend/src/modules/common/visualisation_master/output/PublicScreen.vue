@@ -40,6 +40,7 @@ export default class PublicScreen extends Vue {
   ideas: Idea[] = [];
   galleryIndex = 0;
 
+  taskType: null | string = null;
   currentVisModule: null | string = null;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {

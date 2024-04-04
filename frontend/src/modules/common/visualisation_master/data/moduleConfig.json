@@ -3,12 +3,20 @@
     "gallery": {
       "id": "gallery",
       "image": "gallery/path",
-      "icon": "image"
+      "icon": "image",
+      "type": "IDEA"
     },
     "cardShuffle": {
       "id": "cardShuffle",
       "image": "cardShuffle/path",
-      "icon": "layer-group"
+      "icon": "layer-group",
+      "type": "IDEA"
+    },
+    "voting": {
+      "id": "voting",
+      "image": "cardShuffle/path",
+      "icon": "layer-group",
+      "type": "VOTING"
     }
   }
 }

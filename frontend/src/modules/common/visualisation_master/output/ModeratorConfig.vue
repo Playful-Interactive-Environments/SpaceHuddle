@@ -2,7 +2,7 @@
   <div class="visModules">
     <el-card
       class="visModule"
-      v-for="visModule in moduleConfig.visModules"
+      v-for="visModule in getVisModulesForTaskType()"
       :key="visModule"
       @click="changeSelection(visModule)"
       :class="{
@@ -16,7 +16,7 @@
         {{
           $t(
             'module.common.visualisation_master.visModules.' +
-              getVisModuleID(visModule) +
+              visModule.id +
               '.description.title'
           )
         }}
@@ -28,7 +28,7 @@
         {{
           $t(
             'module.common.visualisation_master.visModules.' +
-              getVisModuleID(visModule) +
+              visModule.id +
               '.description.description'
           )
         }}
@@ -65,6 +65,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   @Prop({ default: {} }) formData!: any;
+  @Prop({ default: {} }) taskType!: any;
 
   moduleConfig = moduleConfig;
   selectedVisModule: null | string = null;
@@ -87,13 +88,11 @@ export default class ModeratorConfig extends Vue {
     }
   }
 
-  getVisModuleID(visModule: string) {
-    for (const module in this.moduleConfig.visModules) {
-      if (this.moduleConfig.visModules[module] === visModule) {
-        return this.moduleConfig.visModules[module].id;
-      }
-    }
-    return null;
+  getVisModulesForTaskType() {
+    const taskType = this.taskType !== 'VOTING' ? 'IDEA' : 'VOTING';
+    return Object.values(this.moduleConfig.visModules).filter(
+      (module) => module.type === taskType
+    );
   }
 }
 </script>
