@@ -199,6 +199,7 @@ export default class SessionSettings extends Vue {
   sessionCash!: cashService.SimplifiedCashEntry<Session>;
   subjectCash!: cashService.SimplifiedCashEntry<string[]>;
   hasAutoKey = true;
+  session: Session | null = null;
 
   formData: ValidationData = {
     title: '',
@@ -248,6 +249,7 @@ export default class SessionSettings extends Vue {
   }
 
   updateSession(session: Session): void {
+    this.session = session;
     this.formData.title = session.title;
     this.formData.description = session.description;
     this.subjectCash.refreshData();
@@ -255,6 +257,7 @@ export default class SessionSettings extends Vue {
     this.formData.theme = session.theme ?? '';
     this.formData.topicActivation = session.topicActivation ?? '';
     this.formData.startingPoints = session.parameter?.startingPoints ?? 0;
+    this.formData.connectionKey = session.connectionKey;
     this.formData.expirationDate = new Date(session.expirationDate);
   }
 
@@ -289,18 +292,30 @@ export default class SessionSettings extends Vue {
   }
 
   reset(): void {
-    this.hasAutoKey = true;
-    this.formData.title = '';
-    this.formData.description = '';
-    this.formData.subject = null;
-    this.formData.theme = null;
-    this.formData.topicActivation = TopicActivation.ALWAYS;
-    this.formData.startingPoints = 0;
-    this.formData.connectionKey = null;
-    this.formData.expirationDate = new Date(
-      this.today.setMonth(this.today.getMonth() + 1)
-    );
-    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
+    if (!this.sessionId) {
+      this.hasAutoKey = true;
+      this.formData.title = '';
+      this.formData.description = '';
+      this.formData.subject = null;
+      this.formData.theme = null;
+      this.formData.topicActivation = TopicActivation.ALWAYS;
+      this.formData.startingPoints = 0;
+      this.formData.connectionKey = null;
+      this.formData.expirationDate = new Date(
+        this.today.setMonth(this.today.getMonth() + 1)
+      );
+      this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
+    } else if (this.session) {
+      this.formData.title = this.session.title;
+      this.formData.description = this.session.description;
+      this.formData.subject = this.session.subject;
+      this.formData.theme = this.session.theme ?? '';
+      this.formData.topicActivation = this.session.topicActivation ?? '';
+      this.formData.startingPoints =
+        this.session.parameter?.startingPoints ?? 0;
+      this.formData.connectionKey = this.session.connectionKey;
+      this.formData.expirationDate = new Date(this.session.expirationDate);
+    }
   }
 
   get isoExpirationDate(): string {

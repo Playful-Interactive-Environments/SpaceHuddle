@@ -318,7 +318,7 @@
         },
         "topicSettings": {
           "header": "Create Topic",
-          "editTopic": "Edit Topic",
+          "headerEdit": "Edit Topic",
           "info": "Topics structure your session.",
           "title": "Title",
           "titleExample": "e.g. What is your favourite ...",

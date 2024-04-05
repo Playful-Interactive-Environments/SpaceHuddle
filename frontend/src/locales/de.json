@@ -318,7 +318,7 @@
         },
         "topicSettings": {
           "header": "Thema erstellen",
-          "editTopic": "Thema bearbeiten",
+          "headerEdit": "Thema bearbeiten",
           "info": "Themen strukturieren deine Sitzung.",
           "title": "Titel",
           "titleExample": "z.B. Was ist dein bevorzugter ...",

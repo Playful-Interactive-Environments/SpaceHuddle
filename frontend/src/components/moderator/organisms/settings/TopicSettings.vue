@@ -7,9 +7,13 @@
   >
     <el-dialog v-model="showDialog" :before-close="handleClose">
       <template #header>
-        <span class="el-dialog__title">{{
-          $t('moderator.organism.settings.topicSettings.header')
-        }}</span>
+        <span class="el-dialog__title">
+          {{
+            topicId
+              ? $t('moderator.organism.settings.topicSettings.headerEdit')
+              : $t('moderator.organism.settings.topicSettings.header')
+          }}
+        </span>
         <br />
         <br />
         <p>
@@ -144,11 +148,16 @@ export default class TopicSettings extends Vue {
   }
 
   reset(): void {
-    this.formData.title = '';
-    this.formData.description = '';
-    this.topic = null;
-    this.$emit('update:topicId', null);
-    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
+    if (!this.topicId) {
+      this.formData.title = '';
+      this.formData.description = '';
+      this.topic = null;
+      this.$emit('update:topicId', null);
+      this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
+    } else if (this.topic) {
+      this.formData.title = this.topic.title;
+      this.formData.description = this.topic.description;
+    }
   }
 
   isSaving = false;
@@ -175,13 +184,15 @@ export default class TopicSettings extends Vue {
             }
           );
       }
-    } else {
+    } else if (this.topic) {
+      this.topic.title = this.formData.title;
+      this.topic.description = this.formData.description;
       await topicService
         .putTopic({
           id: this.topicId,
           title: this.formData.title,
           description: this.formData.description,
-          order: this.topic?.order,
+          order: this.topic.order,
         })
         .then(
           (topic) => {
