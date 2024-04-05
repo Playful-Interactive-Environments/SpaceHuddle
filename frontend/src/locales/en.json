@@ -308,12 +308,12 @@
           "topicsInfo": "Topics help to make a clear distinction between subjects that should have separate brainstorming modules. Tip: Keep it simple - one or two topics are usually enough!",
           "firstTopic": "Topic 1",
           "topicExample": "e.g. New app Name",
-          "theme": "theme",
+          "theme": "participant view",
           "default": "default",
           "calendar": "calendar",
           "submit": "Save session",
           "customKey": "Automatic key generation",
-          "topicActivation": "topic activation",
+          "topicActivation": "topic visibility",
           "startingPoints": "starting points"
         },
         "topicSettings": {
@@ -633,7 +633,7 @@
       "de": "german"
     },
     "topicActivation": {
-      "always": "always",
+      "always": "default",
       "after_previous_started": "after all previous tasks started",
       "after_previous_finished": "after all previous tasks finished"
     }

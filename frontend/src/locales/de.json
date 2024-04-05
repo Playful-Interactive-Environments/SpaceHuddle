@@ -308,12 +308,12 @@
           "topicsInfo": "Themen helfen dabei, eine klare Unterteilung zwischen Bereichen zu definieren, die getrennte Brainstorming-Module haben sollten. Tipp: Halte es einfach, ein oder zwei Themen sind normalerweise genug!",
           "firstTopic": "Thema 1",
           "topicExample": "z.B. Neuer App-Name",
-          "theme": "Thema",
+          "theme": "Teilnehmeransicht",
           "default": "Standard",
           "calendar": "Kalender",
           "submit": "Sitzung speichern",
           "customKey": "Automatische Schlüsselgenerierung",
-          "topicActivation": "Themenaktivierung",
+          "topicActivation": "Themensichtbarkeit",
           "startingPoints": "Startpunkte"
         },
         "topicSettings": {
@@ -633,7 +633,7 @@
       "de": "Deutsch"
     },
     "topicActivation": {
-      "always": "immer",
+      "always": "Standard",
       "after_previous_started": "nachdem alle vorherigen Aufgaben gestartet wurden",
       "after_previous_finished": "nachdem alle vorherigen Aufgaben abgeschlossen wurden"
     }
