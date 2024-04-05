@@ -24,6 +24,8 @@
     :itemIsEquals="(a, b) => (!a && !b) || (a && b && a.id === b.id)"
     :displayItem="(item) => item"
     :darkMode="darkMode"
+    :has-home-state="true"
+    v-model:home-state="shareStateValue"
     @changeOrder="dragDone"
     @changeActiveElement="onEditTaskChanged"
     @changePublicScreen="onPublicTaskChanged"
@@ -51,6 +53,10 @@ import TaskCategory, {
   TaskCategoryType,
 } from '@/types/enum/TaskCategory';
 import * as cashService from '@/services/cash-service';
+import { Topic } from '@/types/api/Topic';
+import TopicStates from '@/types/enum/TopicStates';
+import * as topicService from '@/services/topic-service';
+import EndpointType from '@/types/enum/EndpointType';
 
 @Options({
   components: {
@@ -71,10 +77,12 @@ export default class TaskTimeline extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: false }) readonly darkMode!: boolean;
 
+  topic: Topic | null = null;
   tasks: Task[] = [];
   publicTask: Task | null = null;
   editTask: Task | null = null;
   hasParticipantComponent: { [name: string]: boolean } = {};
+  shareStateValue = false;
 
   TimerEntity = TimerEntity;
 
@@ -98,7 +106,14 @@ export default class TaskTimeline extends Vue {
 
   @Watch('topicId', { immediate: true })
   async onTopicIdChanged(): Promise<void> {
+    cashService.deregisterAllGet(this.updateTopic);
     cashService.deregisterAllGet(this.updateTasks);
+    topicService.registerGetTopicById(
+      this.topicId,
+      this.updateTopic,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
     taskService.registerGetTaskList(
       this.topicId,
       this.updateTasks,
@@ -152,10 +167,30 @@ export default class TaskTimeline extends Vue {
     this.$emit('changePublicScreen', this.publicTask?.id);
   }
 
+  @Watch('shareStateValue', { immediate: true })
+  onShareStateValueChanged(): void {
+    if (this.topic) {
+      this.topic.state = this.shareStateValue
+        ? TopicStates.ACTIVE
+        : TopicStates.INACTIVE;
+      topicService.putTopic(this.topic).then(() => {
+        cashService.refreshCash(`/${EndpointType.TOPIC}/${this.topicId}/`);
+        cashService.refreshCash(
+          `/${EndpointType.SESSION}/${this.sessionId}/${EndpointType.TOPICS}/`
+        );
+      });
+    }
+  }
+
   @Watch('activeTaskId', { immediate: true })
   async onActiveTaskIdChanged(): Promise<void> {
     const task = this.getTaskFromId(this.activeTaskId);
     if (task) this.editTask = task;
+  }
+
+  updateTopic(topic: Topic): void {
+    this.topic = topic;
+    this.shareStateValue = this.topic.state === TopicStates.ACTIVE;
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -191,6 +226,7 @@ export default class TaskTimeline extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTasks);
+    cashService.deregisterAllGet(this.updateTopic);
     cashService.deregisterAllGet(this.updatePublicScreen);
   }
 

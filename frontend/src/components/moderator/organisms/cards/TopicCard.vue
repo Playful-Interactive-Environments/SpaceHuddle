@@ -150,7 +150,7 @@
 </template>
 
 <script lang="ts">
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { Topic } from '@/types/api/Topic';
 import * as topicService from '@/services/topic-service';
@@ -182,6 +182,10 @@ export default class TopicCard extends Vue {
 
   mounted(): void {
     this.editingTopicId = this.topic.id;
+  }
+
+  @Watch('topic.state', { immediate: true })
+  onTopicStateChanged(): void {
     this.shareStateValue = this.topic.state === TopicStates.ACTIVE;
   }
 

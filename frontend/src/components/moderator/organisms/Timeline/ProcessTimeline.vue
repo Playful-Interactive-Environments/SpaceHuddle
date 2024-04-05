@@ -90,6 +90,39 @@
                 </span>
               </div>
             </TutorialStep>
+            <ToolTip
+              :placement="'bottom'"
+              :text="
+                !homeStateValue
+                  ? $t(
+                      `moderator.organism.settings.topicSettings.activateTopic`
+                    )
+                  : $t(
+                      `moderator.organism.settings.topicSettings.deactivateTopic`
+                    )
+              "
+            >
+              <div
+                v-if="hasHomeState"
+                class="homeState"
+                :class="{
+                  'is-checked': homeStateValue,
+                }"
+                v-on:click="homeStateValue = !homeStateValue"
+              >
+                <p class="onOff">
+                  {{
+                    homeStateValue
+                      ? $t(
+                          `moderator.organism.${this.translationModuleName}.on`
+                        )
+                      : $t(
+                          `moderator.organism.${this.translationModuleName}.off`
+                        )
+                  }}
+                </p>
+              </div>
+            </ToolTip>
           </div>
           <i class="line"></i>
         </span>
@@ -185,14 +218,10 @@
                       :text="
                         !isParticipantActive(element)
                           ? $t(
-                              'moderator.organism.' +
-                                this.translationModuleName +
-                                '.activateParticipant'
+                              `moderator.organism.${this.translationModuleName}.activateParticipant`
                             )
                           : $t(
-                              'moderator.organism.' +
-                                this.translationModuleName +
-                                '.deactivateParticipant'
+                              `moderator.organism.${this.translationModuleName}.deactivateParticipant`
                             )
                       "
                     >
@@ -223,14 +252,10 @@
                           {{
                             isParticipantActive(element)
                               ? $t(
-                                  'moderator.organism.' +
-                                    this.translationModuleName +
-                                    '.on'
+                                  `moderator.organism.${this.translationModuleName}.on`
                                 )
                               : $t(
-                                  'moderator.organism.' +
-                                    this.translationModuleName +
-                                    '.off'
+                                  `moderator.organism.${this.translationModuleName}.off`
                                 )
                           }}
                         </p>
@@ -389,6 +414,7 @@ export enum TimelineArea {
     'update:activeItem',
     'homeClicked',
     'resultClicked',
+    'update:homeState',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -445,7 +471,10 @@ export default class ProcessTimeline extends Vue {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   @Prop({ default: (item) => item }) readonly displayItem!: (item: any) => any;
   @Prop({ default: false }) readonly darkMode!: boolean;
+  @Prop({ default: false }) readonly hasHomeState!: boolean;
+  @Prop({ default: false }) readonly homeState!: boolean;
 
+  homeStateValue = false;
   timerContent: any | null = null;
   activePage = 1;
   pageSize = 1000;
@@ -557,6 +586,16 @@ export default class ProcessTimeline extends Vue {
     else if (this.activeArea === TimelineArea.content) {
       this.activeArea = TimelineArea.left;
     }
+  }
+
+  @Watch('homeState', { immediate: true })
+  onHomeStateChanged(): void {
+    this.homeStateValue = this.homeState;
+  }
+
+  @Watch('homeStateValue', { immediate: true })
+  onHomeStateValueChanged(): void {
+    this.$emit('update:homeState', this.homeStateValue);
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -776,7 +815,8 @@ export default class ProcessTimeline extends Vue {
 
 .publicScreenView,
 .participantView,
-.publicScreenViewDisabled {
+.publicScreenViewDisabled,
+.homeState {
   color: var(--color-background);
   height: 3.7rem;
   width: 1.95rem;
@@ -791,6 +831,12 @@ export default class ProcessTimeline extends Vue {
 .publicScreenView,
 .participantView {
   background-color: var(--module-color);
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.homeState {
+  background-color: var(--color-primary);
   left: 50%;
   transform: translate(-50%, 0);
 }
@@ -819,7 +865,8 @@ export default class ProcessTimeline extends Vue {
   }
 }
 
-.participantView {
+.participantView,
+.homeState {
   height: fit-content !important;
   background-color: var(--color-background);
   border-radius: 0 0 var(--tag-border-radius) var(--tag-border-radius);
@@ -848,6 +895,12 @@ export default class ProcessTimeline extends Vue {
   .onOff {
     font-size: 0.8rem;
     pointer-events: none;
+  }
+}
+
+.homeState {
+  &.is-checked {
+    background-color: var(--color-primary);
   }
 }
 
