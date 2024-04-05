@@ -161,7 +161,9 @@
             :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
           />
           <el-dropdown v-if="hasFinishCheckMark(task)" class="media-right">
-            <font-awesome-icon :icon="['far', 'circle-check']" />
+            <div class="checkMark" @click="(event) => event.stopPropagation()">
+              <font-awesome-icon :icon="['far', 'circle-check']" />
+            </div>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item v-on:click="finishTask(task)">
@@ -584,6 +586,12 @@ export default class ParticipantOverview extends Vue {
   width: 40px;
 }
 
+.media.link .media-right svg {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  width: unset;
+}
+
 .participant-header {
   &__header {
     padding-bottom: 2rem;
@@ -729,5 +737,9 @@ table {
 
 .default-theme.disabled:last-child {
   border-radius: 0 0 1rem 1rem;
+}
+
+.checkMark {
+  padding: 0.5rem;
 }
 </style>
