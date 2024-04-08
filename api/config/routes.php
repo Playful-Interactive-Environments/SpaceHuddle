@@ -116,6 +116,7 @@ use \App\Action\Session\SessionReadAllAction;
 use App\Action\User\UserResetPasswordAction;
 use App\Action\User\UserSendConfirmAction;
 use App\Action\View\ViewReadAllAction;
+use App\Action\View\ViewReadSessionAction;
 use App\Action\View\ViewReadSingleAction;
 use App\Action\View\ViewReadTaskInputAction;
 use App\Action\Vote\VoteCreateAction;
@@ -247,6 +248,7 @@ return function (App $app) {
             $app->delete("/{sessionId}/own_user_role[/]", SessionRoleDeleteOwnAction::class);
 
             $app->get("/{sessionId}/participants[/]", SessionParticipantReadAction::class);
+            $app->get("/{sessionId}/views[/]", ViewReadSessionAction::class);
 
             $app->post("[/]", SessionCreateAction::class);
             //$app->get("/{id}[/]", SessionReadSingleAction::class);

@@ -5,7 +5,7 @@ namespace App\Domain\View\Service;
 use App\Domain\Base\Service\ServiceReaderTrait;
 
 /**
- * Service to read all categories for one task.
+ * Service to read all views for one topic.
  */
 class ViewReader
 {

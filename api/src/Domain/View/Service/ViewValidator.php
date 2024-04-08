@@ -48,6 +48,23 @@ class ViewValidator
      *
      * @return void
      */
+    public function validateSessionRead(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("sessionId", "Empty: This field cannot be left empty")
+                ->requirePresence("sessionId", message: "Required: This field is required")
+        );
+    }
+
+    /**
+     * Validate read.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     */
     public function validateTaskRead(array $data): void
     {
         $this->validateEntity(

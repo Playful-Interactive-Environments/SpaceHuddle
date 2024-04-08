@@ -3,6 +3,7 @@
 namespace App\Domain\View\Repository;
 
 use App\Domain\Base\Data\ModificationData;
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
@@ -34,6 +35,40 @@ class ViewRepository implements RepositoryInterface
             "topic_id",
             TopicRepository::class
         );
+    }
+
+    /**
+     * Get entity.
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
+     * @return object|array<object>|null The result entity(s).
+     * @throws GenericException
+     */
+    public function get(array $conditions = [], array $sortConditions = []): null|object|array
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select([
+            "selection_view.*",
+            "selection_view.topic_id",
+            "topic.title as topic_name",
+            "topic.session_id",
+            ])
+            ->innerJoin("topic", "topic.id = selection_view.topic_id")
+            ->andWhere($conditions)
+            ->order($sortConditions);
+
+        return $this->fetchAll($query);
+    }
+
+    /**
+     * Get list of entities for the session ID.
+     * @param string $sessionId The entity session ID.
+     * @return array<object> The result entity list.
+     */
+    public function getSessionList(
+        string $sessionId
+    ): array {
+        return $this->get(["topic.session_id" => $sessionId]);
     }
 
     /**

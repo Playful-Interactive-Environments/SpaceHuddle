@@ -46,6 +46,20 @@ class ViewData
     public ?string $name;
 
     /**
+     * name of the topic.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $topicName;
+
+    /**
+     * ID of the topic.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $topicId;
+
+    /**
      * name of the view.
      * @var array<string>
      * @OA\Property(
@@ -68,6 +82,8 @@ class ViewData
         $this->detailType = $reader->findString("detail_type");
         $this->id = $reader->findString("id");
         $this->taskId = $reader->findString("task_id");
+        $this->topicId = $reader->findString("topic_id");
+        $this->topicName = $reader->findString("topic_name");
         $this->name = $reader->findString("name");
         $this->modules = preg_split("/,/", (string)$reader->findString("modules"));
     }
