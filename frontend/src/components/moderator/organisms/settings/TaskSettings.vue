@@ -678,7 +678,8 @@ export default class TaskSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   sessionId = '';
-  topics: Topic[] = [];
+  topics: { id: string; title: string }[] = [];
+  sessionViews: View[] = [];
   inputTopicId = '';
   componentLoadIndex = 0;
   usedModuleList: ModuleTaskProperty[] = [];
@@ -853,7 +854,7 @@ export default class TaskSettings extends Vue {
   updateTopic(topic: Topic): void {
     this.sessionId = topic.sessionId;
     cashService.deregisterAllGet(this.updateTopics);
-    topicService.registerGetTopicsList(
+    viewService.registerGetSessionList(
       this.sessionId,
       this.updateTopics,
       EndpointAuthorisationType.MODERATOR,
@@ -861,8 +862,28 @@ export default class TaskSettings extends Vue {
     );
   }
 
-  updateTopics(topics: Topic[]): void {
-    this.topics = topics;
+  updateTopics(list: View[]): void {
+    this.sessionViews = list.filter(
+      (item) =>
+        ViewType[item.type] !== ViewType.HIERARCHY ||
+        !item.detailType ||
+        TaskType[item.detailType] !== TaskType.INFORMATION
+    );
+    this.updateAvailableTopics();
+  }
+
+  updateAvailableTopics(): void {
+    this.topics = this.possibleSessionViews
+      .filter(
+        (value, index, array) =>
+          array.findIndex((item) => item.topicId === value.topicId) === index
+      )
+      .map((item) => {
+        return {
+          id: item.topicId,
+          title: item.topicName,
+        };
+      });
   }
 
   reset(): void {
@@ -938,6 +959,26 @@ export default class TaskSettings extends Vue {
 
   get possibleViews(): View[] {
     const filterOptions = this.inputOptionViews.filter(
+      (view) =>
+        (this.inputFilter.types.length === 0 ||
+          this.inputFilter.types.includes(view.type.toLowerCase())) &&
+        (this.inputFilter.detailTypes.length === 0 ||
+          (view.detailType &&
+            this.inputFilter.detailTypes.includes(
+              view.detailType.toLowerCase()
+            ))) &&
+        (this.inputFilter.modules.length === 0 ||
+          this.inputFilter.modules.find((item) => view.modules.includes(item)))
+    );
+    if (this.internalTaskId)
+      return filterOptions.filter(
+        (view) => view.taskId !== this.internalTaskId
+      );
+    return filterOptions;
+  }
+
+  get possibleSessionViews(): View[] {
+    const filterOptions = this.sessionViews.filter(
       (view) =>
         (this.inputFilter.types.length === 0 ||
           this.inputFilter.types.includes(view.type.toLowerCase())) &&
@@ -1042,6 +1083,7 @@ export default class TaskSettings extends Vue {
     this.inputFilter = inputFilter;
     this.maxInputs = maxInputs;
     this.setDefaultInput();
+    this.updateAvailableTopics();
   }
 
   setDefaultInput(): void {

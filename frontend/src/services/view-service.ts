@@ -242,3 +242,18 @@ export const deregisterGetList = (
     callback
   );
 };
+
+export const registerGetSessionList = (
+  sessionId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<View[]> => {
+  return cashService.registerSimplifiedGet<View[]>(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.VIEWS}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};

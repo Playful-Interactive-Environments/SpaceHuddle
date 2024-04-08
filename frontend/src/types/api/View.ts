@@ -8,6 +8,8 @@ export interface View {
   id: string;
   taskId: string | null;
   name: string;
+  topicId: string;
+  topicName: string;
   modules: string[];
 }
 

@@ -3,7 +3,7 @@
   "type": "main",
   "input": "optional",
   "inputFilterTypes": "[\"task\"]",
-  "inputFilterCategories": "[\"information\"]",
+  "inputFilterCategories": "[\"brainstorming\"]",
   "inputFilterModules": "[\"missionmap\"]",
   "maxInputs": 1,
   "syncPublicParticipant": false,
