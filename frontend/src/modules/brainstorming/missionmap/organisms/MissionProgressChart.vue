@@ -264,12 +264,13 @@ export default class MissionProgressChart extends Vue {
         vote: undefined as VoteParameterResult | undefined,
       };
     });
+    let getParameterValue = (item, parameter) => {
+      return item.idea
+        ? item.idea.parameter[this.missionProgressParameter][parameter]
+        : 0;
+    };
     let mapToValue = (list, parameter) =>
-      list.map((item) =>
-        item.idea
-          ? item.idea.parameter[this.missionProgressParameter][parameter]
-          : 0
-      );
+      list.map((item) => getParameterValue(item, parameter));
     if (mapOnlyOwnInfluence) {
       ideaVotes = decidedIdeas
         .map((idea) => {
@@ -289,35 +290,33 @@ export default class MissionProgressChart extends Vue {
             (b.ownVotes[0] as Vote).timestamp
           )
         );
-      mapToValue = (list, parameter) => {
-        return list.map((item) => {
+      getParameterValue = (item, parameter) => {
+        if (
+          item.idea &&
+          item.vote &&
+          item.ownVotes &&
+          item.ownVotes.length > 0
+        ) {
+          const ownSum = item.ownVotes.reduce(
+            (sum, item) => sum + item.parameter.points,
+            0
+          );
           if (
-            item.idea &&
-            item.vote &&
-            item.ownVotes &&
-            item.ownVotes.length > 0
+            item.idea.parameter[this.missionProgressParameter] &&
+            Object.hasOwn(
+              item.idea.parameter[this.missionProgressParameter],
+              parameter
+            )
           ) {
-            const ownSum = item.ownVotes.reduce(
-              (sum, item) => sum + item.parameter.points,
-              0
+            return (
+              item.idea.parameter[this.missionProgressParameter][parameter] *
+              (ownSum / item.vote.sum)
             );
-            if (
-              item.idea.parameter[this.missionProgressParameter] &&
-              Object.hasOwn(
-                item.idea.parameter[this.missionProgressParameter],
-                parameter
-              )
-            ) {
-              return (
-                item.idea.parameter[this.missionProgressParameter][parameter] *
-                (ownSum / item.vote.sum)
-              );
-            } else {
-              return ownSum / item.vote.sum;
-            }
+          } else {
+            return ownSum / item.vote.sum;
           }
-          return 0;
-        });
+        }
+        return 0;
       };
     }
     const ideaProgress: {
@@ -326,6 +325,7 @@ export default class MissionProgressChart extends Vue {
       ownVotes: Vote[];
       vote: VoteParameterResult | undefined;
     }[] = [{ index: -1, idea: null, vote: undefined, ownVotes: [] }];
+    const inputProgress: { [key: string]: number }[] = [];
     for (let i = 0; i < ideaVotes.length; i++) {
       ideaProgress.push({
         index: i,
@@ -333,6 +333,30 @@ export default class MissionProgressChart extends Vue {
         ownVotes: ideaVotes[i].ownVotes,
         vote: ideaVotes[i].vote,
       });
+      const progressValue: { [key: string]: number } = {};
+      for (const key in ideaVotes[i].idea.parameter[
+        this.missionProgressParameter
+      ]) {
+        progressValue[key] = getParameterValue(ideaVotes[i], key);
+      }
+      inputProgress.push(progressValue);
+    }
+    if (
+      this.missionProgressParameter === MissionProgressParameter.electricity
+    ) {
+      const progressData = progress.getElectricityProgressSteps(
+        inputProgress,
+        this.module
+      );
+      mapToValue = (list, parameter) =>
+        list.map((item, index) => {
+          if (index > 0)
+            return (
+              progressData[index][parameter] -
+              progressData[index - 1][parameter]
+            );
+          return 0;
+        });
     }
     const labels = ideaProgress.map((item) =>
       item.idea

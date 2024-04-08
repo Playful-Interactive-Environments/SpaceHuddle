@@ -96,11 +96,63 @@ export function getProgress(
   return result;
 }
 
+export function getElectricityProgressSteps(
+  inputProgress: { [key: string]: number }[],
+  module: Module | null
+): { [key: string]: number }[] {
+  const result: { [key: string]: number }[] = [];
+  const startValues: { [key: string]: number } = {};
+  for (const electricityName in gameConfigMoveIt.electricity) {
+    startValues[electricityName] =
+      gameConfigMoveIt.electricity[electricityName].value;
+  }
+  result.push(startValues);
+  if (module && module.parameter.effectElectricity) {
+    for (const progressValue of inputProgress) {
+      let addedInfluence = 0;
+      const ideaValues: { [key: string]: number } = {
+        ...result[result.length - 1],
+      };
+      const influencedValues: string[] = [];
+      for (const electricityName in gameConfigMoveIt.electricity) {
+        const influence = progressValue[electricityName];
+        if (influence) {
+          ideaValues[electricityName] += influence;
+          addedInfluence += influence;
+          influencedValues.push(electricityName);
+        }
+      }
+      if (addedInfluence !== 0) {
+        for (const electricityName of Object.keys(
+          gameConfigMoveIt.electricity
+        ).reverse()) {
+          if (!influencedValues.includes(electricityName)) {
+            if (addedInfluence > 0) {
+              if (ideaValues[electricityName] > addedInfluence) {
+                ideaValues[electricityName] -= addedInfluence;
+                break;
+              }
+              addedInfluence -= ideaValues[electricityName];
+              ideaValues[electricityName] = 0;
+            } else {
+              ideaValues[electricityName] -= addedInfluence;
+              break;
+            }
+          }
+        }
+      }
+      result.push(ideaValues);
+    }
+  }
+  return result;
+}
+
 export function getElectricityProgress(
   decidedIdeas: Idea[],
   module: Module | null
 ): { [key: string]: ProgressValues } {
   const result: { [key: string]: ProgressValues } = {};
+  let addedInfluence = 0;
   for (const electricityName in gameConfigMoveIt.electricity) {
     const electricityValue =
       gameConfigMoveIt.electricity[electricityName].value;
@@ -112,8 +164,26 @@ export function getElectricityProgress(
       for (const idea of decidedIdeas) {
         const influence = idea.parameter.electricity[electricityName];
         result[electricityName].progress += influence;
+        addedInfluence += influence;
       }
     }
+  }
+  if (addedInfluence > 0) {
+    for (const electricityName of Object.keys(
+      gameConfigMoveIt.electricity
+    ).reverse()) {
+      if (result[electricityName].progress > addedInfluence) {
+        result[electricityName].progress -= addedInfluence;
+        break;
+      }
+      addedInfluence -= result[electricityName].progress;
+      result[electricityName].progress = 0;
+    }
+  } else if (addedInfluence < 0) {
+    const electricityName = Object.keys(
+      gameConfigMoveIt.electricity
+    ).reverse()[0];
+    result[electricityName].progress -= addedInfluence;
   }
   return result;
 }

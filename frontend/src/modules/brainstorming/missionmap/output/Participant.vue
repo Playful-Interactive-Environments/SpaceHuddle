@@ -368,6 +368,9 @@
         :marks="calculateMarks(-5, 5, 1)"
       />
     </el-form-item>
+    <!--
+    :rules="[{ validator: validateElectricity }]"
+    -->
     <el-form-item
       v-for="parameter of Object.keys(additionalParameter)"
       :key="parameter"
@@ -376,7 +379,6 @@
       :style="{
         '--parameter-color': additionalParameter[parameter].color,
       }"
-      :rules="[{ validator: validateElectricity }]"
     >
       <template #label>
         {{ $t(`module.playing.moveit.enums.electricity.${parameter}`) }}
