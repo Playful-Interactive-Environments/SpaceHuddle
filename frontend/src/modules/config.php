@@ -80,6 +80,7 @@ createConfig('common');
 //Add common modules to categories
 $config['brainstorming']['visualisation_master'] = ($config['common']['visualisation_master']);
 $config['information']['visualisation_master'] = ($config['common']['visualisation_master']);
+$config['selection']['visualisation_master'] = ($config['common']['visualisation_master']);
 
 $config['none'] = createDetailConfig('none');
 $config['none']['settings'] = createDetailConfig('none/settings');

@@ -1,8 +1,28 @@
 <template>
-  <Gallery v-if="currentVisModule === 'gallery'" :task-id="this.taskId" />
+  <el-select class="timeModSelect" v-model="timeModifier">
+    <template v-slot:prefix>
+      <font-awesome-icon icon="sort" class="el-icon" />
+    </template>
+    <el-option
+      v-for="type in timeModifierArray"
+      :key="type"
+      :value="type"
+      :label="'x' + type"
+    >
+      <span>
+        {{ 'x' + type }}
+      </span>
+    </el-option>
+  </el-select>
+  <Gallery
+    v-if="currentVisModule === 'gallery'"
+    :task-id="this.taskId"
+    :timeModifier="timeModifier"
+  />
   <CardShuffle
     v-if="currentVisModule === 'cardShuffle'"
     :task-id="this.taskId"
+    :timeModifier="timeModifier"
   />
 </template>
 
@@ -42,6 +62,10 @@ export default class PublicScreen extends Vue {
 
   taskType: null | string = null;
   currentVisModule: null | string = null;
+
+  timeModifier: number | null = 1;
+  timeModifierArray: number[] = [0.25, 0.5, 0.75, 1, 1.5, 2, 4];
+
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -102,6 +126,15 @@ export default class PublicScreen extends Vue {
   unmounted(): void {
     this.deregisterAll();
   }
+
+  menuItemSelected(command: string): void {
+    switch (command) {
+      case 'edit':
+        break;
+      case 'delete':
+        break;
+    }
+  }
 }
 </script>
 
@@ -157,5 +190,13 @@ export default class PublicScreen extends Vue {
   display: block;
   width: 100%;
   text-align: right;
+}
+
+.timeModSelect {
+  width: 8em;
+  position: absolute;
+  top: 1.5rem;
+  right: 3rem;
+  z-index: 10000;
 }
 </style>

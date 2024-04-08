@@ -5,7 +5,7 @@
     type="card"
     arrow="always"
     :initial-index="0"
-    :interval="7000"
+    :interval="7000 / timeModifier"
     v-on:change="galleryIndexChanged"
     trigger="click"
   >
@@ -40,6 +40,7 @@ import * as cashService from '@/services/cash-service';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
