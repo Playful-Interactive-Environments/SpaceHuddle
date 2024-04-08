@@ -19,13 +19,24 @@
         (statePointer >= 0 || !isActive)
       "
     >
+      <figure
+          class="media video"
+          v-if="isLinkVideo(publicImage)"
+      >
+        <iframe
+            :src="convertToEmbed(publicImage)"
+            height="100%"
+            width="100%"
+            allow="fullscreen"
+        ></iframe>
+      </figure>
       <el-image
-        v-if="hasPublicImage"
-        :src="publicImage"
-        class="question-image"
-        alt=""
-        :preview-src-list="[publicImage]"
-        :hide-on-click-modal="true"
+          v-else-if="hasPublicImage"
+          :src="publicImage"
+          class="question-image"
+          alt=""
+          :preview-src-list="[publicImage]"
+          :hide-on-click-modal="true"
       />
       <div class="question">
         {{ publicQuestion.question.keywords }}
@@ -794,6 +805,29 @@ export default class PublicBase extends Vue {
   unmounted(): void {
     this.deregisterAll();
     clearInterval(this.interval);
+  }
+
+  convertToEmbed(link: string | null) {
+    if (link) {
+      if (link.includes('youtube')) {
+        link = link.replace('watch?v=', 'embed/');
+      } else if (link.includes('vimeo')) {
+        const vid = link.split('/');
+        const vidNr = vid[vid.length - 1];
+        link = 'https://player.vimeo.com/video/' + vidNr;
+      }
+    }
+    return link;
+  }
+
+  isLinkVideo(link: string | null): boolean {
+    console.log(link);
+    if (link) {
+      if (link.includes('youtube') || link.includes('vimeo')) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 </script>

@@ -116,8 +116,19 @@
               :preview-src-list="[answer.answer.image]"
               :hide-on-click-modal="true"
             />
+            <figure
+              class="media video"
+              v-else-if="isLinkVideo(answer.answer.link)"
+            >
+              <iframe
+                :src="convertToEmbed(answer.answer.link)"
+                height="100%"
+                width="100%"
+                allow="fullscreen"
+              ></iframe>
+            </figure>
             <el-image
-              v-if="answer.answer.link && !answer.answer.image"
+              v-else-if="answer.answer.link && !answer.answer.image"
               :src="answer.answer.link"
               class="question-image"
               alt=""
@@ -144,15 +155,26 @@
               <el-image
                 v-if="element.answer.image"
                 :src="element.answer.image"
-                class="media-right question-image"
+                class="question-image"
                 alt=""
                 :preview-src-list="[element.answer.image]"
                 :hide-on-click-modal="true"
               />
+              <figure
+                class="media video"
+                v-else-if="isLinkVideo(element.answer.link)"
+              >
+                <iframe
+                  :src="convertToEmbed(element.answer.link)"
+                  height="100%"
+                  width="100%"
+                  allow="fullscreen"
+                ></iframe>
+              </figure>
               <el-image
-                v-if="element.answer.link && !element.answer.image"
+                v-else-if="element.answer.link && !element.answer.image"
                 :src="element.answer.link"
-                class="media-right question-image"
+                class="question-image"
                 alt=""
                 :preview-src-list="[element.answer.link]"
                 :hide-on-click-modal="true"
@@ -182,15 +204,26 @@
                 <el-image
                   v-if="element.answer.image"
                   :src="element.answer.image"
-                  class="media-right question-image"
+                  class="question-image"
                   alt=""
                   :preview-src-list="[element.answer.image]"
                   :hide-on-click-modal="true"
                 />
+                <figure
+                  class="media video"
+                  v-else-if="isLinkVideo(element.answer.link)"
+                >
+                  <iframe
+                    :src="convertToEmbed(element.answer.link)"
+                    height="100%"
+                    width="100%"
+                    allow="fullscreen"
+                  ></iframe>
+                </figure>
                 <el-image
-                  v-if="element.answer.link && !element.answer.image"
+                  v-else-if="element.answer.link && !element.answer.image"
                   :src="element.answer.link"
-                  class="media-right question-image"
+                  class="question-image"
                   alt=""
                   :preview-src-list="[element.answer.link]"
                   :hide-on-click-modal="true"
@@ -1378,6 +1411,29 @@ export default class Participant extends Vue {
   unmounted(): void {
     this.deregisterAll();
     if (this.trackingManager) this.trackingManager.deregisterAll();
+  }
+
+  convertToEmbed(link: string | null) {
+    if (link) {
+      if (link.includes('youtube')) {
+        link = link.replace('watch?v=', 'embed/');
+      } else if (link.includes('vimeo')) {
+        const vid = link.split('/');
+        const vidNr = vid[vid.length - 1];
+        link = 'https://player.vimeo.com/video/' + vidNr;
+      }
+    }
+    return link;
+  }
+
+  isLinkVideo(link: string | null): boolean {
+    console.log(link);
+    if (link) {
+      if (link.includes('youtube') || link.includes('vimeo')) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 </script>
