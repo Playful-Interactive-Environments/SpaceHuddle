@@ -821,7 +821,6 @@ export default class PublicBase extends Vue {
   }
 
   isLinkVideo(link: string | null): boolean {
-    console.log(link);
     if (link) {
       if (link.includes('youtube') || link.includes('vimeo')) {
         return true;
