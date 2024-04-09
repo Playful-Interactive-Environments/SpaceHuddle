@@ -4,12 +4,20 @@
     "description": "anchor your ideas on the map"
   },
   "participant": {
-    "points": "points",
+    "points": "votes",
     "rate": "rate",
+    "description": "description",
     "explanation": "explanation",
     "freeExplanation": "free text for own explanation or suggested answer",
     "save": "save",
-    "spentHeader": "spend additional points on measure",
+    "spentHeader": "spend additional votes on measure",
+    "nothingToSpent": "you currently have too few points to award any more votes for this measure",
+    "maxSpent": "you have already allocated the maximum possible support for this measure",
+    "new": "new",
+    "target": "required in total",
+    "actual": "already received",
+    "own": "your part",
+    "minParticipants": "Minimum number of participants",
     "spent": "spent",
     "cancel": "cancel",
     "finished": {

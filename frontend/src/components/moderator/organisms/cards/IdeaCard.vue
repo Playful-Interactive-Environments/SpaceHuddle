@@ -31,8 +31,13 @@
       alt=""
       :preview-src-list="[idea.image]"
       :hide-on-click-modal="true"
+      @click="stopPropagation"
     />
-    <figure class="media video" v-else-if="isLinkVideo(idea.link)">
+    <figure
+      class="media video"
+      v-else-if="isLinkVideo(idea.link)"
+      @click="stopPropagation"
+    >
       <iframe
         :src="convertToEmbed(idea.link)"
         height="100%"
@@ -47,11 +52,12 @@
       alt=""
       :preview-src-list="[idea.link]"
       :hide-on-click-modal="true"
+      @click="stopPropagation"
     />
     <div v-else class="card__image">
       <slot name="icon"></slot>
     </div>
-    <div class="card__text">
+    <div class="card__text" @click="(event) => $emit('click', event)">
       <div class="card__title">
         <span
           ref="title"
@@ -225,6 +231,7 @@ export enum CollapseIdeas {
     'update:fadeIn',
     'sharedStatusChanged',
     'customCommand',
+    'click',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/

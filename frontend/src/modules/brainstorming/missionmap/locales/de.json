@@ -4,12 +4,20 @@
     "description": "verankere deine Ideen auf der Karte"
   },
   "participant": {
-    "points": "Punkte",
+    "points": "Wählerstimmen",
     "rate": "Rate",
+    "description": "Beschreibung",
     "explanation": "Begründung",
     "freeExplanation": "Freier Text für eigene Erklärung oder Antwortvorschlag",
     "save": "speichern",
-    "spentHeader": "weitere Punkte für die Maßnahme ausgeben",
+    "spentHeader": "weitere Wählerstimmen für die Maßnahme ausgeben",
+    "nothingToSpent": "du hast derzeit zu wenig Punkte um für dieses Maßnahme weiteren Wählerstimmen zu vergeben",
+    "maxSpent": "du hast bereits die maximalle mögliche Unterstützung für diese Maßnahme vergeben",
+    "new": "neu",
+    "target": "insgesamt benötigt",
+    "actual": "bereits erhalten",
+    "own": "dein Anteil",
+    "minParticipants": "Mindestanzahl der Teilnehmer",
     "spent": "ausgeben",
     "cancel": "abbrechen",
     "finished": {

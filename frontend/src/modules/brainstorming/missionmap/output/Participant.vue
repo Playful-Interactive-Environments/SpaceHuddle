@@ -98,6 +98,7 @@
           v-on:click="ideaClicked(element)"
           @ideaDeleted="refreshIdeas"
           @ideaStartEdit="editIdea(element)"
+          @click="() => (showDetails = true)"
         >
           <div class="columns is-mobile" v-if="element.parameter.shareData">
             <div class="column">
@@ -158,12 +159,19 @@
     v-on:reset="reset"
   >
     <el-dialog v-model="showDetails">
-      <template #header>{{ selectedIdea?.keywords }}</template>
+      <template #header>
+        <h2>{{ selectedIdea?.keywords }}</h2>
+      </template>
       <template #footer>
         <el-button type="primary" native-type="submit">
           {{ $t('module.brainstorming.missionmap.participant.save') }}
         </el-button>
       </template>
+      <el-form-item
+        :label="$t('module.brainstorming.missionmap.participant.description')"
+      >
+        <div>{{ selectedIdea?.description }}</div>
+      </el-form-item>
       <el-form-item
         :label="$t('module.brainstorming.missionmap.participant.rate')"
         prop="points"
@@ -178,21 +186,53 @@
         ></el-rate>
       </el-form-item>
       <el-form-item
+        v-if="selectedIdea?.parameter.shareData"
         :label="$t('module.brainstorming.missionmap.participant.points')"
         prop="points"
       >
         <template #label>
-          {{ $t('module.brainstorming.missionmap.participant.points') }}
           <font-awesome-icon icon="person-booth" />
-          {{ selectedVote.previousSpendPoints + selectedVote.points }}
+          {{ $t('module.brainstorming.missionmap.participant.points') }}
         </template>
+        <div class="pointsInfo">
+          {{ $t('module.brainstorming.missionmap.participant.target') }}:
+          {{ selectedIdea?.parameter.points }}
+          <font-awesome-icon icon="coins" />
+        </div>
+        <div class="pointsInfo">
+          {{ $t('module.brainstorming.missionmap.participant.actual') }}:
+          {{ selectedVote.previousSpendTotalPoints + selectedVote.points }}
+          <font-awesome-icon icon="person-booth" />
+        </div>
+        <!--<div class="pointsInfo">
+          {{
+            $t('module.brainstorming.missionmap.participant.minParticipants')
+          }}:
+          {{ selectedIdea?.parameter.minParticipants }}
+        </div>-->
+        <div class="pointsInfo">
+          {{ $t('module.brainstorming.missionmap.participant.own') }}:
+          {{ selectedVote.previousSpendPoints + selectedVote.points }}
+          ({{ $t('module.brainstorming.missionmap.participant.new') }}:
+          {{ selectedVote.points }})
+          <font-awesome-icon icon="person-booth" />
+        </div>
         <el-button
+          v-if="points >= minSpentPoints && maxSpentPoints >= minSpentPoints"
           type="primary"
-          :disabled="points < minSpentPoints || maxSpentPoints < minSpentPoints"
           @click="showSpentPoints = true"
         >
-          {{ selectedVote.points }}
           {{ $t('module.brainstorming.missionmap.participant.spentHeader') }}
+        </el-button>
+        <el-button
+          v-else-if="points < minSpentPoints"
+          type="primary"
+          :disabled="true"
+        >
+          {{ $t('module.brainstorming.missionmap.participant.nothingToSpent') }}
+        </el-button>
+        <el-button v-else type="primary" :disabled="true">
+          {{ $t('module.brainstorming.missionmap.participant.maxSpent') }}
         </el-button>
       </el-form-item>
       <el-form-item
@@ -427,6 +467,7 @@ export default class Participant extends Vue {
     explanationIndex: 3,
     previousSpendPoints: 0,
     previousInputSpendPoints: 0,
+    previousSpendTotalPoints: 0,
     spentPoints: 0,
   };
   trackingManager!: TrackingManager;
@@ -850,7 +891,7 @@ export default class Participant extends Vue {
     this.selectedIdea = idea;
   }
 
-  reset(): void {
+  reset(previousSpendTotalPoints = 0): void {
     this.selectedVote = {
       rate: 0,
       order: 0,
@@ -858,6 +899,7 @@ export default class Participant extends Vue {
       explanation: '',
       explanationIndex: 3,
       previousSpendPoints: 0,
+      previousSpendTotalPoints: previousSpendTotalPoints,
       previousInputSpendPoints: 0,
       spentPoints: 0,
     };
@@ -882,7 +924,9 @@ export default class Participant extends Vue {
             explanationIndex: vote.parameter.explanationIndex
               ? vote.parameter.explanationIndex
               : inputVote.parameter.explanationIndex,
-            previousSpendPoints: voteResult.sum,
+            previousSpendPoints:
+              (vote.parameter.points ?? 0) + (inputVote.parameter.points ?? 0),
+            previousSpendTotalPoints: voteResult.sum,
             previousInputSpendPoints: inputVote.parameter.points,
             spentPoints: 0,
           };
@@ -893,12 +937,14 @@ export default class Participant extends Vue {
             points: 0,
             explanation: vote.parameter.explanation,
             explanationIndex: vote.parameter.explanationIndex,
-            previousSpendPoints: voteResult.sum,
+            previousSpendPoints: vote.parameter.points,
+            previousSpendTotalPoints: voteResult.sum,
             previousInputSpendPoints: 0,
             spentPoints: 0,
           };
         }
-      } else this.reset();
+      } else if (voteResult) this.reset(voteResult.sum);
+      else this.reset();
     }
   }
 
@@ -1085,7 +1131,7 @@ export default class Participant extends Vue {
         color-mix(in srgb, var(--background-color) 45%, transparent)
       ),
       url('@/modules/information/quiz/assets/paper.jpg');
-    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    //filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
     border: none;
   }
 
@@ -1193,5 +1239,16 @@ export default class Participant extends Vue {
 
 .accept {
   color: var(--color-green);
+}
+
+.el-dialog {
+  h2 {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+.pointsInfo {
+  margin-bottom: 0.5rem;
+  font-size: var(--font-size-large);
 }
 </style>
