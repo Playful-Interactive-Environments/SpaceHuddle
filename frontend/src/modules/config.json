@@ -176,7 +176,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
+             "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"brainstorming\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
            "path": "playing/moveit"  
        },  
        "shopit": {  
@@ -223,6 +223,14 @@
            "locales": "de,en,",  
              "icon": "list",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "voting/slots"  
+       },  
+       "vote": {  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,  
+           "path": "voting/vote"  
        },  
        "settings": {  
            "parameter": "TaskParameter",  
