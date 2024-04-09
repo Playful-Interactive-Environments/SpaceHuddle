@@ -502,7 +502,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   addData(newIdea: Idea): void {
     if (!this.settingsIdea.id) {
       this.inputManager.addIdea(newIdea);
-      this.ideas = this.inputManager.ideas;
+      //this.ideas = this.inputManager.ideas;
+      this.updateIdeas();
     }
     this.resetAddIdea();
   }
