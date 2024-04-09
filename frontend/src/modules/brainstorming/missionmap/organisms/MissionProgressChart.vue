@@ -192,7 +192,11 @@ export default class MissionProgressChart extends Vue {
       );
       this.inputManager.callbackUpdateIdeas = this.updateIdeas;
       this.inputManager.callbackUpdateVotes = this.updateVotes;
-      taskService.registerGetTaskById(this.taskId, this.updateTask);
+      taskService.registerGetTaskById(
+        this.taskId,
+        this.updateTask,
+        this.authHeaderTyp
+      );
     }
   }
 
@@ -297,6 +301,12 @@ export default class MissionProgressChart extends Vue {
           item.ownVotes &&
           item.ownVotes.length > 0
         ) {
+          if (
+            isNaN(item.idea.parameter[this.missionProgressParameter][parameter])
+          )
+            return item.idea.parameter[this.missionProgressParameter][
+              parameter
+            ];
           const ownSum = item.ownVotes.reduce(
             (sum, item) => sum + item.parameter.points,
             0
@@ -325,7 +335,7 @@ export default class MissionProgressChart extends Vue {
       ownVotes: Vote[];
       vote: VoteParameterResult | undefined;
     }[] = [{ index: -1, idea: null, vote: undefined, ownVotes: [] }];
-    const inputProgress: { [key: string]: number }[] = [];
+    const inputProgress: { [key: string]: number | string }[] = [];
     for (let i = 0; i < ideaVotes.length; i++) {
       ideaProgress.push({
         index: i,
@@ -333,7 +343,7 @@ export default class MissionProgressChart extends Vue {
         ownVotes: ideaVotes[i].ownVotes,
         vote: ideaVotes[i].vote,
       });
-      const progressValue: { [key: string]: number } = {};
+      const progressValue: { [key: string]: number | string } = {};
       for (const key in ideaVotes[i].idea.parameter[
         this.missionProgressParameter
       ]) {

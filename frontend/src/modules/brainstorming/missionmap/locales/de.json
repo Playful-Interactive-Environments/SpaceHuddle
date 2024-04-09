@@ -52,6 +52,7 @@
     "displayAll": "Alle Anzeigen",
     "add": "Info hinzufügen",
     "points": "Benötigte Summe an Punkten",
+    "electricityInfluence": "Einfluss auf Strommix",
     "mapLocation": "Standort",
     "share": "für alle sichtbar machen",
     "evaluation": "Bewertung",
@@ -92,6 +93,10 @@
       "general": "gemeinsamer Fortschritte",
       "own": "eigener Anteil am gemeinsamen Fortschritt",
       "ownFuture": "eigener Weg"
+    },
+    "electricityInfluence": {
+      "increase_electricity_demand": "Strombedarf erhöhen",
+      "change_electricity_supply": "Stromzusammensetzung ändern"
     }
   }
 }

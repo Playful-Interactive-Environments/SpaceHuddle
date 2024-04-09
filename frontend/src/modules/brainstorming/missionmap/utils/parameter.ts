@@ -4,6 +4,7 @@ import { until } from '@/utils/wait';
 import { defaultCenter } from '@/utils/map';
 import gameConfigMoveIt from '@/modules/playing/moveit/data/gameConfig.json';
 import { Module } from '@/types/api/Module';
+import { ElectricityInfluence } from '@/modules/brainstorming/missionmap/types/ElectricityInfluence';
 
 export async function setEmptyParameterIfNotExists(
   idea: Idea,
@@ -35,10 +36,14 @@ export async function setEmptyParameterIfNotExists(
     module.parameter.effectElectricity &&
     !idea.parameter.electricity
   ) {
-    idea.parameter.electricity = {};
-    for (const parameter of Object.keys(gameConfigMoveIt.electricity)) {
+    idea.parameter.electricity = {
+      influence: ElectricityInfluence.INCREASE_ELECTRICITY_DEMAND,
+      type: Object.keys(gameConfigMoveIt.electricity)[0],
+      value: 0,
+    };
+    /*for (const parameter of Object.keys(gameConfigMoveIt.electricity)) {
       idea.parameter.electricity[parameter] = 0;
-    }
+    }*/
   }
   if (!idea.parameter.minParticipants) {
     if (module && module.parameter.minParticipants) {

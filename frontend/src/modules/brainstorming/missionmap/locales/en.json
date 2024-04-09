@@ -53,6 +53,7 @@
     "add": "add content",
     "points": "required sum of points",
     "mapLocation": "location",
+    "electricityInfluence": "electricity influence",
     "share": "make it visible to all",
     "evaluation": "evaluation",
     "reason": "reason for rejection",
@@ -92,6 +93,10 @@
       "general": "joint progression",
       "own": "own part in the joint progress",
       "ownFuture": "own path"
+    },
+    "electricityInfluence": {
+      "increase_electricity_demand": "increase electricity demand",
+      "change_electricity_supply": "change electricity supply"
     }
   }
 }

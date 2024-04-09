@@ -101,7 +101,7 @@
     <!--
       :rules="[{ validator: validateElectricity }]"
     --->
-    <el-form-item
+    <!--<el-form-item
       v-for="parameter of Object.keys(additionalParameter)"
       :key="parameter"
       :label="$t(`module.playing.moveit.enums.electricity.${parameter}`)"
@@ -117,6 +117,52 @@
       <el-input-number
         v-if="idea.parameter.electricity"
         v-model="idea.parameter.electricity[parameter]"
+        :min="-100"
+        :max="100"
+      />
+    </el-form-item>-->
+    <el-form-item
+      v-if="effectElectricity && idea.parameter.electricity"
+      :label="
+        $t(
+          'module.brainstorming.missionmap.moderatorContent.electricityInfluence'
+        )
+      "
+      :prop="`parameter.electricity`"
+      class="electricity"
+    >
+      <el-select v-model="idea.parameter.electricity.influence">
+        <el-option
+          v-for="item of Object.values(ElectricityInfluence)"
+          :key="item"
+          :value="item"
+          :label="
+            $t(
+              `module.brainstorming.missionmap.enum.electricityInfluence.${item}`
+            )
+          "
+        />
+      </el-select>
+      <el-select
+        v-if="
+          idea.parameter.electricity.influence ===
+          ElectricityInfluence.CHANGE_ELECTRICITY_SUPPLY
+        "
+        v-model="idea.parameter.electricity.type"
+      >
+        <el-option
+          v-for="item in Object.keys(additionalParameter)"
+          :key="item"
+          :value="item"
+          :label="$t(`module.playing.moveit.enums.electricity.${item}`)"
+          :style="{ color: additionalParameter[item].color }"
+        >
+          {{ $t(`module.playing.moveit.enums.electricity.${item}`) }}
+          <font-awesome-icon :icon="additionalParameter[item].icon" />
+        </el-option>
+      </el-select>
+      <el-input-number
+        v-model="idea.parameter.electricity.value"
         :min="-100"
         :max="100"
       />
@@ -240,6 +286,8 @@ import * as turf from '@turf/turf';
 import { until } from '@/utils/wait';
 import { defaultCenter } from '@/utils/map';
 import * as moduleService from '@/services/module-service';
+import { ElectricityInfluence } from '@/modules/brainstorming/missionmap/types/ElectricityInfluence';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
   computed: {
@@ -254,6 +302,7 @@ import * as moduleService from '@/services/module-service';
     },
   },
   components: {
+    FontAwesomeIcon,
     IdeaSettings,
     ValidationForm,
     MglNavigationControl,
@@ -275,10 +324,15 @@ export default class MissionSettings extends Vue {
 
   module: Module | null = null;
   calculateMarks = calculateMarks;
+  ElectricityInfluence = ElectricityInfluence;
 
   map: Map | null = null;
   mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;
+
+  get effectElectricity(): boolean | null {
+    return this.module && this.module.parameter.effectElectricity;
+  }
 
   get additionalParameter(): any {
     if (this.module && this.module.parameter.effectElectricity)
@@ -321,7 +375,7 @@ export default class MissionSettings extends Vue {
       moduleService.registerGetModuleById(
         this.moduleId,
         this.updateModule,
-        EndpointAuthorisationType.PARTICIPANT,
+        this.authHeaderTyp,
         60 * 60
       );
     }
@@ -444,5 +498,11 @@ export default class MissionSettings extends Vue {
   --pin-color: var(--color-primary);
   font-size: var(--font-size-xxxlarge);
   color: var(--pin-color);
+}
+
+.electricity {
+  .el-select {
+    margin-right: 1rem;
+  }
 }
 </style>
