@@ -1,0 +1,833 @@
+<template>
+  <ParticipantModuleDefaultContainer
+    :task-id="taskId"
+    :module="moduleName"
+    :module-theme="theme"
+    :class="{ PMDC: hasImage }"
+  >
+    <div id="preloader"></div>
+    <div id="loadingScreen">
+      <span>{{ $t('module.voting.vote.participant.waiting') }}...</span>
+      <span
+        id="loading"
+        v-loading="true"
+        element-loading-background="rgba(0, 0, 0, 0)"
+      ></span>
+    </div>
+    <template #footer>
+      <span class="previousNext">
+        <el-button
+          type="primary"
+          class="el-button--submit"
+          native-type="submit"
+          :disabled="votes.filter((vote) => vote.rating).length <= 0"
+          @click="submit"
+          v-if="!submitScreen"
+        >
+          {{ $t('module.voting.vote.participant.submit') }}
+        </el-button>
+      </span>
+    </template>
+    <el-space direction="vertical" class="fill" v-if="!submitScreen">
+      <div v-for="idea in allIdeas" :key="idea.id" class="votable">
+        <el-button
+          :disabled="false"
+          :loading="isSaving(idea.id)"
+          v-on:click="changeVote(idea.id)"
+          class="circleCheck"
+        >
+          <template #icon>
+            <font-awesome-icon
+              v-if="isAnswerSelected(idea.id)"
+              icon="circle-check"
+              class="circleCheckIcon"
+            />
+            <font-awesome-icon
+              v-else
+              :icon="['far', 'circle']"
+              class="circleCheckIcon"
+            />
+          </template>
+        </el-button>
+        <IdeaCard
+          class="media-left, IdeaCard"
+          :idea="idea"
+          :is-selectable="false"
+          :is-editable="false"
+          :show-state="false"
+          :portrait="!collapsed"
+          @update:collapse-ideas="collapsed = !collapsed"
+        />
+      </div>
+    </el-space>
+    <div id="submitScreen" v-if="submitScreen">
+      <span>{{ $t('module.voting.vote.participant.thanksIndividual') }}</span>
+    </div>
+  </ParticipantModuleDefaultContainer>
+</template>
+
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
+import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
+import * as moduleService from '@/services/module-service';
+import { Module } from '@/types/api/Module';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as votingService from '@/services/voting-service';
+import { Vote } from '@/types/api/Vote';
+import PublicBase from '@/modules/information/quiz/organisms/PublicBase.vue';
+import { Task } from '@/types/api/Task';
+import * as taskService from '@/services/task-service';
+import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
+import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
+import { QuestionType } from '@/modules/information/quiz/types/Question';
+import { Hierarchy } from '@/types/api/Hierarchy';
+import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
+import * as cashService from '@/services/cash-service';
+import draggable from 'vuedraggable';
+import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
+import { Idea } from '@/types/api/Idea';
+import * as viewService from '@/services/view-service';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+
+@Options({
+  components: {
+    IdeaCard,
+    ImagePicker,
+    QuizResult,
+    ParticipantModuleDefaultContainer,
+    PublicBase,
+    draggable,
+  },
+})
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+export default class Participant extends Vue {
+  @Prop() readonly taskId!: string;
+  @Prop() readonly moduleId!: string;
+  @Prop({ default: false }) readonly useFullSize!: boolean;
+  @Prop({ default: '' }) readonly backgroundClass!: string;
+  activeQuestion: Hierarchy | null = null;
+  module: Module | null = null;
+  task: Task | null = null;
+  votes: Vote[] = [];
+  EndpointAuthorisationType = EndpointAuthorisationType;
+  questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
+  moderatedQuestionFlow = true;
+  score = 0;
+  theme = '';
+
+  ideas: Idea[] = [];
+  allIdeas: Idea[] = [];
+
+  trackingManager!: TrackingManager;
+  inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
+  collapsed = true;
+
+  QuestionType = QuestionType;
+  submitScreen = false;
+
+  hasAnswer(): boolean {
+    return this.hasQuestionAnCorrectAnswer(this.activeQuestion);
+  }
+
+  hasQuestionAnCorrectAnswer(question: Hierarchy | null): boolean {
+    if (question && Object.hasOwn(question.parameter, 'hasAnswer'))
+      return question.parameter.hasAnswer;
+    return this.questionnaireType !== QuestionnaireType.SURVEY;
+  }
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {}, true);
+    }
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    this.inputCash = viewService.registerGetInputIdeas(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
+    this.votingCash = votingService.registerGetVotes(
+      this.taskId,
+      this.updateVotes,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
+  inputIdeas: Idea[] = [];
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeas();
+  }
+
+  updateVotes(votes: Vote[]): void {
+    this.votes = votes;
+    votes.forEach((vote) => {
+      const ideaIndex = this.ideas.findIndex((idea) => idea.id == vote.ideaId);
+      if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
+    });
+  }
+
+  updateIdeas(): void {
+    const ideas = viewService.customizeView(
+      this.inputIdeas,
+      null,
+      (this as any).$t,
+      [],
+      '',
+      this.task ? this.task.parameter.input.length : 1
+    );
+    this.allIdeas = [...ideas];
+    this.ideas = ideas;
+  }
+
+  get loading(): boolean {
+    const element = document.getElementById('loadingScreen');
+
+    if (element && !element.classList.contains('zeroOpacity')) {
+      const preload = document.getElementById('preloader');
+      preload?.classList.add('PreloadSprites');
+
+      setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
+      setTimeout(() => element?.classList.add('zeroOpacity'), 1000);
+      setTimeout(() => element?.classList.add('hidden'), 3000);
+      return true;
+    }
+    return false;
+  }
+
+  initData = true;
+  mounted(): void {
+    this.initData = true;
+    this.loading;
+  }
+
+  get hasImage(): boolean {
+    //check if the question has an image and return true or false
+    return false;
+  }
+
+  isAnswerSelected(answerId: string): boolean {
+    return !!this.votes.find((vote) => vote.ideaId == answerId);
+  }
+
+  isSavingList: string[] = [];
+  isSaving(answerId: string): boolean {
+    return this.isSavingList.includes(answerId);
+  }
+
+  dataSaved = true;
+  dataSaveStart = -1;
+
+  async changeVote(answerId: string): Promise<void> {
+    const dataSaveStart = Date.now();
+    this.dataSaveStart = dataSaveStart;
+    this.dataSaved = false;
+    if (!this.isSaving(answerId)) {
+      this.isSavingList.push(answerId);
+      const vote = this.votes.find((vote) => vote.ideaId === answerId);
+      if (vote) {
+        await votingService
+          .deleteVote(vote.id, EndpointAuthorisationType.PARTICIPANT)
+          .then((result) => {
+            if (result) {
+              const index = this.votes.findIndex(
+                (vote) => vote.ideaId === answerId
+              );
+              if (index > -1) this.votes.splice(index, 1);
+            }
+          });
+      } else {
+        await votingService
+          .postVote(this.taskId, {
+            ideaId: answerId,
+            rating: 1,
+            detailRating: 1,
+          })
+          .then((vote) => {
+            this.votes.push(vote);
+          });
+      }
+      const index = this.isSavingList.indexOf(answerId);
+      this.isSavingList.splice(index, 1);
+    }
+    const deleteVotes = this.votes.filter((vote) => vote.ideaId !== answerId);
+    for (const deleteVote of deleteVotes) {
+      await votingService
+        .deleteVote(deleteVote.id, EndpointAuthorisationType.PARTICIPANT)
+        .then((result) => {
+          if (result) {
+            const index = this.votes.findIndex(
+              (vote) => vote.ideaId === deleteVote.ideaId
+            );
+            if (index > -1) this.votes.splice(index, 1);
+          }
+        });
+    }
+    if (this.dataSaveStart === dataSaveStart) this.dataSaved = true;
+  }
+
+  get moduleName(): string {
+    if (this.module) return this.module.name;
+    return '';
+  }
+
+  @Watch('moduleId', { immediate: true })
+  onModuleIdChanged(): void {
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
+  }
+
+  updateModule(module: Module): void {
+    this.module = module;
+    if (module.parameter.theme) this.theme = module.parameter.theme;
+    this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+    if (this.moderatedQuestionFlow) this.initData = false;
+  }
+
+  updateTask(task: Task): void {
+    this.task = task;
+  }
+
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateVotes);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    if (this.trackingManager) this.trackingManager.deregisterAll();
+  }
+
+  async submit() {
+    this.submitScreen = true;
+    if (this.trackingManager) {
+      await this.trackingManager.createInstanceStepPoints(
+        this.votes[0].ideaId,
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        {
+          rating: this.votes[0].rating,
+          detailRating: this.votes[0].detailRating,
+          parameter: this.votes[0].parameter,
+        },
+        1,
+        null,
+        true,
+        false,
+        () => true
+      );
+      await this.trackingManager.saveIterationStep(
+        {
+          rating: this.votes[0].rating,
+          detailRating: this.votes[0].detailRating,
+          parameter: this.votes[0].parameter,
+        },
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        null,
+        1,
+        true,
+        null,
+        false,
+        () => true
+      );
+    }
+    await this.trackingManager.saveIteration(
+      null,
+      TaskParticipantIterationStatesType.PARTICIPATED,
+      null,
+      true
+    );
+    await this.trackingManager.saveState(
+      {
+        voteCount: this.votes.length,
+      },
+      TaskParticipantStatesType.FINISHED
+    );
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.el-space::v-deep(.el-space__item) {
+  width: 100%;
+}
+
+.el-footer {
+  height: auto;
+}
+
+.module-content::v-deep(.question) {
+  text-transform: none;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--el-font-size-extra-large);
+}
+
+.explanation {
+  width: 100%;
+  text-align: justify;
+  white-space: pre-line;
+}
+
+.previousNext {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.el-button {
+  padding: 1rem 2rem;
+  justify-content: left;
+}
+
+.PMDC {
+  border-radius: 30px 30px 0 0;
+  position: absolute;
+  top: 30%;
+  min-height: 70%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  z-index: 1;
+}
+
+#PMDC::v-deep(.el-steps) {
+  margin-bottom: 3%;
+}
+
+div#loadingScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  max-width: 760px;
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-color: var(--color-dark-contrast);
+
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  flex-direction: column;
+
+  opacity: 1;
+  z-index: 2;
+}
+
+div#loadingScreen > span {
+  width: 70%;
+  text-align: center;
+  color: white;
+  font-size: var(--font-size-large);
+  position: relative;
+  margin: auto auto 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+div#loadingScreen > span#loading {
+  margin-top: 50px;
+  margin-bottom: auto;
+}
+
+div#loadingScreen > span#loading::v-deep(.path) {
+  stroke: white;
+  stroke-width: 4;
+}
+
+.zeroOpacity {
+  opacity: 0 !important;
+  transition: 2s;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#QuizImageBackground {
+  position: absolute;
+
+  max-width: inherit;
+  height: 80%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-image: url('@/assets/illustrations/Voting/StarsSpace.png');
+  background-size: contain;
+
+  z-index: 0;
+}
+
+#QuizImageContainer {
+  position: absolute;
+
+  height: 23%;
+
+  width: 60%;
+
+  top: 3%;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.QuizImage {
+  position: absolute;
+  height: 100%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  border-radius: 20px;
+  border: 10px solid var(--color-dark-contrast-light);
+}
+
+.el-space::v-deep(.outline-thick):hover {
+  background-color: var(--color-dark-contrast);
+  border-color: var(--color-dark-contrast-light);
+  color: white;
+}
+
+.outline-thick {
+  border-color: var(--el-button-border-color);
+  border-width: 2px;
+  border-style: solid;
+}
+
+.el-space::v-deep(.link) > span {
+  width: 100%;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-align: left;
+  margin-left: 4%;
+
+  img {
+    background-color: white;
+  }
+}
+
+.el-space::v-deep(.link) {
+  height: auto;
+  padding: 2% 5% 2% 5%;
+}
+
+.el-space::v-deep(.fa-circle-check) > path {
+  fill: var(--color-informing);
+}
+
+.el-space::v-deep(.fa-circle) > path {
+  fill: var(--color-dark-contrast-light);
+}
+
+#submitScreen {
+  margin-top: 10%;
+  text-align: center;
+}
+
+.el-button.submitScreenButton {
+  width: 100%;
+  text-align: center;
+  display: flex;
+
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+}
+
+#ScoreString {
+  display: block;
+  font-size: var(--font-size-xxxxlarge);
+  font-weight: var(--font-weight-bold);
+  margin-top: 2rem;
+}
+
+.el-button::v-deep(> span) {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.question-image {
+  overflow: unset;
+}
+
+.question-image::v-deep(img.el-image__preview) {
+  height: 5rem;
+  object-fit: contain;
+  background-color: var(--color-primary);
+  //margin: -0.8rem -2.1rem -0.8rem 0.5rem;
+  //border-radius: 0 0.8rem 0.8rem 0;
+  border-radius: 0.8rem;
+  max-width: unset;
+  width: unset;
+}
+
+label {
+  font-weight: var(--font-weight-semibold);
+}
+
+.el-slider::v-deep(.el-slider__stop) {
+  width: 0.1px;
+}
+
+.media + .media {
+  padding-top: 1rem;
+}
+
+.orderDraggable {
+  background-color: var(--color-background);
+  padding: 1rem;
+  cursor: move;
+  margin: 1rem 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+
+  img {
+    margin: -1rem;
+  }
+}
+
+.orderDraggable h2 {
+  font-weight: bold;
+}
+
+.ghost {
+  background-color: var(--color-dark-contrast);
+  color: white;
+}
+
+[module-theme='paper'] {
+  background-image: url('@/modules/information/quiz/assets/clipboard.png');
+  background-size: cover;
+  background-position: center top;
+
+  .el-space .questionInfo {
+    padding: 0.5rem;
+    background: linear-gradient(
+        color-mix(in srgb, white 45%, transparent),
+        color-mix(in srgb, white 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    color: var(--color-dark-contrast);
+  }
+
+  .el-space .el-button,
+  .orderDraggable,
+  .el-slider,
+  .el-rate,
+  .el-input-number,
+  .el-textarea::v-deep(.el-textarea__inner) {
+    border-radius: 0;
+    background: linear-gradient(
+        color-mix(in srgb, var(--color-informing) 45%, transparent),
+        color-mix(in srgb, var(--color-informing) 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    color: var(--color-dark-contrast);
+    border: none;
+  }
+
+  .el-slider {
+    padding: 1.5rem 1.5rem 3rem 1.5rem;
+  }
+
+  .el-rate {
+    padding: 1.5rem;
+  }
+
+  .el-input-number::v-deep(.el-input-number__decrease),
+  .el-input-number::v-deep(.el-input-number__increase) {
+    background-color: color-mix(
+      in srgb,
+      var(--el-fill-color-light) 60%,
+      transparent
+    );
+    border-radius: 0;
+  }
+
+  .el-input-number::v-deep(.el-input__wrapper) {
+    background-color: transparent;
+    border-radius: 0;
+  }
+
+  .el-rate::v-deep(.el-rate__item) {
+    color: var(--color-dark-contrast);
+  }
+
+  .el-slider::v-deep(.el-slider__marks-text) {
+    color: var(--color-dark-contrast);
+  }
+
+  #submitScreen {
+    background: linear-gradient(
+        color-mix(in srgb, var(--color-informing) 45%, transparent),
+        color-mix(in srgb, var(--color-informing) 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    padding: 1rem;
+  }
+}
+
+[module-theme='paper'].module-content::v-deep(.media) {
+  --module-color: var(--color-dark-contrast);
+}
+
+[module-theme='paper'].module-content::v-deep(.fixed) {
+  margin: 0 -2rem -1rem -2rem;
+  padding: 1rem 2rem;
+  width: calc(100% + 4rem);
+}
+
+[module-theme='interview'] {
+  background-image: url('@/modules/information/quiz/assets/lectern.png'),
+    url('@/modules/information/quiz/assets/stage.png');
+  background-position: center bottom, left top;
+  background-repeat: no-repeat;
+  background-size: contain, cover;
+
+  .el-space .questionInfo {
+    border-radius: var(--border-radius) var(--border-radius)
+      var(--border-radius) 0;
+    background-color: color-mix(
+      in srgb,
+      var(--color-informing) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    padding: 0.5rem;
+  }
+
+  .el-space .el-button,
+  .orderDraggable,
+  .el-slider,
+  .el-rate,
+  .el-input-number,
+  .el-textarea::v-deep(.el-textarea__inner) {
+    border-radius: var(--border-radius) var(--border-radius) 0
+      var(--border-radius);
+    background-color: color-mix(
+      in srgb,
+      var(--color-background) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    color: var(--color-dark-contrast);
+  }
+
+  .el-slider {
+    padding: 1.5rem 1.5rem 3rem 1.5rem;
+  }
+
+  .el-rate {
+    padding: 1.5rem;
+  }
+
+  .el-rate::v-deep(.el-rate__item) {
+    color: var(--color-dark-contrast);
+  }
+
+  .el-slider::v-deep(.el-slider__marks-text) {
+    color: var(--color-dark-contrast);
+  }
+
+  .el-input-number::v-deep(.el-input-number__decrease),
+  .el-input-number::v-deep(.el-input-number__increase) {
+    background-color: color-mix(
+      in srgb,
+      var(--el-fill-color-light) 60%,
+      transparent
+    );
+  }
+
+  .el-input-number::v-deep(.el-input-number__decrease) {
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+  }
+
+  .el-input-number::v-deep(.el-input-number__increase) {
+    border-radius: 0 calc(var(--border-radius) - 3px) 0 0;
+  }
+
+  .el-input-number::v-deep(.el-input__wrapper) {
+    background-color: transparent;
+    border-radius: var(--border-radius) var(--border-radius) 0
+      var(--border-radius);
+  }
+
+  #submitScreen {
+    border-radius: var(--border-radius) var(--border-radius)
+      var(--border-radius) 0;
+    background-color: color-mix(
+      in srgb,
+      var(--color-informing) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    padding: 1rem;
+  }
+}
+
+.votable {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.circleCheck {
+  font-size: var(--font-size-xxlarge);
+  width: fit-content;
+  padding: 0;
+  background: transparent;
+  border: none;
+  margin-right: 0.5rem;
+}
+
+[module-theme='interview'].module-content::v-deep(.fixed) {
+  margin: 0 -2rem -1rem -2rem;
+  padding: 1rem 2rem;
+  width: calc(100% + 4rem);
+}
+</style>

@@ -1,0 +1,13 @@
+{
+  "description": {
+    "title": "Vote",
+    "description": "Wähle zwischen mehreren Auswahlen"
+  },
+  "participant": {
+    "thanksModerated": "Deine Wahl wurde gespeichert.",
+    "thanksIndividual": "Deine Wahl wurde gespeichert.",
+    "submit": "Speichern",
+    "waiting": "Bitte warten. Fragen und Antworten werden geladen.",
+    "imageKeywords": "Bildbeschreibung"
+  }
+}
