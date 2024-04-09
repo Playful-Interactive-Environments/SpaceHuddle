@@ -258,9 +258,10 @@
     />
   </el-dialog>
 
-  <IdeaSettings
+  <MissionSettings
     v-model:show-modal="showIdeaSettings"
     :taskId="taskId"
+    :module-id="moduleId"
     :idea="settingsIdea"
     :title="
       $t('module.brainstorming.missionmap.moderatorContent.settingsTitle')
@@ -269,156 +270,7 @@
     @updateData="addData"
     ref="ideaSettings"
   >
-    <el-form-item
-      :label="`${$t(
-        'module.brainstorming.missionmap.moderatorContent.points'
-      )}: ${settingsIdea.parameter.points}`"
-      :prop="`parameter.points`"
-    >
-      <el-slider
-        v-model="settingsIdea.parameter.points"
-        :min="500"
-        :max="10000"
-        :step="500"
-        :show-stops="true"
-        :marks="calculateMarks(1000, 10000, 1000)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="`${$t(
-        'module.brainstorming.missionmap.moderatorConfig.minParticipants'
-      )}: ${settingsIdea.parameter.minParticipants}`"
-      :prop="`parameter.minParticipants`"
-    >
-      <el-slider
-        v-model="settingsIdea.parameter.minParticipants"
-        :min="2"
-        :max="30"
-        :step="1"
-        :show-stops="true"
-        :marks="calculateMarks(5, 30, 5)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="`${$t(
-        'module.brainstorming.missionmap.moderatorConfig.minPoints'
-      )}: ${settingsIdea.parameter.minPoints}`"
-      :prop="`parameter.minPoints`"
-    >
-      <!--<el-slider
-        v-model="settingsIdeaRange"
-        range
-        :step="100"
-        :min="100"
-        :max="settingsIdea.parameter.points"
-        :show-stops="true"
-        :marks="calculateMarks(1000, settingsIdea.parameter.points, 1000)"
-      />-->
-      <el-slider
-        v-model="settingsIdea.parameter.minPoints"
-        :min="100"
-        :max="settingsIdea.parameter.maxPoints"
-        :step="100"
-        :show-stops="true"
-        :marks="calculateMarks(100, settingsIdea.parameter.maxPoints, 100, 10)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="`${$t(
-        'module.brainstorming.missionmap.moderatorConfig.maxPoints'
-      )}: ${settingsIdea.parameter.maxPoints}`"
-      :prop="`parameter.maxPoints`"
-    >
-      <el-slider
-        v-model="settingsIdea.parameter.maxPoints"
-        :min="settingsIdea.parameter.minPoints"
-        :max="settingsIdea.parameter.points"
-        :step="100"
-        :show-stops="true"
-        :marks="
-          calculateMarks(
-            settingsIdea.parameter.minPoints,
-            settingsIdea.parameter.points,
-            100,
-            10
-          )
-        "
-      />
-    </el-form-item>
-    <el-form-item
-      v-for="parameter of Object.keys(gameConfig.parameter)"
-      :key="parameter"
-      :label="$t(`module.brainstorming.missionmap.gameConfig.${parameter}`)"
-      :prop="`parameter.influenceAreas.${parameter}`"
-      :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
-    >
-      <template #label>
-        {{ $t(`module.brainstorming.missionmap.gameConfig.${parameter}`) }}
-        <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />:
-        <span v-if="settingsIdea.parameter.influenceAreas">
-          {{ settingsIdea.parameter.influenceAreas[parameter] }}
-        </span>
-      </template>
-      <el-slider
-        v-if="settingsIdea.parameter.influenceAreas"
-        v-model="settingsIdea.parameter.influenceAreas[parameter]"
-        :min="-5"
-        :max="5"
-        :show-stops="true"
-        :marks="calculateMarks(-5, 5, 1)"
-      />
-    </el-form-item>
-    <!--
-    :rules="[{ validator: validateElectricity }]"
-    -->
-    <el-form-item
-      v-for="parameter of Object.keys(additionalParameter)"
-      :key="parameter"
-      :label="$t(`module.playing.moveit.enums.electricity.${parameter}`)"
-      :prop="`parameter.electricity.${parameter}`"
-      :style="{
-        '--parameter-color': additionalParameter[parameter].color,
-      }"
-    >
-      <template #label>
-        {{ $t(`module.playing.moveit.enums.electricity.${parameter}`) }}
-        <font-awesome-icon :icon="additionalParameter[parameter].icon" />
-      </template>
-      <el-input-number
-        v-if="settingsIdea.parameter.electricity"
-        v-model="settingsIdea.parameter.electricity[parameter]"
-        :min="-100"
-        :max="100"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="
-        $t('module.brainstorming.missionmap.moderatorContent.mapLocation')
-      "
-      :prop="`parameter.mapLocation`"
-    >
-      <div style="height: var(--map-settings-height)">
-        <mgl-map
-          :center="mapCenter"
-          :zoom="mapZoom"
-          :double-click-zoom="false"
-          @map:load="onLoad"
-        >
-          <CustomMapMarker
-            :coordinates="convertCoordinates(settingsIdea.parameter.position)"
-            :draggable="true"
-            v-on:dragend="positionChanged"
-          >
-            <template v-slot:icon>
-              <font-awesome-icon icon="location-crosshairs" class="pin" />
-            </template>
-          </CustomMapMarker>
-
-          <mgl-navigation-control position="bottom-left" />
-        </mgl-map>
-      </div>
-    </el-form-item>
-  </IdeaSettings>
+  </MissionSettings>
   <el-dialog
     v-if="activeTab === 'map'"
     v-model="showSelectedIdea"
@@ -485,7 +337,6 @@ import { Module } from '@/types/api/Module';
 import { Task } from '@/types/api/Task';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import * as cashService from '@/services/cash-service';
@@ -508,19 +359,11 @@ import MissionProgressChart, {
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import gameConfigMoveIt from '@/modules/playing/moveit/data/gameConfig.json';
-import { ValidationRules } from '@/types/ui/ValidationRule';
-import { calculateMarks } from '@/utils/element-plus';
-import { defaultCenter } from '@/utils/map';
-import { LngLatLike, Map } from 'maplibre-gl';
-import * as turf from '@turf/turf';
-import { MglEvent, MglMap, MglNavigationControl } from 'vue-maplibre-gl';
-import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
-import { until } from '@/utils/wait';
 import IdeaStates from '@/types/enum/IdeaStates';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { Session } from '@/types/api/Session';
 import * as sessionService from '@/services/session-service';
+import MissionSettings from '@/modules/brainstorming/missionmap/organisms/MissionSettings.vue';
 
 interface ProgressValues {
   origin: number;
@@ -542,15 +385,12 @@ interface ProgressValues {
     },
   },
   components: {
-    MglNavigationControl,
-    MglMap,
-    CustomMapMarker,
+    MissionSettings,
     MissionProgressChart,
     FontAwesomeIcon,
     ValidationForm,
     IdeaMap,
     IdeaCard,
-    IdeaSettings,
     ParticipantModuleDefaultContainer,
     draggable,
     AddItem,
@@ -579,7 +419,6 @@ export default class Participant extends Vue {
   points = 0;
   showDetails = false;
   showSpentPoints = false;
-  showProgress = false;
   selectedVote = {
     rate: 0,
     order: 0,
@@ -606,27 +445,6 @@ export default class Participant extends Vue {
     parameter: {},
   };
   settingsIdea = this.addIdea;
-
-  mapCenter = [...defaultCenter] as [number, number];
-  mapZoom = 5;
-
-  calculateMarks = calculateMarks;
-
-  get settingsIdeaRange(): [number, number] {
-    if (this.settingsIdea && this.settingsIdea.parameter)
-      return [
-        this.settingsIdea.parameter.minPoints,
-        this.settingsIdea.parameter.maxPoints,
-      ];
-    return [0, 100];
-  }
-
-  set settingsIdeaRange(value: [number, number]) {
-    if (this.settingsIdea && this.settingsIdea.parameter) {
-      this.settingsIdea.parameter.minPoints = value[0];
-      this.settingsIdea.parameter.maxPoints = value[1];
-    }
-  }
 
   get minSpentPoints(): number {
     const absoluteMinimum = 100;
@@ -727,44 +545,6 @@ export default class Participant extends Vue {
     if (this.isDecided(idea.id))
       return themeColors.getBrainstormingColor('-light');
     return '#ffffff';
-  }
-
-  get additionalParameter(): any {
-    if (this.module && this.module.parameter.effectElectricity)
-      return gameConfigMoveIt.electricity;
-    return {};
-  }
-
-  validateElectricity(
-    rule: ValidationRules,
-    value: string,
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    callback: any
-  ): boolean {
-    const parameterList = Object.keys(this.additionalParameter);
-    if (parameterList.length === 0) {
-      callback();
-      return true;
-    }
-    let sum = 0;
-    for (const parameterName of parameterList) {
-      const parameterValue =
-        this.settingsIdea.parameter.electricity[parameterName];
-      sum += parameterValue;
-    }
-    const form = (this.$refs.ideaSettings as IdeaSettings).$refs
-      .dataForm as ValidationForm;
-    form.clearValidate();
-    if (sum === 0) {
-      callback();
-      return true;
-    } else {
-      const errorText = (this as any).$t(
-        'module.brainstorming.missionmap.moderatorContent.electricityValidationErrors'
-      );
-      callback(new Error(`${errorText} ${sum}`));
-      return false;
-    }
   }
 
   @Watch('taskId', { immediate: true })
@@ -1030,68 +810,6 @@ export default class Participant extends Vue {
   updateModule(module: Module): void {
     this.module = module;
     if (module.parameter.theme) this.theme = module.parameter.theme;
-
-    if (module.parameter.mapCenter) {
-      this.mapCenter = module.parameter.mapCenter;
-    }
-    if (module.parameter.mapZoom) {
-      this.mapZoom = module.parameter.mapZoom;
-    }
-  }
-
-  convertCoordinates(position: [number, number]): LngLatLike {
-    if (position) {
-      return {
-        lng: position[0],
-        lat: position[1],
-      };
-    }
-    if (this.map) {
-      const bounds = this.map.getBounds();
-      const pos = turf.randomPosition([
-        bounds._sw.lng,
-        bounds._sw.lat,
-        bounds._ne.lng,
-        bounds._ne.lat,
-      ]);
-      this.settingsIdea.parameter.position = pos;
-      return {
-        lng: pos[0],
-        lat: pos[1],
-      };
-    } else {
-      until(() => this.map).then(() => {
-        if (this.map) {
-          const bounds = this.map.getBounds();
-          this.settingsIdea.parameter.position = turf.randomPosition([
-            bounds._sw.lng,
-            bounds._sw.lat,
-            bounds._ne.lng,
-            bounds._ne.lat,
-          ]);
-        }
-      });
-    }
-    if (this.mapCenter) {
-      return {
-        lng: this.mapCenter[0],
-        lat: this.mapCenter[1],
-      };
-    }
-    return {
-      lng: 0,
-      lat: 0,
-    };
-  }
-
-  map: Map | null = null;
-  onLoad(e: MglEvent): void {
-    this.map = e.map;
-  }
-
-  positionChanged(marker: any): void {
-    const lngLat = marker.target._lngLat;
-    this.settingsIdea.parameter.position = [lngLat.lng, lngLat.lat];
   }
 
   deregisterAll(): void {

@@ -171,185 +171,15 @@
       </div>
     </el-collapse-item>
   </el-collapse>
-  <IdeaSettings
+  <MissionSettings
     v-model:show-modal="showSettings"
     :taskId="taskId"
+    :module-id="module?.id"
     :idea="settingsIdea"
     @updateData="addData"
     ref="ideaSettings"
   >
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.points')"
-      :prop="`parameter.points`"
-    >
-      <el-slider
-        v-model="settingsIdea.parameter.points"
-        :min="500"
-        :max="10000"
-        :step="500"
-        :show-stops="true"
-        :marks="calculateMarks(1000, 10000, 1000)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="
-        $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
-      "
-      :prop="`parameter.minParticipants`"
-    >
-      <el-slider
-        v-model="settingsIdea.parameter.minParticipants"
-        :min="2"
-        :max="30"
-        :step="1"
-        :show-stops="true"
-        :marks="calculateMarks(5, 30, 5)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
-      :prop="`parameter.minPoints`"
-    >
-      <el-slider
-        v-model="settingsIdea.parameter.minPoints"
-        :min="100"
-        :max="settingsIdea.parameter.maxPoints"
-        :step="100"
-        :show-stops="true"
-        :marks="calculateMarks(100, settingsIdea.parameter.maxPoints, 100, 10)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
-      :prop="`parameter.maxPoints`"
-    >
-      <el-slider
-        v-model="settingsIdea.parameter.maxPoints"
-        :min="settingsIdea.parameter.minPoints"
-        :max="settingsIdea.parameter.points"
-        :step="100"
-        :show-stops="true"
-        :marks="
-          calculateMarks(
-            settingsIdea.parameter.minPoints,
-            settingsIdea.parameter.points,
-            100,
-            10
-          )
-        "
-      />
-    </el-form-item>
-    <el-form-item
-      v-for="parameter of Object.keys(gameConfig.parameter)"
-      :key="parameter"
-      :label="$t(`module.brainstorming.missionmap.gameConfig.${parameter}`)"
-      :prop="`parameter.influenceAreas.${parameter}`"
-      :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
-    >
-      <template #label>
-        {{ $t(`module.brainstorming.missionmap.gameConfig.${parameter}`) }}
-        <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
-      </template>
-      <el-slider
-        v-if="settingsIdea.parameter.influenceAreas"
-        v-model="settingsIdea.parameter.influenceAreas[parameter]"
-        :min="-5"
-        :max="5"
-        :show-stops="true"
-        :marks="calculateMarks(-5, 5, 1)"
-      />
-    </el-form-item>
-    <!--
-      :rules="[{ validator: validateElectricity }]"
-    --->
-    <el-form-item
-      v-for="parameter of Object.keys(additionalParameter)"
-      :key="parameter"
-      :label="$t(`module.playing.moveit.enums.electricity.${parameter}`)"
-      :prop="`parameter.electricity.${parameter}`"
-      :style="{
-        '--parameter-color': additionalParameter[parameter].color,
-      }"
-    >
-      <template #label>
-        {{ $t(`module.playing.moveit.enums.electricity.${parameter}`) }}
-        <font-awesome-icon :icon="additionalParameter[parameter].icon" />
-      </template>
-      <el-input-number
-        v-if="settingsIdea.parameter.electricity"
-        v-model="settingsIdea.parameter.electricity[parameter]"
-        :min="-100"
-        :max="100"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.explanation')"
-      :prop="`parameter.explanationList`"
-    >
-      <el-input
-        v-for="(explanation, index) of settingsIdea.parameter.explanationList"
-        :key="index"
-        v-model="settingsIdea.parameter.explanationList[index]"
-      >
-        <template #prepend>
-          <span style="width: 1.5rem">{{ index + 1 }}.</span>
-        </template>
-      </el-input>
-    </el-form-item>
-    <!--<el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.share')"
-      :prop="`parameter.shareData`"
-    >
-      <el-switch v-model="settingsIdea.parameter.shareData" />
-    </el-form-item>-->
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.evaluation')"
-      :prop="`parameter.shareData`"
-    >
-      <span
-        class="link"
-        :class="{
-          'is-active':
-            settingsIdea.state?.toLowerCase() === IdeaStates.THUMBS_UP,
-        }"
-        @click="
-          () => {
-            settingsIdea.parameter.shareData = true;
-            settingsIdea.state = IdeaStates.THUMBS_UP;
-          }
-        "
-      >
-        <font-awesome-icon icon="thumbs-up" />
-      </span>
-      <span
-        class="link"
-        :class="{
-          'is-active':
-            settingsIdea.state?.toLowerCase() === IdeaStates.THUMBS_DOWN,
-        }"
-        @click="
-          () => {
-            settingsIdea.parameter.shareData = false;
-            settingsIdea.state = IdeaStates.THUMBS_DOWN;
-          }
-        "
-      >
-        <font-awesome-icon icon="thumbs-down" />
-      </span>
-      <div v-if="settingsIdea.state?.toLowerCase() === IdeaStates.THUMBS_DOWN">
-        <el-input
-          v-model="settingsIdea.parameter.reasonsForRejection"
-          :rows="3"
-          type="textarea"
-          :placeholder="
-            $t(
-              'module.brainstorming.missionmap.moderatorContent.reasonsForRejection'
-            )
-          "
-        />
-      </div>
-    </el-form-item>
-  </IdeaSettings>
+  </MissionSettings>
   <el-dialog v-model="showReason" :before-close="resetReason">
     <template #header>
       {{ $t('module.brainstorming.missionmap.moderatorContent.reason') }}
@@ -395,9 +225,7 @@ import {
 import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
-import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
-import gameConfigMoveIt from '@/modules/playing/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Vote } from '@/types/api/Vote';
 import { setEmptyParameterIfNotExists } from '@/modules/brainstorming/missionmap/utils/parameter';
@@ -405,13 +233,11 @@ import * as themeColors from '@/utils/themeColors';
 import MissionProgressChart, {
   MissionProgressParameter,
 } from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
-import { ValidationRules } from '@/types/ui/ValidationRule';
-import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 import { MissionInputData } from '@/modules/brainstorming/missionmap/types/MissionInputData';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
-import { calculateMarks } from '@/utils/element-plus';
 import IdeaStates from '@/types/enum/IdeaStates';
+import MissionSettings from '@/modules/brainstorming/missionmap/organisms/MissionSettings.vue';
 
 @Options({
   computed: {
@@ -426,6 +252,7 @@ import IdeaStates from '@/types/enum/IdeaStates';
     },
   },
   components: {
+    MissionSettings,
     FontAwesomeIcon,
     IdeaMap,
     AddItem,
@@ -433,7 +260,6 @@ import IdeaStates from '@/types/enum/IdeaStates';
     CollapseTitle,
     draggable,
     IdeaFilter,
-    IdeaSettings,
     MissionProgressChart,
   },
 })
@@ -466,8 +292,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   inputManager!: CombinedInputManager;
   activeProgressTab = MissionProgressParameter.influenceAreas;
 
-  calculateMarks = calculateMarks;
-
   getIdeaColor(idea: Idea): string {
     if (!idea.parameter.shareData)
       return themeColors.getInformingColor('-light');
@@ -489,50 +313,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return this.filter.orderType === IdeaSortOrder.ORDER;
   }
 
-  get additionalParameter(): any {
-    if (this.module && this.module.parameter.effectElectricity)
-      return gameConfigMoveIt.electricity;
-    return {};
-  }
-
   get progress(): { [key: string]: progress.ProgressValues } {
     return progress.getProgress(this.decidedIdeas, this.module);
   }
 
   isDecided(ideaId: string): boolean {
     return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
-  }
-
-  validateElectricity(
-    rule: ValidationRules,
-    value: string,
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    callback: any
-  ): boolean {
-    const parameterList = Object.keys(this.additionalParameter);
-    if (parameterList.length === 0) {
-      callback();
-      return true;
-    }
-    let sum = 0;
-    for (const parameterName of parameterList) {
-      const parameterValue =
-        this.settingsIdea.parameter.electricity[parameterName];
-      sum += parameterValue;
-    }
-    const form = (this.$refs.ideaSettings as IdeaSettings).$refs
-      .dataForm as ValidationForm;
-    form.clearValidate();
-    if (sum === 0) {
-      callback();
-      return true;
-    } else {
-      const errorText = (this as any).$t(
-        'module.brainstorming.missionmap.moderatorContent.electricityValidationErrors'
-      );
-      callback(new Error(`${errorText} ${sum}`));
-      return false;
-    }
   }
 
   @Watch('taskId', { immediate: true })
