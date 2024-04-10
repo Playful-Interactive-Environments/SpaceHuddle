@@ -509,14 +509,23 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   resetAddIdea(): void {
-    this.settingsIdea = this.addIdea;
+    this.settingsIdea = {
+      keywords: '',
+      description: '',
+      image: null,
+      link: null,
+      order: this.ideas.length,
+      parameter: {},
+    };
     this.addIdea.keywords = '';
     this.addIdea.description = '';
     this.addIdea.image = null;
     this.addIdea.link = null;
     this.addIdea.order = this.ideas.length;
     this.addIdea.parameter = {};
-    setEmptyParameterIfNotExists(this.addIdea, () => this.module);
+    setEmptyParameterIfNotExists(this.addIdea, () => this.module).then(() => {
+      this.settingsIdea = this.addIdea;
+    });
   }
 
   editNewImage(): void {

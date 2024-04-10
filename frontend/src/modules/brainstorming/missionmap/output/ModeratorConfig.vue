@@ -30,6 +30,10 @@
     />
   </el-form-item>-->
   <el-form-item
+    :label="$t('module.brainstorming.missionmap.moderatorConfig.startingPoint')"
+  >
+  </el-form-item>
+  <el-form-item
     v-for="parameter of ManuelInitParameter"
     :key="parameter"
     :label="$t(`module.brainstorming.missionmap.gameConfig.${parameter}`)"
@@ -62,7 +66,12 @@
     "
     :prop="`${rulePropPath}.maxRatingStars`"
   >
-    <el-input-number v-model="modelValue.maxRatingStars" :min="3" :max="10" />
+    <el-slider
+      v-model="modelValue.maxRatingStars"
+      :min="3"
+      :max="10"
+      :marks="calculateMarks(3, 10)"
+    />
   </el-form-item>
   <el-form-item
     :label="
@@ -70,41 +79,60 @@
     "
     :prop="`${rulePropPath}.minParticipants`"
   >
-    <el-input-number v-model="modelValue.minParticipants" :min="1" :max="100" />
+    <el-slider
+      v-model="modelValue.minParticipants"
+      :min="2"
+      :max="100"
+      :marks="calculateMarks(0, 100, 10, 11, 2)"
+    />
   </el-form-item>
   <el-form-item
     :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
     :prop="`${rulePropPath}.minPoints`"
   >
-    <el-input-number
+    <el-slider
       v-model="modelValue.minPoints"
       :min="100"
       :max="modelValue.maxPoints"
+      :step="100"
+      :marks="calculateMarks(100, modelValue.maxPoints, 100, 11)"
     />
   </el-form-item>
   <el-form-item
     :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
     :prop="`${rulePropPath}.maxPoints`"
   >
-    <el-input-number
+    <el-slider
       v-model="modelValue.maxPoints"
       :min="modelValue.minPoints"
       :max="10000"
+      :step="100"
+      :marks="calculateMarks(0, 10000, 100, 11, modelValue.minPoints)"
     />
   </el-form-item>
   <el-form-item
     :label="$t('module.brainstorming.missionmap.moderatorConfig.explanation')"
     :prop="`${rulePropPath}.explanationList`"
   >
-    <el-input
+    <div
       v-for="(explanation, index) of modelValue.explanationList"
       :key="index"
-      v-model="modelValue.explanationList[index]"
     >
-      <template #prepend>
-        <span style="width: 1.5rem">{{ index + 1 }}.</span>
-      </template>
-    </el-input>
+      <el-input v-model="modelValue.explanationList[index]">
+        <template #prepend>
+          <span style="width: 1.5rem">{{ index + 1 }}.</span>
+          <div @click="() => modelValue.explanationList.splice(index, 1)">
+            <font-awesome-icon icon="trash" />
+          </div>
+        </template>
+      </el-input>
+    </div>
+    <AddItem
+      :text="
+        $t('module.brainstorming.missionmap.moderatorConfig.addExplanation')
+      "
+      @addNew="() => modelValue.explanationList.push('')"
+    />
   </el-form-item>
   <el-form-item
     :label="
@@ -151,6 +179,8 @@ import * as mapStyle from '@/utils/mapStyle';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { defaultCenter } from '@/utils/map';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import { calculateMarks } from '@/utils/element-plus';
 
 mapStyle.setMapStyleStreets();
 
@@ -164,6 +194,7 @@ mapStyle.setMapStyleStreets();
     MglNavigationControl,
     MglMap,
     FontAwesomeIcon,
+    AddItem,
   },
   emits: ['update'],
 })
@@ -182,6 +213,7 @@ export default class ModeratorConfig extends Vue {
   mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;
   hasInput = false;
+  calculateMarks = calculateMarks;
 
   get ManuelInitParameter(): string[] {
     /*if (this.hasInput && this.modelValue.insertInitProgressionFromInput)

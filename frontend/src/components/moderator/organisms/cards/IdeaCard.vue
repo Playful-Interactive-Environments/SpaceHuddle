@@ -24,35 +24,10 @@
       '--background-color': backgroundColor,
     }"
   >
-    <el-image
-      v-if="idea.image"
-      :src="idea.image"
-      class="card__image"
-      alt=""
-      :preview-src-list="[idea.image]"
-      :hide-on-click-modal="true"
-      @click="stopPropagation"
-    />
-    <figure
-      class="media video"
-      v-else-if="isLinkVideo(idea.link)"
-      @click="stopPropagation"
-    >
-      <iframe
-        :src="convertToEmbed(idea.link)"
-        height="100%"
-        width="100%"
-        allow="fullscreen"
-      ></iframe>
-    </figure>
-    <el-image
-      v-else-if="idea.link && !idea.image"
-      :src="idea.link"
-      class="card__image"
-      alt=""
-      :preview-src-list="[idea.link]"
-      :hide-on-click-modal="true"
-      @click="stopPropagation"
+    <IdeaMediaViewer
+      v-if="idea.image || idea.link"
+      :idea="idea"
+      css-class="card__image"
     />
     <div v-else class="card__image">
       <slot name="icon"></slot>
@@ -214,6 +189,7 @@ import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as themeColors from '@/utils/themeColors';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import IdeaMediaViewer from '@/components/moderator/molecules/IdeaMediaViewer.vue';
 
 export enum CollapseIdeas {
   collapseAll = 'collapseAll',
@@ -222,7 +198,7 @@ export enum CollapseIdeas {
 }
 
 @Options({
-  components: { ToolTip, IdeaSettings },
+  components: { IdeaMediaViewer, ToolTip, IdeaSettings },
   emits: [
     'ideaDeleted',
     'ideaStartEdit',
@@ -266,8 +242,6 @@ export default class IdeaCard extends Vue {
   preventClosing = false;
 
   IdeaStates = IdeaStates;
-
-  imgPreview = false;
 
   levelSharedChanged() {
     this.$emit('sharedStatusChanged', this.shareStateValue);
@@ -460,28 +434,6 @@ export default class IdeaCard extends Vue {
   collapseChanged(): void {
     this.limitedTextLength = !this.limitedTextLength;
     this.$emit('update:collapseIdeas', CollapseIdeas.custom);
-  }
-
-  convertToEmbed(link: string | null) {
-    if (link) {
-      if (link.includes('youtube')) {
-        link = link.replace('watch?v=', 'embed/');
-      } else if (link.includes('vimeo')) {
-        const vid = link.split('/');
-        const vidNr = vid[vid.length - 1];
-        link = 'https://player.vimeo.com/video/' + vidNr;
-      }
-    }
-    return link;
-  }
-
-  isLinkVideo(link: string | null): boolean {
-    if (link) {
-      if (link.includes('youtube') || link.includes('vimeo')) {
-        return true;
-      }
-    }
-    return false;
   }
 }
 </script>

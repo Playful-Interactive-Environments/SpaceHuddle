@@ -7,13 +7,13 @@
     "points": "votes",
     "rate": "rate",
     "description": "description",
-    "explanation": "explanation",
+    "explanation": "comment",
     "freeExplanation": "free text for own explanation or suggested answer",
     "save": "save",
     "spentHeader": "spend additional votes on measure",
     "nothingToSpent": "you currently have too few points to award any more votes for this measure",
     "maxSpent": "you have already allocated the maximum possible support for this measure",
-    "new": "new",
+    "new": "thereof new",
     "target": "required in total",
     "actual": "already received",
     "own": "your part",
@@ -47,19 +47,25 @@
     "minParticipants": "minimum required participants",
     "minPoints": "minimum required points per participant",
     "maxPoints": "maximum points to be spent per participant",
-    "explanation": "explanations selectable for the participant",
+    "explanation": "general suggested texts for the participants' comments on the individual measures",
     "maxRatingStars": "max rating stars",
+    "startingPoint": "starting point",
     "insertInitProgressionFromInput": "insert starting progression from input",
     "theme": "theme",
     "preparation": "preparation",
     "meeting": "council meeting",
-    "default": "default"
+    "default": "default",
+    "addExplanation": "add"
   },
   "moderatorContent": {
     "settingsTitle": "idea settings",
     "displayAll": "display all",
     "add": "add content",
     "points": "required sum of points",
+    "minParticipants": "minimum required participants",
+    "minPoints": "minimum required points per participant",
+    "maxPoints": "maximum points to be spent per participant",
+    "explanation": "suggested texts for the participants' comments on this measure",
     "mapLocation": "location",
     "electricityInfluence": "electricity influence",
     "share": "make it visible to all",
@@ -67,7 +73,15 @@
     "reason": "reason for rejection",
     "save": "save",
     "reasonsForRejection": "Give reasons for your rejection",
-    "electricityValidationErrors": "electricity sum must be 0 please adjust the values so that the sum is again 0 instead of "
+    "electricityValidationErrors": "electricity sum must be 0 please adjust the values so that the sum is again 0 instead of ",
+    "addExplanation": "add",
+    "electricity": {
+      "none": "0",
+      "min-demand": " reduction",
+      "max-demand": " increase",
+      "min-supply": " lower coverage of the total demand",
+      "max-supply": " additional coverage of the total demand"
+    }
   },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."

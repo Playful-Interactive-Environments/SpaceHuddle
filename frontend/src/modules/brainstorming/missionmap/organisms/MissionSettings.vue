@@ -5,7 +5,7 @@
     :idea="idea"
     :title="title"
     :auth-header-typ="authHeaderTyp"
-    @updateData="(data) => $emit('updateData', data)"
+    @updateData="updateData"
     ref="ideaSettings"
   >
     <el-form-item
@@ -21,9 +21,9 @@
         :marks="calculateMarks(1000, 10000, 1000)"
       />
     </el-form-item>
-    <el-form-item
+    <!--<el-form-item
       :label="
-        $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
+        $t('module.brainstorming.missionmap.moderatorContent.minParticipants')
       "
       :prop="`parameter.minParticipants`"
     >
@@ -37,18 +37,9 @@
       />
     </el-form-item>
     <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
+      :label="$t('module.brainstorming.missionmap.moderatorContent.minPoints')"
       :prop="`parameter.minPoints`"
     >
-      <!--<el-slider
-        v-model="ideaRange"
-        range
-        :step="100"
-        :min="100"
-        :max="idea.parameter.points"
-        :show-stops="true"
-        :marks="calculateMarks(1000, idea.parameter.points, 1000)"
-      />-->
       <el-slider
         v-model="idea.parameter.minPoints"
         :min="100"
@@ -59,7 +50,7 @@
       />
     </el-form-item>
     <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
+      :label="$t('module.brainstorming.missionmap.moderatorContent.maxPoints')"
       :prop="`parameter.maxPoints`"
     >
       <el-slider
@@ -77,7 +68,7 @@
           )
         "
       />
-    </el-form-item>
+    </el-form-item>-->
     <el-form-item
       v-for="parameter of Object.keys(gameConfig.parameter)"
       :key="parameter"
@@ -161,26 +152,97 @@
           <font-awesome-icon :icon="additionalParameter[item].icon" />
         </el-option>
       </el-select>
-      <el-input-number
+      <el-slider
+        v-if="
+          idea.parameter.electricity.influence ===
+          ElectricityInfluence.CHANGE_ELECTRICITY_SUPPLY
+        "
+        v-model="idea.parameter.electricity.value"
+        :min="0"
+        :max="50"
+        :marks="{
+          0: $t(
+            'module.brainstorming.missionmap.moderatorContent.electricity.none'
+          ),
+          50: {
+            style: {
+              color: getGreenColor(),
+              '--translate': '-100%',
+            },
+            label: `50%${$t(
+              'module.brainstorming.missionmap.moderatorContent.electricity.max-supply'
+            )}`,
+          },
+        }"
+      />
+      <el-slider
+        v-else
         v-model="idea.parameter.electricity.value"
         :min="-100"
         :max="100"
+        :marks="{
+          '-100': {
+            style: {
+              color: getRedColor(),
+              '--translate': 0,
+            },
+            label: `-100%${$t(
+              'module.brainstorming.missionmap.moderatorContent.electricity.min-demand'
+            )}`,
+          },
+          '-50': {
+            style: {
+              color: getRedColor(),
+            },
+            label: `-50%`,
+          },
+          0: $t(
+            'module.brainstorming.missionmap.moderatorContent.electricity.none'
+          ),
+          50: {
+            style: {
+              color: getGreenColor(),
+            },
+            label: `50%`,
+          },
+          100: {
+            style: {
+              color: getGreenColor(),
+              '--translate': '-100%',
+            },
+            label: `100%${$t(
+              'module.brainstorming.missionmap.moderatorContent.electricity.max-demand'
+            )}`,
+          },
+        }"
       />
     </el-form-item>
     <el-form-item
       v-if="authHeaderTyp === EndpointAuthorisationType.MODERATOR"
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.explanation')"
+      :label="
+        $t('module.brainstorming.missionmap.moderatorContent.explanation')
+      "
       :prop="`parameter.explanationList`"
     >
-      <el-input
+      <div
         v-for="(explanation, index) of idea.parameter.explanationList"
         :key="index"
-        v-model="idea.parameter.explanationList[index]"
       >
-        <template #prepend>
-          <span style="width: 1.5rem">{{ index + 1 }}.</span>
-        </template>
-      </el-input>
+        <el-input v-model="idea.parameter.explanationList[index]">
+          <template #prepend>
+            <span style="width: 1.5rem">{{ index + 1 }}.</span>
+            <div @click="() => idea.parameter.explanationList.splice(index, 1)">
+              <font-awesome-icon icon="trash" />
+            </div>
+          </template>
+        </el-input>
+      </div>
+      <AddItem
+        :text="
+          $t('module.brainstorming.missionmap.moderatorContent.addExplanation')
+        "
+        @addNew="() => idea.parameter.explanationList.push('')"
+      />
     </el-form-item>
     <!--<el-form-item
       :label="$t('module.brainstorming.missionmap.moderatorContent.share')"
@@ -189,7 +251,10 @@
       <el-switch v-model="idea.parameter.shareData" />
     </el-form-item>-->
     <el-form-item
-      v-if="authHeaderTyp === EndpointAuthorisationType.MODERATOR"
+      v-if="
+        authHeaderTyp === EndpointAuthorisationType.MODERATOR &&
+        idea.participantId
+      "
       :label="$t('module.brainstorming.missionmap.moderatorContent.evaluation')"
       :prop="`parameter.shareData`"
     >
@@ -288,8 +353,11 @@ import { defaultCenter } from '@/utils/map';
 import * as moduleService from '@/services/module-service';
 import { ElectricityInfluence } from '@/modules/brainstorming/missionmap/types/ElectricityInfluence';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import { getGreenColor, getRedColor } from '@/utils/themeColors';
 
 @Options({
+  methods: { getRedColor, getGreenColor },
   computed: {
     EndpointAuthorisationType() {
       return EndpointAuthorisationType;
@@ -308,6 +376,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
     MglNavigationControl,
     MglMap,
     CustomMapMarker,
+    AddItem,
   },
   emits: ['update:showModal', 'updateData'],
 })
@@ -367,6 +436,30 @@ export default class MissionSettings extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+  }
+
+  @Watch('idea.parameter.points', { immediate: true })
+  onPointsChanged(): void {
+    if (this.idea.parameter.points) {
+      this.idea.parameter.maxPoints =
+        Math.round(
+          Math.min(
+            (this.idea.parameter.points / 3) * 2,
+            this.idea.parameter.points -
+              (this.idea.parameter.minParticipants - 1) *
+                this.idea.parameter.minPoints
+          ) / 10
+        ) * 10;
+      if (this.idea.parameter.maxPoints < this.idea.parameter.minPoints * 2)
+        this.idea.parameter.maxPoints = this.idea.parameter.minPoints * 2;
+      if (
+        this.module &&
+        this.module.parameter.maxPoints &&
+        this.module.parameter.maxPoints < this.idea.parameter.maxPoints
+      ) {
+        this.idea.parameter.maxPoints = this.module.parameter.maxPoints;
+      }
+    }
   }
 
   @Watch('moduleId', { immediate: true })
@@ -476,6 +569,13 @@ export default class MissionSettings extends Vue {
     const lngLat = marker.target._lngLat;
     this.idea.parameter.position = [lngLat.lng, lngLat.lat];
   }
+
+  updateData(data: Idea): void {
+    data.parameter.explanationList = data.parameter.explanationList.filter(
+      (item) => item
+    );
+    this.$emit('updateData', data);
+  }
 }
 </script>
 
@@ -504,5 +604,10 @@ export default class MissionSettings extends Vue {
   .el-select {
     margin-right: 1rem;
   }
+}
+
+.el-slider::v-deep(.el-slider__marks-text) {
+  --translate: -50%;
+  transform: translateX(var(--translate));
 }
 </style>

@@ -21,21 +21,7 @@
           <font-awesome-icon icon="plus" />
           <span>{{ $t('moderator.atom.imagePicker.add') }}</span>
         </div>
-        <figure class="media video" v-if="isLinkVideo(link)">
-          <iframe
-            :src="convertToEmbed(link)"
-            height="100%"
-            width="100%"
-            allow="fullscreen"
-          ></iframe>
-        </figure>
-        <el-image
-          fit="contain"
-          :src="link"
-          alt=""
-          v-if="link && !image && !isLinkVideo(link)"
-        />
-        <el-image fit="contain" :src="image" alt="" v-if="image" />
+        <MediaViewer :src="image ?? link" fit="contain" />
       </div>
       <div
         v-if="useEditOverlay"
@@ -67,9 +53,11 @@ import { Prop, Watch } from 'vue-property-decorator';
 import LinkSettings from '@/components/moderator/organisms/settings/LinkSettings.vue';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 import DrawingUpload from '@/components/shared/organisms/DrawingUpload.vue';
+import MediaViewer from '@/components/moderator/molecules/MediaViewer.vue';
 
 @Options({
   components: {
+    MediaViewer,
     DrawingUpload,
     ImageUploader,
     LinkSettings,
@@ -102,28 +90,6 @@ export default class ImagePicker extends Vue {
   @Watch('link', { immediate: true, deep: true })
   async onLinkChanged(link: string | null): Promise<void> {
     this.editLink = link;
-  }
-
-  convertToEmbed(link: string | null) {
-    if (link) {
-      if (link.includes('youtube')) {
-        link = link.replace('watch?v=', 'embed/');
-      } else if (link.includes('vimeo')) {
-        const vid = link.split('/');
-        const vidNr = vid[vid.length - 1];
-        link = 'https://player.vimeo.com/video/' + vidNr;
-      }
-    }
-    return link;
-  }
-
-  isLinkVideo(link: string | null): boolean {
-    if (link) {
-      if (link.includes('youtube') || link.includes('vimeo')) {
-        return true;
-      }
-    }
-    return false;
   }
 
   @Watch('editLink', { immediate: true, deep: true })

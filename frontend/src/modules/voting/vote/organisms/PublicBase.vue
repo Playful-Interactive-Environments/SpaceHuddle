@@ -19,24 +19,10 @@
         (statePointer >= 0 || !isActive)
       "
     >
-      <figure
-          class="media video"
-          v-if="isLinkVideo(publicImage)"
-      >
-        <iframe
-            :src="convertToEmbed(publicImage)"
-            height="100%"
-            width="100%"
-            allow="fullscreen"
-        ></iframe>
-      </figure>
-      <el-image
-          v-else-if="hasPublicImage"
-          :src="publicImage"
-          class="question-image"
-          alt=""
-          :preview-src-list="[publicImage]"
-          :hide-on-click-modal="true"
+      <MediaViewer
+        v-if="hasPublicImage"
+        :src="publicImage"
+        css-class="question-image"
       />
       <div class="question">
         {{ publicQuestion.question.keywords }}
@@ -131,6 +117,7 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import Highscore from '@/modules/information/quiz/organisms/Highscore.vue';
 import { TimelineArea } from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
+import MediaViewer from '@/components/moderator/molecules/MediaViewer.vue';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -141,6 +128,7 @@ export interface PublicAnswerData {
 
 @Options({
   components: {
+    MediaViewer,
     Highscore,
     QuizResult,
   },
@@ -805,28 +793,6 @@ export default class PublicBase extends Vue {
   unmounted(): void {
     this.deregisterAll();
     clearInterval(this.interval);
-  }
-
-  convertToEmbed(link: string | null) {
-    if (link) {
-      if (link.includes('youtube')) {
-        link = link.replace('watch?v=', 'embed/');
-      } else if (link.includes('vimeo')) {
-        const vid = link.split('/');
-        const vidNr = vid[vid.length - 1];
-        link = 'https://player.vimeo.com/video/' + vidNr;
-      }
-    }
-    return link;
-  }
-
-  isLinkVideo(link: string | null): boolean {
-    if (link) {
-      if (link.includes('youtube') || link.includes('vimeo')) {
-        return true;
-      }
-    }
-    return false;
   }
 }
 </script>

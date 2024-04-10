@@ -63,6 +63,6 @@ export async function setEmptyParameterIfNotExists(
   if (!idea.parameter.explanationList) {
     if (module && module.parameter.explanationList) {
       idea.parameter.explanationList = [...module.parameter.explanationList];
-    } else idea.parameter.explanationList = ['', '', ''];
+    } else idea.parameter.explanationList = [];
   }
 }

@@ -108,33 +108,7 @@
                 ? answer.answer.description
                 : answer.answer.keywords
             }}
-            <el-image
-              v-if="answer.answer.image"
-              :src="answer.answer.image"
-              class="question-image"
-              alt=""
-              :preview-src-list="[answer.answer.image]"
-              :hide-on-click-modal="true"
-            />
-            <figure
-              class="media video"
-              v-else-if="isLinkVideo(answer.answer.link)"
-            >
-              <iframe
-                :src="convertToEmbed(answer.answer.link)"
-                height="100%"
-                width="100%"
-                allow="fullscreen"
-              ></iframe>
-            </figure>
-            <el-image
-              v-else-if="answer.answer.link && !answer.answer.image"
-              :src="answer.answer.link"
-              class="question-image"
-              alt=""
-              :preview-src-list="[answer.answer.link]"
-              :hide-on-click-modal="true"
-            />
+            <IdeaMediaViewer :idea="answer.answer" css-class="question-image" />
           </el-button>
         </el-space>
         <el-space
@@ -152,32 +126,9 @@
                 {{ publicAnswerList.indexOf(element) + 1 }}
               </h2>
               <p class="media-content">{{ element.answer.keywords }}</p>
-              <el-image
-                v-if="element.answer.image"
-                :src="element.answer.image"
-                class="question-image"
-                alt=""
-                :preview-src-list="[element.answer.image]"
-                :hide-on-click-modal="true"
-              />
-              <figure
-                class="media video"
-                v-else-if="isLinkVideo(element.answer.link)"
-              >
-                <iframe
-                  :src="convertToEmbed(element.answer.link)"
-                  height="100%"
-                  width="100%"
-                  allow="fullscreen"
-                ></iframe>
-              </figure>
-              <el-image
-                v-else-if="element.answer.link && !element.answer.image"
-                :src="element.answer.link"
-                class="question-image"
-                alt=""
-                :preview-src-list="[element.answer.link]"
-                :hide-on-click-modal="true"
+              <IdeaMediaViewer
+                :idea="element.answer"
+                css-class="question-image"
               />
             </div>
           </div>
@@ -201,32 +152,9 @@
                   {{ orderAnswers.indexOf(element) + 1 }}
                 </h2>
                 <p class="media-content">{{ element.answer.keywords }}</p>
-                <el-image
-                  v-if="element.answer.image"
-                  :src="element.answer.image"
-                  class="question-image"
-                  alt=""
-                  :preview-src-list="[element.answer.image]"
-                  :hide-on-click-modal="true"
-                />
-                <figure
-                  class="media video"
-                  v-else-if="isLinkVideo(element.answer.link)"
-                >
-                  <iframe
-                    :src="convertToEmbed(element.answer.link)"
-                    height="100%"
-                    width="100%"
-                    allow="fullscreen"
-                  ></iframe>
-                </figure>
-                <el-image
-                  v-else-if="element.answer.link && !element.answer.image"
-                  :src="element.answer.link"
-                  class="question-image"
-                  alt=""
-                  :preview-src-list="[element.answer.link]"
-                  :hide-on-click-modal="true"
+                <IdeaMediaViewer
+                  :idea="element.answer"
+                  css-class="question-image"
                 />
               </div>
             </template>
@@ -345,6 +273,7 @@ import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipant
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { delay, until } from '@/utils/wait';
+import IdeaMediaViewer from '@/components/moderator/molecules/IdeaMediaViewer.vue';
 
 interface AnswerValue {
   numValue: number | null;
@@ -355,6 +284,7 @@ interface AnswerValue {
 
 @Options({
   components: {
+    IdeaMediaViewer,
     ImagePicker,
     QuizResult,
     ParticipantModuleDefaultContainer,
@@ -1412,28 +1342,6 @@ export default class Participant extends Vue {
     this.deregisterAll();
     if (this.trackingManager) this.trackingManager.deregisterAll();
   }
-
-  convertToEmbed(link: string | null) {
-    if (link) {
-      if (link.includes('youtube')) {
-        link = link.replace('watch?v=', 'embed/');
-      } else if (link.includes('vimeo')) {
-        const vid = link.split('/');
-        const vidNr = vid[vid.length - 1];
-        link = 'https://player.vimeo.com/video/' + vidNr;
-      }
-    }
-    return link;
-  }
-
-  isLinkVideo(link: string | null): boolean {
-    if (link) {
-      if (link.includes('youtube') || link.includes('vimeo')) {
-        return true;
-      }
-    }
-    return false;
-  }
 }
 </script>
 
@@ -1720,7 +1628,7 @@ label {
         color-mix(in srgb, white 45%, transparent)
       ),
       url('@/modules/information/quiz/assets/paper.jpg');
-    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    //filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
     color: var(--color-dark-contrast);
   }
 
@@ -1736,7 +1644,7 @@ label {
         color-mix(in srgb, var(--color-informing) 45%, transparent)
       ),
       url('@/modules/information/quiz/assets/paper.jpg');
-    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    //filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
     color: var(--color-dark-contrast);
     border: none;
   }
@@ -1778,7 +1686,7 @@ label {
         color-mix(in srgb, var(--color-informing) 45%, transparent)
       ),
       url('@/modules/information/quiz/assets/paper.jpg');
-    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    //filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
     padding: 1rem;
   }
 }
