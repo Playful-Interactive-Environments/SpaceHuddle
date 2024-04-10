@@ -36,6 +36,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   @Prop({ default: {} }) formData!: any;
+  @Prop({ default: {} }) taskType!: any;
   module: Module | null = null;
 
   @Watch('modelValue', { immediate: true })

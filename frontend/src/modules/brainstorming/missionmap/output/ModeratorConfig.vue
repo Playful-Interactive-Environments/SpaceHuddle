@@ -209,6 +209,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   @Prop({ default: {} }) formData!: any;
+  @Prop({ default: {} }) taskType!: any;
 
   mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;
