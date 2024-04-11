@@ -242,7 +242,7 @@
       }"
     />
     <div class="layout__columns">
-      <el-card v-for="item of commentList" :key="item.text">
+      <el-card v-for="(item, index) of commentList" :key="index">
         {{ item.text }}
         <span v-if="item.count > 1" class="comment-count">
           {{ item.count }}x

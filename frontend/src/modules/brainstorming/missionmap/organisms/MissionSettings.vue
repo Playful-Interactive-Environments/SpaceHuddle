@@ -174,6 +174,7 @@
             )}`,
           },
         }"
+        @change="calculateElectricityMix"
       />
       <el-slider
         v-else
@@ -215,7 +216,35 @@
             )}`,
           },
         }"
+        @change="calculateElectricityMix"
       />
+      <div>
+        <Doughnut
+          ref="chartElectricityMixRef"
+          :data="chartDataElectricityMix"
+          :options="{
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+              duration: 0,
+            },
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  color: '#000000',
+                },
+              },
+              title: {
+                display: true,
+                text: $t(
+                  'module.playing.moveit.participant.info.electricity.scale'
+                ),
+              },
+            },
+          }"
+        />
+      </div>
     </el-form-item>
     <el-form-item
       v-if="authHeaderTyp === EndpointAuthorisationType.MODERATOR"
@@ -355,6 +384,9 @@ import { ElectricityInfluence } from '@/modules/brainstorming/missionmap/types/E
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { getGreenColor, getRedColor } from '@/utils/themeColors';
+import { Doughnut } from 'vue-chartjs';
+import { ChartData } from 'chart.js';
+import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 
 @Options({
   methods: { getRedColor, getGreenColor },
@@ -377,6 +409,7 @@ import { getGreenColor, getRedColor } from '@/utils/themeColors';
     MglMap,
     CustomMapMarker,
     AddItem,
+    Doughnut,
   },
   emits: ['update:showModal', 'updateData'],
 })
@@ -398,6 +431,11 @@ export default class MissionSettings extends Vue {
   map: Map | null = null;
   mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;
+
+  chartDataElectricityMix: ChartData = {
+    labels: [],
+    datasets: [],
+  };
 
   get effectElectricity(): boolean | null {
     return this.module && this.module.parameter.effectElectricity;
@@ -513,6 +551,46 @@ export default class MissionSettings extends Vue {
       );
       callback(new Error(`${errorText} ${sum}`));
       return false;
+    }
+  }
+
+  @Watch('idea.parameter.electricity.influence', { immediate: true })
+  @Watch('idea.parameter.electricity.type', { immediate: true })
+  calculateElectricityMix(): void {
+    if (this.idea?.parameter?.electricity) {
+      const data: ChartData = {
+        labels: [],
+        datasets: [
+          {
+            label: this.$t('module.playing.moveit.participant.electricity'),
+            backgroundColor: [],
+            data: [],
+          },
+        ],
+      };
+      const progressData = progress.getElectricityDevelopment(
+        this.idea.parameter.electricity.influence,
+        this.idea.parameter.electricity.type,
+        this.idea.parameter.electricity.value
+      );
+      for (const energySource of Object.keys(progressData)) {
+        if (data.labels)
+          data.labels.push(
+            this.$t(`module.playing.moveit.enums.electricity.${energySource}`)
+          );
+        data.datasets[0].data.push(progressData[energySource]);
+        (data.datasets[0].backgroundColor as string[]).push(
+          gameConfigMoveIt.electricity[energySource].color
+        );
+      }
+      this.chartDataElectricityMix = data;
+      if (this.$refs.chartElectricityMixRef) {
+        const chartRef = this.$refs.chartElectricityMixRef as any;
+        if (chartRef.chart) {
+          chartRef.chart.data = this.chartDataElectricityMix;
+          chartRef.chart.update();
+        }
+      }
     }
   }
 
