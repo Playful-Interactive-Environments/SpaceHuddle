@@ -407,6 +407,8 @@ export default class MissionProgressChart extends Vue {
           target: 'stack',
           above: `${(dataset as any).borderColor}77`,
         };
+      } else {
+        (dataset as any).fill = false;
       }
     }
     this.lineChartDataList.push({
