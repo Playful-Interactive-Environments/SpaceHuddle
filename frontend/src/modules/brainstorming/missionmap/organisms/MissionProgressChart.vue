@@ -2,7 +2,7 @@
   <div v-for="(chartData, index) in lineChartDataList" :key="index">
     <Line
       :data="chartData.data"
-      :height="150"
+      :height="250"
       :options="{
         maintainAspectRatio: false,
         animation: {
@@ -22,6 +22,8 @@
             },
           },
           y: {
+            stacked:
+              missionProgressParameter === MissionProgressParameter.electricity,
             ticks: {
               stepSize: 1,
             },
@@ -116,6 +118,8 @@ export default class MissionProgressChart extends Vue {
   inputManager!: CombinedInputManager;
   decidedIdeas: Idea[] = [];
   displayLabels = false;
+
+  MissionProgressParameter = MissionProgressParameter;
 
   chartAnnotations(chartData: LineChartData): any {
     if (
@@ -396,6 +400,14 @@ export default class MissionProgressChart extends Vue {
     );
     for (const dataset of datasets) {
       (dataset as any).pointStyle = 'circle';
+      if (
+        this.missionProgressParameter === MissionProgressParameter.electricity
+      ) {
+        (dataset as any).fill = {
+          target: 'stack',
+          above: `${(dataset as any).borderColor}77`,
+        };
+      }
     }
     this.lineChartDataList.push({
       title: this.$t(
