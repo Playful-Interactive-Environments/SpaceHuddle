@@ -78,7 +78,13 @@
             @ideaStartEdit="editIdea(element)"
             v-on:click="selectedIdea = element"
             @sharedStatusChanged="sharedStatusChanged(element, $event)"
+            @customCommand="dropdownCommand($event, element)"
           >
+            <template #dropdown>
+              <el-dropdown-item command="statistic">
+                <font-awesome-icon icon="chart-column" />
+              </el-dropdown-item>
+            </template>
             <div>
               <font-awesome-icon icon="coins" />
               {{ getPointsForIdea(element.id) }} /
@@ -135,7 +141,13 @@
           @ideaStartEdit="editIdea(idea)"
           v-on:click="selectedIdea = idea"
           @sharedStatusChanged="sharedStatusChanged(idea, $event)"
+          @customCommand="dropdownCommand($event, idea)"
         >
+          <template #dropdown>
+            <el-dropdown-item command="statistic">
+              <font-awesome-icon icon="chart-column" />
+            </el-dropdown-item>
+          </template>
           <div>
             <font-awesome-icon icon="coins" />
             {{ getPointsForIdea(idea.id) }} / {{ idea.parameter.points }}
@@ -198,6 +210,46 @@
       {{ $t('module.brainstorming.missionmap.moderatorContent.save') }}
     </el-button>
   </el-dialog>
+  <el-dialog v-model="showComments">
+    <template #header>
+      {{ commentIdea.keywords }}
+    </template>
+    <div>
+      <font-awesome-icon icon="coins" />
+      {{ getPointsForIdea(commentIdea.id) }} /
+      {{ commentIdea.parameter.points }}
+    </div>
+    <div>
+      <font-awesome-icon icon="users" />
+      {{ getPointCountForIdea(commentIdea.id) }} (
+      <span
+        v-for="(vote, index) of getPointListForIdea(commentIdea.id)"
+        :key="index"
+      >
+        <span v-if="index > 0">,</span>
+        {{ vote }}
+      </span>
+      )
+    </div>
+    <Bar
+      :data="commentRateData"
+      :height="80"
+      :options="{
+        maintainAspectRatio: true,
+        animation: {
+          duration: 0,
+        },
+      }"
+    />
+    <div class="layout__columns">
+      <el-card v-for="item of commentList" :key="item.text">
+        {{ item.text }}
+        <span v-if="item.count > 1" class="comment-count">
+          {{ item.count }}x
+        </span>
+      </el-card>
+    </div>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -238,6 +290,8 @@ import { MissionInputData } from '@/modules/brainstorming/missionmap/types/Missi
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 import IdeaStates from '@/types/enum/IdeaStates';
 import MissionSettings from '@/modules/brainstorming/missionmap/organisms/MissionSettings.vue';
+import { ChartData } from 'chart.js';
+import { Bar } from 'vue-chartjs';
 
 @Options({
   computed: {
@@ -261,6 +315,7 @@ import MissionSettings from '@/modules/brainstorming/missionmap/organisms/Missio
     draggable,
     IdeaFilter,
     MissionProgressChart,
+    Bar,
   },
 })
 
@@ -291,6 +346,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   missionInput!: MissionInputData;
   inputManager!: CombinedInputManager;
   activeProgressTab = MissionProgressParameter.influenceAreas;
+  showComments = false;
+  commentIdea: Idea | null = null;
+  commentRateData: ChartData | null = null;
+  commentList: { text: string; count: number }[] = [];
 
   getIdeaColor(idea: Idea): string {
     if (!idea.parameter.shareData)
@@ -300,13 +359,28 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return '#ffffff';
   }
 
+  getPointListForIdea(ideaId: string): number[] {
+    return this.votes
+      .filter((vote) => vote.ideaId === ideaId && vote.parameter.points)
+      .map((vote) => vote.parameter.points)
+      .sort();
+  }
+
   getPointsForIdea(ideaId: string): number {
-    const ideaVotes = this.votes.filter((vote) => vote.ideaId === ideaId);
+    const ideaVotes = this.votes.filter(
+      (vote) => vote.ideaId === ideaId && vote.parameter.points
+    );
     let points = 0;
     for (const vote of ideaVotes) {
       points += vote.parameter.points;
     }
     return points;
+  }
+
+  getPointCountForIdea(ideaId: string): number {
+    return this.votes.filter(
+      (vote) => vote.ideaId === ideaId && vote.parameter.points
+    ).length;
   }
 
   get orderIsChangeable(): boolean {
@@ -537,6 +611,67 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.settingsIdea = idea;
     this.showSettings = true;
   }
+
+  dropdownCommand(command: string, idea: Idea): void {
+    switch (command) {
+      case 'statistic':
+        this.showComments = true;
+        this.commentIdea = idea;
+        this.calculateRatingChart();
+        this.calculateComments();
+        break;
+    }
+  }
+
+  calculateComments(): void {
+    this.commentList = [];
+    const list = this.votes.filter(
+      (item) =>
+        item.ideaId === this.commentIdea?.id && item.parameter.explanation
+    );
+    for (const item of list) {
+      const comment = this.commentList.find(
+        (comment) => item.parameter.explanation === comment.text
+      );
+      if (comment) {
+        comment.count++;
+      } else {
+        this.commentList.push({
+          text: item.parameter.explanation,
+          count: 1,
+        });
+      }
+    }
+  }
+
+  calculateRatingChart(): void {
+    const labels: string[] = [
+      '-',
+      '\uf005',
+      '\uf005\uf005',
+      '\uf005\uf005\uf005',
+    ];
+    const data: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      data.push(
+        this.votes.filter(
+          (item) => item.ideaId === this.commentIdea?.id && item.rating === i
+        ).length
+      );
+    }
+    this.commentRateData = {
+      labels: labels,
+      datasets: [
+        {
+          label: (this as any).$t(
+            'module.brainstorming.missionmap.moderatorContent.ratingChart'
+          ),
+          backgroundColor: themeColors.getEvaluatingColor(),
+          data: data,
+        },
+      ],
+    };
+  }
 }
 </script>
 
@@ -567,5 +702,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .is-active {
   color: var(--color-dark-contrast-dark);
+}
+
+.comment-count {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brainstorming);
 }
 </style>

@@ -81,7 +81,8 @@
       "max-demand": " increase",
       "min-supply": " lower coverage of the total demand",
       "max-supply": " additional coverage of the total demand"
-    }
+    },
+    "ratingChart": "rating distribution"
   },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."
