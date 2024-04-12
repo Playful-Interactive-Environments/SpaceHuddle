@@ -114,7 +114,6 @@ export default class ParticipantTutorial extends Vue {
   }
 
   getIncludeStep(stepName: string): boolean {
-    console.log(this.showTutorialOnlyOnce, this.tutorialSteps);
     if (this.showTutorialOnlyOnce) {
       return !!this.tutorialSteps.find(
         (tutorial) =>
