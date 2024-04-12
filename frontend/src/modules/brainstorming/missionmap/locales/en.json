@@ -37,7 +37,8 @@
     "chart": {
       "x": "measures",
       "y-influenceAreas": "development of society",
-      "y-electricity": "electricity ratio in %"
+      "y-electricity": "electricity ratio in %",
+      "y-electricityAmount": "Electricity consumption for the whole of Austria in TWh"
     }
   },
   "moderatorConfig": {
@@ -83,7 +84,8 @@
       "max-supply": " additional coverage of the total demand"
     },
     "ratingChart": "rating distribution",
-    "orderChart": "order distribution"
+    "orderChart": "order distribution",
+    "future": "future"
   },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."
@@ -121,6 +123,13 @@
     "electricityInfluence": {
       "increase_electricity_demand": "increase electricity demand",
       "change_electricity_supply": "change electricity supply"
+    },
+    "electricityConsumption": {
+      "industry": "industry",
+      "traffic": "traffic",
+      "services": "services",
+      "household": "household",
+      "agriculture": "agriculture"
     }
   }
 }

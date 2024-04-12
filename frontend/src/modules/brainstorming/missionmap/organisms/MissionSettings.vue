@@ -152,6 +152,19 @@
           <font-awesome-icon :icon="additionalParameter[item].icon" />
         </el-option>
       </el-select>
+      <el-select v-else v-model="idea.parameter.electricity.type">
+        <el-option
+          v-for="item in Object.keys(ElectricityConsumption)"
+          :key="item"
+          :value="item"
+          :label="
+            $t(
+              `module.brainstorming.missionmap.enum.electricityConsumption.${item}`
+            )
+          "
+          :style="{ color: ElectricityConsumption[item].color }"
+        />
+      </el-select>
       <el-slider
         v-if="
           idea.parameter.electricity.influence ===
@@ -218,32 +231,72 @@
         }"
         @change="calculateElectricityMix"
       />
-      <div>
-        <Doughnut
-          ref="chartElectricityMixRef"
-          :data="chartDataElectricityMix"
-          :options="{
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-              duration: 0,
-            },
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  color: '#000000',
+      <div class="columns">
+        <div class="chart column">
+          <Doughnut
+            ref="chartElectricityMixRef"
+            :data="chartDataElectricityMix"
+            :options="{
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: {
+                duration: 0,
+              },
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    color: '#000000',
+                  },
+                },
+                title: {
+                  display: true,
+                  text: $t(
+                    'module.playing.moveit.participant.info.electricity.scale'
+                  ),
                 },
               },
-              title: {
-                display: true,
-                text: $t(
-                  'module.playing.moveit.participant.info.electricity.scale'
-                ),
+            }"
+          />
+        </div>
+        <div class="chart column">
+          <Bar
+            ref="chartElectricityAmountRef"
+            :data="chartDataElectricityAmount"
+            :height="150"
+            :options="{
+              maintainAspectRatio: true,
+              animation: {
+                duration: 0,
               },
-            },
-          }"
-        />
+              scales: {
+                x: {
+                  stacked: true,
+                },
+                y: {
+                  stacked: true,
+                  ticks: {
+                    precision: 0,
+                  },
+                },
+              },
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    color: '#000000',
+                  },
+                },
+                title: {
+                  display: true,
+                  text: $t(
+                    'module.brainstorming.missionmap.participant.chart.y-electricityAmount'
+                  ),
+                },
+              },
+            }"
+          />
+        </div>
       </div>
     </el-form-item>
     <el-form-item
@@ -384,9 +437,10 @@ import { ElectricityInfluence } from '@/modules/brainstorming/missionmap/types/E
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { getGreenColor, getRedColor } from '@/utils/themeColors';
-import { Doughnut } from 'vue-chartjs';
+import { Bar, Doughnut } from 'vue-chartjs';
 import { ChartData } from 'chart.js';
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
+import { ElectricityConsumption } from '@/modules/brainstorming/missionmap/types/ElectricityConsumption';
 
 @Options({
   methods: { getRedColor, getGreenColor },
@@ -410,6 +464,7 @@ import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
     CustomMapMarker,
     AddItem,
     Doughnut,
+    Bar,
   },
   emits: ['update:showModal', 'updateData'],
 })
@@ -427,12 +482,17 @@ export default class MissionSettings extends Vue {
   module: Module | null = null;
   calculateMarks = calculateMarks;
   ElectricityInfluence = ElectricityInfluence;
+  ElectricityConsumption = ElectricityConsumption;
 
   map: Map | null = null;
   mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;
 
   chartDataElectricityMix: ChartData = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataElectricityAmount: ChartData = {
     labels: [],
     datasets: [],
   };
@@ -555,6 +615,24 @@ export default class MissionSettings extends Vue {
   }
 
   @Watch('idea.parameter.electricity.influence', { immediate: true })
+  onInfluenceChanged(): void {
+    if (this.idea?.parameter?.electricity) {
+      if (
+        this.idea.parameter.electricity.influence ===
+        ElectricityInfluence.INCREASE_ELECTRICITY_DEMAND
+      ) {
+        this.idea.parameter.electricity.type = Object.keys(
+          ElectricityConsumption
+        )[0];
+      } else {
+        this.idea.parameter.electricity.type = Object.keys(
+          gameConfigMoveIt.electricity
+        )[0];
+      }
+    }
+  }
+
+  @Watch('idea.parameter.electricity.influence', { immediate: true })
   @Watch('idea.parameter.electricity.type', { immediate: true })
   calculateElectricityMix(): void {
     if (this.idea?.parameter?.electricity) {
@@ -590,6 +668,61 @@ export default class MissionSettings extends Vue {
           chartRef.chart.data = this.chartDataElectricityMix;
           chartRef.chart.update();
         }
+      }
+    }
+    this.calculateElectricityAmount();
+  }
+
+  calculateElectricityAmount(): void {
+    if (!this.idea?.parameter?.electricity) return;
+    const labels: string[] = [
+      '2022',
+      this.$t('module.brainstorming.missionmap.moderatorContent.future'),
+    ];
+    const datasets: any[] = [];
+    let residualValue = 0;
+    let totalElectricityAmount = 0;
+    for (const sector of Object.keys(ElectricityConsumption)) {
+      totalElectricityAmount += ElectricityConsumption[sector].value;
+    }
+    for (const sector of Object.keys(ElectricityConsumption)) {
+      const valueNew = ElectricityConsumption[sector].value;
+      const valueFuture =
+        sector === this.idea.parameter.electricity.type
+          ? valueNew +
+            (this.idea.parameter.electricity.value * totalElectricityAmount) /
+              100
+          : valueNew;
+      if (valueFuture < 0) {
+        residualValue = valueFuture;
+      }
+      const data: number[] = [valueNew, valueFuture > 0 ? valueFuture : 0];
+      datasets.push({
+        label: (this as any).$t(
+          `module.brainstorming.missionmap.enum.electricityConsumption.${sector}`
+        ),
+        backgroundColor: ElectricityConsumption[sector].color,
+        data: data,
+      });
+    }
+    if (residualValue < 0) {
+      for (const dataset of datasets) {
+        dataset.data[1] += residualValue;
+        if (dataset.data[1] < 0) {
+          residualValue = dataset.data[1];
+          dataset.data[1] = 0;
+        } else break;
+      }
+    }
+    this.chartDataElectricityAmount = {
+      labels: labels,
+      datasets: datasets,
+    };
+    if (this.$refs.chartElectricityAmountRef) {
+      const chartRef = this.$refs.chartElectricityAmountRef as any;
+      if (chartRef.chart) {
+        chartRef.chart.data = this.chartDataElectricityAmount;
+        chartRef.chart.update();
       }
     }
   }
@@ -687,5 +820,9 @@ export default class MissionSettings extends Vue {
 .el-slider::v-deep(.el-slider__marks-text) {
   --translate: -50%;
   transform: translateX(var(--translate));
+}
+
+.chart {
+  padding-top: 1rem;
 }
 </style>

@@ -37,7 +37,8 @@
     "chart": {
       "x": "Maßnahmen",
       "y-influenceAreas": "Entwicklung der Gesellschaft",
-      "y-electricity": "Stromanteil in %"
+      "y-electricity": "Stromanteil in %",
+      "y-electricityAmount": "Stromverbrauch für ganz Österreich in TWh"
     }
   },
   "moderatorConfig": {
@@ -83,7 +84,8 @@
       "max-supply": " zusätzliche Deckung des Gesamtbedarfs"
     },
     "ratingChart": "Verteilung der Ratings",
-    "orderChart": "Verteilung der Sortierreihenfolge"
+    "orderChart": "Verteilung der Sortierreihenfolge",
+    "future": "Zukunft"
   },
   "publicScreen": {
     "noIdeas": "Noch keine Ideen - Bleib dran."
@@ -121,6 +123,13 @@
     "electricityInfluence": {
       "increase_electricity_demand": "Strombedarf erhöhen",
       "change_electricity_supply": "Stromzusammensetzung ändern"
+    },
+    "electricityConsumption": {
+      "industry": "Industrie",
+      "traffic": "Verkehr",
+      "services": "Dienstleistungen",
+      "household": "Private Haushalt",
+      "agriculture": "Landwirtschaft"
     }
   }
 }

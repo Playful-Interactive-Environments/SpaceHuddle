@@ -2,9 +2,9 @@ import { Idea } from '@/types/api/Idea';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
 import { until } from '@/utils/wait';
 import { defaultCenter } from '@/utils/map';
-import gameConfigMoveIt from '@/modules/playing/moveit/data/gameConfig.json';
 import { Module } from '@/types/api/Module';
 import { ElectricityInfluence } from '@/modules/brainstorming/missionmap/types/ElectricityInfluence';
+import { ElectricityConsumption } from '@/modules/brainstorming/missionmap/types/ElectricityConsumption';
 
 export async function setEmptyParameterIfNotExists(
   idea: Idea,
@@ -38,7 +38,7 @@ export async function setEmptyParameterIfNotExists(
   ) {
     idea.parameter.electricity = {
       influence: ElectricityInfluence.INCREASE_ELECTRICITY_DEMAND,
-      type: Object.keys(gameConfigMoveIt.electricity)[0],
+      type: Object.keys(ElectricityConsumption)[0],
       value: 0,
     };
     /*for (const parameter of Object.keys(gameConfigMoveIt.electricity)) {
