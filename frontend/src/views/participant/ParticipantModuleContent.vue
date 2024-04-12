@@ -51,8 +51,26 @@
         {{ points }}
       </div>
     </template>
+    <participant-tutorial
+      v-if="
+        moduleDisplayState === ModuleDisplayState.tutorial && task?.description
+      "
+      :module-info-entry-data-list="['description']"
+      @infoRead="moduleDisplayState = ModuleDisplayState.content"
+      :info-type="moduleId"
+      :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
+    >
+      <div class="info-text">
+        <h1>
+          {{ task.name }}
+        </h1>
+        <p>
+          {{ task.description }}
+        </p>
+      </div>
+    </participant-tutorial>
     <ParticipantModuleComponent
-      v-if="task"
+      v-else-if="task"
       :task-id="taskId"
       :module-id="moduleId"
       v-model:useFullSize="useFullSize"
@@ -90,9 +108,16 @@ import * as cashService from '@/services/cash-service';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { RouteName } from '@/types/enum/RouteName';
 import { Session } from '@/types/api/Session';
+import ParticipantTutorial from '@/components/participant/molecules/ParticipantTutorial.vue';
+
+enum ModuleDisplayState {
+  tutorial = 'tutorial',
+  content = 'content',
+}
 
 @Options({
   components: {
+    ParticipantTutorial,
     Timer,
     ParticipantDefaultContainer,
     ParticipantModuleComponent: getEmptyComponent(),
@@ -117,8 +142,10 @@ export default class ParticipantModuleContent extends Vue {
   drawNavigation = true;
   points = 0;
   backClicked = false;
+  moduleDisplayState = ModuleDisplayState.tutorial;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
+  ModuleDisplayState = ModuleDisplayState;
 
   get showCoins(): boolean {
     return JSON.parse(process.env.VUE_APP_SHOW_COINS);
@@ -430,5 +457,15 @@ export default class ParticipantModuleContent extends Vue {
 
 .el-tabs {
   pointer-events: auto;
+}
+
+.info-text {
+  padding: 2rem;
+  margin: 2vh 1vh 1vh 1vh;
+
+  h1 {
+    font-weight: var(--font-weight-bold);
+    padding-bottom: 0.5rem;
+  }
 }
 </style>
