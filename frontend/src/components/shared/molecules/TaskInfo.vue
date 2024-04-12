@@ -238,6 +238,7 @@ export default class TaskInfo extends Vue {
   justify-content: flex-start;
   align-items: unset;
   gap: 0.5rem;
+  height: unset;
 }
 
 .el-collapse::v-deep(.el-collapse-item__arrow) {
