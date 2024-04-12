@@ -28,7 +28,7 @@
         </el-button>
       </span>
     </template>
-    <el-space direction="vertical" class="fill" v-if="!submitScreen">
+    <el-space direction="vertical" class="fill votables" v-if="!submitScreen">
       <div v-for="idea in allIdeas" :key="idea.id" class="votable">
         <el-button
           :disabled="false"
@@ -55,7 +55,7 @@
           :is-selectable="false"
           :is-editable="false"
           :show-state="false"
-          :portrait="!collapsed"
+          :portrait="!collapsed || !(idea.image || idea.link)"
           @update:collapse-ideas="collapsed = !collapsed"
         />
       </div>
@@ -813,7 +813,10 @@ label {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
+  .IdeaCard {
+    width: 100%;
+  }
 }
 
 .circleCheck {
@@ -823,6 +826,7 @@ label {
   background: transparent;
   border: none;
   margin-right: 0.5rem;
+  margin-left: 0;
 }
 
 [module-theme='interview'].module-content::v-deep(.fixed) {
