@@ -634,7 +634,7 @@ export default class Participant extends Vue {
   }
 
   applyPoints(): void {
-    this.selectedVote.points = this.selectedVote.spentPoints;
+    this.selectedVote.points += this.selectedVote.spentPoints;
     this.showSpentPoints = false;
     this.saveVoting(true);
   }
@@ -742,17 +742,17 @@ export default class Participant extends Vue {
         TaskParticipantIterationStepStatesType.NEUTRAL,
         saveOnlyPointChanges
           ? {
-              points: this.selectedVote.points,
+              points: this.selectedVote.spentPoints,
             }
           : {
               rating: this.selectedVote.rate,
               order: this.selectedVote.order,
-              points: this.selectedVote.points,
+              points: this.selectedVote.spentPoints,
               explanation: this.selectedVote.explanation,
               explanationIndex: this.selectedVote.explanationIndex,
             },
         points,
-        this.selectedVote.points,
+        this.selectedVote.spentPoints,
         true
       );
       if (
@@ -822,6 +822,8 @@ export default class Participant extends Vue {
             if (!saveOnlyPointChanges) {
               await this.inputManager.refreshVotes();
               this.loadSelectedVote();
+            } else {
+              this.inputManager.currentVotes.push(vote);
             }
           });
       } else {
@@ -1014,6 +1016,7 @@ export default class Participant extends Vue {
           })
           .then((vote) => {
             this.votes.push(vote);
+            this.inputManager.refreshVotes();
           });
       } else {
         vote.detailRating = index;
