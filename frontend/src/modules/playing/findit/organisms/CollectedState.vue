@@ -30,8 +30,23 @@
         :key="object.name"
         :id="object.name"
         class="endObject"
+        :class="{
+          endObjectCorrect: correctClassified.includes(object.name),
+          endObjectIncorrect:
+            !correctClassified.includes(object.name) &&
+            classified.includes(object.name),
+        }"
         @click="activeObjectChanged(object, object.name, true)"
       >
+        <p class="objectName">
+          {{
+            $t(
+              `module.playing.findit.participant.placeables.${levelType}.${
+                object.type
+              }.${getExplanationKey(object)}.name`
+            )
+          }}
+        </p>
         <img
           v-if="
             levelTypeImages[object.type] &&
@@ -48,7 +63,7 @@
             hazardIcon: checkType(true, object.name),
             noHazardIcon: checkType(false, object.name),
           }"
-          v-if="this.correctClassified.includes(object.name)"
+          v-if="this.classified.includes(object.name)"
         />
       </div>
     </div>
@@ -84,7 +99,7 @@
         class="marginTop"
         v-if="
           this.activeObject !== null &&
-          this.correctClassified.includes(this.activeObjectId)
+          this.classified.includes(this.activeObjectId)
         "
       >
         {{
@@ -102,7 +117,7 @@
       v-if="
         endObjects
           .map((x) => x.name)
-          .every((x) => correctClassified.includes(x)) ||
+          .every((x) => classified.includes(x)) ||
         this.endObjects.length === 0
       "
     >
@@ -144,6 +159,7 @@ export default class CollectedState extends Vue {
   activeObject: placeable.PlaceableBase | null = null;
 
   correctClassified: string[] = [];
+  classified: string[] = [];
   gameConfig = gameConfig;
 
   collectKeys: string[] = [];
@@ -162,16 +178,15 @@ export default class CollectedState extends Vue {
 
   getCollectKeys(): string[] {
     const keys: string[] = [];
-    for (let i = 0; i < this.endObjects.length; i++) {
-      const key =
-        gameConfig[this.levelType].categories[this.endObjects[i].type].items[
-          this.endObjects[i].name
-        ].collectKey;
-      if (!keys.includes(key)) {
-        keys.push(key);
+    for (const category in gameConfig[this.levelType].categories) {
+      for (const item in gameConfig[this.levelType].categories[category]
+        .items) {
+        keys.push(
+          gameConfig[this.levelType].categories[category].items[item].collectKey
+        );
       }
     }
-    return keys;
+    return Array.from(new Set(keys)).filter((d) => d != null);
   }
 
   checkType(key: string, id: string) {
@@ -181,9 +196,13 @@ export default class CollectedState extends Vue {
           this.activeObject.name
         ].collectKey === key
       ) {
-        this.correctClassified.push(id);
-        return true;
+        if (!this.classified.includes(id)) {
+          this.correctClassified.push(id);
+          this.classified.push(id);
+          return true;
+        }
       }
+      this.classified.push(id);
       return false;
     }
   }
@@ -391,7 +410,17 @@ export default class CollectedState extends Vue {
   width: var(--end-object-width);
   vertical-align: center;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   flex: 0 0 auto;
+}
+.endObjectCorrect {
+  background-color: var(--color-brainstorming-light);
+}
+
+.endObjectIncorrect {
+  background-color: var(--color-evaluating-light);
 }
 
 .objectContainerActive {
@@ -459,5 +488,12 @@ export default class CollectedState extends Vue {
   right: 0.5rem;
   width: 2rem;
   height: 2rem;
+}
+
+.objectName {
+  position: absolute;
+  text-align: center;
+  top: 0.2rem;
+  text-transform: capitalize;
 }
 </style>
