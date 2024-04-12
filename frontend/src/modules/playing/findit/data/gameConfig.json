@@ -30,7 +30,7 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "cigarette",
-            "collectKey": "fire"
+            "collectKey": "dispose"
           },
           "campfire": {
             "escalationLevels": [
@@ -42,7 +42,7 @@
             "width": 5,
             "shape": "circle",
             "explanationKey": "campfire",
-            "collectKey": "fire"
+            "collectKey": "dispose"
           },
           "dead-tree": {
             "escalationLevels": [
@@ -54,7 +54,7 @@
             "width": 7,
             "shape": "rect",
             "explanationKey": "dead-tree",
-            "collectKey": "fire"
+            "collectKey": "dispose"
           }
         }
       },
@@ -73,7 +73,7 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "bottle",
-            "collectKey": "garbage"
+            "collectKey": "recycle"
           },
           "bottleWine": {
             "severity": 1,
@@ -81,7 +81,7 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "bottle",
-            "collectKey": "garbage"
+            "collectKey": "recycle"
           },
           "bottleBeer": {
             "severity": 1,
@@ -89,7 +89,7 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "bottle",
-            "collectKey": "garbage"
+            "collectKey": "recycle"
           },
           "turtle": {
             "severity": 1,
@@ -97,7 +97,7 @@
             "width": 3,
             "shape": "rect",
             "explanationKey": "turtle",
-            "collectKey": "animal"
+            "collectKey": "rescue"
           },
           "ladybug": {
             "severity": 1,
@@ -105,7 +105,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           },
           "bug": {
             "severity": 1,
@@ -113,7 +113,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           },
           "dragonfly": {
             "severity": 1,
@@ -121,7 +121,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           },
           "earthworm": {
             "severity": 1,
@@ -129,7 +129,7 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           }
         }
       },
@@ -262,7 +262,7 @@
             "width": 2,
             "shape": "rect",
             "explanationKey": "sandbag",
-            "collectKey": "collect",
+            "collectKey": "recycle",
             "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
           },
           "branches": {
@@ -281,7 +281,7 @@
             "width": 5,
             "shape": "rect",
             "explanationKey": "branches",
-            "collectKey": "collect",
+            "collectKey": "dispose",
             "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
           },
           "bottleWhite": {
@@ -300,7 +300,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
-            "collectKey": "litter",
+            "collectKey": "recycle",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "bottleWine": {
@@ -319,7 +319,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
-            "collectKey": "litter",
+            "collectKey": "recycle",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "bottleBeer": {
@@ -338,7 +338,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
-            "collectKey": "litter",
+            "collectKey": "recycle",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           }
         }
@@ -358,7 +358,7 @@
             "width": 3,
             "shape": "rect",
             "explanationKey": "turtle",
-            "collectKey": "animal"
+            "collectKey": "leave"
           },
           "ladybug": {
             "severity": 1,
@@ -366,7 +366,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           },
           "bug": {
             "severity": 1,
@@ -374,7 +374,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           },
           "dragonfly": {
             "severity": 1,
@@ -382,7 +382,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           },
           "earthworm": {
             "severity": 1,
@@ -390,7 +390,7 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "animal"
+            "collectKey": "leave"
           }
         }
       },
