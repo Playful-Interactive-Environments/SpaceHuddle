@@ -82,7 +82,8 @@
       "min-supply": " geringere Deckung des Gesamtbedarfs",
       "max-supply": " zusätzliche Deckung des Gesamtbedarfs"
     },
-    "ratingChart": "Verteilung der Ratings"
+    "ratingChart": "Verteilung der Ratings",
+    "orderChart": "Verteilung der Sortierreihenfolge"
   },
   "publicScreen": {
     "noIdeas": "Noch keine Ideen - Bleib dran."

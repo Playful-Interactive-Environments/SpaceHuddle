@@ -233,11 +233,18 @@
     </div>
     <Bar
       :data="commentRateData"
-      :height="80"
+      :height="150"
       :options="{
         maintainAspectRatio: true,
         animation: {
           duration: 0,
+        },
+        scales: {
+          y: {
+            ticks: {
+              precision: 0,
+            },
+          },
         },
       }"
     />
@@ -249,6 +256,23 @@
         </span>
       </el-card>
     </div>
+    <Bar
+      :data="commentOrderData"
+      :height="150"
+      :options="{
+        maintainAspectRatio: true,
+        animation: {
+          duration: 0,
+        },
+        scales: {
+          y: {
+            ticks: {
+              precision: 0,
+            },
+          },
+        },
+      }"
+    />
   </el-dialog>
 </template>
 
@@ -349,6 +373,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   showComments = false;
   commentIdea: Idea | null = null;
   commentRateData: ChartData | null = null;
+  commentOrderData: ChartData | null = null;
   commentList: { text: string; count: number }[] = [];
 
   getIdeaColor(idea: Idea): string {
@@ -618,6 +643,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         this.showComments = true;
         this.commentIdea = idea;
         this.calculateRatingChart();
+        this.calculateOrderChart();
         this.calculateComments();
         break;
     }
@@ -665,6 +691,32 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         {
           label: (this as any).$t(
             'module.brainstorming.missionmap.moderatorContent.ratingChart'
+          ),
+          backgroundColor: themeColors.getEvaluatingColor(),
+          data: data,
+        },
+      ],
+    };
+  }
+
+  calculateOrderChart(): void {
+    const labels: number[] = [];
+    const data: number[] = [];
+    for (let i = 0; i < this.ideas.length; i++) {
+      labels.push(i + 1);
+      data.push(
+        this.votes.filter(
+          (item) =>
+            item.ideaId === this.commentIdea?.id && item.detailRating === i
+        ).length
+      );
+    }
+    this.commentOrderData = {
+      labels: labels,
+      datasets: [
+        {
+          label: (this as any).$t(
+            'module.brainstorming.missionmap.moderatorContent.orderChart'
           ),
           backgroundColor: themeColors.getEvaluatingColor(),
           data: data,
