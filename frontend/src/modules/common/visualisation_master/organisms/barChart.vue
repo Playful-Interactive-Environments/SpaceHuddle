@@ -7,9 +7,15 @@
       animation: {
         duration: 0,
       },
+      elements: {
+        bar: {
+          borderRadius: 10,
+        },
+      },
       scales: {
         x: {
           ticks: {
+            display: timerEnded,
             color: contrastColor,
           },
           grid: {
@@ -21,10 +27,14 @@
             color: contrastColor,
             stepSize: 1,
           },
+          grid: {
+            display: false,
+          },
         },
       },
       plugins: {
         legend: {
+          display: false,
           labels: {
             color: contrastColor,
           },
@@ -41,12 +51,9 @@ import { Bar } from 'vue-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
 import { EventType } from '@/types/enum/EventType';
-import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as themeColors from '@/utils/themeColors';
-import * as taskService from '@/services/task-service';
-import { Task } from '@/types/api/Task';
 
 @Options({
   components: {
@@ -55,8 +62,10 @@ import { Task } from '@/types/api/Task';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContent extends Vue implements IModeratorContent {
+export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: 0 }) readonly timeModifier!: number;
+  @Prop({ default: false }) readonly timerEnded!: boolean;
   votes: VoteResult[] = [];
   chartData: any = {
     labels: [],
@@ -68,6 +77,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
+
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
     this.deregisterAll();
@@ -75,7 +85,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.taskId,
       this.updateVotes,
       EndpointAuthorisationType.MODERATOR,
-      20
+      5
     );
   }
 
@@ -133,4 +143,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+#resultChart {
+  max-height: 100%;
+}
+</style>

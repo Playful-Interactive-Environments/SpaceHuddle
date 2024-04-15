@@ -59,6 +59,8 @@
           class="timer-process"
           v-if="task !== null"
           :entity="task"
+          @timer-update="timerEnded = false"
+          @timer-ends="timerEnded = true"
         />
       </el-header>
     </el-container>
@@ -82,6 +84,7 @@
             :task-id="taskId"
             :key="componentLoadIndex"
             :authHeaderTyp="authHeaderTyp"
+            :timerEnd="timerEnded"
           />
         </el-scrollbar>
       </el-main>
@@ -178,6 +181,8 @@ export default class PublicScreen extends Vue {
   TaskStates = TaskStates;
 
   topContentPosition = 250;
+
+  timerEnded = false;
 
   get contrastColor(): string {
     return themeColors.getContrastColor();

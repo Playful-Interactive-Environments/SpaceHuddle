@@ -10,10 +10,10 @@
         "description": "Zeige Ideen als Galerie"
       }
     },
-    "cardShuffle": {
+    "barChart": {
       "description": {
-        "title": "Karten mischen",
-        "description": "Animiere Ideen"
+        "title": "Balkendiagramm",
+        "description": "Daten und Abstimmungen als Balkendiagramm dargestellt"
       }
     }
   }
