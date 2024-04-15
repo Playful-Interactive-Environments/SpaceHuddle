@@ -1168,6 +1168,7 @@ export default class Participant extends Vue {
 }
 
 .measureList {
+  margin: 0 2rem;
   padding-bottom: 1rem;
 }
 
@@ -1185,8 +1186,6 @@ export default class Participant extends Vue {
   background-position: center top;
 
   .el-card {
-    margin-right: 2rem;
-    margin-left: 2rem;
     border-radius: 0;
     background: linear-gradient(
         color-mix(in srgb, var(--background-color) 45%, transparent),
@@ -1324,5 +1323,11 @@ export default class Participant extends Vue {
   width: 100%;
   text-align: center;
   padding: 1rem 0;
+}
+
+.el-tabs::v-deep(.el-tabs__nav-next),
+.el-tabs::v-deep(.el-tabs__nav-prev) {
+  line-height: unset;
+  font-weight: var(--font-weight-bold);
 }
 </style>

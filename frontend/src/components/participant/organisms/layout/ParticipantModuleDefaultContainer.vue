@@ -55,7 +55,6 @@
       <div ref="scrollContent">
         <el-scrollbar
           v-if="scrollSizeCalculated"
-          always
           :height="`${scrollHeight}px`"
           :style="{ '--scroll-height': `${scrollHeight}px` }"
         >
@@ -190,5 +189,10 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   background-color: var(--color-background);
   margin-bottom: -1rem;
   padding: 1rem 0;
+}
+
+.el-scrollbar::v-deep(.el-scrollbar__thumb) {
+  opacity: unset;
+  background-color: var(--color-primary);
 }
 </style>
