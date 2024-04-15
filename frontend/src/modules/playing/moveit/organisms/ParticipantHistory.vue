@@ -11,7 +11,7 @@
       @change="historyPageChanged"
     >
       <el-carousel-item v-for="(step, index) of activeStepsList" :key="step.id">
-        <h1>
+        <h1 class="history-vehicle">
           {{
             $t(
               `module.playing.moveit.enums.vehicles.${step.parameter.vehicle.category}.${step.parameter.vehicle.type}`
@@ -19,6 +19,36 @@
           }}
           {{ index + 1 }} / {{ activeStepsList.length }}
         </h1>
+        <h2 class="heading heading--regular">
+          {{ $t('module.playing.moveit.participant.drivingStats.avgSpeed') }} :
+          {{ Math.round(calculateSpeed('average')) }}
+          {{ $t('module.playing.moveit.enums.units.km/h') }}
+        </h2>
+        <h2 class="heading heading--regular">
+          {{ $t('module.playing.moveit.participant.drivingStats.maxSpeed') }} :
+          {{ Math.round(calculateSpeed('max')) }}
+          {{ $t('module.playing.moveit.enums.units.km/h') }}
+        </h2>
+        <h2 class="heading heading--regular">
+          {{ $t('module.playing.moveit.participant.drivingStats.consumption') }}
+          :
+          {{ Math.round(calculateSpeed('consumption') * 1000) / 1000 }}
+          <span v-if="vehicle.vehicle.fuel === 'electricity'">
+            {{ $t('module.playing.moveit.enums.units.kw') }}
+          </span>
+          <span v-else>
+            {{ $t('module.playing.moveit.enums.units.liters') }}
+          </span>
+        </h2>
+        <h2 class="heading heading--regular">
+          {{ $t('module.playing.moveit.participant.drivingStats.distance') }} :
+          {{ Math.round(calculateSpeed('distance') * 100) / 100 }}
+          {{ $t('module.playing.moveit.enums.units.km') }}
+        </h2>
+        <h2 class="heading heading--regular">
+          {{ $t('module.playing.moveit.participant.drivingStats.persons') }} :
+          {{ Math.round(calculateSpeed('persons')) }}
+        </h2>
       </el-carousel-item>
     </el-carousel>
     <h2>
@@ -153,7 +183,14 @@ import * as taskParticipantService from '@/services/task-participant-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { Line } from 'vue-chartjs';
-import { normalizedTrackingData } from '@/modules/playing/moveit/utils/trackingData';
+import {
+  maxSpeed,
+  averageSpeed,
+  consumption,
+  distance,
+  normalizedTrackingData,
+  persons,
+} from '@/modules/playing/moveit/utils/trackingData';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
 import * as constants from '@/modules/playing/moveit/utils/consts';
@@ -369,15 +406,42 @@ export default class ParticipantHistory extends Vue {
   getVehicleParameter(vehicle: any): any {
     return configCalculation.getVehicleParameter(vehicle);
   }
+
+  calculateSpeed(type: string): number {
+    const trackingData =
+      this.activeStepsList[this.activeHistoryIndex].parameter.drive
+        .trackingData;
+    switch (type) {
+      case 'max':
+        return maxSpeed(trackingData);
+      case 'average':
+        return averageSpeed(trackingData);
+      case 'consumption':
+        return consumption(trackingData);
+      case 'distance':
+        return distance(trackingData);
+      case 'persons':
+        return persons(trackingData);
+    }
+    return 0;
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .el-carousel::v-deep(.el-carousel__container) {
-  height: 5rem;
+  height: 12rem;
 }
+
 .history-carousel {
-  height: 5rem;
+  //height: 15rem;
+}
+
+.history-vehicle {
+  font-weight: var(--font-weight-semibold);
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
 }
 
 .chartArea {

@@ -185,16 +185,13 @@
         "compact": "Kleinwagen",
         "e-car": "E-Auto"
       },
-      "bike": {
-        "category": "Fahrrad",
-        "e-bike": "E Bike",
-        "city": "Citybike"
-      },
       "motorcycle": {
         "category": "Motorrad",
         "moped": "Moped",
         "e-moped": "Elektroroller",
-        "motorcycle": "Motorrad"
+        "motorcycle": "Motorrad",
+        "e-bike": "E Bike",
+        "city": "Citybike"
       },
       "scooter":  {
         "category": "Scooter",

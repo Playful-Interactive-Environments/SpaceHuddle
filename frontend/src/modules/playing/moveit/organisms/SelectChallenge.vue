@@ -603,7 +603,6 @@ export default class SelectChallenge extends Vue {
   showHighScore = false;
   highScoreList: HighscoreData = {};
   openHighScoreCategories: string[] = [];
-  openHighScoreVehicles: string[] = [];
 
   get activeVehicle(): VehicleData | null {
     if (this.vehicleList.length > this.activeVehicleIndex)
