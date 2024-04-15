@@ -678,6 +678,7 @@ interface MoleculeData extends CoolItHitRegion, IGameObjectSource {
   size: number;
   controllable: boolean;
   absorbedByTree: boolean;
+  absorbable: boolean;
   color: string;
   rise: boolean;
   isActive: boolean;
@@ -1495,6 +1496,7 @@ export default class PlayLevel extends Vue {
       }
       reactiveMolecule.position = position;
       reactiveMolecule.rise = true;
+      reactiveMolecule.absorbable = false;
       reactiveMolecule.isActive = true;
     } else {
       this.moleculeList.push({
@@ -1522,6 +1524,7 @@ export default class PlayLevel extends Vue {
         temperature: 0,
         emits: [],
         rise: true,
+        absorbable: false,
         calculateTemperature: true,
         isActive: true,
         isClicked: false,
@@ -1646,6 +1649,7 @@ export default class PlayLevel extends Vue {
           temperature: 0,
           emits: [],
           rise: false,
+          absorbable: true,
           calculateTemperature: true,
           isActive: true,
           isClicked: false,
@@ -2267,6 +2271,17 @@ export default class PlayLevel extends Vue {
     for (const item of inactiveMolecules) {
       item.isActive = false;
     }
+    const absorbableMolecules = this.moleculeList.filter(
+      (item) =>
+        item.isActive &&
+        !item.absorbable &&
+        item.absorbedByTree &&
+        item.gameObject &&
+        item.gameObject.transformation.position[1] < (this.gameHeight / 3) * 2
+    );
+    for (const item of absorbableMolecules) {
+      item.absorbable = true;
+    }
 
     if (this.vehicleSprite?.playing) {
       this.animationFrameChanged();
@@ -2667,7 +2682,11 @@ export default class PlayLevel extends Vue {
     const obstacleType = this.getLevelTypeCategoryItems(obstacle.type)[
       obstacle.name
     ].type;
-    if (obstacleType === ObstacleType.carbonSink && molecule.absorbedByTree) {
+    if (
+      obstacleType === ObstacleType.carbonSink &&
+      molecule.absorbedByTree &&
+      molecule.absorbable
+    ) {
       this.moleculeState[molecule.name].decreaseCount++;
       const moleculeName = 'oxygen';
       this.updatedMolecule(molecule, moleculeName);
