@@ -55,6 +55,7 @@
       <div ref="scrollContent">
         <el-scrollbar
           v-if="scrollSizeCalculated"
+          always
           :height="`${scrollHeight}px`"
           :style="{ '--scroll-height': `${scrollHeight}px` }"
         >
