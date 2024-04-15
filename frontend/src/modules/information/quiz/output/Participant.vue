@@ -160,13 +160,22 @@
             </template>
           </draggable>
         </el-space>
-        <el-rate
-          v-else-if="activeQuestionType === QuestionType.RATING"
-          :max="activeQuestion.parameter.maxValue"
-          v-model="activeAnswer.numValue"
-          :disabled="quizState === QuestionState.RESULT_ANSWER"
-          v-on:change="onAnswerValueChanged"
-        ></el-rate>
+        <div v-else-if="activeQuestionType === QuestionType.RATING">
+          0 <font-awesome-icon :icon="['far', 'star']" /> =
+          {{ $t('module.information.quiz.participant.bad') }}
+          <br />
+          {{ activeQuestion.parameter.maxValue }}
+          <font-awesome-icon icon="star" /> =
+          {{ $t('module.information.quiz.participant.good') }}
+          <br />
+          <el-rate
+            :max="activeQuestion.parameter.maxValue"
+            v-model="activeAnswer.numValue"
+            :disabled="quizState === QuestionState.RESULT_ANSWER"
+            size="large"
+            v-on:change="onAnswerValueChanged"
+          ></el-rate>
+        </div>
         <el-slider
           v-else-if="activeQuestionType === QuestionType.SLIDER"
           :min="activeQuestion.parameter.minValue"
@@ -176,16 +185,27 @@
           :marks="activeQuestionRange"
           :disabled="quizState === QuestionState.RESULT_ANSWER"
         ></el-slider>
-        <el-input-number
+        <div
           v-else-if="activeQuestionType === QuestionType.NUMBER"
-          :max="activeQuestion.parameter.maxValue"
-          :min="activeQuestion.parameter.minValue"
-          :value-on-clear="null"
-          v-model="activeAnswer.numValue"
-          v-on:change="onInputNumberChanged(true)"
-          v-on:input="onInputNumberChanged(false)"
-          :disabled="quizState === QuestionState.RESULT_ANSWER"
-        ></el-input-number>
+          class="media"
+        >
+          <div class="media-left">
+            {{ activeQuestion.parameter.minValue }}
+          </div>
+          <el-input-number
+            class="media-content"
+            :max="activeQuestion.parameter.maxValue"
+            :min="activeQuestion.parameter.minValue"
+            :value-on-clear="null"
+            v-model="activeAnswer.numValue"
+            v-on:change="onInputNumberChanged(true)"
+            v-on:input="onInputNumberChanged(false)"
+            :disabled="quizState === QuestionState.RESULT_ANSWER"
+          ></el-input-number>
+          <div class="media-right">
+            {{ activeQuestion.parameter.maxValue }}
+          </div>
+        </div>
         <el-input
           v-else-if="activeQuestionType === QuestionType.TEXT"
           type="textarea"
@@ -274,6 +294,7 @@ import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIter
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { delay, until } from '@/utils/wait';
 import IdeaMediaViewer from '@/components/moderator/molecules/IdeaMediaViewer.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface AnswerValue {
   numValue: number | null;
@@ -284,6 +305,7 @@ interface AnswerValue {
 
 @Options({
   components: {
+    FontAwesomeIcon,
     IdeaMediaViewer,
     ImagePicker,
     QuizResult,
@@ -1793,5 +1815,10 @@ label {
   margin: 0 -2rem -1rem -2rem;
   padding: 1rem 2rem;
   width: calc(100% + 4rem);
+}
+
+.media-left,
+.media-right {
+  margin: auto 0.5rem;
 }
 </style>

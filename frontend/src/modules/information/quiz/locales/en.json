@@ -42,7 +42,9 @@
     "next": "next",
     "submit": "Save",
     "waiting": "Please wait. Questions and answers are being loaded.",
-    "imageKeywords": "image caption"
+    "imageKeywords": "image caption",
+    "good": "very good",
+    "bad": "very bad"
   },
   "enum": {
     "questionType": {
