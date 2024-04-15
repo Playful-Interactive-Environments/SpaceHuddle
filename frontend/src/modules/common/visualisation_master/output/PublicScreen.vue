@@ -1,5 +1,5 @@
 <template>
-  <el-select class="timeModSelect" v-model="timeModifier">
+  <el-select v-if="displayTimeMod" class="timeModSelect" v-model="timeModifier">
     <template v-slot:prefix>
       <font-awesome-icon icon="sort" class="el-icon" />
     </template>
@@ -14,16 +14,24 @@
       </span>
     </el-option>
   </el-select>
-  <Gallery
-    v-if="currentVisModule === 'gallery'"
-    :task-id="this.taskId"
-    :timeModifier="timeModifier"
-  />
-  <CardShuffle
-    v-if="currentVisModule === 'cardShuffle'"
-    :task-id="this.taskId"
-    :timeModifier="timeModifier"
-  />
+  <div id="visContainer">
+    <Gallery
+      v-if="currentVisModule === 'gallery'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+    />
+    <CardShuffle
+      v-if="currentVisModule === 'cardShuffle'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+    />
+    <BarChart
+      v-if="currentVisModule === 'barChart'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :timerEnded="this.timerEnd"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -35,16 +43,18 @@ import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
-
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
 import CardShuffle from '@/modules/common/visualisation_master/organisms/cardShuffle.vue';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import * as timerService from '@/services/timer-service';
-import * as sessionService from '@/services/session-service';
+import { TimerEntity } from '@/types/enum/TimerEntity';
+import BarChart from '@/modules/common/visualisation_master/organisms/barChart.vue';
+import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
 
 @Options({
   components: {
+    BarChart,
     CardShuffle,
     IdeaCard,
     Gallery,
@@ -54,11 +64,13 @@ import * as sessionService from '@/services/session-service';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: false }) readonly timerEnd!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   task: Task | null = null;
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
   galleryIndex = 0;
+  moduleConfig = moduleConfig;
 
   taskType: null | string = null;
   currentVisModule: null | string = null;
@@ -69,14 +81,19 @@ export default class PublicScreen extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
-    ideaService.registerGetIdeasForTask(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateIdeas,
-      this.authHeaderTyp,
-      10
-    );
+    if (
+      this.currentVisModule &&
+      moduleConfig.visModules[this.currentVisModule].type === 'IDEA'
+    ) {
+      ideaService.registerGetIdeasForTask(
+        this.taskId,
+        IdeaSortOrder.TIMESTAMP,
+        null,
+        this.updateIdeas,
+        this.authHeaderTyp,
+        10
+      );
+    }
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -85,6 +102,13 @@ export default class PublicScreen extends Vue {
     );
   }
 
+  get displayTimeMod(): boolean {
+    if (this.currentVisModule) {
+      return moduleConfig.visModules[this.currentVisModule].allowTimeMod;
+    } else {
+      return false;
+    }
+  }
   updateTask(task: Task): void {
     this.task = task;
     const visModule = this.task.modules.filter(
@@ -198,5 +222,9 @@ export default class PublicScreen extends Vue {
   top: 1.5rem;
   right: 3rem;
   z-index: 10000;
+}
+
+#visContainer {
+  height: 87%;
 }
 </style>

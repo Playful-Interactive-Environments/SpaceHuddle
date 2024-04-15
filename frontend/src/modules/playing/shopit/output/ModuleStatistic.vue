@@ -150,7 +150,7 @@ export default class ModuleStatistic extends Vue {
       });
     }
   }
-
+//TODO Object bug in statistic
   calculatePointsSpentChart(): void {
     if (this.steps) {
       const avatarList = this.getAvatarList(this.steps);

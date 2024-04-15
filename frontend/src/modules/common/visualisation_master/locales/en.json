@@ -10,10 +10,10 @@
         "description": "Show items as gallery"
       }
     },
-    "cardShuffle": {
+    "barChart": {
       "description": {
-        "title": "Card shuffle",
-        "description": "animate ideas"
+        "title": "Bar Chart",
+        "description": "data or votes displayed as a bar chart"
       }
     }
   }

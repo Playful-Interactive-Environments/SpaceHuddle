@@ -19,7 +19,7 @@ import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
-  emits: ['timerEnds'],
+  emits: ['timerEnds', 'timerUpdate'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -69,6 +69,8 @@ export default class TimerProgress extends Vue {
     this.totalTime = totalTime;
     timerService.setTotalTime(this.entity, totalTime);
     timerService.setRemainingTime(this.entity, remainingTime);
+
+    remainingTime != null ? this.$emit('timerUpdate') : this.$emit('timerEnds');
 
     if (timerService.getState(item) !== timerService.getState(this.entity)) {
       timerService.setState(this.entity, state);

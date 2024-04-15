@@ -4,19 +4,22 @@
       "id": "gallery",
       "image": "gallery/path",
       "icon": "image",
-      "type": "IDEA"
+      "type": "IDEA",
+      "allowTimeMod": true
     },
     "cardShuffle": {
       "id": "cardShuffle",
       "image": "cardShuffle/path",
       "icon": "layer-group",
-      "type": "IDEA"
+      "type": "IDEA",
+      "allowTimeMod": true
     },
-    "voting": {
-      "id": "voting",
-      "image": "cardShuffle/path",
+    "barChart": {
+      "id": "barChart",
+      "image": "barChart/path",
       "icon": "layer-group",
-      "type": "VOTING"
+      "type": "VOTING",
+      "allowTimeMod": false
     }
   }
 }
