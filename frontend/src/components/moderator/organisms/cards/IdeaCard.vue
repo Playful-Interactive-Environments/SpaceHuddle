@@ -32,7 +32,12 @@
     <div v-else class="card__image">
       <slot name="icon"></slot>
     </div>
-    <div class="card__text" @touchend="handleClick" @click="handleClick">
+    <div
+      class="card__text"
+      @touchstart="touchStart"
+      @touchend="handleClick"
+      @click="handleClick"
+    >
       <div class="card__title">
         <span
           ref="title"
@@ -245,10 +250,23 @@ export default class IdeaCard extends Vue {
 
   handleClick(event: any): void {
     if (event.touches) {
-      setTimeout(() => this.$emit('click', event), 100);
+      const touchUp: Touch = event.changedTouches[0];
+      const moveX = this.touchDown
+        ? Math.abs(touchUp.clientX - this.touchDown.clientX)
+        : 0;
+      const moveY = this.touchDown
+        ? Math.abs(touchUp.clientY - this.touchDown.clientY)
+        : 0;
+      if (moveX < 10 && moveY < 10)
+        setTimeout(() => this.$emit('click', event), 100);
     } else {
       this.$emit('click', event);
     }
+  }
+
+  touchDown: Touch | null = null;
+  touchStart(event: any): void {
+    this.touchDown = event.changedTouches[0];
   }
 
   levelSharedChanged() {
