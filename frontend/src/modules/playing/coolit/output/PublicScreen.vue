@@ -84,9 +84,9 @@ export default class PublicScreen extends Vue {
       this.openHighScoreLevels = list.map((item) => item.ideaId);
     for (const level of list) {
       if (level.details) {
-        level.details = level.details.sort(
-          (a, b) => b.value.normalisedTime - a.value.normalisedTime
-        );
+        level.details = level.details
+          .sort((a, b) => b.value.normalisedTime - a.value.normalisedTime)
+          .slice(0, 5);
       }
     }
     this.highScoreList = list;

@@ -158,9 +158,9 @@ export default class PublicScreen extends Vue {
       for (const vehicle of Object.keys(data[category])) {
         if (Object.keys(this.highScoreList).length === 0)
           this.openHighScoreCategories.push(vehicle);
-        data[category][vehicle].sort(
-          (a, b) => b.value.percentage - a.value.percentage
-        );
+        data[category][vehicle] = data[category][vehicle]
+          .sort((a, b) => b.value.percentage - a.value.percentage)
+          .slice(0, 5);
       }
     }
     this.highScoreList = data;
