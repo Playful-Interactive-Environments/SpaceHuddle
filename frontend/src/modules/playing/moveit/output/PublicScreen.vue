@@ -1,22 +1,184 @@
 <template>
-  {{ $t('general.noPublicView') }}
+  <el-collapse v-model="openHighScoreCategories">
+    <el-collapse-item
+      v-for="(categoryData, category) of highScoreList"
+      :key="category"
+      :title="$t(`module.playing.moveit.enums.vehicles.${category}.category`)"
+      :name="category"
+    >
+      <el-collapse-item
+        v-for="(vehicleData, vehicle) of categoryData"
+        :key="vehicle"
+        :title="
+          $t(`module.playing.moveit.enums.vehicles.${category}.${vehicle}`)
+        "
+        :name="vehicle"
+      >
+        <table class="highscore-table">
+          <tr>
+            <th />
+            <th>
+              {{
+                $t('module.playing.moveit.participant.drivingStats.collected')
+              }}
+            </th>
+            <th>
+              {{
+                $t('module.playing.moveit.participant.drivingStats.avgSpeed')
+              }}
+            </th>
+            <th>
+              {{
+                $t('module.playing.moveit.participant.drivingStats.maxSpeed')
+              }}
+            </th>
+            <th>
+              {{
+                $t('module.playing.moveit.participant.drivingStats.consumption')
+              }}
+            </th>
+            <th>
+              {{ $t('module.playing.moveit.participant.drivingStats.persons') }}
+            </th>
+          </tr>
+          <tr v-for="entry of vehicleData" :key="entry.avatar.symbol">
+            <td>
+              <font-awesome-icon
+                :icon="entry.avatar.symbol"
+                :style="{ color: entry.avatar.color }"
+              ></font-awesome-icon>
+            </td>
+            <td>
+              {{ entry.value.collectedCount }} / {{ entry.value.totalCount }}
+            </td>
+            <td>
+              {{ Math.round(entry.value.averageSpeed) }}
+              {{ $t('module.playing.moveit.enums.units.km/h') }}
+            </td>
+            <td>
+              {{ Math.round(entry.value.maxSpeed) }}
+              {{ $t('module.playing.moveit.enums.units.km/h') }}
+            </td>
+            <td>
+              {{ Math.round(entry.value.consumption * 1000) / 1000 }}
+              <span v-if="isElectric(category, vehicle)">
+                {{ $t('module.playing.moveit.enums.units.kw') }}
+              </span>
+              <span v-else>
+                {{ $t('module.playing.moveit.enums.units.liters') }}
+              </span>
+            </td>
+            <td>
+              {{ Math.round(entry.value.persons) }}
+            </td>
+            <td>
+              <el-rate
+                v-model="entry.value.rate"
+                size="large"
+                :max="3"
+                :disabled="true"
+              />
+            </td>
+          </tr>
+        </table>
+      </el-collapse-item>
+    </el-collapse-item>
+  </el-collapse>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { VoteParameterResult } from '@/types/api/Vote';
+import * as cashService from '@/services/cash-service';
+import * as votingService from '@/services/voting-service';
+import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+
+interface HighscoreData {
+  [key: string]: {
+    [key: string]: {
+      avatar: { color: string; symbol: string };
+      value: {
+        percentage: number;
+        rate: number;
+        totalCount: number;
+        collectedCount: number;
+      };
+    }[];
+  };
+}
 
 @Options({
   components: {},
 })
-
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
+  highScoreList: HighscoreData = {};
+  openHighScoreCategories: string[] = [];
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    if (this.taskId) {
+      votingService.registerGetParameterResult(
+        this.taskId,
+        '-',
+        this.updateHighScore,
+        this.authHeaderTyp,
+        5 * 60
+      );
+    }
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateHighScore);
+  }
+
+  updateHighScore(list: VoteParameterResult[]): void {
+    const data: HighscoreData = {};
+    for (const level of list) {
+      if (level.details) {
+        for (const detail of level.details) {
+          if (!data[detail.value.vehicle.category])
+            data[detail.value.vehicle.category] = {};
+          if (!data[detail.value.vehicle.category][detail.value.vehicle.type])
+            data[detail.value.vehicle.category][detail.value.vehicle.type] = [];
+          data[detail.value.vehicle.category][detail.value.vehicle.type].push({
+            avatar: detail.avatar,
+            value: detail.value,
+          });
+        }
+      }
+    }
+    for (const category of Object.keys(data)) {
+      if (Object.keys(this.highScoreList).length === 0)
+        this.openHighScoreCategories.push(category);
+      for (const vehicle of Object.keys(data[category])) {
+        if (Object.keys(this.highScoreList).length === 0)
+          this.openHighScoreCategories.push(vehicle);
+        data[category][vehicle].sort(
+          (a, b) => b.value.percentage - a.value.percentage
+        );
+      }
+    }
+    this.highScoreList = data;
+  }
+
+  isElectric(category: string, type: string): boolean {
+    const vehicle = gameConfig.vehicles[category].types.find(
+      (item) => item.name === type
+    );
+    if (vehicle) return vehicle.fuel === 'electricity';
+    return false;
+  }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.highscore-table {
+  color: var(--color-playing);
+  width: 100%;
+}
+</style>
