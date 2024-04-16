@@ -10,6 +10,18 @@
         "description": "Zeige Ideen als Galerie"
       }
     },
+    "cardShuffle": {
+      "description": {
+        "title": "Karten mischen",
+        "description": "Zeige Ideen als Kartenmischanimation"
+      }
+    },
+    "infiniteScroll": {
+      "description": {
+        "title": "Endlos Scrolling",
+        "description": "Ideen werden endlos gescrollt"
+      }
+    },
     "barChart": {
       "description": {
         "title": "Balkendiagramm",

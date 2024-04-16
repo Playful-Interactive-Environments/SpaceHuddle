@@ -31,6 +31,11 @@
       :timeModifier="timeModifier"
       :timerEnded="this.timerEnd"
     />
+    <infinite-scroll
+        v-if="currentVisModule === 'infiniteScroll'"
+        :task-id="this.taskId"
+        :timeModifier="timeModifier"
+    />
   </div>
 </template>
 
@@ -51,9 +56,11 @@ import * as timerService from '@/services/timer-service';
 import { TimerEntity } from '@/types/enum/TimerEntity';
 import BarChart from '@/modules/common/visualisation_master/organisms/barChart.vue';
 import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
+import InfiniteScroll from "@/modules/common/visualisation_master/organisms/infiniteScroll.vue";
 
 @Options({
   components: {
+    InfiniteScroll,
     BarChart,
     CardShuffle,
     IdeaCard,
