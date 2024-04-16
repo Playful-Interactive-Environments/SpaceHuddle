@@ -10,6 +10,18 @@
         "description": "Show items as gallery"
       }
     },
+    "cardShuffle": {
+      "description": {
+        "title": "Card Shuffle",
+        "description": "Show ideas as a card shuffle animation"
+      }
+    },
+    "infiniteScroll": {
+      "description": {
+        "title": "Infinite Scrolling",
+        "description": "Ideas are scrolled infinitely"
+      }
+    },
     "barChart": {
       "description": {
         "title": "Bar Chart",
