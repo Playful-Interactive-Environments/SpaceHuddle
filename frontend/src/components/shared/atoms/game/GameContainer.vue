@@ -504,12 +504,28 @@ export default class GameContainer extends Vue {
 
   get backgroundTexturePositionSprite(): PIXI.Texture | null {
     if (this.usePreCalculation) {
-      if (this.endlessPanning && this.preRenderTextureEndless)
+      if (
+        this.endlessPanning &&
+        this.preRenderTextureEndless &&
+        this.preRenderTextureEndless.valid
+      )
         return this.preRenderTextureEndless;
-      if (this.preRenderTexture) return this.preRenderTexture;
+      if (this.preRenderTexture && this.preRenderTexture.valid)
+        return this.preRenderTexture;
     }
-    if (!this.endlessPanning) return this.backgroundSprite;
-    return this.backgroundSpriteEndlessPanning;
+    if (
+      this.endlessPanning &&
+      this.backgroundSpriteEndlessPanning &&
+      this.backgroundSpriteEndlessPanning.valid
+    )
+      return this.backgroundSpriteEndlessPanning;
+    if (
+      !this.endlessPanning &&
+      this.backgroundSprite &&
+      this.backgroundSprite.valid
+    )
+      return this.backgroundSprite;
+    return null;
   }
 
   getGameObjectForBody(body: Matter.Body): GameObject | null {
