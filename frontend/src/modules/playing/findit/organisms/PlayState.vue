@@ -186,6 +186,8 @@ export interface PlayStateResult {
   time: number;
   collected: number;
   total: number;
+  classified: number;
+  correctClassified: number;
   itemList: placeable.PlaceableBase[];
   redHerringList: placeable.PlaceableBase[];
 }
@@ -304,6 +306,8 @@ export default class PlayState extends Vue {
       time: Date.now() - this.startTime,
       collected: this.collectedCount,
       total: this.totalCount,
+      classified: 0,
+      correctClassified: 0,
       itemList: this.collectedObjects,
       redHerringList: this.collectedRedHerrings,
     };

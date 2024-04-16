@@ -31,10 +31,9 @@
         :id="object.name"
         class="endObject"
         :class="{
-          endObjectCorrect: correctClassified.includes(object.name),
+          endObjectCorrect: isCorrectClassified(object.name),
           endObjectIncorrect:
-            !correctClassified.includes(object.name) &&
-            classified.includes(object.name),
+            !isCorrectClassified(object.name) && isClassified(object.name),
         }"
         @click="activeObjectChanged(object, object.name, true)"
       >
@@ -60,8 +59,9 @@
           :icon="gameConfig[levelType].categories[object.type].settings.icon"
           class="categoryIcon"
           :class="{
-            hazardIcon: checkType(true, object.name),
-            noHazardIcon: checkType(false, object.name),
+            correctClassificationIcon: isCorrectClassified(object.name),
+            wrongClassificationIcon:
+              isClassified(object.name) && !isCorrectClassified(object.name),
           }"
           v-if="this.classified.includes(object.name)"
         />
@@ -113,11 +113,9 @@
     </div>
     <el-button
       class="el-button--submit returnButton"
-      @click="this.$emit('replayFinished')"
+      @click="this.$emit('replayFinished', classified, correctClassified)"
       v-if="
-        endObjects
-          .map((x) => x.name)
-          .every((x) => classified.includes(x)) ||
+        endObjects.map((x) => x.name).every((x) => classified.includes(x)) ||
         this.endObjects.length === 0
       "
     >
@@ -196,15 +194,26 @@ export default class CollectedState extends Vue {
           this.activeObject.name
         ].collectKey === key
       ) {
-        if (!this.classified.includes(id)) {
+        if (
+          !this.classified.includes(id) &&
+          !this.correctClassified.includes(id)
+        ) {
           this.correctClassified.push(id);
           this.classified.push(id);
           return true;
         }
       }
-      this.classified.push(id);
+      if (!this.classified.includes(id)) this.classified.push(id);
       return false;
     }
+  }
+
+  isClassified(id: string): boolean {
+    return this.classified.includes(id);
+  }
+
+  isCorrectClassified(id: string): boolean {
+    return this.correctClassified.includes(id);
   }
 
   checkAllAnswered() {
@@ -327,6 +336,7 @@ export default class CollectedState extends Vue {
     return placeableConfig.explanationKey;
   }
   //#endregion interaction
+
   shuffle(array) {
     let currentIndex = array.length;
     let randomIndex;
@@ -474,11 +484,11 @@ export default class CollectedState extends Vue {
   background-color: var(--color-background);
 }
 
-.hazardIcon {
+.wrongClassificationIcon {
   color: var(--color-evaluating);
 }
 
-.noHazardIcon {
+.correctClassificationIcon {
   color: var(--color-brainstorming);
 }
 

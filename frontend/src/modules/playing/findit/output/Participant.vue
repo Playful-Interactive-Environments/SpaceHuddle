@@ -239,13 +239,37 @@ export default class Participant extends Vue {
           ? TaskParticipantIterationStepStatesType.CORRECT
           : TaskParticipantIterationStepStatesType.WRONG,
         result,
-        result.stars,
+        0, //result.stars,
         null,
         true,
         (item) => item.parameter.step === GameStep.Play
       );
     }
     this.selectedLevel = null;
+  }
+
+  async replayFinished(
+    classified: string[],
+    correctClassified: string[]
+  ): Promise<void> {
+    this.gameStep = GameStep.Select;
+    this.gameState = GameState.Info;
+    const stars = Math.floor(
+      (correctClassified.length / classified.length) * 3
+    );
+    this.trackingManager.saveIterationStep(
+      {
+        correctClassified: correctClassified.length,
+        classified: classified.length,
+      },
+      correctClassified.length === classified.length
+        ? TaskParticipantIterationStepStatesType.CORRECT
+        : TaskParticipantIterationStepStatesType.WRONG,
+      stars,
+      null,
+      true,
+      (item) => item.parameter.step === GameStep.Play
+    );
 
     if (this.trackingManager) {
       await this.trackingManager.saveIteration(
@@ -253,25 +277,20 @@ export default class Participant extends Vue {
           gameStep: this.gameStep,
           levelId: null,
         },
-        result.stars >= 2
+        stars >= 2
           ? TaskParticipantIterationStatesType.WIN
           : TaskParticipantIterationStatesType.LOOS
       );
       if (
         this.trackingManager.state &&
         (!this.trackingManager.state.parameter.rate ||
-          this.trackingManager.state.parameter.rate < result.stars)
+          this.trackingManager.state.parameter.rate < stars)
       ) {
         this.trackingManager.setFinishedState(this.module, {
-          rate: result.stars,
+          rate: stars,
         });
       } else this.trackingManager.setFinishedState(this.module);
     }
-  }
-
-  replayFinished(): void {
-    this.gameStep = GameStep.Select;
-    this.gameState = GameState.Info;
   }
 }
 </script>
