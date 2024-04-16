@@ -1,10 +1,23 @@
 <template>
   <div id="scrollVis">
+    <el-button class="playPause">
+      <font-awesome-icon
+        v-if="paused"
+        :icon="['fas', 'play']"
+        @click="paused = false"
+      />
+      <font-awesome-icon
+        v-else
+        :icon="['fas', 'pause']"
+        @click="paused = true"
+      />
+    </el-button>
     <div
       id="scrollParent"
       :style="`animation: infiniteScroll ${
         fullScrollTime / timeModifier
       }s infinite linear`"
+      :class="{ paused: paused }"
     >
       <div class="scroll-container columnLayout" id="scrollContainer">
         <IdeaCard
@@ -52,6 +65,9 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
 
+  fullScrollTime = 40;
+  paused = false;
+
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -75,8 +91,6 @@ export default class PublicScreen extends Vue {
       this.ideas = ideas;
     }
   }
-
-  fullScrollTime = 40;
 
   /*scrollModifier = 0;
   scrollInterval = 500;
@@ -177,6 +191,16 @@ export default class PublicScreen extends Vue {
   column-fill: balance;
 }
 
+.playPause {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1000;
+  background-color: transparent;
+  color: var(--color-dark-contrast);
+  font-size: var(--font-size-xxlarge);
+}
+
 #scrollParent {
   width: 100%;
 }
@@ -185,15 +209,8 @@ export default class PublicScreen extends Vue {
   width: 100%;
   height: 100%;
   overflow: hidden;
-}
-
-@keyframes scroll {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-50%);
-  }
+  position: relative;
+  border-radius: var(--border-radius-small);
 }
 </style>
 <style lang="scss">
@@ -204,5 +221,8 @@ export default class PublicScreen extends Vue {
   to {
     transform: translateY(-50%);
   }
+}
+.paused {
+  animation-play-state: paused !important;
 }
 </style>
