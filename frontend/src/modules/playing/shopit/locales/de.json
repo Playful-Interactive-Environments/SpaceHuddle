@@ -19,6 +19,7 @@
     "cardsPlayed": "Wie viele Karten wurden in einer Runde gespielt?"
   },
   "participant": {
+    "skip": "überspringen",
     "tutorial": {
       "rules1": "Jeder Spieler hat 3 Karten und muss 3 Kategorien füllen. Um einen Punkt in einer Kategorie zu erlangen, muss der Spieler eine Runde in dieser Kategorie gewinnen. Der Spieler der als erstes alle Kategorien gefüllt hat, gewinnt!",
       "rules2": "Aber Achtung! Die Punkte die du ausgeben darfst sind begrenzt. Wie viele Punkte schon ausgegeben wurden siehst du am roten Balken.",
@@ -79,6 +80,15 @@
       "CO²": "CO²",
       "electricity": "Energie",
       "lifetime": "Lebenszeit",
+      "water": "Wasser",
+      "money": "Geld"
+    },
+    "highscore": {
+      "header": "Highscore",
+      "co2": "CO²",
+      "pointsSpent": "ausgegebene Punkte",
+      "electricity": "Energie",
+      "lifetime": "Lebensdauer",
       "water": "Wasser",
       "money": "Geld"
     }

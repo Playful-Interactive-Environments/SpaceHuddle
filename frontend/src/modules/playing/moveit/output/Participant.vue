@@ -93,6 +93,7 @@ import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIter
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import * as votingService from '@/services/voting-service';
 import { Vote } from '@/types/api/Vote';
+import EndpointType from '@/types/enum/EndpointType';
 
 enum GameStep {
   Select = 'select',
@@ -571,7 +572,11 @@ export default class Participant extends Vue {
           highScore.parameter.consumption = consumption(this.trackingData);
           highScore.parameter.persons = persons(this.trackingData);
         }
-        votingService.putVote(highScore);
+        votingService.putVote(highScore).then(() => {
+          cashService.refreshCash(
+            `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+          );
+        });
       }
     } else {
       const parameter: any = {
@@ -591,7 +596,12 @@ export default class Participant extends Vue {
           detailRating: successStatus,
           parameter: parameter,
         })
-        .then((vote) => this.myHighScoreList.push(vote));
+        .then((vote) => {
+          this.myHighScoreList.push(vote);
+          cashService.refreshCash(
+            `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+          );
+        });
     }
   }
 

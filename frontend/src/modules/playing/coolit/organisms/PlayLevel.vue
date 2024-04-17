@@ -536,6 +536,7 @@ import weatherConfig from '@/modules/playing/coolit/data/weather.json';
 import * as preRenderer from '@/modules/playing/coolit/utils/preRender';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
+import EndpointType from "@/types/enum/EndpointType";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -2860,7 +2861,11 @@ export default class PlayLevel extends Vue {
         this.highScore.parameter.rate < this.stars
       )
         this.highScore.parameter.rate = this.stars;
-      votingService.putVote(this.highScore);
+      votingService.putVote(this.highScore).then(() => {
+        cashService.refreshCash(
+          `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+        );
+      });
     } else {
       const parameter: any = {
         normalisedTime: this.normalisedTime,
@@ -2894,7 +2899,12 @@ export default class PlayLevel extends Vue {
           detailRating: this.playTime,
           parameter: parameter,
         })
-        .then((vote) => (this.highScore = vote));
+        .then((vote) => {
+          this.highScore = vote;
+          cashService.refreshCash(
+            `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+          );
+        });
     }
     this.$emit('finished', this.playStateResult);
   }

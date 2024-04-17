@@ -321,9 +321,15 @@ export default class SelectState extends Vue {
       this.openHighScoreLevels = list.map((item) => item.ideaId);
     for (const level of list) {
       if (level.details) {
-        level.details = level.details.sort(
-          (a, b) => b.value.normalisedTime - a.value.normalisedTime
-        );
+        level.details = level.details.sort((a, b) => {
+          if (b.value.stars === a.value.stars) {
+            if (b.value.collected === a.value.collected) {
+              return b.value.correctClassified - a.value.correctClassified;
+            }
+            return b.value.collected - a.value.collected;
+          }
+          return b.value.stars - a.value.stars;
+        });
       }
     }
     this.highScoreList = list;

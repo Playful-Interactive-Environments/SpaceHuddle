@@ -28,6 +28,7 @@
     <JoinState
       v-if="gameStep === GameStep.Join && gameState === GameState.Game"
       :task-id="taskId"
+      :open-high-score="levelDone"
       @selectionDone="selectionDone"
     />
     <SingleplayerState
@@ -87,6 +88,9 @@ import { Task } from '@/types/api/Task';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { Vote } from '@/types/api/Vote';
+import * as votingService from '@/services/voting-service';
+import EndpointType from '@/types/enum/EndpointType';
 
 export enum GameStep {
   Join = 'join',
@@ -118,6 +122,8 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   loading = true;
+  levelDone = false;
+  highscore: Vote | null = null;
 
   sizeCalculated = false;
 
@@ -179,6 +185,13 @@ export default class Participant extends Vue {
       },
       500
     );
+
+    votingService.registerGetVotes(
+      this.taskId,
+      this.updateHighScore,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
   get moduleName(): string {
@@ -202,8 +215,14 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
+  updateHighScore(votes: Vote[]): void {
+    if (votes.length > 0) this.highscore = votes[0];
+    else this.highscore = null;
+  }
+
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateHighScore);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateGame);
     cashService.deregisterAllGet(this.checkGames);
@@ -498,6 +517,8 @@ export default class Participant extends Vue {
       );
     }
     this.clearAndReset();
+    this.levelDone = true;
+    this.saveHighScore();
   }
 
   calcRate(win, pointsSpent): number | null {
@@ -537,6 +558,56 @@ export default class Participant extends Vue {
     }
     this.gameStep = GameStep.Join;
     this.gameState = GameState.Left;
+  }
+
+  saveHighScore(): void {
+    const parameter = this.trackingManager.iterationStep?.parameter;
+    if (!parameter) return;
+    if (this.highscore) {
+      if (
+        !this.highscore.parameter.rate ||
+        this.highscore.parameter.rate <= parameter.rate
+      ) {
+        this.highscore.detailRating = parameter.rate;
+        this.highscore.rating = parameter.rate;
+        this.highscore.parameter.rate = parameter.rate;
+        this.highscore.parameter.cardsPlayed =
+          parameter.game.pointsSpent.length;
+        this.highscore.parameter.pointsSpent = parameter.game.pointsSpent;
+        this.highscore.parameter.co2 = parameter.game.co2;
+        this.highscore.parameter.electricity = parameter.game.electricity;
+        this.highscore.parameter.lifetime = parameter.game.lifetime;
+        this.highscore.parameter.water = parameter.game.water;
+        this.highscore.parameter.money = parameter.game.money;
+        votingService.putVote(this.highscore).then(() => {
+          cashService.refreshCash(
+            `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+          );
+        });
+      }
+    } else {
+      votingService
+        .postVote(this.taskId, {
+          rating: parameter.rate,
+          detailRating: parameter.rate,
+          parameter: {
+            rate: parameter.rate,
+            cardsPlayed: parameter.game.cardsPlayed.length,
+            pointsSpent: parameter.game.pointsSpent,
+            co2: parameter.game.co2,
+            electricity: parameter.game.electricity,
+            lifetime: parameter.game.lifetime,
+            water: parameter.game.water,
+            money: parameter.game.money,
+          },
+        })
+        .then((vote) => {
+          this.highscore = vote;
+          cashService.refreshCash(
+            `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+          );
+        });
+    }
   }
 }
 </script>

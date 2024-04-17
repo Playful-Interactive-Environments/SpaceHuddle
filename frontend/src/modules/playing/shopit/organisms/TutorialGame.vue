@@ -1,5 +1,5 @@
 <template>
-  <div class="gameArea" :style="{ height: height }">
+  <div class="gameArea">
     <div class="cardBox">
       <div
         class="cardContainer"
@@ -78,9 +78,10 @@
         @click="$emit('playFinished')"
         >Continue</el-button
       >
-      <el-button type="tertiary" id="skip" @click="$emit('playFinished')"
-        >skip</el-button
-      >
+      <el-button id="skip" @click="$emit('playFinished')">
+        {{ $t('module.playing.shopit.participant.skip') }}
+        skip
+      </el-button>
     </div>
   </div>
 </template>

@@ -46,8 +46,9 @@
       class="activeCards"
       tag="div"
       id="activeCards"
+      key="activeCard"
     >
-      <div class="waitingTexts">
+      <div class="waitingTexts" key="activeCard">
         <p
           v-show="
             cardsPlayed.length === 0 &&
@@ -130,7 +131,7 @@
         ></div>
       </div>
     </div>
-    <TransitionGroup name="hand" class="hand" tag="div">
+    <TransitionGroup name="hand" class="hand" tag="div" key="hand">
       <div
         v-for="card in cardHand"
         :key="card.name"
