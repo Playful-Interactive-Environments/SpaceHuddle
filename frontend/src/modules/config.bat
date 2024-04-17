@@ -63,10 +63,17 @@ for /d %%d in (*.*) do (
             )
         )
 
-        if !task! neq none (
-            if exist ..\common\visualisation_master\ (
-                echo        "visualisation_master": "common/visualisation_master",  >> .\..\config.json
-            )
+        if /i "!task!"=="brainstorming" if exist ..\common\visualisation_master\ (
+            echo        "visualisation_master": "common/visualisation_master",  >> .\..\config.json
+        )
+        if /i "!task!"=="information" if exist ..\common\visualisation_master\ (
+            echo        "visualisation_master": "common/visualisation_master",  >> .\..\config.json
+        )
+        if /i "!task!"=="selection" if exist ..\common\visualisation_master\ (
+            echo        "visualisation_master": "common/visualisation_master",  >> .\..\config.json
+        )
+        if /i "!task!"=="voting" if exist ..\common\visualisation_master\ (
+            echo        "visualisation_master": "common/visualisation_master",  >> .\..\config.json
         )
 
         if exist settings (
