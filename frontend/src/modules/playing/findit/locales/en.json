@@ -113,6 +113,7 @@
       "non-flammable": "no hazard"
     },
     "highscore": {
+      "header": "highscore",
       "collected": "collected",
       "classified": "classified",
       "time": "time"

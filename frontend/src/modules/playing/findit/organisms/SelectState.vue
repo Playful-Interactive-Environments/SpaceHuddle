@@ -104,6 +104,66 @@
       </div>
     </div>
   </div>
+  <DrawerBottomOverlay v-model="showHighScore" class="highscore">
+    <template v-slot:header>
+      {{ $t('module.playing.findit.participant.highscore.header') }}
+    </template>
+    <el-collapse v-model="openHighScoreLevels">
+      <el-collapse-item
+        v-for="level of highScoreList"
+        :key="level.ideaId"
+        :title="getLevelTitle(level.ideaId)"
+        :name="level.ideaId"
+      >
+        <table class="highscore-table">
+          <tr>
+            <th />
+            <th>
+              {{ $t('module.playing.findit.participant.highscore.collected') }}
+            </th>
+            <th>
+              {{ $t('module.playing.findit.participant.highscore.classified') }}
+            </th>
+            <th>
+              {{ $t('module.playing.findit.participant.highscore.time') }}
+            </th>
+            <th></th>
+          </tr>
+          <tr v-for="entry of level.details" :key="entry.avatar.symbol">
+            <td>
+              <font-awesome-icon
+                :icon="entry.avatar.symbol"
+                :style="{ color: entry.avatar.color }"
+              ></font-awesome-icon>
+            </td>
+            <td>{{ entry.value.collected }} / {{ entry.value.total }}</td>
+            <td>
+              {{ entry.value.correctClassified }} / {{ entry.value.classified }}
+            </td>
+            <td>
+              {{ Math.round((entry.value.time / 60000) * 100) }}
+            </td>
+            <td>
+              <el-rate
+                v-model="entry.value.stars"
+                size="large"
+                :max="3"
+                :disabled="true"
+              />
+            </td>
+          </tr>
+        </table>
+      </el-collapse-item>
+    </el-collapse>
+    <template v-slot:footer>
+      <el-button type="primary" @click="showHighScore = false">
+        {{ $t('module.playing.coolit.participant.confirm') }}
+      </el-button>
+    </template>
+  </DrawerBottomOverlay>
+  <el-button class="open-highscore" v-on:click="showHighScore = true">
+    <font-awesome-icon icon="trophy" />
+  </el-button>
 </template>
 
 <script lang="ts">
@@ -121,9 +181,12 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
+import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
+import { VoteParameterResult } from '@/types/api/Vote';
+import * as votingService from '@/services/voting-service';
 
 @Options({
-  components: { FontAwesomeIcon },
+  components: { FontAwesomeIcon, DrawerBottomOverlay },
   emits: ['selectionDone'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -131,10 +194,14 @@ export default class SelectState extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: {} }) readonly gameConfig!: any;
   @Prop() readonly trackingManager!: TrackingManager;
+  @Prop({ default: true }) readonly openHighScore!: boolean;
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
   selection = false;
+  showHighScore = false;
+  highScoreList: VoteParameterResult[] = [];
+  openHighScoreLevels: string[] = [];
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -147,9 +214,21 @@ export default class SelectState extends Vue {
     return this.trackingManager.getStarPoints(this.mapping[ideaId]);
   }
 
+  mounted(): void {
+    this.showHighScore = this.openHighScore;
+    votingService.registerGetParameterResult(
+      this.taskId,
+      '-',
+      this.updateHighScore,
+      EndpointAuthorisationType.PARTICIPANT,
+      5 * 60
+    );
+  }
+
   unmounted(): void {
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateIterationSteps);
+    cashService.deregisterAllGet(this.updateHighScore);
   }
 
   getStarsForIdea(ideaId: string): number {
@@ -235,6 +314,27 @@ export default class SelectState extends Vue {
       const levelType = configParameter.getTypeForLevel(this.gameConfig, level);
       this.$emit('selectionDone', levelType, level);
     }
+  }
+
+  updateHighScore(list: VoteParameterResult[]): void {
+    if (this.highScoreList.length === 0)
+      this.openHighScoreLevels = list.map((item) => item.ideaId);
+    for (const level of list) {
+      if (level.details) {
+        level.details = level.details.sort(
+          (a, b) => b.value.normalisedTime - a.value.normalisedTime
+        );
+      }
+    }
+    this.highScoreList = list;
+  }
+
+  getLevelTitle(levelId: string): string {
+    if (this.ideas) {
+      const level = this.ideas.find((item) => item.id === levelId);
+      if (level) return level.keywords;
+    }
+    return '';
   }
 }
 </script>
@@ -357,5 +457,32 @@ export default class SelectState extends Vue {
     left: 0.5rem;
     z-index: 150;
   }
+}
+
+.highscore-table {
+  color: var(--color-playing);
+  width: 100%;
+
+  td {
+    width: 33%;
+  }
+}
+
+.highscore::v-deep(.footer) {
+  text-align: center;
+  background-color: unset;
+}
+
+.highscore {
+  --footer-height: 4rem;
+}
+
+.open-highscore {
+  position: absolute;
+  margin: 0;
+  bottom: 0.2rem;
+  right: 0.2rem;
+  text-align: center;
+  background-color: transparent;
 }
 </style>

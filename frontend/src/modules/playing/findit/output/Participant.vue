@@ -14,6 +14,7 @@
       :task-id="taskId"
       :gameConfig="gameConfig"
       :tracking-manager="trackingManager"
+      :open-high-score="levelDone"
       @selectionDone="levelSelected"
     />
     <LevelBuilder
@@ -109,6 +110,7 @@ export default class Participant extends Vue {
   playStateResult: PlayStateResult | null = null;
   highScore: Vote | null = null;
   votes: Vote[] = [];
+  levelDone = false;
 
   // Flag which indicates if the window size has finished calculating.
   sizeCalculated = false;
@@ -270,6 +272,7 @@ export default class Participant extends Vue {
     classified: string[],
     correctClassified: string[]
   ): Promise<void> {
+    this.levelDone = true;
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
     const parameter = this.playStateResult;
