@@ -21,7 +21,7 @@
           )
         }}
       </h2>
-      <div class="awesome-icon">
+      <div class="visIcon">
         <font-awesome-icon :icon="visModule.icon" v-if="visModule.icon" />
       </div>
       <p>
@@ -119,7 +119,7 @@ export default class ModeratorConfig extends Vue {
   font-size: var(--font-size-default);
 }
 
-.awesome-icon {
+.visIcon {
   text-align: center;
   width: 100%;
   font-size: 40pt;
