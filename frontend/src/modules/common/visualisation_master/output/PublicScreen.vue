@@ -19,11 +19,13 @@
       v-if="currentVisModule === 'gallery'"
       :task-id="this.taskId"
       :timeModifier="timeModifier"
+      :ideas="this.ideas"
     />
     <CardShuffle
       v-if="currentVisModule === 'cardShuffle'"
       :task-id="this.taskId"
       :timeModifier="timeModifier"
+      :ideas="this.ideas"
     />
     <BarChart
       v-if="currentVisModule === 'barChart'"
@@ -32,9 +34,10 @@
       :timerEnded="this.timerEnd"
     />
     <infinite-scroll
-        v-if="currentVisModule === 'infiniteScroll'"
-        :task-id="this.taskId"
-        :timeModifier="timeModifier"
+      v-if="currentVisModule === 'infiniteScroll'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :ideas="this.ideas"
     />
   </div>
 </template>
@@ -52,11 +55,9 @@ import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue
 import CardShuffle from '@/modules/common/visualisation_master/organisms/cardShuffle.vue';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
-import * as timerService from '@/services/timer-service';
-import { TimerEntity } from '@/types/enum/TimerEntity';
 import BarChart from '@/modules/common/visualisation_master/organisms/barChart.vue';
 import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
-import InfiniteScroll from "@/modules/common/visualisation_master/organisms/infiniteScroll.vue";
+import InfiniteScroll from '@/modules/common/visualisation_master/organisms/infiniteScroll.vue';
 
 @Options({
   components: {
@@ -75,9 +76,8 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   task: Task | null = null;
   authHeaderTyp!: EndpointAuthorisationType;
+  allIdeas: Idea[] = [];
   ideas: Idea[] = [];
-  galleryIndex = 0;
-  moduleConfig = moduleConfig;
 
   taskType: null | string = null;
   currentVisModule: null | string = null;
@@ -94,7 +94,7 @@ export default class PublicScreen extends Vue {
     ) {
       ideaService.registerGetIdeasForTask(
         this.taskId,
-        IdeaSortOrder.TIMESTAMP,
+        this.task ? this.task.parameter.orderType : IdeaSortOrder.TIMESTAMP,
         null,
         this.updateIdeas,
         this.authHeaderTyp,
@@ -107,6 +107,23 @@ export default class PublicScreen extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       2 * 60
     );
+  }
+
+  @Watch('currentVisModule', { immediate: true })
+  onCurrentVisModuleChanged(): void {
+    if (
+      this.currentVisModule &&
+      moduleConfig.visModules[this.currentVisModule].type === 'IDEA'
+    ) {
+      ideaService.registerGetIdeasForTask(
+        this.taskId,
+        this.task ? this.task.parameter.orderType : IdeaSortOrder.TIMESTAMP,
+        null,
+        this.updateIdeas,
+        this.authHeaderTyp,
+        10
+      );
+    }
   }
 
   get displayTimeMod(): boolean {
@@ -124,29 +141,19 @@ export default class PublicScreen extends Vue {
     this.currentVisModule = visModule.parameter.visModule.id;
   }
 
-  updateIdeas(ideas: Idea[]): void {
-    ideas = ideas.reverse();
-    if (this.ideas.length == 0) {
-      this.ideas = ideas;
-    } else {
-      const newIdees: Idea[] = ideas.filter(
-        (idea) => !this.ideas.some((old) => old.id == idea.id)
-      );
-      this.ideas.splice(this.galleryIndex + 2, 0, ...newIdees);
-      let deleteIndex = 0;
-      while (deleteIndex > -1) {
-        deleteIndex = this.ideas.findIndex(
-          (old) => !ideas.some((idea) => idea.id == old.id)
-        );
-        if (deleteIndex > -1) {
-          this.ideas.splice(deleteIndex, 1);
-        }
-      }
-    }
+  @Watch('task.parameter.stateFilter', { immediate: true })
+  onStateFilterChanged(): void {
+    this.ideas = this.allIdeas.filter((d) =>
+      this.task?.parameter.stateFilter.includes(d.state)
+    );
   }
 
-  galleryIndexChanged(newIndex: number): void {
-    this.galleryIndex = newIndex;
+  updateIdeas(ideas: Idea[]): void {
+    this.allIdeas = ideas;
+    ideas = ideas.filter((d) =>
+      this.task?.parameter.stateFilter.includes(d.state)
+    );
+    this.ideas = ideas;
   }
 
   deregisterAll(): void {

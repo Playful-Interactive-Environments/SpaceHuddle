@@ -43,38 +43,26 @@ export default class PublicScreen extends Vue {
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  ideas: Idea[] = [];
+  @Prop({ default: [] }) readonly ideas!: Idea[];
   galleryIndex = 0;
 
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    this.deregisterAll();
-    ideaService.registerGetIdeasForTask(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateIdeas,
-      this.authHeaderTyp,
-      10
-    );
-  }
+  useIdeas: Idea[] = [];
 
-  updateIdeas(ideas: Idea[]): void {
-    ideas = ideas.reverse();
-    if (this.ideas.length == 0) {
-      this.ideas = ideas;
+  updateIdeas(): void {
+    if (this.useIdeas.length == 0) {
+      this.useIdeas = this.ideas;
     } else {
-      const newIdees: Idea[] = ideas.filter(
-        (idea) => !this.ideas.some((old) => old.id == idea.id)
+      const newIdees: Idea[] = this.ideas.filter(
+        (idea) => !this.useIdeas.some((old) => old.id == idea.id)
       );
-      this.ideas.splice(this.galleryIndex + 2, 0, ...newIdees);
+      this.useIdeas.splice(this.galleryIndex + 2, 0, ...newIdees);
       let deleteIndex = 0;
       while (deleteIndex > -1) {
-        deleteIndex = this.ideas.findIndex(
-          (old) => !ideas.some((idea) => idea.id == old.id)
+        deleteIndex = this.useIdeas.findIndex(
+          (old) => !this.ideas.some((idea) => idea.id == old.id)
         );
         if (deleteIndex > -1) {
-          this.ideas.splice(deleteIndex, 1);
+          this.useIdeas.splice(deleteIndex, 1);
         }
       }
     }
@@ -82,14 +70,6 @@ export default class PublicScreen extends Vue {
 
   galleryIndexChanged(newIndex: number): void {
     this.galleryIndex = newIndex;
-  }
-
-  deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateIdeas);
-  }
-
-  unmounted(): void {
-    this.deregisterAll();
   }
 }
 </script>

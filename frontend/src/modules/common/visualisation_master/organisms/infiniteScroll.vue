@@ -21,7 +21,7 @@
     >
       <div class="scroll-container columnLayout" id="scrollContainer">
         <IdeaCard
-          v-for="idea in ideas"
+          v-for="idea in useIdeas"
           :key="idea.id"
           class="scroll-item"
           :idea="idea"
@@ -50,6 +50,10 @@ import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
+import {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilterBase.vue';
 
 @Options({
   components: {
@@ -61,66 +65,25 @@ import * as cashService from '@/services/cash-service';
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: 0 }) readonly timeModifier!: number;
+  @Prop({ default: null }) readonly taskParameter!: any;
+  @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  ideas: Idea[] = [];
+  filter: FilterData = { ...defaultFilterData };
+
+  useIdeas: Idea[] = [];
 
   fullScrollTime = 40;
   paused = false;
 
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    this.deregisterAll();
-    ideaService.registerGetIdeasForTask(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateIdeas,
-      this.authHeaderTyp,
-      10
-    );
-  }
-
-  updateIdeas(ideas: Idea[]): void {
-    if (ideas.length > 10) {
-      while (ideas.length < 70) {
-        ideas = ideas.concat(ideas);
-      }
-      this.ideas = ideas;
-    } else {
-      this.ideas = ideas;
-    }
-  }
-
-  /*scrollModifier = 0;
-  scrollInterval = 500;
-  infiniteScrolling(): void {
-    if (this.scrollModifier === -100) {
-      const queue = document.getElementById('scrollParent'); // Get the list whose id is queue.
-      if (queue) {
-        const elements = queue?.getElementsByClassName('scroll-container'); // Get HTMLCollection of elements with the li tag name.
-        if (elements) {
-          const element = queue.removeChild(elements[0]); // Remove the child from queue that is the first li element.
-          queue.appendChild(element);
-          console.log("did it");
-        }
+  @Watch('ideas', { immediate: true })
+  updateIdeas(): void {
+    this.useIdeas = this.ideas;
+    if (this.useIdeas.length > 10) {
+      while (this.useIdeas.length < 70) {
+        this.useIdeas = this.useIdeas.concat(this.useIdeas);
       }
     }
-    this.scrollModifier -= 1;
-    setTimeout(() => {
-      this.infiniteScrolling();
-    }, this.scrollInterval);
-  }
-  mounted(): void {
-    this.infiniteScrolling();
-  }*/
-
-  deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateIdeas);
-  }
-
-  unmounted(): void {
-    this.deregisterAll();
   }
 }
 </script>
@@ -207,7 +170,7 @@ export default class PublicScreen extends Vue {
 
 #scrollVis {
   width: 100%;
-  height: 100%;
+  height: 150%;
   overflow: hidden;
   position: relative;
   border-radius: var(--border-radius-small);

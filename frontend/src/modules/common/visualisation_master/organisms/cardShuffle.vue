@@ -55,47 +55,14 @@ export default class PublicScreen extends Vue {
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  ideas: Idea[] = [];
+  @Prop({ default: [] }) readonly ideas!: Idea[];
   filter: FilterData = { ...defaultFilterData };
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.deregisterAll();
-    taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      EndpointAuthorisationType.MODERATOR,
-      2 * 60
-    );
-    this.ideaCash = ideaService.registerGetIdeasForTask(
-      this.taskId,
-      this.filter.orderType,
-      null,
-      this.updateIdeas,
-      this.authHeaderTyp,
-      2 * 60
-    );
     this.active = true;
     this.stackCards();
-  }
-
-  updateTask(task: Task): void {
-    this.filter = getFilterForTask(task);
-    this.ideaCash.parameter.urlParameter = ideaService.getIdeaListParameter(
-      this.filter.orderType,
-      null
-    );
-  }
-
-  updateIdeas(ideas: Idea[]): void {
-    ideas = this.filter.orderAsc ? ideas : ideas.reverse();
-    ideas = ideaService.filterIdeas(
-      ideas,
-      this.filter.stateFilter,
-      this.filter.textFilter
-    );
-    this.ideas = ideas;
   }
 
   shuffleDelay = 150;
@@ -159,13 +126,7 @@ export default class PublicScreen extends Vue {
     this.calcCardGrid();
   }
 
-  deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateIdeas);
-  }
-
   unmounted(): void {
-    this.deregisterAll();
     this.active = false;
     window.removeEventListener('resize', this.calcCardGrid);
   }

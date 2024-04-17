@@ -99,6 +99,16 @@ export default class IdeaFilter extends Vue {
     if (this.task && this.syncToPublicScreen) this.saveParameterChanges();
   }
 
+  @Watch('modelValue.orderType', { immediate: true })
+  onOrderTypeChanged(): void {
+    if (this.task && this.syncToPublicScreen) this.saveParameterChanges();
+  }
+
+  @Watch('modelValue.stateFilter', { immediate: true })
+  onStateFilterChanged(): void {
+    if (this.task && this.syncToPublicScreen) this.saveParameterChanges();
+  }
+
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(): void {
     if (this.sessionId) {
