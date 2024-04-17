@@ -111,6 +111,11 @@
     "categorisationButtons": {
       "flammable": "fire hazard",
       "non-flammable": "no hazard"
+    },
+    "highscore": {
+      "collected": "collected",
+      "classified": "classified",
+      "time": "time"
     }
   },
   "statistic": {

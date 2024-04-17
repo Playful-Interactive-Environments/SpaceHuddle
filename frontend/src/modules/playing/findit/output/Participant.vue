@@ -69,6 +69,9 @@ import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import CollectedState from '@/modules/playing/findit/organisms/CollectedState.vue';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import * as votingService from '@/services/voting-service';
+import { Vote } from '@/types/api/Vote';
+import EndpointType from '@/types/enum/EndpointType';
 
 export enum GameStep {
   Select = 'select',
@@ -104,6 +107,8 @@ export default class Participant extends Vue {
   selectedLevelType: string | null = null;
   //spritesheet!: PIXI.Spritesheet;
   playStateResult: PlayStateResult | null = null;
+  highScore: Vote | null = null;
+  votes: Vote[] = [];
 
   // Flag which indicates if the window size has finished calculating.
   sizeCalculated = false;
@@ -129,6 +134,12 @@ export default class Participant extends Vue {
       },
       500
     );
+    votingService.registerGetVotes(
+      this.taskId,
+      this.updateHighScore,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
   unmounted(): void {
@@ -139,6 +150,7 @@ export default class Participant extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateHighScore);
     if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
@@ -147,6 +159,13 @@ export default class Participant extends Vue {
     this.selectedLevel = level;
     this.gameState = GameState.Info;
     this.gameStep = !level ? GameStep.Build : GameStep.Play;
+
+    if (this.selectedLevel) {
+      const levelId = this.selectedLevel.id;
+      const vote = this.votes.find((item) => item.ideaId === levelId);
+      console.log(this.highScore, vote, this.votes, levelId);
+      if (vote) this.highScore = vote;
+    }
 
     if (this.trackingManager) {
       this.trackingManager.saveIteration({
@@ -239,13 +258,13 @@ export default class Participant extends Vue {
           ? TaskParticipantIterationStepStatesType.CORRECT
           : TaskParticipantIterationStepStatesType.WRONG,
         result,
-        0, //result.stars,
+        result.stars,
         null,
         true,
         (item) => item.parameter.step === GameStep.Play
       );
     }
-    this.selectedLevel = null;
+    this.saveHighScore();
   }
 
   async replayFinished(
@@ -254,18 +273,24 @@ export default class Participant extends Vue {
   ): Promise<void> {
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
-    const stars = Math.floor(
-      (correctClassified.length / classified.length) * 3
-    );
+    const parameter = this.playStateResult;
+    if (parameter) {
+      parameter.classified = classified.length;
+      parameter.correctClassified = correctClassified.length;
+    }
+    const isAllCollected = parameter && parameter.collected === parameter.total;
+    const isAllCorrect = correctClassified.length === classified.length;
+    if (isAllCorrect && isAllCollected && parameter) parameter.stars = 3;
     this.trackingManager.saveIterationStep(
       {
         correctClassified: correctClassified.length,
         classified: classified.length,
+        stars: parameter?.stars,
       },
       correctClassified.length === classified.length
         ? TaskParticipantIterationStepStatesType.CORRECT
         : TaskParticipantIterationStepStatesType.WRONG,
-      stars,
+      isAllCollected && isAllCorrect ? 3 : null,
       null,
       true,
       (item) => item.parameter.step === GameStep.Play
@@ -277,19 +302,64 @@ export default class Participant extends Vue {
           gameStep: this.gameStep,
           levelId: null,
         },
-        stars >= 2
+        isAllCollected && isAllCorrect
           ? TaskParticipantIterationStatesType.WIN
           : TaskParticipantIterationStatesType.LOOS
       );
-      if (
-        this.trackingManager.state &&
-        (!this.trackingManager.state.parameter.rate ||
-          this.trackingManager.state.parameter.rate < stars)
-      ) {
+      if (isAllCollected && isAllCorrect) {
         this.trackingManager.setFinishedState(this.module, {
-          rate: stars,
+          rate: 3,
         });
       } else this.trackingManager.setFinishedState(this.module);
+    }
+    this.saveHighScore();
+    this.selectedLevel = null;
+  }
+
+  updateHighScore(votes: Vote[]): void {
+    this.votes = votes;
+    if (this.selectedLevel) {
+      const levelId = this.selectedLevel.id;
+      const vote = votes.find((item) => item.ideaId === levelId);
+      if (vote) this.highScore = vote;
+    }
+  }
+
+  saveHighScore(): void {
+    const parameter = this.playStateResult;
+    if (!parameter) return;
+    const isAllCollected = parameter && parameter.collected === parameter.total;
+    const detailRating =
+      parameter.collected + (isAllCollected ? parameter.correctClassified : 0);
+    if (this.highScore) {
+      if (
+        this.highScore.detailRating < detailRating ||
+        (this.highScore.detailRating === detailRating &&
+          this.highScore.parameter.time <= parameter.time)
+      ) {
+        this.highScore.rating = parameter.stars;
+        this.highScore.detailRating = detailRating;
+        this.highScore.parameter = { ...parameter };
+      }
+      votingService.putVote(this.highScore).then(() => {
+        cashService.refreshCash(
+          `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+        );
+      });
+    } else {
+      votingService
+        .postVote(this.taskId, {
+          ideaId: this.selectedLevel?.id,
+          rating: parameter.stars,
+          detailRating: detailRating,
+          parameter: parameter,
+        })
+        .then((vote) => {
+          this.highScore = vote;
+          cashService.refreshCash(
+            `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
+          );
+        });
     }
   }
 }

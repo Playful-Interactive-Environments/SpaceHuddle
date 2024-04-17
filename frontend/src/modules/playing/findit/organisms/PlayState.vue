@@ -301,8 +301,14 @@ export default class PlayState extends Vue {
   }
 
   get playStateResult(): PlayStateResult {
+    const rate =
+      this.collectedCount === this.totalCount
+        ? 2
+        : this.collectedCount > (this.totalCount / 3) * 2
+        ? 1
+        : 0; // Math.floor((this.collectedCount / this.totalCount) * 2)
     return {
-      stars: Math.floor((this.collectedCount / this.totalCount) * 3),
+      stars: rate,
       time: Date.now() - this.startTime,
       collected: this.collectedCount,
       total: this.totalCount,
