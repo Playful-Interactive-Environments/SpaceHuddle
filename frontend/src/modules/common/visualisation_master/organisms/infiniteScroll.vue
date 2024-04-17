@@ -31,7 +31,7 @@
       </div>
       <div class="scroll-container columnLayout" id="scrollContainer2">
         <IdeaCard
-          v-for="idea in ideas"
+          v-for="idea in useIdeas"
           :key="idea.id"
           class="scroll-item"
           :idea="idea"
