@@ -43,11 +43,6 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import * as ideaService from '@/services/idea-service';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
-import * as taskService from '@/services/task-service';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Task } from '@/types/api/Task';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
 
 @Options({
@@ -97,7 +92,7 @@ export default class ModeratorConfig extends Vue {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .visModules {
   display: flex;
   flex-direction: row;
@@ -140,7 +135,7 @@ p {
   p {
     color: white;
   }
-  .awesome-icon {
+  .visIcon {
     color: white;
   }
 }
