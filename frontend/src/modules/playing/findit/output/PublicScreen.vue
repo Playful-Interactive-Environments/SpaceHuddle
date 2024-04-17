@@ -97,19 +97,16 @@ export default class PublicScreen extends Vue {
   }
 
   updateHighScore(list: VoteParameterResult[]): void {
-    console.log('updateHighScore', list);
     if (this.highScoreList.length === 0)
       this.openHighScoreLevels = list.map((item) => item.ideaId);
     for (const level of list) {
       if (level.details) {
-        console.log(level, level.details);
         level.details = level.details
           .sort((a, b) => b.value.normalisedTime - a.value.normalisedTime)
           .slice(0, 5);
       }
     }
     this.highScoreList = list;
-    console.log(list);
   }
 
   updateIdeas(ideas: Idea[]): void {

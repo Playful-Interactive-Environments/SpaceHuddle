@@ -45,8 +45,8 @@ export default class Imprint extends Vue {
     support: '',
     liability: '',
   };
+
   mounted(): void {
-    console.log(process.env.VUE_APP_THEME);
     let url = 'assets/imprint.json';
     if (process.env.VUE_APP_THEME !== 'default') {
       url = `assets/theme/${process.env.VUE_APP_THEME}/imprint.json`;

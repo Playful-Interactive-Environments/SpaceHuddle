@@ -163,7 +163,6 @@ export default class Participant extends Vue {
     if (this.selectedLevel) {
       const levelId = this.selectedLevel.id;
       const vote = this.votes.find((item) => item.ideaId === levelId);
-      console.log(this.highScore, vote, this.votes, levelId);
       if (vote) this.highScore = vote;
     }
 
