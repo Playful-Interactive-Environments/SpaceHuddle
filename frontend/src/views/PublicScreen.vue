@@ -380,8 +380,8 @@ h3 {
 
     &.star-header {
       background: var(--color-dark-contrast);
-      background-image: url('~@/assets/illustrations/sky.png');
-      background-size: contain;
+      background-image: var(--public-screen-sky);
+      background-size: cover;
       mask-image: radial-gradient(
           circle farthest-corner at 100% 100%,
           transparent 69%,
@@ -583,6 +583,7 @@ h3 {
       height: 30rem;
       max-height: calc(var(--app-height) / 2);
       max-width: unset;
+      content: var(--public-screen-corner-image);
     }
   }
 }
