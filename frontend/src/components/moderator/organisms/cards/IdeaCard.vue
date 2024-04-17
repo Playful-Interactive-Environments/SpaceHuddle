@@ -27,6 +27,7 @@
     <IdeaMediaViewer
       v-if="idea.image || idea.link"
       :idea="idea"
+      :allow-image-preview="allowImagePreview"
       css-class="card__image"
     />
     <div v-else class="card__image">
@@ -236,6 +237,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) portrait!: boolean;
   @Prop({ default: true }) showKeyword!: boolean;
   @Prop({ default: false }) shareState!: boolean;
+  @Prop({ default: true }) allowImagePreview!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;

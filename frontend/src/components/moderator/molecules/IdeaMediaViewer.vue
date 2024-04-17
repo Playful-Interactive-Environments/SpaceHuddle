@@ -21,7 +21,7 @@
     :src="idea?.link"
     :class="cssClass"
     alt=""
-    :preview-src-list="[idea?.link]"
+    :preview-src-list="allowImagePreview ? [idea?.link] : []"
     :hide-on-click-modal="true"
     :fit="fit"
   />
@@ -36,6 +36,7 @@ import * as imageUtil from '@/utils/image';
 
 export default class IdeaMediaViewer extends Vue {
   @Prop() idea!: Idea;
+  @Prop({ default: true }) allowImagePreview!: boolean;
   @Prop() cssClass!: string;
   @Prop({ default: '' }) fit!:
     | ''

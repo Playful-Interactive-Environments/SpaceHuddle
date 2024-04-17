@@ -26,6 +26,7 @@
           class="scroll-item"
           :idea="idea"
           :is-editable="false"
+          :allow-image-preview="false"
         />
       </div>
       <div class="scroll-container columnLayout" id="scrollContainer2">
@@ -35,6 +36,7 @@
           class="scroll-item"
           :idea="idea"
           :is-editable="false"
+          :allow-image-preview="false"
         />
       </div>
     </div>
