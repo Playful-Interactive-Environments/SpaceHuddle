@@ -62,6 +62,13 @@ for /d %%d in (*.*) do (
                 )
             )
         )
+
+        if !task! neq none (
+            if exist ..\common\visualisation_master\ (
+                echo        "visualisation_master": "common/visualisation_master",  >> .\..\config.json
+            )
+        )
+
         if exist settings (
             echo        "settings": {  >> .\..\config.json
             if exist settings\TaskParameter.vue (
