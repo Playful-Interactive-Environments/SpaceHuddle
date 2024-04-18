@@ -27,6 +27,7 @@
       "tires": 4,
       "types": [
         {
+          "requirementCount": 1,
           "name": "sport",
           "image": "sport-car.png",
           "imageTop": "sport-car-top.png",
@@ -48,6 +49,7 @@
           "tireWareEmissionFactors": 13
         },
         {
+          "requirementCount": 1,
           "name": "suv",
           "image": "suv.png",
           "imageTop": "suv-top.png",
@@ -69,6 +71,7 @@
           "tireWareEmissionFactors": 18
         },
         {
+          "requirementCount": 2,
           "name": "e-suv",
           "image": "e-suv.png",
           "imageTop": "e-suv-top.png",
@@ -90,6 +93,7 @@
           "tireWareEmissionFactors": 19
         },
         {
+          "requirementCount": 0,
           "name": "compact",
           "image": "compact-car.png",
           "imageTop": "compact-car-top.png",
@@ -111,6 +115,7 @@
           "tireWareEmissionFactors": 8
         },
         {
+          "requirementCount": 2,
           "name": "e-car",
           "image": "e-car.png",
           "imageTop": "e-car-top.png",
@@ -138,6 +143,7 @@
       "tires": 2,
       "types": [
         {
+          "requirementCount": 4,
           "name": "moped",
           "image": "motorcycle.png",
           "imageTop": "motorcycle-top.png",
@@ -158,6 +164,7 @@
           "tireWareEmissionFactors": 4
         },
         {
+          "requirementCount": 4,
           "name": "e-moped",
           "image": "e-scooter.png",
           "imageTop": "e-scooter-top.png",
@@ -178,6 +185,7 @@
           "tireWareEmissionFactors": 4.3
         },
         {
+          "requirementCount": 4,
           "name": "motorcycle",
           "image": "motorbike.png",
           "imageTop": "motorbike-top.png",
@@ -199,6 +207,7 @@
           "tireWareEmissionFactors": 5
         },
         {
+          "requirementCount": 5,
           "name": "city",
           "image": "bike.png",
           "imageTop": "bike-top.png",
@@ -217,6 +226,7 @@
           "tireWareEmissionFactors": 1
         },
         {
+          "requirementCount": 5,
           "name": "e-bike",
           "image": "e-bike.png",
           "imageTop": "e-bike-top.png",
@@ -242,6 +252,7 @@
       "tires": 4,
       "types": [
         {
+          "requirementCount": 3,
           "name": "bus",
           "image": "bus.png",
           "imageTop": "bus-top.png",
@@ -263,6 +274,7 @@
           "tireWareEmissionFactors": 70
         },
         {
+          "requirementCount": 3,
           "name": "e-bus",
           "image": "e-bus.png",
           "imageTop": "e-bus-top.png",

@@ -1,6 +1,6 @@
 <template>
   <nav class="level is-mobile">
-    <div class="level-left category-selection">
+    <div class="level-left category-selection" v-if="categoryCount > 1">
       <el-button
         v-for="vehicle of Object.keys(gameConfig.vehicles)"
         :key="vehicle"
@@ -9,6 +9,7 @@
         @click="vehicleTypeClicked(vehicle)"
         class="level-item"
         :class="{ active: vehicle === activeVehicle?.category }"
+        :disabled="!hasCategory(vehicle)"
       >
         <font-awesome-icon
           v-if="!gameConfig.vehicles[vehicle].iconPrefix"
@@ -59,6 +60,9 @@
       </el-carousel-item>
     </el-carousel>
     <div class="vehicle-info">
+      <div class="vehicle-index">
+        {{ activeVehicleIndex + 1 }} / {{ vehicleList.length }}
+      </div>
       <el-card class="vehicle-card">
         <template #header>
           <div class="card-header media is-mobile">
@@ -406,7 +410,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Doughnut, Bar } from 'vue-chartjs';
+import { Bar, Doughnut } from 'vue-chartjs';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
@@ -423,6 +427,7 @@ import { remToPx } from '@/modules/playing/moveit/utils/consts';
 import ParticipantHistory from '@/modules/playing/moveit/organisms/ParticipantHistory.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import Highscore from '../organisms/Highscore.vue';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export enum NavigationType {
@@ -628,19 +633,36 @@ export default class SelectChallenge extends Vue {
   }
 
   get vehicleList(): VehicleData[] {
+    const previousPlayCount = this.trackingManager.iterationList.filter(
+      (item) => item.state !== TaskParticipantIterationStatesType.IN_PROGRESS
+    ).length;
     const list: VehicleData[] = [];
     for (const category of Object.keys(gameConfig.vehicles)) {
       list.push(
-        ...gameConfig.vehicles[category].types.map((vehicle) => {
-          return {
-            vehicle: vehicle,
-            category: category,
-            animation: this.getAnimationForVehicle(vehicle),
-          };
-        })
+        ...gameConfig.vehicles[category].types
+          .filter((vehicle) => vehicle.requirementCount <= previousPlayCount)
+          .map((vehicle) => {
+            return {
+              vehicle: vehicle,
+              category: category,
+              animation: this.getAnimationForVehicle(vehicle),
+            };
+          })
       );
     }
     return list;
+  }
+
+  get categoryCount(): number {
+    return this.vehicleList
+      .map((item) => item.category)
+      .filter((value, index, array) => array.indexOf(value) === index).length;
+  }
+
+  hasCategory(category: string): boolean {
+    return (
+      this.vehicleList.filter((item) => item.category === category).length > 0
+    );
   }
 
   targetWidth = 100;
@@ -1018,6 +1040,13 @@ export default class SelectChallenge extends Vue {
   text-align: left;
   font-size: var(--font-size-small);
   max-width: 30rem;
+}
+
+.vehicle-index {
+  text-align: center;
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-semibold);
+  padding-bottom: 0.5rem;
 }
 </style>
 
