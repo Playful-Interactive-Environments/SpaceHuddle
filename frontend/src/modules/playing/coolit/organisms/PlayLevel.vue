@@ -60,6 +60,7 @@
             @collision="obstacleCollision"
           >
             <SpriteConverter
+              v-if="obstacle.texture && obstacle.texture.valid"
               :texture="obstacle.texture"
               :anchor="obstacle.pivot"
               :space-width="obstacle.width"

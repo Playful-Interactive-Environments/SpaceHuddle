@@ -1416,7 +1416,10 @@ export default class GameContainer extends Vue {
       ) as PIXI.Container[];
     };
 
-    await until(() => !!this.app && !!this.backgroundSprite);
+    await until(
+      () =>
+        !!this.app && !!this.backgroundSprite && this.backgroundSprite?.valid
+    );
     //const startPos = [...this.backgroundPositionOffset] as [number, number];
     if (this.app) {
       await until(
@@ -1522,8 +1525,10 @@ export default class GameContainer extends Vue {
     }
     await delay(1000);
     //this.backgroundPositionOffset = startPos;
-    this.preRendered = true;
-    container.removeFromParent();
+    if (this.preRenderTexture?.valid) {
+      this.preRendered = true;
+      container.removeFromParent();
+    }
   }
   //#endregion events
 
