@@ -83,50 +83,7 @@
     <template v-slot:header>
       {{ $t('module.playing.shopit.participant.highscore.header') }}
     </template>
-    <table class="highscore-table">
-      <tr>
-        <th />
-        <th>
-          {{ $t('module.playing.shopit.participant.highscore.pointsSpent') }}
-        </th>
-        <th>
-          {{ $t('module.playing.shopit.participant.highscore.co2') }}
-        </th>
-        <th>
-          {{ $t('module.playing.shopit.participant.highscore.water') }}
-        </th>
-        <th>
-          {{ $t('module.playing.shopit.participant.highscore.lifetime') }}
-        </th>
-        <th></th>
-      </tr>
-      <tr v-for="entry of highScoreList" :key="entry.avatar.symbol">
-        <td>
-          <font-awesome-icon
-            :icon="entry.avatar.symbol"
-            :style="{ color: entry.avatar.color }"
-          ></font-awesome-icon>
-        </td>
-        <td>{{ entry.value.pointsSpent }}</td>
-        <td>
-          {{ entry.value.co2 }}
-        </td>
-        <td>
-          {{ entry.value.water }}
-        </td>
-        <td>
-          {{ entry.value.lifetime }}
-        </td>
-        <td>
-          <el-rate
-            v-model="entry.value.rate"
-            size="large"
-            :max="3"
-            :disabled="true"
-          />
-        </td>
-      </tr>
-    </table>
+    <Highscore :task-id="taskId" />
     <template v-slot:footer>
       <el-button type="primary" @click="showHighScore = false">
         {{ $t('module.playing.coolit.participant.confirm') }}
@@ -150,13 +107,11 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import { VoteParameterResult } from '@/types/api/Vote';
-import * as votingService from '@/services/voting-service';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
-import { Avatar } from '@/types/api/Participant';
+import Highscore from '../organisms/Highscore.vue';
 
 @Options({
-  components: { FontAwesomeIcon, DrawerBottomOverlay },
+  components: { FontAwesomeIcon, DrawerBottomOverlay, Highscore },
   emits: ['selectionDone'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -172,22 +127,13 @@ export default class SelectState extends Vue {
   inputID = '';
   ownPlayID = this.createPlayID();
   showHighScore = false;
-  highScoreList: { value: number | any; avatar: Avatar }[] = [];
 
   mounted(): void {
     this.showHighScore = this.openHighScore;
-    votingService.registerGetParameterResult(
-      this.taskId,
-      '-',
-      this.updateHighScore,
-      EndpointAuthorisationType.PARTICIPANT,
-      5 * 60
-    );
   }
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateIdeas);
-    cashService.deregisterAllGet(this.updateHighScore);
   }
 
   createPlayID() {
@@ -226,20 +172,6 @@ export default class SelectState extends Vue {
       this.$emit('selectionDone', option, id);
     } else if (option === 'singleplayer') {
       this.$emit('selectionDone', option, null);
-    }
-  }
-
-  updateHighScore(list: VoteParameterResult[]): void {
-    for (const level of list) {
-      if (level.details) {
-        this.highScoreList = level.details.sort((a, b) => {
-          if (b.value.stars === a.value.stars) {
-            return a.value.pointsSpent - b.value.pointsSpent;
-          }
-          return b.value.stars - a.value.stars;
-        });
-        break;
-      }
     }
   }
 }
@@ -318,20 +250,6 @@ label {
   height: auto;
   margin-bottom: 0.3rem;
   margin-top: 1rem;
-}
-
-.highscore-table {
-  color: var(--color-playing);
-  width: 100%;
-}
-
-.highscore::v-deep(.footer) {
-  text-align: center;
-  background-color: unset;
-}
-
-.highscore {
-  --footer-height: 4rem;
 }
 
 .open-highscore {

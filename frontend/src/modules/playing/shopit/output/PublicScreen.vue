@@ -1,14 +1,15 @@
 <template>
-  {{ $t('general.noPublicView') }}
+  <Highscore :task-id="taskId" />
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import Highscore from '../organisms/Highscore.vue';
 
 @Options({
-  components: {},
+  components: { Highscore },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
