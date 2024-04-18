@@ -537,7 +537,7 @@ import weatherConfig from '@/modules/playing/coolit/data/weather.json';
 import * as preRenderer from '@/modules/playing/coolit/utils/preRender';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
-import EndpointType from "@/types/enum/EndpointType";
+import EndpointType from '@/types/enum/EndpointType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
