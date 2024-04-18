@@ -26,7 +26,7 @@
         :mission-progress-parameter="activeProgressTab"
       />
     </el-header>
-    <el-container>
+    <el-container ref="mapSpace">
       <el-aside width="70vw" class="mapSpace">
         <IdeaMap
           v-if="sizeLoaded"
@@ -242,7 +242,14 @@ export default class PublicScreen extends Vue {
     this.domKey = registerDomElement(
       dom,
       () => {
-        this.sizeLoaded = true;
+        const dom = (this.$refs.mapSpace as any)?.$el as HTMLElement;
+        this.domKey = registerDomElement(
+          dom,
+          () => {
+            this.sizeLoaded = true;
+          },
+          2000
+        );
       },
       2000
     );
@@ -272,9 +279,11 @@ export default class PublicScreen extends Vue {
 .mapSpace {
   height: 100%;
   margin-right: 1rem;
+  overflow: hidden;
 }
 
 .statistic {
-  margin-bottom: 3rem;
+  height: unset;
+  //margin-bottom: 3rem;
 }
 </style>
