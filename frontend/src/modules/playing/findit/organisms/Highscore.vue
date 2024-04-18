@@ -1,13 +1,14 @@
 <template>
   <el-collapse v-model="openHighScoreLevels">
     <el-collapse-item
-      v-for="level of highScoreList"
+      v-for="(level, index) of highScoreList"
       :key="level.ideaId"
       :title="getLevelTitle(level.ideaId)"
       :name="level.ideaId"
     >
       <table class="highscore-table">
         <tr>
+          <th />
           <th />
           <th>
             {{ $t('module.playing.findit.participant.highscore.collected') }}
@@ -24,6 +25,7 @@
           v-for="entry of level.details.slice(0, level.count)"
           :key="entry.avatar.symbol"
         >
+          <td>{{ index + 1 }}.</td>
           <td>
             <font-awesome-icon
               :icon="entry.avatar.symbol"
@@ -49,7 +51,7 @@
         <tr v-if="level.count < level.details.length">
           <td>
             <el-button
-              type="text"
+              link
               @click="level.count = level.details.length"
               class="text-button"
             >

@@ -8,9 +8,10 @@
     >
       <table class="highscore-table">
         <tr
-          v-for="entry of level.details.slice(0, level.count)"
+          v-for="(entry, index) of level.details.slice(0, level.count)"
           :key="entry.avatar.symbol"
         >
+          <td>{{ index + 1 }}.</td>
           <td>
             <font-awesome-icon
               :icon="entry.avatar.symbol"
@@ -32,7 +33,7 @@
         <tr v-if="level.count < level.details.length">
           <td>
             <el-button
-              type="text"
+              link
               @click="level.count = level.details.length"
               class="text-button"
             >
@@ -134,7 +135,7 @@ export default class Highscore extends Vue {
   width: 100%;
 
   td {
-    width: 33%;
+    width: 25%;
   }
 }
 

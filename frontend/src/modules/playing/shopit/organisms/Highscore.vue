@@ -2,6 +2,7 @@
   <table class="highscore-table">
     <tr>
       <th />
+      <th />
       <th>
         {{ $t('module.playing.shopit.participant.highscore.pointsSpent') }}
       </th>
@@ -17,9 +18,10 @@
       <th></th>
     </tr>
     <tr
-      v-for="entry of highScoreList.slice(0, this.highScoreCount)"
+      v-for="(entry, index) of highScoreList.slice(0, this.highScoreCount)"
       :key="entry.avatar.symbol"
     >
+      <td>{{ index + 1 }}.</td>
       <td>
         <font-awesome-icon
           :icon="entry.avatar.symbol"
@@ -48,7 +50,7 @@
     <tr v-if="highScoreCount < highScoreList.length">
       <td>
         <el-button
-          type="text"
+          link
           @click="highScoreCount = highScoreList.length"
           class="text-button"
         >

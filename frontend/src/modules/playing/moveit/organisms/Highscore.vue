@@ -17,6 +17,7 @@
         <table class="highscore-table">
           <tr>
             <th />
+            <th />
             <th>
               {{
                 $t('module.playing.moveit.participant.drivingStats.collected')
@@ -42,12 +43,13 @@
             </th>
           </tr>
           <tr
-            v-for="entry of vehicleData.slice(
+            v-for="(entry, index) of vehicleData.slice(
               0,
               highScoreCount[category][vehicle]
             )"
             :key="entry.avatar.symbol"
           >
+            <td>{{ index + 1 }}.</td>
             <td>
               <font-awesome-icon
                 :icon="entry.avatar.symbol"
@@ -89,7 +91,7 @@
           <tr v-if="highScoreCount[category][vehicle] < vehicleData.length">
             <td>
               <el-button
-                type="text"
+                link
                 @click="highScoreCount[category][vehicle] = vehicleData.length"
                 class="text-button"
               >
