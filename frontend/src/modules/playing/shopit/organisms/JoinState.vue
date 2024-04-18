@@ -83,7 +83,10 @@
     <template v-slot:header>
       {{ $t('module.playing.shopit.participant.highscore.header') }}
     </template>
-    <Highscore :task-id="taskId" />
+    <Highscore
+      :task-id="taskId"
+      :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+    />
     <template v-slot:footer>
       <el-button type="primary" @click="showHighScore = false">
         {{ $t('module.playing.coolit.participant.confirm') }}
@@ -127,6 +130,7 @@ export default class SelectState extends Vue {
   inputID = '';
   ownPlayID = this.createPlayID();
   showHighScore = false;
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   mounted(): void {
     this.showHighScore = this.openHighScore;

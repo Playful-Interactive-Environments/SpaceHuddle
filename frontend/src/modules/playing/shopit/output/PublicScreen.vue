@@ -1,5 +1,5 @@
 <template>
-  <Highscore :task-id="taskId" />
+  <Highscore :task-id="taskId" :auth-header-typ="authHeaderTyp" />
 </template>
 
 <script lang="ts">

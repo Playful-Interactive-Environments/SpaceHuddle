@@ -108,53 +108,10 @@
     <template v-slot:header>
       {{ $t('module.playing.findit.participant.highscore.header') }}
     </template>
-    <el-collapse v-model="openHighScoreLevels">
-      <el-collapse-item
-        v-for="level of highScoreList"
-        :key="level.ideaId"
-        :title="getLevelTitle(level.ideaId)"
-        :name="level.ideaId"
-      >
-        <table class="highscore-table">
-          <tr>
-            <th />
-            <th>
-              {{ $t('module.playing.findit.participant.highscore.collected') }}
-            </th>
-            <th>
-              {{ $t('module.playing.findit.participant.highscore.classified') }}
-            </th>
-            <th>
-              {{ $t('module.playing.findit.participant.highscore.time') }}
-            </th>
-            <th></th>
-          </tr>
-          <tr v-for="entry of level.details" :key="entry.avatar.symbol">
-            <td>
-              <font-awesome-icon
-                :icon="entry.avatar.symbol"
-                :style="{ color: entry.avatar.color }"
-              ></font-awesome-icon>
-            </td>
-            <td>{{ entry.value.collected }} / {{ entry.value.total }}</td>
-            <td>
-              {{ entry.value.correctClassified }} / {{ entry.value.classified }}
-            </td>
-            <td>
-              {{ Math.round((entry.value.time / 60000) * 100) }}
-            </td>
-            <td>
-              <el-rate
-                v-model="entry.value.stars"
-                size="large"
-                :max="3"
-                :disabled="true"
-              />
-            </td>
-          </tr>
-        </table>
-      </el-collapse-item>
-    </el-collapse>
+    <Highscore
+      :task-id="taskId"
+      :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+    />
     <template v-slot:footer>
       <el-button type="primary" @click="showHighScore = false">
         {{ $t('module.playing.coolit.participant.confirm') }}
@@ -182,11 +139,10 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
-import { VoteParameterResult } from '@/types/api/Vote';
-import * as votingService from '@/services/voting-service';
+import Highscore from '../organisms/Highscore.vue';
 
 @Options({
-  components: { FontAwesomeIcon, DrawerBottomOverlay },
+  components: { FontAwesomeIcon, DrawerBottomOverlay, Highscore },
   emits: ['selectionDone'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -200,8 +156,7 @@ export default class SelectState extends Vue {
   mapping: { [key: string]: number } = {};
   selection = false;
   showHighScore = false;
-  highScoreList: VoteParameterResult[] = [];
-  openHighScoreLevels: string[] = [];
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -216,19 +171,11 @@ export default class SelectState extends Vue {
 
   mounted(): void {
     this.showHighScore = this.openHighScore;
-    votingService.registerGetParameterResult(
-      this.taskId,
-      '-',
-      this.updateHighScore,
-      EndpointAuthorisationType.PARTICIPANT,
-      5 * 60
-    );
   }
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateIterationSteps);
-    cashService.deregisterAllGet(this.updateHighScore);
   }
 
   getStarsForIdea(ideaId: string): number {
@@ -314,25 +261,6 @@ export default class SelectState extends Vue {
       const levelType = configParameter.getTypeForLevel(this.gameConfig, level);
       this.$emit('selectionDone', levelType, level);
     }
-  }
-
-  updateHighScore(list: VoteParameterResult[]): void {
-    if (this.highScoreList.length === 0)
-      this.openHighScoreLevels = list.map((item) => item.ideaId);
-    for (const level of list) {
-      if (level.details) {
-        level.details = level.details.sort((a, b) => {
-          if (b.value.stars === a.value.stars) {
-            if (b.value.collected === a.value.collected) {
-              return b.value.correctClassified - a.value.correctClassified;
-            }
-            return b.value.collected - a.value.collected;
-          }
-          return b.value.stars - a.value.stars;
-        });
-      }
-    }
-    this.highScoreList = list;
   }
 
   getLevelTitle(levelId: string): string {
@@ -462,15 +390,6 @@ export default class SelectState extends Vue {
     top: 0.5rem;
     left: 0.5rem;
     z-index: 150;
-  }
-}
-
-.highscore-table {
-  color: var(--color-playing);
-  width: 100%;
-
-  td {
-    width: 33%;
   }
 }
 

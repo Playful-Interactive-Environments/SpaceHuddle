@@ -62,6 +62,8 @@ import { VoteParameterResult } from '@/types/api/Vote';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Highscore extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   highScoreList: { value: number | any; avatar: Avatar }[] = [];
 
   mounted(): void {
@@ -69,7 +71,7 @@ export default class Highscore extends Vue {
       this.taskId,
       '-',
       this.updateHighScore,
-      EndpointAuthorisationType.PARTICIPANT,
+      this.authHeaderTyp,
       5 * 60
     );
   }

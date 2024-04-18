@@ -356,36 +356,10 @@
     <template v-slot:header>
       {{ $t('module.playing.coolit.participant.highScore.header') }}
     </template>
-    <el-collapse v-model="openHighScoreLevels">
-      <el-collapse-item
-        v-for="level of highScoreList"
-        :key="level.ideaId"
-        :title="getLevelTitle(level.ideaId)"
-        :name="level.ideaId"
-      >
-        <table class="highscore-table">
-          <tr v-for="entry of level.details" :key="entry.avatar.symbol">
-            <td>
-              <font-awesome-icon
-                :icon="entry.avatar.symbol"
-                :style="{ color: entry.avatar.color }"
-              ></font-awesome-icon>
-            </td>
-            <td>
-              {{ Math.round((entry.value.normalisedTime / 60000) * 100) }}
-            </td>
-            <td>
-              <el-rate
-                v-model="entry.value.rate"
-                size="large"
-                :max="3"
-                :disabled="true"
-              />
-            </td>
-          </tr>
-        </table>
-      </el-collapse-item>
-    </el-collapse>
+    <Highscore
+      :task-id="taskId"
+      :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+    />
     <template v-slot:footer>
       <el-button type="primary" @click="showHighScore = false">
         {{ $t('module.playing.coolit.participant.confirm') }}
@@ -499,7 +473,6 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as taskParticipantService from '@/services/task-participant-service';
-import * as votingService from '@/services/voting-service';
 import { Idea } from '@/types/api/Idea';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { GameStep } from '@/modules/playing/coolit/output/Participant.vue';
@@ -514,10 +487,10 @@ import { until } from '@/utils/wait';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 import * as cashService from '@/services/cash-service';
-import { VoteParameterResult } from '@/types/api/Vote';
 import globalWarmingParticle from '@/modules/playing/coolit/data/globalWarming.json';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import { Doughnut } from 'vue-chartjs';
+import Highscore from '../organisms/Highscore.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 enum DifficultyLevel {
@@ -544,7 +517,13 @@ export interface ChartData {
 }
 
 @Options({
+  computed: {
+    EndpointAuthorisationType() {
+      return EndpointAuthorisationType;
+    },
+  },
   components: {
+    Highscore,
     SpriteCanvas,
     FontAwesomeIcon,
     IdeaMap,
@@ -579,8 +558,6 @@ export default class SelectLevel extends Vue {
   circleGradientTexture: PIXI.Texture | null = null;
   temperatureRise = 0;
   marks = {};
-  highScoreList: VoteParameterResult[] = [];
-  openHighScoreLevels: string[] = [];
   difficultyLevel = DifficultyLevel.today;
   textureToken = pixiUtil.createLoadingToken();
 
@@ -733,13 +710,6 @@ export default class SelectLevel extends Vue {
     ) {
       this.marks[i] = `${i}°C`;
     }
-    votingService.registerGetParameterResult(
-      this.taskId,
-      '-',
-      this.updateHighScore,
-      EndpointAuthorisationType.PARTICIPANT,
-      5 * 60
-    );
 
     this.chartDataAtmosphere.datasets.push({
       label: this.$t(
@@ -888,22 +858,8 @@ export default class SelectLevel extends Vue {
 
   unmounted(): void {
     pixiUtil.cleanupToken(this.textureToken);
-    cashService.deregisterAllGet(this.updateHighScore);
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateIterationSteps);
-  }
-
-  updateHighScore(list: VoteParameterResult[]): void {
-    if (this.highScoreList.length === 0)
-      this.openHighScoreLevels = list.map((item) => item.ideaId);
-    for (const level of list) {
-      if (level.details) {
-        level.details = level.details.sort(
-          (a, b) => b.value.normalisedTime - a.value.normalisedTime
-        );
-      }
-    }
-    this.highScoreList = list;
   }
 
   @Watch('taskId', { immediate: true })
@@ -1216,15 +1172,6 @@ export default class SelectLevel extends Vue {
 
 .molecule {
   font-size: var(--font-size-xxsmall);
-}
-
-.highscore-table {
-  color: var(--color-playing);
-  width: 100%;
-
-  td {
-    width: 33%;
-  }
 }
 
 .mapRate {
