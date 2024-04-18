@@ -259,5 +259,9 @@
         "mix": "Wie war die Buspersonenanzahl?"
       }
     }
+  },
+  "publicScreen": {
+    "tutorial": "Tutorial",
+    "highscore": "Highscore"
   }
 }

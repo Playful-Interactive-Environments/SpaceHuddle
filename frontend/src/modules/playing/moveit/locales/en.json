@@ -259,5 +259,9 @@
         "mix": "What was the bus person count?"
       }
     }
+  },
+  "publicScreen": {
+    "tutorial": "tutorial",
+    "highscore": "highscore"
   }
 }

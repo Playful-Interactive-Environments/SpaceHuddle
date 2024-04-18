@@ -24,11 +24,13 @@
       />
     </template>
     <template v-slot="entry">
-      <img
+      <el-image
         v-if="keyHasDefaultImage(entry.key)"
         class="info-image"
         :src="getImageForKey(entry.key)"
         :alt="entry.key"
+        :preview-src-list="[getImageForKey(entry.key)]"
+        :hide-on-click-modal="true"
       />
       <div class="info-text">
         <p

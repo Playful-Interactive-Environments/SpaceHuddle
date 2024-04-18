@@ -133,5 +133,9 @@
       "play": "Wie viele Gegenstände wurden gefunden?",
       "build": "Wie viele Gegenstände wurden versteckt?"
     }
+  },
+  "publicScreen": {
+    "tutorial": "Tutorial",
+    "highscore": "Highscore"
   }
 }

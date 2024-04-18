@@ -93,5 +93,9 @@
       "water": "water",
       "money": "money"
     }
+  },
+  "publicScreen": {
+    "tutorial": "tutorial",
+    "highscore": "highscore"
   }
 }
