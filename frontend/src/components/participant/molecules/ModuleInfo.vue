@@ -31,6 +31,7 @@
         :alt="entry.key"
         :preview-src-list="[getImageForKey(entry.key)]"
         :hide-on-click-modal="true"
+        fit="contain"
       />
       <div class="info-text">
         <p
@@ -139,11 +140,10 @@ export default class ModuleInfo extends Vue {
   right: 0;
 }
 
-img {
+.el-image {
   max-height: 50%;
   height: 50%;
   width: 100%;
-  object-fit: contain;
 }
 
 .info-image {
