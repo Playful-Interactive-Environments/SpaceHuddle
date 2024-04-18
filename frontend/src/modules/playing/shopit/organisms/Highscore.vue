@@ -16,7 +16,10 @@
       </th>
       <th></th>
     </tr>
-    <tr v-for="entry of highScoreList" :key="entry.avatar.symbol">
+    <tr
+      v-for="entry of highScoreList.slice(0, this.highScoreCount)"
+      :key="entry.avatar.symbol"
+    >
       <td>
         <font-awesome-icon
           :icon="entry.avatar.symbol"
@@ -40,6 +43,17 @@
           :max="3"
           :disabled="true"
         />
+      </td>
+    </tr>
+    <tr v-if="highScoreCount < highScoreList.length">
+      <td>
+        <el-button
+          type="text"
+          @click="highScoreCount = highScoreList.length"
+          class="text-button"
+        >
+          ...
+        </el-button>
       </td>
     </tr>
   </table>
@@ -80,6 +94,7 @@ export default class Highscore extends Vue {
     cashService.deregisterAllGet(this.updateHighScore);
   }
 
+  highScoreCount = 0;
   updateHighScore(list: VoteParameterResult[]): void {
     for (const level of list) {
       if (level.details) {
@@ -89,6 +104,9 @@ export default class Highscore extends Vue {
           }
           return b.value.stars - a.value.stars;
         });
+        if (level.details.length > 5) {
+          this.highScoreCount = this.highScoreCount ?? 5;
+        } else this.highScoreCount = level.details.length;
         break;
       }
     }
@@ -109,5 +127,11 @@ export default class Highscore extends Vue {
 
 .highscore {
   --footer-height: 4rem;
+}
+
+.text-button {
+  min-height: unset;
+  margin: unset;
+  padding: unset;
 }
 </style>

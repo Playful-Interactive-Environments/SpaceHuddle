@@ -20,7 +20,10 @@
           </th>
           <th></th>
         </tr>
-        <tr v-for="entry of level.details" :key="entry.avatar.symbol">
+        <tr
+          v-for="entry of level.details.slice(0, level.count)"
+          :key="entry.avatar.symbol"
+        >
           <td>
             <font-awesome-icon
               :icon="entry.avatar.symbol"
@@ -41,6 +44,17 @@
               :max="3"
               :disabled="true"
             />
+          </td>
+        </tr>
+        <tr v-if="level.count < level.details.length">
+          <td>
+            <el-button
+              type="text"
+              @click="level.count = level.details.length"
+              class="text-button"
+            >
+              ...
+            </el-button>
           </td>
         </tr>
       </table>
@@ -101,17 +115,21 @@ export default class Highscore extends Vue {
       this.openHighScoreLevels = list.map((item) => item.ideaId);
     for (const level of list) {
       if (level.details) {
-        level.details = level.details
-          .sort((a, b) => {
-            if (b.value.stars === a.value.stars) {
-              if (b.value.collected === a.value.collected) {
-                return b.value.correctClassified - a.value.correctClassified;
-              }
-              return b.value.collected - a.value.collected;
+        level.details = level.details.sort((a, b) => {
+          if (b.value.stars === a.value.stars) {
+            if (b.value.collected === a.value.collected) {
+              return b.value.correctClassified - a.value.correctClassified;
             }
-            return b.value.stars - a.value.stars;
-          })
-          .slice(0, 5);
+            return b.value.collected - a.value.collected;
+          }
+          return b.value.stars - a.value.stars;
+        });
+        if (level.details.length > 5) {
+          const oldCount = this.highScoreList.find(
+            (item) => item.ideaId === level.ideaId
+          )?.count;
+          level.count = oldCount ?? 5;
+        } else level.count = level.details.length;
       }
     }
     this.highScoreList = list;
@@ -137,5 +155,11 @@ export default class Highscore extends Vue {
 .highscore-table {
   color: var(--color-playing);
   width: 100%;
+}
+
+.text-button {
+  min-height: unset;
+  margin: unset;
+  padding: unset;
 }
 </style>

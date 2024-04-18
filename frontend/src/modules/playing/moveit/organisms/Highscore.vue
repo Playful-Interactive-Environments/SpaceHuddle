@@ -41,7 +41,13 @@
               {{ $t('module.playing.moveit.participant.drivingStats.persons') }}
             </th>
           </tr>
-          <tr v-for="entry of vehicleData" :key="entry.avatar.symbol">
+          <tr
+            v-for="entry of vehicleData.slice(
+              0,
+              highScoreCount[category][vehicle]
+            )"
+            :key="entry.avatar.symbol"
+          >
             <td>
               <font-awesome-icon
                 :icon="entry.avatar.symbol"
@@ -78,6 +84,17 @@
                 :max="3"
                 :disabled="true"
               />
+            </td>
+          </tr>
+          <tr v-if="highScoreCount[category][vehicle] < vehicleData.length">
+            <td>
+              <el-button
+                type="text"
+                @click="highScoreCount[category][vehicle] = vehicleData.length"
+                class="text-button"
+              >
+                ...
+              </el-button>
             </td>
           </tr>
         </table>
@@ -136,6 +153,11 @@ export default class Highscore extends Vue {
     cashService.deregisterAllGet(this.updateHighScore);
   }
 
+  highScoreCount: {
+    [key: string]: {
+      [key: string]: number;
+    };
+  } = {};
   updateHighScore(list: VoteParameterResult[]): void {
     const data: HighscoreData = {};
     for (const level of list) {
@@ -155,12 +177,19 @@ export default class Highscore extends Vue {
     for (const category of Object.keys(data)) {
       if (Object.keys(this.highScoreList).length === 0)
         this.openHighScoreCategories.push(category);
+      if (!this.highScoreCount[category]) this.highScoreCount[category] = {};
       for (const vehicle of Object.keys(data[category])) {
         if (Object.keys(this.highScoreList).length === 0)
           this.openHighScoreCategories.push(vehicle);
-        data[category][vehicle] = data[category][vehicle]
-          .sort((a, b) => b.value.percentage - a.value.percentage)
-          .slice(0, 5);
+        data[category][vehicle] = data[category][vehicle].sort(
+          (a, b) => b.value.percentage - a.value.percentage
+        );
+        if (data[category][vehicle].length > 5) {
+          const oldCount = this.highScoreCount[category][vehicle];
+          this.highScoreCount[category][vehicle] = oldCount ?? 5;
+        } else
+          this.highScoreCount[category][vehicle] =
+            data[category][vehicle].length;
       }
     }
     this.highScoreList = data;
@@ -180,5 +209,11 @@ export default class Highscore extends Vue {
 .highscore-table {
   color: var(--color-playing);
   width: 100%;
+}
+
+.text-button {
+  min-height: unset;
+  margin: unset;
+  padding: unset;
 }
 </style>
