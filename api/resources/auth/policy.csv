@@ -129,7 +129,7 @@ p, MODERATOR, /session/:sessionId/topic/, POST
 p, MODERATOR|FACILITATOR, /topic/, PUT
 p, MODERATOR|FACILITATOR, /topic/:id/export/:exportType/, GET
 
-p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/views/, GET
+p, MODERATOR|FACILITATOR, /session/:sessionId/views/, GET
 p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/views/, GET
 p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/input/, GET
 p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /view/:type/:typeId/, GET
