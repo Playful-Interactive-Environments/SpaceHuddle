@@ -49,8 +49,8 @@
           },
           plugins: {
             legend: {
-              onHover: (evt, item) => handleHover(evt, item, index),
-              onLeave: handleLeave,
+              onHover: (evt, item) => handleHoverLegend(evt, item, index),
+              onLeave: handleLeaveLegend,
               display: chartData.data.datasets.length > 1 && displayLabels,
               position: 'right',
               labels: {
@@ -449,7 +449,7 @@ export default class MissionProgressChart extends Vue {
     });
   }
 
-  handleHover(evt: MouseEvent, item: any, chartIndex) {
+  handleHoverLegend(evt: MouseEvent, item: any, chartIndex) {
     this.hoverChart = chartIndex;
     this.labelPos = [evt.x, evt.y];
     if (
@@ -471,7 +471,7 @@ export default class MissionProgressChart extends Vue {
     }
   }
 
-  handleLeave() {
+  handleLeaveLegend() {
     this.hoverLabel = null;
   }
 }
