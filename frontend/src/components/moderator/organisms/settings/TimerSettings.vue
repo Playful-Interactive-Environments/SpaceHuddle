@@ -26,25 +26,30 @@
         class="timeOptions"
       >
         <el-button
-          type="primary"
-          v-if="showDeactivate"
+          :type="!isActive ? 'primary' : 'info'"
           @click="deactivateTimer"
         >
           {{ $t('moderator.organism.settings.timerSettings.off') }}
         </el-button>
-        <el-button type="primary" @click="setTimeLimit(false)">
+        <el-button
+          :type="isActive && !formData.hasTimeLimit ? 'primary' : 'info'"
+          @click="setTimeLimit(false)"
+        >
           <font-awesome-icon icon="infinity" />
         </el-button>
-        <el-button type="primary" @click="setTimeLimit(true, 5 * 60)">
+        <el-button type="info" @click="setTimeLimit(true, 5 * 60)">
           5:00
         </el-button>
-        <el-button type="primary" @click="setTimeLimit(true, 10 * 60)">
+        <el-button type="info" @click="setTimeLimit(true, 10 * 60)">
           10:00
         </el-button>
-        <el-button type="primary" @click="setTimeLimit(true, 15 * 60)">
+        <el-button type="info" @click="setTimeLimit(true, 15 * 60)">
           15:00
         </el-button>
-        <el-button type="primary" @click="setTimeLimit(true)">
+        <el-button
+          :type="isActive && formData.hasTimeLimit ? 'primary' : 'info'"
+          @click="setTimeLimit(true)"
+        >
           {{ $t('moderator.organism.settings.timerSettings.custom') }}
         </el-button>
         <!--<div class="level">
@@ -90,7 +95,7 @@
         <!--<el-button
           class="deactivate"
           v-on:click="deactivateTimer"
-          v-if="showDeactivate"
+          v-if="isActive"
         >
           {{ $t('moderator.organism.settings.timerSettings.deactivate') }}
         </el-button>-->
@@ -153,7 +158,7 @@ export default class TimerSettings extends Vue {
     this.reset();
   }
 
-  get showDeactivate(): boolean {
+  get isActive(): boolean {
     return this.entityState === TaskStates.ACTIVE;
   }
 
@@ -250,9 +255,10 @@ export default class TimerSettings extends Vue {
   }
 
   setTimeLimit(hasTimeLimit: boolean, time: number | null = null): void {
+    this.entityState = TaskStates.ACTIVE;
     this.formData.hasTimeLimit = hasTimeLimit;
-    this.remainingSeconds = time;
     if (hasTimeLimit && time === null) this.customTime = true;
+    else this.remainingSeconds = time;
     if (!this.customTime) this.save();
   }
 
