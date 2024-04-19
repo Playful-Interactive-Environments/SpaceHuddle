@@ -1,42 +1,44 @@
 <template>
-  <el-form-item
-    :label="$t('module.playing.coolit.moderatorConfig.replayable')"
-    :prop="`${rulePropPath}.replayable`"
-  >
-    <el-switch class="level-item" v-model="modelValue.replayable" />
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.playing.coolit.moderatorConfig.showTutorialOnlyOnce')"
-    :prop="`${rulePropPath}.showTutorialOnlyOnce`"
-  >
-    <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.playing.coolit.moderatorConfig.mapSection')"
-    :prop="`${rulePropPath}.mapSection`"
-  >
-    <div style="height: var(--map-settings-height)">
-      <mgl-map
-        :center="mapCenter"
-        :zoom="mapZoom"
-        :double-click-zoom="false"
-        @map:zoomend="changeSection"
-        @map:dragend="changeSection"
-      >
-        <CustomMapMarker
-          :coordinates="mapStart"
-          :draggable="true"
-          v-on:dragend="startPositionChanged"
+  <div>
+    <el-form-item
+      :label="$t('module.playing.coolit.moderatorConfig.replayable')"
+      :prop="`${rulePropPath}.replayable`"
+    >
+      <el-switch class="level-item" v-model="modelValue.replayable" />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.playing.coolit.moderatorConfig.showTutorialOnlyOnce')"
+      :prop="`${rulePropPath}.showTutorialOnlyOnce`"
+    >
+      <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.playing.coolit.moderatorConfig.mapSection')"
+      :prop="`${rulePropPath}.mapSection`"
+    >
+      <div style="height: var(--map-settings-height)">
+        <mgl-map
+          :center="mapCenter"
+          :zoom="mapZoom"
+          :double-click-zoom="false"
+          @map:zoomend="changeSection"
+          @map:dragend="changeSection"
         >
-          <template v-slot:icon>
-            <font-awesome-icon icon="location-crosshairs" class="pin" />
-          </template>
-        </CustomMapMarker>
+          <CustomMapMarker
+            :coordinates="mapStart"
+            :draggable="true"
+            v-on:dragend="startPositionChanged"
+          >
+            <template v-slot:icon>
+              <font-awesome-icon icon="location-crosshairs" class="pin" />
+            </template>
+          </CustomMapMarker>
 
-        <mgl-navigation-control position="bottom-left" />
-      </mgl-map>
-    </div>
-  </el-form-item>
+          <mgl-navigation-control position="bottom-left" />
+        </mgl-map>
+      </div>
+    </el-form-item>
+  </div>
 </template>
 
 <script lang="ts">

@@ -1,94 +1,100 @@
 <template>
-  <el-form-item
-    :label="$t('module.information.quiz.moderatorConfig.answerCount')"
-    :prop="`${rulePropPath}.answerCount`"
-    :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
-  >
-    <el-input-number
-      v-model="modelValue.answerCount"
-      :min="2"
-      :placeholder="
-        $t('module.information.quiz.moderatorConfig.answerCountExample')
-      "
-    />
-  </el-form-item>
-  <el-form-item
-    v-if="limitQuestionType === null"
-    :label="$t('module.information.quiz.moderatorConfig.questionType')"
-    :prop="`${rulePropPath}.questionType`"
-  >
-    <el-select v-model="modelValue.questionType">
-      <el-option
-        v-for="questionType in Object.values(QuestionType)"
-        :key="questionType"
-        :value="questionType"
-        :label="$t(`module.information.quiz.enum.questionType.${questionType}`)"
-      >
-      </el-option>
-    </el-select>
-  </el-form-item>
-  <el-form-item
-    v-if="modelValue.questionType === QuestionType.QUIZ"
-    :label="$t('module.information.quiz.moderatorConfig.moderatedQuestionFlow')"
-    :prop="`${rulePropPath}.moderatedQuestionFlow`"
-  >
-    <el-switch
-      class="level-item"
-      v-model="modelValue.moderatedQuestionFlow"
-      :inactive-text="
+  <div>
+    <el-form-item
+      :label="$t('module.information.quiz.moderatorConfig.answerCount')"
+      :prop="`${rulePropPath}.answerCount`"
+      :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
+    >
+      <el-input-number
+        v-model="modelValue.answerCount"
+        :min="2"
+        :placeholder="
+          $t('module.information.quiz.moderatorConfig.answerCountExample')
+        "
+      />
+    </el-form-item>
+    <el-form-item
+      v-if="limitQuestionType === null"
+      :label="$t('module.information.quiz.moderatorConfig.questionType')"
+      :prop="`${rulePropPath}.questionType`"
+    >
+      <el-select v-model="modelValue.questionType">
+        <el-option
+          v-for="questionType in Object.values(QuestionType)"
+          :key="questionType"
+          :value="questionType"
+          :label="
+            $t(`module.information.quiz.enum.questionType.${questionType}`)
+          "
+        >
+        </el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="modelValue.questionType === QuestionType.QUIZ"
+      :label="
         $t('module.information.quiz.moderatorConfig.moderatedQuestionFlow')
       "
-    />
-  </el-form-item>
-  <el-form-item
-    v-if="
-      modelValue.moderatedQuestionFlow &&
-      modelValue.questionType === QuestionType.QUIZ
-    "
-    :label="$t('module.information.quiz.moderatorConfig.time')"
-    :prop="`${rulePropPath}.defaultQuestionTime`"
-    :rules="[
-      defaultFormRules.ruleRequiredIf(modelValue.hasTimeLimit),
-      defaultFormRules.ruleDate,
-    ]"
-  >
-    <div class="level">
-      <span class="level-left">
-        <el-switch
-          class="level-item"
-          v-model="hasTimeLimit"
-          :inactive-text="
-            $t('moderator.organism.settings.timerSettings.useTimer')
-          "
+      :prop="`${rulePropPath}.moderatedQuestionFlow`"
+    >
+      <el-switch
+        class="level-item"
+        v-model="modelValue.moderatedQuestionFlow"
+        :inactive-text="
+          $t('module.information.quiz.moderatorConfig.moderatedQuestionFlow')
+        "
+      />
+    </el-form-item>
+    <el-form-item
+      v-if="
+        modelValue.moderatedQuestionFlow &&
+        modelValue.questionType === QuestionType.QUIZ
+      "
+      :label="$t('module.information.quiz.moderatorConfig.time')"
+      :prop="`${rulePropPath}.defaultQuestionTime`"
+      :rules="[
+        defaultFormRules.ruleRequiredIf(modelValue.hasTimeLimit),
+        defaultFormRules.ruleDate,
+      ]"
+    >
+      <div class="level">
+        <span class="level-left">
+          <el-switch
+            class="level-item"
+            v-model="hasTimeLimit"
+            :inactive-text="
+              $t('moderator.organism.settings.timerSettings.useTimer')
+            "
+          />
+          <el-time-picker
+            v-if="hasTimeLimit"
+            class="level-item"
+            v-model="defaultQuestionTime"
+            :disabled="!hasTimeLimit"
+          />
+        </span>
+      </div>
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.information.quiz.moderatorConfig.theme')"
+      :prop="`${rulePropPath}.theme`"
+    >
+      <el-select v-model="modelValue.theme">
+        <el-option
+          value=""
+          :label="$t('module.information.quiz.moderatorConfig.default')"
         />
-        <el-time-picker
-          v-if="hasTimeLimit"
-          class="level-item"
-          v-model="defaultQuestionTime"
-          :disabled="!hasTimeLimit"
+        <el-option
+          value="paper"
+          :label="$t('module.information.quiz.moderatorConfig.paper')"
         />
-      </span>
-    </div>
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.information.quiz.moderatorConfig.theme')"
-    :prop="`${rulePropPath}.theme`"
-  >
-    <el-select v-model="modelValue.theme">
-      <el-option
-        value=""
-        :label="$t('module.information.quiz.moderatorConfig.default')"
-      />
-      <el-option
-        value="paper"
-        :label="$t('module.information.quiz.moderatorConfig.paper')"
-      />
-      <el-option
-        value="interview"
-        :label="$t('module.information.quiz.moderatorConfig.interview')"
-      />
-    </el-select>
-  </el-form-item>
+        <el-option
+          value="interview"
+          :label="$t('module.information.quiz.moderatorConfig.interview')"
+        />
+      </el-select>
+    </el-form-item>
+  </div>
 </template>
 
 <script lang="ts">

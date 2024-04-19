@@ -1,16 +1,18 @@
 <template>
-  <el-form-item
-    :label="$t('module.playing.shopit.moderatorConfig.replayable')"
-    :prop="`${rulePropPath}.replayable`"
-  >
-    <el-switch class="level-item" v-model="modelValue.replayable" />
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.playing.shopit.moderatorConfig.showTutorialOnlyOnce')"
-    :prop="`${rulePropPath}.showTutorialOnlyOnce`"
-  >
-    <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
-  </el-form-item>
+  <div>
+    <el-form-item
+      :label="$t('module.playing.shopit.moderatorConfig.replayable')"
+      :prop="`${rulePropPath}.replayable`"
+    >
+      <el-switch class="level-item" v-model="modelValue.replayable" />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.playing.shopit.moderatorConfig.showTutorialOnlyOnce')"
+      :prop="`${rulePropPath}.showTutorialOnlyOnce`"
+    >
+      <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
+    </el-form-item>
+  </div>
 </template>
 
 <script lang="ts">

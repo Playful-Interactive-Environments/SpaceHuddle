@@ -1,173 +1,177 @@
 <template>
-  <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.mapSection')"
-    :prop="`${rulePropPath}.mapSection`"
-  >
-    <div style="height: var(--map-settings-height)">
-      <mgl-map
-        :center="mapCenter"
-        :zoom="mapZoom"
-        :double-click-zoom="false"
-        @map:zoomend="changeSection"
-        @map:dragend="changeSection"
-      >
-        <mgl-navigation-control position="bottom-left" />
-      </mgl-map>
-    </div>
-  </el-form-item>
-  <!--<el-form-item
-    v-if="hasInput"
-    :label="
-      $t(
-        'module.brainstorming.missionmap.moderatorConfig.insertInitProgressionFromInput'
-      )
-    "
-    :prop="`${rulePropPath}.insertInitProgressionFromInput`"
-  >
-    <el-switch
-      class="level-item"
-      v-model="modelValue.insertInitProgressionFromInput"
-    />
-  </el-form-item>-->
-  <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.startingPoint')"
-  >
-  </el-form-item>
-  <el-form-item
-    v-for="parameter of ManuelInitParameter"
-    :key="parameter"
-    :label="$t(`module.brainstorming.missionmap.gameConfig.${parameter}`)"
-    :prop="`${rulePropPath}.${parameter}`"
-    :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
-  >
-    <template #label>
-      {{ $t(`module.brainstorming.missionmap.gameConfig.${parameter}`) }}
-      <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
-    </template>
-    <el-slider
-      v-if="modelValue"
-      v-model="modelValue[parameter]"
-      :min="-10"
-      :max="10"
-      show-stops
-    />
-  </el-form-item>
-  <el-form-item
-    :label="
-      $t('module.brainstorming.missionmap.moderatorConfig.effectElectricity')
-    "
-    :prop="`${rulePropPath}.effectElectricity`"
-  >
-    <el-switch class="level-item" v-model="modelValue.effectElectricity" />
-  </el-form-item>
-  <el-form-item
-    :label="
-      $t('module.brainstorming.missionmap.moderatorConfig.maxRatingStars')
-    "
-    :prop="`${rulePropPath}.maxRatingStars`"
-  >
-    <el-slider
-      v-model="modelValue.maxRatingStars"
-      :min="3"
-      :max="10"
-      :marks="calculateMarks(3, 10)"
-    />
-  </el-form-item>
-  <el-form-item
-    :label="
-      $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
-    "
-    :prop="`${rulePropPath}.minParticipants`"
-  >
-    <el-slider
-      v-model="modelValue.minParticipants"
-      :min="2"
-      :max="100"
-      :marks="calculateMarks(0, 100, 10, 11, 2)"
-    />
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
-    :prop="`${rulePropPath}.minPoints`"
-  >
-    <el-slider
-      v-model="modelValue.minPoints"
-      :min="100"
-      :max="modelValue.maxPoints"
-      :step="100"
-      :marks="calculateMarks(100, modelValue.maxPoints, 100, 11)"
-    />
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
-    :prop="`${rulePropPath}.maxPoints`"
-  >
-    <el-slider
-      v-model="modelValue.maxPoints"
-      :min="modelValue.minPoints"
-      :max="10000"
-      :step="100"
-      :marks="calculateMarks(0, 10000, 100, 11, modelValue.minPoints)"
-    />
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.explanation')"
-    :prop="`${rulePropPath}.explanationList`"
-  >
-    <div
-      v-for="(explanation, index) of modelValue.explanationList"
-      :key="index"
+  <div>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.mapSection')"
+      :prop="`${rulePropPath}.mapSection`"
     >
-      <el-input v-model="modelValue.explanationList[index]">
-        <template #prepend>
-          <span style="width: 1.5rem">{{ index + 1 }}.</span>
-          <div @click="() => modelValue.explanationList.splice(index, 1)">
-            <font-awesome-icon icon="trash" />
-          </div>
-        </template>
-      </el-input>
-    </div>
-    <AddItem
-      :text="
-        $t('module.brainstorming.missionmap.moderatorConfig.addExplanation')
+      <div style="height: var(--map-settings-height)">
+        <mgl-map
+          :center="mapCenter"
+          :zoom="mapZoom"
+          :double-click-zoom="false"
+          @map:zoomend="changeSection"
+          @map:dragend="changeSection"
+        >
+          <mgl-navigation-control position="bottom-left" />
+        </mgl-map>
+      </div>
+    </el-form-item>
+    <!--<el-form-item
+      v-if="hasInput"
+      :label="
+        $t(
+          'module.brainstorming.missionmap.moderatorConfig.insertInitProgressionFromInput'
+        )
       "
-      @addNew="() => modelValue.explanationList.push('')"
-    />
-  </el-form-item>
-  <el-form-item
-    :label="
-      $t(
-        'module.brainstorming.missionmap.moderatorConfig.allowParticipationMeasures'
-      )
-    "
-    :prop="`${rulePropPath}.allowParticipationMeasures`"
-  >
-    <el-switch
-      class="level-item"
-      v-model="modelValue.allowParticipationMeasures"
-    />
-  </el-form-item>
-  <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.theme')"
-    :prop="`${rulePropPath}.theme`"
-  >
-    <el-select v-model="modelValue.theme">
-      <el-option
-        value=""
-        :label="$t('module.brainstorming.missionmap.moderatorConfig.default')"
+      :prop="`${rulePropPath}.insertInitProgressionFromInput`"
+    >
+      <el-switch
+        class="level-item"
+        v-model="modelValue.insertInitProgressionFromInput"
       />
-      <el-option
-        value="preparation"
-        :label="
-          $t('module.brainstorming.missionmap.moderatorConfig.preparation')
+    </el-form-item>-->
+    <el-form-item
+      :label="
+        $t('module.brainstorming.missionmap.moderatorConfig.startingPoint')
+      "
+    >
+    </el-form-item>
+    <el-form-item
+      v-for="parameter of ManuelInitParameter"
+      :key="parameter"
+      :label="$t(`module.brainstorming.missionmap.gameConfig.${parameter}`)"
+      :prop="`${rulePropPath}.${parameter}`"
+      :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
+    >
+      <template #label>
+        {{ $t(`module.brainstorming.missionmap.gameConfig.${parameter}`) }}
+        <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+      </template>
+      <el-slider
+        v-if="modelValue"
+        v-model="modelValue[parameter]"
+        :min="-10"
+        :max="10"
+        show-stops
+      />
+    </el-form-item>
+    <el-form-item
+      :label="
+        $t('module.brainstorming.missionmap.moderatorConfig.effectElectricity')
+      "
+      :prop="`${rulePropPath}.effectElectricity`"
+    >
+      <el-switch class="level-item" v-model="modelValue.effectElectricity" />
+    </el-form-item>
+    <el-form-item
+      :label="
+        $t('module.brainstorming.missionmap.moderatorConfig.maxRatingStars')
+      "
+      :prop="`${rulePropPath}.maxRatingStars`"
+    >
+      <el-slider
+        v-model="modelValue.maxRatingStars"
+        :min="3"
+        :max="10"
+        :marks="calculateMarks(3, 10)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="
+        $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
+      "
+      :prop="`${rulePropPath}.minParticipants`"
+    >
+      <el-slider
+        v-model="modelValue.minParticipants"
+        :min="2"
+        :max="100"
+        :marks="calculateMarks(0, 100, 10, 11, 2)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
+      :prop="`${rulePropPath}.minPoints`"
+    >
+      <el-slider
+        v-model="modelValue.minPoints"
+        :min="100"
+        :max="modelValue.maxPoints"
+        :step="100"
+        :marks="calculateMarks(100, modelValue.maxPoints, 100, 11)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
+      :prop="`${rulePropPath}.maxPoints`"
+    >
+      <el-slider
+        v-model="modelValue.maxPoints"
+        :min="modelValue.minPoints"
+        :max="10000"
+        :step="100"
+        :marks="calculateMarks(0, 10000, 100, 11, modelValue.minPoints)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.explanation')"
+      :prop="`${rulePropPath}.explanationList`"
+    >
+      <div
+        v-for="(explanation, index) of modelValue.explanationList"
+        :key="index"
+      >
+        <el-input v-model="modelValue.explanationList[index]">
+          <template #prepend>
+            <span style="width: 1.5rem">{{ index + 1 }}.</span>
+            <div @click="() => modelValue.explanationList.splice(index, 1)">
+              <font-awesome-icon icon="trash" />
+            </div>
+          </template>
+        </el-input>
+      </div>
+      <AddItem
+        :text="
+          $t('module.brainstorming.missionmap.moderatorConfig.addExplanation')
         "
+        @addNew="() => modelValue.explanationList.push('')"
       />
-      <el-option
-        value="meeting"
-        :label="$t('module.brainstorming.missionmap.moderatorConfig.meeting')"
+    </el-form-item>
+    <el-form-item
+      :label="
+        $t(
+          'module.brainstorming.missionmap.moderatorConfig.allowParticipationMeasures'
+        )
+      "
+      :prop="`${rulePropPath}.allowParticipationMeasures`"
+    >
+      <el-switch
+        class="level-item"
+        v-model="modelValue.allowParticipationMeasures"
       />
-    </el-select>
-  </el-form-item>
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.theme')"
+      :prop="`${rulePropPath}.theme`"
+    >
+      <el-select v-model="modelValue.theme">
+        <el-option
+          value=""
+          :label="$t('module.brainstorming.missionmap.moderatorConfig.default')"
+        />
+        <el-option
+          value="preparation"
+          :label="
+            $t('module.brainstorming.missionmap.moderatorConfig.preparation')
+          "
+        />
+        <el-option
+          value="meeting"
+          :label="$t('module.brainstorming.missionmap.moderatorConfig.meeting')"
+        />
+      </el-select>
+    </el-form-item>
+  </div>
 </template>
 
 <script lang="ts">
