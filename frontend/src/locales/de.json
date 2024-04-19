@@ -204,7 +204,9 @@
           "time": "Zeitlimit",
           "useTimer": "aktiviere Zeitlimit",
           "submit": "Speichern",
-          "deactivate": "deaktivieren"
+          "deactivate": "deaktivieren",
+          "custom": "individuell",
+          "off": "aus"
         },
         "ideaSettings": {
           "header": "Ideen-Einstellungen ",

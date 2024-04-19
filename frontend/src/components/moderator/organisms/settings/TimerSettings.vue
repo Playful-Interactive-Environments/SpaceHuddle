@@ -16,14 +16,38 @@
         }}</span>
       </template>
       <el-form-item
+        v-if="!customTime"
         prop="remindingTime"
         :label="$t('moderator.organism.settings.timerSettings.time')"
         :rules="[
           defaultFormRules.ruleRequiredIf(formData.hasTimeLimit),
           defaultFormRules.ruleDate,
         ]"
+        class="timeOptions"
       >
-        <div class="level">
+        <el-button
+          type="primary"
+          v-if="showDeactivate"
+          @click="deactivateTimer"
+        >
+          {{ $t('moderator.organism.settings.timerSettings.off') }}
+        </el-button>
+        <el-button type="primary" @click="setTimeLimit(false)">
+          <font-awesome-icon icon="infinity" />
+        </el-button>
+        <el-button type="primary" @click="setTimeLimit(true, 5 * 60)">
+          5:00
+        </el-button>
+        <el-button type="primary" @click="setTimeLimit(true, 10 * 60)">
+          10:00
+        </el-button>
+        <el-button type="primary" @click="setTimeLimit(true, 15 * 60)">
+          15:00
+        </el-button>
+        <el-button type="primary" @click="setTimeLimit(true)">
+          {{ $t('moderator.organism.settings.timerSettings.custom') }}
+        </el-button>
+        <!--<div class="level">
           <span class="level-left">
             <el-switch
               class="level-item"
@@ -39,20 +63,37 @@
               :style="{ display: formData.hasTimeLimit ? 'block' : 'none' }"
             />
           </span>
-        </div>
+        </div>-->
+      </el-form-item>
+      <el-form-item
+        v-else
+        prop="remindingTime"
+        :label="$t('moderator.organism.settings.timerSettings.time')"
+        :rules="[
+          defaultFormRules.ruleRequiredIf(formData.hasTimeLimit),
+          defaultFormRules.ruleDate,
+        ]"
+      >
+        <el-time-picker
+          class="level-item"
+          v-model="formData.remindingTime"
+          :disabled="!formData.hasTimeLimit"
+          :style="{ display: formData.hasTimeLimit ? 'block' : 'none' }"
+        />
       </el-form-item>
       <template #footer>
         <FromSubmitItem
+          v-if="customTime"
           :form-state-message="formData.stateMessage"
           submit-label-key="moderator.organism.settings.timerSettings.submit"
         />
-        <el-button
+        <!--<el-button
           class="deactivate"
           v-on:click="deactivateTimer"
           v-if="showDeactivate"
         >
           {{ $t('moderator.organism.settings.timerSettings.deactivate') }}
-        </el-button>
+        </el-button>-->
       </template>
     </el-dialog>
   </ValidationForm>
@@ -70,9 +111,11 @@ import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import TaskStates from '@/types/enum/TaskStates';
 import { TimerEntity } from '@/types/enum/TimerEntity';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
   components: {
+    FontAwesomeIcon,
     ValidationForm,
     FromSubmitItem,
   },
@@ -87,6 +130,8 @@ export default class TimerSettings extends Vue {
   @Prop({ default: TimerEntity.TASK }) entityName!: string;
   @Prop() entity!: any;
   @Prop({ default: null }) defaultTimerSeconds!: number | null;
+
+  customTime = false;
 
   get defaultTime(): number {
     if (this.defaultTimerSeconds) return this.defaultTimerSeconds;
@@ -174,6 +219,12 @@ export default class TimerSettings extends Vue {
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
+  set remainingSeconds(value: number | null) {
+    if (value !== null)
+      this.formData.remindingTime = timerService.getDate(value);
+    else this.formData.remindingTime = null;
+  }
+
   get remainingSeconds(): number | null {
     if (!this.formData.hasTimeLimit || !this.formData.remindingTime)
       return null;
@@ -198,6 +249,13 @@ export default class TimerSettings extends Vue {
     }
   }
 
+  setTimeLimit(hasTimeLimit: boolean, time: number | null = null): void {
+    this.formData.hasTimeLimit = hasTimeLimit;
+    this.remainingSeconds = time;
+    if (hasTimeLimit && time === null) this.customTime = true;
+    if (!this.customTime) this.save();
+  }
+
   save(): void {
     this.entityState = TaskStates.ACTIVE;
     this.entityRemainingTime = this.remainingSeconds;
@@ -212,5 +270,9 @@ export default class TimerSettings extends Vue {
 <style scoped>
 .deactivate {
   width: 100%;
+}
+
+.timeOptions .el-button {
+  margin-right: 0.5rem;
 }
 </style>
