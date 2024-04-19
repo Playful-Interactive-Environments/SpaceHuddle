@@ -175,6 +175,14 @@
         />
       </div>
     </div>
+    <div class="card__drag" v-if="showDragArea">
+      <ToolTip
+        :placement="'left'"
+        :text="$t('moderator.organism.settings.topicSettings.drag')"
+      >
+        <font-awesome-icon icon="grip-vertical" class="card__drag__icon" />
+      </ToolTip>
+    </div>
     <IdeaSettings
       v-if="isEditable"
       v-model:show-modal="showSettings"
@@ -238,6 +246,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) showKeyword!: boolean;
   @Prop({ default: false }) shareState!: boolean;
   @Prop({ default: true }) allowImagePreview!: boolean;
+  @Prop({ default: false }) showDragArea!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
@@ -532,6 +541,24 @@ export default class IdeaCard extends Vue {
   margin-bottom: 0.5rem;
 }
 
+.card__drag {
+  display: flex;
+  flex-basis: auto;
+  flex-grow: 0;
+  flex-shrink: 0;
+  justify-content: center;
+  background-color: var(--color-primary);
+  height: 1.5rem;
+  border-radius: 0 0 var(--border-radius-xs) var(--border-radius-xs);
+  align-self: stretch;
+  cursor: grab;
+  align-items: center;
+
+  &__icon {
+    color: white;
+  }
+}
+
 .landscape::v-deep(.el-card__body) {
   display: flex;
 
@@ -543,6 +570,12 @@ export default class IdeaCard extends Vue {
 
   .card__text {
     width: 70%;
+  }
+
+  .card__drag {
+    border-radius: 0 var(--border-radius-xs) var(--border-radius-xs) 0;
+    height: unset;
+    width: 1.5rem;
   }
 }
 

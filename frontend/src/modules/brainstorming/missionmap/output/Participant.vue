@@ -75,6 +75,7 @@
       item-key="id"
       @end="dragDone"
       class="measureList"
+      handle=".card__drag"
     >
       <template v-slot:item="{ element }">
         <IdeaCard
@@ -95,6 +96,7 @@
           :handleEditable="false"
           :background-color="getIdeaColor(element)"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+          :showDragArea="true"
           v-on:click="ideaClicked(element)"
           @ideaDeleted="refreshIdeas"
           @ideaStartEdit="editIdea(element)"
