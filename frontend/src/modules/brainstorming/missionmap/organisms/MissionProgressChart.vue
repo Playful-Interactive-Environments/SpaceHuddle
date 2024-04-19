@@ -1,57 +1,74 @@
 <template>
-  <div v-for="(chartData, index) in lineChartDataList" :key="index">
-    <Line
-      :data="chartData.data"
-      :height="250"
-      :options="{
-        maintainAspectRatio: false,
-        animation: {
-          duration: 0,
-        },
-        scales: {
-          x: {
-            ticks: {
-              color: chartData.labelColors,
+  <div class="chart_container">
+    <el-tooltip :visible="!!hoverLabel" placement="left">
+      <template #content>
+        {{ $t(`${toolTipTranslation}.${hoverLabel}`) }}
+      </template>
+      <div
+        class="label-tooltip"
+        :style="{
+          '--x': `${labelPos[0]}px`,
+          '--y': `${labelPos[1] + hoverChart * 250}px`,
+        }"
+      ></div>
+    </el-tooltip>
+    <div v-for="(chartData, index) in lineChartDataList" :key="index">
+      <Line
+        :data="chartData.data"
+        :height="250"
+        :options="{
+          maintainAspectRatio: false,
+          animation: {
+            duration: 0,
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: chartData.labelColors,
+              },
+              grid: {
+                display: false,
+              },
+              title: {
+                text: $t('module.brainstorming.missionmap.participant.chart.x'),
+                display: true,
+              },
             },
-            grid: {
-              display: false,
+            y: {
+              stacked:
+                missionProgressParameter ===
+                MissionProgressParameter.electricity,
+              ticks: {
+                stepSize: 1,
+              },
+              title: {
+                text: yLabel,
+                display: true,
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              onHover: (evt, item) => handleHover(evt, item, index),
+              onLeave: handleLeave,
+              display: chartData.data.datasets.length > 1 && displayLabels,
+              position: 'right',
+              labels: {
+                color: colorPrimary,
+                usePointStyle: true,
+              },
             },
             title: {
-              text: $t('module.brainstorming.missionmap.participant.chart.x'),
-              display: true,
+              display: lineChartDataList.length > 1,
+              text: chartData.title,
+            },
+            annotation: {
+              annotations: chartAnnotations(chartData),
             },
           },
-          y: {
-            stacked:
-              missionProgressParameter === MissionProgressParameter.electricity,
-            ticks: {
-              stepSize: 1,
-            },
-            title: {
-              text: yLabel,
-              display: true,
-            },
-          },
-        },
-        plugins: {
-          legend: {
-            display: chartData.data.datasets.length > 1 && displayLabels,
-            position: 'right',
-            labels: {
-              color: colorPrimary,
-              usePointStyle: true,
-            },
-          },
-          title: {
-            display: lineChartDataList.length > 1,
-            text: chartData.title,
-          },
-          annotation: {
-            annotations: chartAnnotations(chartData),
-          },
-        },
-      }"
-    />
+        }"
+      />
+    </div>
   </div>
 </template>
 
@@ -118,8 +135,17 @@ export default class MissionProgressChart extends Vue {
   inputManager!: CombinedInputManager;
   decidedIdeas: Idea[] = [];
   displayLabels = false;
+  hoverLabel: string | null = null;
+  labelPos: [number, number] = [0, 0];
+  hoverChart = 0;
 
   MissionProgressParameter = MissionProgressParameter;
+
+  get toolTipTranslation(): string {
+    if (this.missionProgressParameter === MissionProgressParameter.electricity)
+      return 'module.playing.moveit.enums.electricity';
+    return 'module.brainstorming.missionmap.gameConfig';
+  }
 
   chartAnnotations(chartData: LineChartData): any {
     if (
@@ -422,6 +448,32 @@ export default class MissionProgressChart extends Vue {
       labelColors: themeColors.getContrastColor(),
     });
   }
+
+  handleHover(evt: MouseEvent, item: any, chartIndex) {
+    this.hoverChart = chartIndex;
+    this.labelPos = [evt.x, evt.y];
+    if (
+      this.missionProgressParameter === MissionProgressParameter.influenceAreas
+    ) {
+      for (const key of Object.keys(gameConfig.parameter)) {
+        if (gameConfig.parameter[key].iconCode === item.text) {
+          this.hoverLabel = key;
+          break;
+        }
+      }
+    } else {
+      for (const key of Object.keys(gameConfigMoveIt.electricity)) {
+        if (gameConfigMoveIt.electricity[key].iconCode === item.text) {
+          this.hoverLabel = key;
+          break;
+        }
+      }
+    }
+  }
+
+  handleLeave() {
+    this.hoverLabel = null;
+  }
 }
 </script>
 
@@ -442,5 +494,15 @@ export default class MissionProgressChart extends Vue {
 .el-tabs::v-deep(.el-tabs__nav-next),
 .el-tabs::v-deep(.el-tabs__nav-prev) {
   line-height: unset;
+}
+
+.label-tooltip {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+}
+
+.chart_container {
+  position: relative;
 }
 </style>
