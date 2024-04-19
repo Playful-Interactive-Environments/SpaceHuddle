@@ -169,7 +169,11 @@ export default class TimerSettings extends Vue {
   }
 
   set activeState(value: string) {
-    if (value === 'on') this.entityState = TaskStates.ACTIVE;
+    if (
+      value === 'on' ||
+      value === this.$t('moderator.organism.settings.timerSettings.on')
+    )
+      this.entityState = TaskStates.ACTIVE;
     else this.entityState = TaskStates.WAIT;
     this.formData.hasTimeLimit = false;
     this.entityRemainingTime = null;
@@ -177,7 +181,11 @@ export default class TimerSettings extends Vue {
   }
 
   get activeState(): string {
-    return this.entityState === TaskStates.ACTIVE ? 'on' : 'off';
+    if (this.$t('moderator.organism.settings.timerSettings.on') === 'on')
+      return this.entityState === TaskStates.ACTIVE ? 'on' : 'off';
+    return this.entityState === TaskStates.ACTIVE
+      ? this.$t('moderator.organism.settings.timerSettings.on')
+      : this.$t('moderator.organism.settings.timerSettings.off');
   }
 
   get isActive(): boolean {
