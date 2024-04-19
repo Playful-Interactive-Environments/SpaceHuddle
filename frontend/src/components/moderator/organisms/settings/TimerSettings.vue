@@ -14,9 +14,19 @@
         <span class="el-dialog__title">{{
           $t('moderator.organism.settings.timerSettings.header')
         }}</span>
+        <el-radio-group v-model="activeState" size="large">
+          <el-radio-button
+            :label="$t('moderator.organism.settings.timerSettings.off')"
+            value="off"
+          />
+          <el-radio-button
+            :label="$t('moderator.organism.settings.timerSettings.on')"
+            value="on"
+          />
+        </el-radio-group>
       </template>
       <el-form-item
-        v-if="!customTime"
+        v-if="!customTime && isActive"
         prop="remindingTime"
         :label="$t('moderator.organism.settings.timerSettings.time')"
         :rules="[
@@ -25,12 +35,12 @@
         ]"
         class="timeOptions"
       >
-        <el-button
+        <!--<el-button
           :type="!isActive ? 'primary' : 'info'"
           @click="deactivateTimer"
         >
           {{ $t('moderator.organism.settings.timerSettings.off') }}
-        </el-button>
+        </el-button>-->
         <el-button
           :type="isActive && !formData.hasTimeLimit ? 'primary' : 'info'"
           @click="setTimeLimit(false)"
@@ -71,7 +81,7 @@
         </div>-->
       </el-form-item>
       <el-form-item
-        v-else
+        v-else-if="customTime && isActive"
         prop="remindingTime"
         :label="$t('moderator.organism.settings.timerSettings.time')"
         :rules="[
@@ -156,6 +166,18 @@ export default class TimerSettings extends Vue {
 
   mounted(): void {
     this.reset();
+  }
+
+  set activeState(value: string) {
+    if (value === 'on') this.entityState = TaskStates.ACTIVE;
+    else this.entityState = TaskStates.WAIT;
+    this.formData.hasTimeLimit = false;
+    this.entityRemainingTime = null;
+    timerService.update(this.entityName, this.entity);
+  }
+
+  get activeState(): string {
+    return this.entityState === TaskStates.ACTIVE ? 'on' : 'off';
   }
 
   get isActive(): boolean {
@@ -280,5 +302,9 @@ export default class TimerSettings extends Vue {
 
 .timeOptions .el-button {
   margin-right: 0.5rem;
+}
+
+.el-radio-group {
+  margin-left: 1rem;
 }
 </style>

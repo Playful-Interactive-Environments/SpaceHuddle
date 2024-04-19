@@ -206,6 +206,7 @@
           "submit": "Save",
           "deactivate": "deactivate",
           "custom": "custom",
+          "on": "on",
           "off": "off"
         },
         "ideaSettings": {
