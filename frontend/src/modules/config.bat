@@ -11,6 +11,22 @@ for /d %%d in (*.*) do (
         set task=%%d
         echo    "!task!": {  >> .\config.json
         cd !task!
+
+        if exist ..\common\visualisation_master\ (
+            if !task!==brainstorming (
+                call :addVisualisationMaster task
+            )
+            if !task!==information (
+                call :addVisualisationMaster task
+            )
+            if !task!==selection (
+                call :addVisualisationMaster task
+            )
+            if !task!==voting (
+                call :addVisualisationMaster task
+            )
+        )
+
         for /d %%d in (*.*) do (
             set module=%%d
             if !module! neq settings if !module! neq output (
@@ -26,21 +42,6 @@ for /d %%d in (*.*) do (
                 if !task! neq none (
                     echo        },  >> .\..\config.json
                 )
-            )
-        )
-
-        if exist ..\common\visualisation_master\ (
-            if !task!==brainstorming (
-                call :addVisualisationMaster task
-            )
-            if !task!==information (
-                call :addVisualisationMaster task
-            )
-            if !task!==selection (
-                call :addVisualisationMaster task
-            )
-            if !task!==voting (
-                call :addVisualisationMaster task
             )
         )
 
