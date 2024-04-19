@@ -200,7 +200,7 @@
           "download": "download"
         },
         "timerSettings": {
-          "header": "Set Timer",
+          "header": "Set Status",
           "time": "Time limit",
           "useTimer": "activate time limit",
           "submit": "Save",
