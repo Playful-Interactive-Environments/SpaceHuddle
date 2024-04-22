@@ -86,7 +86,6 @@ export default class PublicScreen extends Vue {
       }
       if (repetitions === this.columns) {
         this.columns -= 1;
-        console.log(this.columns);
       }
     }
   }
