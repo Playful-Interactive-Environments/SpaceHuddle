@@ -10,6 +10,9 @@
     "next": "next",
     "submit": "Save",
     "waiting": "Please wait. Questions and answers are being loaded.",
-    "imageKeywords": "image caption"
+    "imageKeywords": "image caption",
+    "saveQuestion": "Do you want to save your selection?",
+    "yes": "yes",
+    "no": "no"
   }
 }

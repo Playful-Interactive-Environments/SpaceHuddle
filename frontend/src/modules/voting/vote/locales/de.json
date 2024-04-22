@@ -8,6 +8,9 @@
     "thanksIndividual": "Deine Wahl wurde gespeichert.",
     "submit": "Speichern",
     "waiting": "Bitte warten. Fragen und Antworten werden geladen.",
-    "imageKeywords": "Bildbeschreibung"
+    "imageKeywords": "Bildbeschreibung",
+    "saveQuestion": "Soll die Auswahl gespeichert werden?",
+    "yes": "ja",
+    "no": "nein"
   }
 }

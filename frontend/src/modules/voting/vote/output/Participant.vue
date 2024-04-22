@@ -20,7 +20,7 @@
           type="primary"
           class="el-button--submit"
           native-type="submit"
-          :disabled="votes.filter((vote) => vote.rating).length <= 0"
+          :disabled="!answerId"
           @click="submit"
           v-if="!submitScreen"
         >
@@ -32,7 +32,6 @@
       <div v-for="idea in allIdeas" :key="idea.id" class="votable">
         <el-button
           :disabled="false"
-          :loading="isSaving(idea.id)"
           v-on:click="changeVote(idea.id)"
           class="circleCheck"
         >
@@ -93,6 +92,8 @@ import { Idea } from '@/types/api/Idea';
 import * as viewService from '@/services/view-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import { ElMessageBox } from 'element-plus';
+import EndpointType from '@/types/enum/EndpointType';
 
 @Options({
   components: {
@@ -113,12 +114,12 @@ export default class Participant extends Vue {
   activeQuestion: Hierarchy | null = null;
   module: Module | null = null;
   task: Task | null = null;
-  votes: Vote[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
   score = 0;
   theme = '';
+  answerId = '';
 
   ideas: Idea[] = [];
   allIdeas: Idea[] = [];
@@ -161,26 +162,12 @@ export default class Participant extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       30
     );
-    this.votingCash = votingService.registerGetVotes(
-      this.taskId,
-      this.updateVotes,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
   }
 
   inputIdeas: Idea[] = [];
   updateInputIdeas(ideas: Idea[]): void {
     this.inputIdeas = ideas;
     this.updateIdeas();
-  }
-
-  updateVotes(votes: Vote[]): void {
-    this.votes = votes;
-    votes.forEach((vote) => {
-      const ideaIndex = this.ideas.findIndex((idea) => idea.id == vote.ideaId);
-      if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
-    });
   }
 
   updateIdeas(): void {
@@ -223,63 +210,11 @@ export default class Participant extends Vue {
   }
 
   isAnswerSelected(answerId: string): boolean {
-    return !!this.votes.find((vote) => vote.ideaId == answerId);
+    return answerId === this.answerId;
   }
-
-  isSavingList: string[] = [];
-  isSaving(answerId: string): boolean {
-    return this.isSavingList.includes(answerId);
-  }
-
-  dataSaved = true;
-  dataSaveStart = -1;
 
   async changeVote(answerId: string): Promise<void> {
-    const dataSaveStart = Date.now();
-    this.dataSaveStart = dataSaveStart;
-    this.dataSaved = false;
-    if (!this.isSaving(answerId)) {
-      this.isSavingList.push(answerId);
-      const vote = this.votes.find((vote) => vote.ideaId === answerId);
-      if (vote) {
-        await votingService
-          .deleteVote(vote.id, EndpointAuthorisationType.PARTICIPANT)
-          .then((result) => {
-            if (result) {
-              const index = this.votes.findIndex(
-                (vote) => vote.ideaId === answerId
-              );
-              if (index > -1) this.votes.splice(index, 1);
-            }
-          });
-      } else {
-        await votingService
-          .postVote(this.taskId, {
-            ideaId: answerId,
-            rating: 1,
-            detailRating: 1,
-          })
-          .then((vote) => {
-            this.votes.push(vote);
-          });
-      }
-      const index = this.isSavingList.indexOf(answerId);
-      this.isSavingList.splice(index, 1);
-    }
-    const deleteVotes = this.votes.filter((vote) => vote.ideaId !== answerId);
-    for (const deleteVote of deleteVotes) {
-      await votingService
-        .deleteVote(deleteVote.id, EndpointAuthorisationType.PARTICIPANT)
-        .then((result) => {
-          if (result) {
-            const index = this.votes.findIndex(
-              (vote) => vote.ideaId === deleteVote.ideaId
-            );
-            if (index > -1) this.votes.splice(index, 1);
-          }
-        });
-    }
-    if (this.dataSaveStart === dataSaveStart) this.dataSaved = true;
+    this.answerId = answerId;
   }
 
   get moduleName(): string {
@@ -313,24 +248,47 @@ export default class Participant extends Vue {
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateVotes);
   }
 
-  unmounted(): void {
+  async unmounted(): Promise<void> {
+    if (!this.submitScreen && !!this.answerId) {
+      let submit = false;
+      await ElMessageBox.confirm(
+        this.$t('module.voting.vote.participant.saveQuestion'),
+        'Warning',
+        {
+          confirmButtonText: this.$t('module.voting.vote.participant.yes'),
+          cancelButtonText: this.$t('module.voting.vote.participant.no'),
+          type: 'warning',
+        }
+      )
+        .then(() => {
+          submit = true;
+        })
+        .catch(() => {
+          submit = false;
+        });
+      if (submit) await this.submit();
+    }
     this.deregisterAll();
     if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
   async submit() {
     this.submitScreen = true;
+    const vote = await votingService.postVote(this.taskId, {
+      ideaId: this.answerId,
+      rating: 1,
+      detailRating: 1,
+    });
     if (this.trackingManager) {
       await this.trackingManager.createInstanceStepPoints(
-        this.votes[0].ideaId,
+        vote.ideaId,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
-          rating: this.votes[0].rating,
-          detailRating: this.votes[0].detailRating,
-          parameter: this.votes[0].parameter,
+          rating: vote.rating,
+          detailRating: vote.detailRating,
+          parameter: vote.parameter,
         },
         1,
         null,
@@ -340,9 +298,9 @@ export default class Participant extends Vue {
       );
       await this.trackingManager.saveIterationStep(
         {
-          rating: this.votes[0].rating,
-          detailRating: this.votes[0].detailRating,
-          parameter: this.votes[0].parameter,
+          rating: vote.rating,
+          detailRating: vote.detailRating,
+          parameter: vote.parameter,
         },
         TaskParticipantIterationStepStatesType.NEUTRAL,
         null,
@@ -361,10 +319,14 @@ export default class Participant extends Vue {
     );
     await this.trackingManager.saveState(
       {
-        voteCount: this.votes.length,
+        voteCount: 1,
       },
       TaskParticipantStatesType.FINISHED
     );
+    if (this.task)
+      cashService.refreshCash(
+        `/${EndpointType.SESSION}/${this.task.sessionId}/${EndpointType.PARTICIPANT_STATE}`
+      );
   }
 }
 </script>
