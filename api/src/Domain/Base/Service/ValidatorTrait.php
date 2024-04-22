@@ -96,7 +96,8 @@ trait ValidatorTrait
     protected function validateEntity(array $data, ?Validator $validator = null, bool $newRecord = true): void
     {
         if (is_null($validator)) {
-            $validator = $this->createValidator();
+            if ($newRecord) $validator = $this->createValidator();
+            else $validator = $this->updateValidator();
         }
 
         $validationResult = $this->validationFactory->createValidationResult(
@@ -116,6 +117,16 @@ trait ValidatorTrait
     protected function createValidator(): Validator
     {
         return $this->validationFactory->createValidator();
+    }
+
+    /**
+     * Create validator.
+     *
+     * @return Validator The validator
+     */
+    protected function updateValidator(): Validator
+    {
+        return $this->createValidator();
     }
 
     /**

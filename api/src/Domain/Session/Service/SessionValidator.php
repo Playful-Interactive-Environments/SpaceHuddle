@@ -54,6 +54,22 @@ final class SessionValidator
     }
 
     /**
+     * Create validator.
+     *
+     * @return Validator The validator
+     */
+    protected function updateValidator(): Validator
+    {
+        $validator = $this->validationFactory->createValidator();
+
+        return $validator
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("title", "Empty: This field cannot be left empty")
+            ->requirePresence("title", "create", "Required: This field is required");
+    }
+
+    /**
      * State update validator.
      * @param array $data Data to be verified.
      * @return void
