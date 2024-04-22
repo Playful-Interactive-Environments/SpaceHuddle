@@ -1,17 +1,5 @@
 <template>
   <div id="scrollVis">
-    <el-button class="playPause">
-      <font-awesome-icon
-        v-if="paused"
-        :icon="['fas', 'play']"
-        @click="paused = false"
-      />
-      <font-awesome-icon
-        v-else
-        :icon="['fas', 'pause']"
-        @click="paused = true"
-      />
-    </el-button>
     <div
       id="scrollParent"
       :style="{
@@ -71,6 +59,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: null }) readonly taskParameter!: any;
   @Prop({ default: [] }) readonly ideas!: Idea[];
+  @Prop({ default: false }) readonly paused!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   filter: FilterData = { ...defaultFilterData };
@@ -78,7 +67,6 @@ export default class PublicScreen extends Vue {
   useIdeas: Idea[] = [];
 
   fullScrollTime = 40;
-  paused = false;
 
   columns = 5;
 

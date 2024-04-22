@@ -56,6 +56,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: [] }) readonly ideas!: Idea[];
+  @Prop({ default: false }) readonly paused!: boolean;
   filter: FilterData = { ...defaultFilterData };
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
@@ -65,9 +66,15 @@ export default class PublicScreen extends Vue {
     this.stackCards();
   }
 
+  @Watch('paused', { immediate: true })
+  onPausedChanged(): void {
+    this.active = true;
+    this.stackCards();
+  }
+
   shuffleDelay = 150;
   stackCards(): void {
-    if (!this.active) return;
+    if (!this.active || this.paused) return;
 
     const cardList = this.$refs.cardList as HTMLElement;
     const cardCount = cardList ? cardList.children.length : 0;
@@ -89,7 +96,7 @@ export default class PublicScreen extends Vue {
   }
 
   spreadCards(): void {
-    if (!this.active) return;
+    if (!this.active || this.paused) return;
 
     const cardList = this.$refs.cardList as HTMLElement;
     const cardCount = cardList ? cardList.children.length : 0;

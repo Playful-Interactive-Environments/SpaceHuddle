@@ -5,7 +5,7 @@
     type="card"
     arrow="always"
     :initial-index="0"
-    :interval="7000 / timeModifier"
+    :interval="paused ? 0 : 7000 / timeModifier"
     v-on:change="galleryIndexChanged"
     trigger="click"
   >
@@ -44,6 +44,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: [] }) readonly ideas!: Idea[];
+  @Prop({ default: false }) readonly paused!: boolean;
   galleryIndex = 0;
 
   useIdeas: Idea[] = [];

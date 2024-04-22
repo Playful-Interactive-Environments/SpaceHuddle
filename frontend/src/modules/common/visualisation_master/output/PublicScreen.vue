@@ -1,31 +1,47 @@
 <template>
-  <el-select v-if="displayTimeMod" class="timeModSelect" v-model="timeModifier">
-    <template v-slot:prefix>
-      <font-awesome-icon icon="sort" class="el-icon" />
-    </template>
-    <el-option
-      v-for="type in timeModifierArray"
-      :key="type"
-      :value="type"
-      :label="'x' + type"
-    >
+  <div class="timeControls">
+    <el-button class="playPause">
+      <font-awesome-icon
+          v-if="paused"
+          :icon="['fas', 'play']"
+          @click="paused = false"
+      />
+      <font-awesome-icon
+          v-else
+          :icon="['fas', 'pause']"
+          @click="paused = true"
+      />
+    </el-button>
+    <el-select v-if="displayTimeMod" class="timeModSelect" v-model="timeModifier">
+      <template v-slot:prefix>
+        <font-awesome-icon icon="sort" class="el-icon" />
+      </template>
+      <el-option
+          v-for="type in timeModifierArray"
+          :key="type"
+          :value="type"
+          :label="'x' + type"
+      >
       <span>
         {{ 'x' + type }}
       </span>
-    </el-option>
-  </el-select>
+      </el-option>
+    </el-select>
+  </div>
   <div id="visContainer">
     <Gallery
       v-if="currentVisModule === 'gallery'"
       :task-id="this.taskId"
       :timeModifier="timeModifier"
       :ideas="this.ideas"
+      :paused="paused"
     />
     <CardShuffle
       v-if="currentVisModule === 'cardShuffle'"
       :task-id="this.taskId"
       :timeModifier="timeModifier"
       :ideas="this.ideas"
+      :paused="paused"
     />
     <BarChart
       v-if="currentVisModule === 'barChart'"
@@ -38,6 +54,7 @@
       :task-id="this.taskId"
       :timeModifier="timeModifier"
       :ideas="this.ideas"
+      :paused="paused"
     />
   </div>
 </template>
@@ -78,6 +95,8 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   allIdeas: Idea[] = [];
   ideas: Idea[] = [];
+
+  paused = false;
 
   taskType: null | string = null;
   currentVisModule: null | string = null;
@@ -230,15 +249,33 @@ export default class PublicScreen extends Vue {
   text-align: right;
 }
 
-.timeModSelect {
-  width: 8em;
+.timeControls {
+  width: 100%;
   position: absolute;
   top: 1.5rem;
-  right: 3rem;
+  left: 0;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  align-items: center;
+}
+
+.timeModSelect {
+  width: 8em;
   z-index: 10000;
 }
 
 #visContainer {
   height: 87%;
+}
+
+.playPause {
+  z-index: 1000;
+  background-color: transparent;
+  margin: 0;
+  color: var(--color-dark-contrast);
+  font-size: var(--font-size-xxlarge);
 }
 </style>
