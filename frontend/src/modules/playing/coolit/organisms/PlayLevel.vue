@@ -108,6 +108,25 @@
                 snow.startTime + minExtremeWeatherTime < Date.now()
               "
             />
+            <sprite
+              :texture="levelTypeSettings.background"
+              :tint="'#000'"
+              :width="gameWidth"
+              :height="gameHeight"
+              :alpha="darkOverlayAlpha"
+            />
+            <animated-sprite
+              ref="lightning"
+              v-if="lightningStylesheets && (hail.frequency || snow.frequency)"
+              :textures="lightningStylesheets.animations['lightning']"
+              :animation-speed="0.15"
+              :height="gameHeight"
+              :x="gameWidth/2"
+              :y="gameHeight/2"
+              :anchor="[0.5, 0.5]"
+              playing
+              :loop="true"
+            />
             <ParticlePlayer
               v-if="weatherStylesheets"
               :config="hail"
@@ -119,7 +138,7 @@
                 hail.startTime + minExtremeWeatherTime < Date.now()
               "
             />
-            <animated-sprite
+<!--            <animated-sprite
               ref="cloud"
               v-if="cloudStylesheets"
               :textures="cloudStylesheets.animations['cloud']"
@@ -131,7 +150,7 @@
               :anchor="[0.5, 1]"
               playing
               :loop="true"
-            />
+            />-->
             <container>
               <sprite
                 v-if="temperatureScaleTexture"
@@ -751,6 +770,7 @@ export default class PlayLevel extends Vue {
   weatherStylesheets: PIXI.Spritesheet | null = null;
   cloudStylesheets: PIXI.Spritesheet | null = null;
   sunStylesheets: PIXI.Spritesheet | null = null;
+  lightningStylesheets: PIXI.Spritesheet | null = null;
   startTime = Date.now();
   playTime = 0;
   autoPanSpeed = 0.4;
@@ -826,6 +846,8 @@ export default class PlayLevel extends Vue {
 
   temperatureScaleTexture: PIXI.Texture | null = null;
   temperatureScaleResultTexture: PIXI.Texture | null = null;
+
+  darkOverlayAlpha = 0;
   //#endregion variables
 
   //#region get / set
@@ -1418,6 +1440,11 @@ export default class PlayLevel extends Vue {
       .loadTexture('/assets/games/coolit/city/cloud.json', this.textureToken)
       .then((sheet) => {
         this.cloudStylesheets = sheet;
+      });
+    pixiUtil
+      .loadTexture('/assets/games/coolit/city/lightning.json', this.textureToken)
+      .then((sheet) => {
+        this.lightningStylesheets = sheet;
       });
 
     for (
@@ -2113,7 +2140,7 @@ export default class PlayLevel extends Vue {
   cloudY = 0;
   updateLoop(): void {
     if (!this.$refs.gameContainer) return;
-    if (
+    /*if (
       (this.hail.frequency || this.snow.frequency) &&
       this.cloudY < this.gameHeight / 5
     ) {
@@ -2124,6 +2151,19 @@ export default class PlayLevel extends Vue {
       this.cloudY > 0
     ) {
       this.cloudY -= 15;
+    }*/
+    if (
+      (this.hail.frequency || this.snow.frequency) &&
+      this.darkOverlayAlpha <= 0.3
+    ) {
+      this.darkOverlayAlpha += 0.01;
+
+    } else if (
+      !this.hail.frequency &&
+      !this.snow.frequency &&
+      this.darkOverlayAlpha >= 0
+    ) {
+      this.darkOverlayAlpha -= 0.01;
     }
     this.cloudX = this.gameWidth / 2;
     this.windForce = this.getWindForce();

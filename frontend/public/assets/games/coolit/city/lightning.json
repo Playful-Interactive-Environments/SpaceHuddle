@@ -1,0 +1,33 @@
+{
+"frames": {
+	"empty.png": {
+		"frame": {"x":501, "y":0, "w":500, "h":1200},
+		"spriteSourceSize": {"x":0,"y":0,"w":500,"h":1200},
+		"sourceSize": {"w":500,"h":1200}
+	},
+	"lightning-1.png": {
+		"frame": {"x":1503, "y":0, "w":500, "h":1200},
+		"spriteSourceSize": {"x":0,"y":0,"w":500,"h":1200},
+		"sourceSize": {"w":500,"h":1200}
+	},
+	"lightning-2.png": {
+		"frame": {"x":0, "y":0, "w":500, "h":1200},
+		"spriteSourceSize": {"x":0,"y":0,"w":500,"h":1200},
+		"sourceSize": {"w":500,"h":1200}
+	},
+	"lightning.png": {
+		"frame": {"x":1002, "y":0, "w":500, "h":1200},
+		"spriteSourceSize": {"x":0,"y":0,"w":500,"h":1200},
+		"sourceSize": {"w":500,"h":1200}
+	}
+
+},
+"meta": {
+	"image": "lightning.png",
+	"size": {"w": 2004, "h": 1201},
+	"scale": "1"
+},
+"animations": {
+		"lightning": ["empty.png", "empty.png", "empty.png", "empty.png", "empty.png", "empty.png", "lightning-1.png", "empty.png", "empty.png", "empty.png", "empty.png", "empty.png", "empty.png", "lightning-2.png", "lightning-1.png", "empty.png", "empty.png", "empty.png", "empty.png", "lightning.png", "empty.png", "empty.png", "empty.png", "lightning-1.png", "empty.png", "empty.png", "empty.png", "empty.png", "empty.png", "lightning-2.png", "lightning-1.png", "empty.png", "empty.png", "empty.png", "empty.png", "lightning.png"]
+	}
+}
