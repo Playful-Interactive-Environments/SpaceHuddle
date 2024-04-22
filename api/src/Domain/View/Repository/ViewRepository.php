@@ -203,7 +203,8 @@ class ViewRepository implements RepositoryInterface
 
         if ($count && ($orderType != $countOrderType || $refId != $countRefId)) {
             $ideaList = $this->getDetailSet($type, $typeId, $countOrderType, $countRefId, $filter, $count);
-            $query->whereInList("idea.id", $ideaList);
+            if (sizeof($ideaList) > 0)
+                $query->whereInList("idea.id", $ideaList);
         }
 
         if (count($sortConditions) > 0) {
