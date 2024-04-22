@@ -169,9 +169,11 @@ export default class PublicScreen extends Vue {
 
   updateIdeas(ideas: Idea[]): void {
     this.allIdeas = ideas;
-    ideas = ideas.filter((d) =>
-      this.task?.parameter.stateFilter.includes(d.state)
-    );
+    if (this.task && this.task.parameter.stateFilter) {
+      ideas = ideas.filter((d) =>
+        this.task?.parameter.stateFilter.includes(d.state)
+      );
+    }
     this.ideas = ideas;
   }
 
