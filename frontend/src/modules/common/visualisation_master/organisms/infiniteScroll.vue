@@ -14,12 +14,14 @@
     </el-button>
     <div
       id="scrollParent"
-      :style="`animation: infiniteScroll ${
-        fullScrollTime / timeModifier
-      }s infinite linear`"
+      :style="{
+        animation: `infiniteScroll ${
+          fullScrollTime / timeModifier
+        }s infinite linear`,
+      }"
       :class="{ paused: paused }"
     >
-      <div class="scroll-container columnLayout" id="scrollContainer">
+      <div class="scroll-container columnLayout" id="scrollContainer" :style="{columnCount: columns}">
         <IdeaCard
           v-for="idea in useIdeas"
           :key="idea.id"
@@ -29,7 +31,7 @@
           :allow-image-preview="false"
         />
       </div>
-      <div class="scroll-container columnLayout" id="scrollContainer2">
+      <div class="scroll-container columnLayout" id="scrollContainer2" :style="{columnCount: columns}">
         <IdeaCard
           v-for="idea in useIdeas"
           :key="idea.id"
@@ -78,12 +80,20 @@ export default class PublicScreen extends Vue {
   fullScrollTime = 40;
   paused = false;
 
+  columns = 5;
+
   @Watch('ideas', { immediate: true })
   updateIdeas(): void {
     this.useIdeas = this.ideas;
     if (this.useIdeas.length > 10) {
-      while (this.useIdeas.length < 70) {
-        this.useIdeas = this.useIdeas.concat(this.useIdeas);
+      let repetitions = 1;
+      while (this.useIdeas.length < 50) {
+        this.useIdeas = this.useIdeas.concat(this.ideas);
+        repetitions++;
+      }
+      if (repetitions === this.columns) {
+        this.columns -= 1;
+        console.log(this.columns);
       }
     }
   }
@@ -149,11 +159,21 @@ export default class PublicScreen extends Vue {
   transition: all 0.5s;
 }
 
-.columnLayout {
-  width: 100%;
-  column-width: 20rem;
-  column-gap: 1rem;
-  column-fill: balance;
+@media only screen and (min-width: 950px) {
+  .columnLayout {
+    width: 100%;
+    column-gap: 1rem;
+    column-fill: balance;
+  }
+}
+
+@media only screen and (max-width: 949px) {
+  .columnLayout {
+    width: 100%;
+    column-width: 15rem;
+    column-gap: 1rem;
+    column-fill: balance;
+  }
 }
 
 .playPause {
