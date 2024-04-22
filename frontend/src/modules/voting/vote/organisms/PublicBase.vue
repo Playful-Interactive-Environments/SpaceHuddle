@@ -610,7 +610,10 @@ export default class PublicBase extends Vue {
     if (init) {
       this.initQuestionState();
       cashService.deregisterAllGet(this.updateFinalResult);
-      if (this.moduleQuestionnaireType !== QuestionnaireType.SURVEY) {
+      if (
+        this.moduleQuestionnaireType !== QuestionnaireType.SURVEY &&
+        this.authHeaderTyp !== EndpointAuthorisationType.UNAUTHORISED
+      ) {
         taskParticipantService.registerGetIterationStepFinalList(
           this.taskId,
           this.updateFinalResult,
