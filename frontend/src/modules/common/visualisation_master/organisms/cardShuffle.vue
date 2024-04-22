@@ -30,17 +30,13 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { getFilterForTask } from '@/components/moderator/molecules/IdeaFilter.vue';
 import {
   defaultFilterData,
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilterBase.vue';
-import * as taskService from '@/services/task-service';
-import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
 
 @Options({

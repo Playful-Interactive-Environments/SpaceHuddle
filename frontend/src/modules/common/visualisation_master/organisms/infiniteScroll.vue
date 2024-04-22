@@ -9,7 +9,11 @@
       }"
       :class="{ paused: paused }"
     >
-      <div class="scroll-container columnLayout" id="scrollContainer" :style="{columnCount: columns}">
+      <div
+        class="scroll-container columnLayout"
+        id="scrollContainer"
+        :style="{ columnCount: columns }"
+      >
         <IdeaCard
           v-for="idea in useIdeas"
           :key="idea.id"
@@ -19,7 +23,11 @@
           :allow-image-preview="false"
         />
       </div>
-      <div class="scroll-container columnLayout" id="scrollContainer2" :style="{columnCount: columns}">
+      <div
+        class="scroll-container columnLayout"
+        id="scrollContainer2"
+        :style="{ columnCount: columns }"
+      >
         <IdeaCard
           v-for="idea in useIdeas"
           :key="idea.id"
@@ -36,12 +44,9 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from '@/services/cash-service';
 import {
   defaultFilterData,
   FilterData,

@@ -2,29 +2,33 @@
   <div class="timeControls">
     <el-button class="playPause">
       <font-awesome-icon
-          v-if="paused"
-          :icon="['fas', 'play']"
-          @click="paused = false"
+        v-if="paused"
+        :icon="['fas', 'play']"
+        @click="paused = false"
       />
       <font-awesome-icon
-          v-else
-          :icon="['fas', 'pause']"
-          @click="paused = true"
+        v-else
+        :icon="['fas', 'pause']"
+        @click="paused = true"
       />
     </el-button>
-    <el-select v-if="displayTimeMod" class="timeModSelect" v-model="timeModifier">
+    <el-select
+      v-if="displayTimeMod"
+      class="timeModSelect"
+      v-model="timeModifier"
+    >
       <template v-slot:prefix>
         <font-awesome-icon icon="sort" class="el-icon" />
       </template>
       <el-option
-          v-for="type in timeModifierArray"
-          :key="type"
-          :value="type"
-          :label="'x' + type"
+        v-for="type in timeModifierArray"
+        :key="type"
+        :value="type"
+        :label="'x' + type"
       >
-      <span>
-        {{ 'x' + type }}
-      </span>
+        <span>
+          {{ 'x' + type }}
+        </span>
       </el-option>
     </el-select>
   </div>

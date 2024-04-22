@@ -24,12 +24,9 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import * as ideaService from '@/services/idea-service';
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
