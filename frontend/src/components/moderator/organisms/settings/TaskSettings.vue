@@ -612,7 +612,7 @@ export class InputData {
   }
 
   set maxCountInput(value: number | undefined) {
-    this.maxCount = this.maxCount ? this.maxCount : null;
+    this.maxCount = this.maxCount && value ? value : null;
   }
 }
 
