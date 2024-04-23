@@ -236,7 +236,10 @@
               <tbody>
                 <tr v-for="input in formData.input" :key="input.view">
                   <td v-if="topics && topics.length > 1">
-                    <el-select v-model="inputTopicId" class="select--fullwidth">
+                    <el-select
+                      v-model="input.viewTopic"
+                      class="select--fullwidth"
+                    >
                       <el-option
                         v-for="topic in topics"
                         :key="topic.id"
@@ -247,9 +250,12 @@
                     </el-select>
                   </td>
                   <td>
-                    <el-select v-model="input.view" class="select--fullwidth">
+                    <el-select
+                      v-model="input.viewInput"
+                      class="select--fullwidth"
+                    >
                       <el-option
-                        v-for="view in possibleViews"
+                        v-for="view in getPossibleViews(input.viewTopic)"
                         :key="view"
                         :value="getViewKey(view)"
                         :label="getViewName(view)"
@@ -273,7 +279,11 @@
                     </el-select>
                   </td>
                   <td>
-                    <el-select v-model="input.order" class="select--fullwidth">
+                    <el-select
+                      v-model="input.order"
+                      class="select--fullwidth"
+                      :disabled="input.isVoteInput"
+                    >
                       <el-option
                         v-for="type in sortOrderOptions"
                         :key="type.orderType"
@@ -316,7 +326,7 @@
             </table>
             <TutorialStep
               v-if="
-                possibleViews.length > minAddModuleLength &&
+                possibleSessionViews.length > minAddModuleLength &&
                 formData.input.length < maxInputs
               "
               step="inputAdd"
@@ -576,6 +586,7 @@ interface ModuleComponentDefinition {
 }
 
 export class InputData {
+  viewTopic: string | null = null;
   view = '';
   maxCount: number | null = null;
   filter: string[] = [];
@@ -587,12 +598,14 @@ export class InputData {
     view: string,
     maxCount: number | null,
     filter: string[],
-    order: string
+    order: string,
+    viewTopic: string | null = null
   ) {
     this.view = view;
     this.maxCount = maxCount;
     this.filter = filter;
     this.order = order;
+    this.viewTopic = viewTopic;
   }
 
   get hasMaxCount(): boolean {
@@ -613,6 +626,21 @@ export class InputData {
 
   set maxCountInput(value: number | undefined) {
     this.maxCount = this.maxCount && value ? value : null;
+  }
+
+  get viewInput(): string {
+    return this.view;
+  }
+
+  set viewInput(value: string) {
+    this.view = value;
+    if (this.isVoteInput) {
+      this.order = IdeaSortOrder.ORDER;
+    }
+  }
+
+  get isVoteInput(): boolean {
+    return this.view.toLowerCase().startsWith(ViewType.VOTE);
   }
 }
 
@@ -710,7 +738,6 @@ export default class TaskSettings extends Vue {
     modules: [],
   };
   maxInputs = 20;
-  inputOptionViews: View[] = [];
   sortOrderOptions: SortOrderOption[] = [];
   moduleScrollbar: { sizeWidth: string } = { sizeWidth: '' };
   isEditStep = true;
@@ -731,28 +758,16 @@ export default class TaskSettings extends Vue {
   @Watch('topicId', { immediate: true })
   onTopicIdChanged(): void {
     this.inputTopicId = this.topicId;
-  }
-
-  @Watch('inputTopicId', { immediate: true })
-  onInputTopicIdChanged(): void {
-    cashService.deregisterAllGet(this.updateViews);
     cashService.deregisterAllGet(this.updateTaskCount);
     cashService.deregisterAllGet(this.updateTopic);
-    this.viewCash = viewService.registerGetList(
-      this.inputTopicId,
-      this.updateViews,
-      EndpointAuthorisationType.MODERATOR,
-      60 * 60
-    );
-    this.sortOrderOptions = ideaService.getSortOrderOptions([]);
     this.taskListCash = taskService.registerGetTaskList(
-      this.inputTopicId,
+      this.topicId,
       this.updateTaskCount,
       EndpointAuthorisationType.MODERATOR,
       60 * 60
     );
     topicService.registerGetTopicById(
-      this.inputTopicId,
+      this.topicId,
       this.updateTopic,
       EndpointAuthorisationType.MODERATOR,
       60 * 60
@@ -787,9 +802,12 @@ export default class TaskSettings extends Vue {
     cashService.deregisterAllGet(this.updateTaskCount);
     cashService.deregisterAllGet(this.updateModuleName);
     cashService.deregisterAllGet(this.updateInput);
-    cashService.deregisterAllGet(this.updateViews);
     cashService.deregisterAllGet(this.updateTopic);
     cashService.deregisterAllGet(this.updateTopics);
+  }
+
+  mounted(): void {
+    this.sortOrderOptions = ideaService.getSortOrderOptions([]);
   }
 
   unmounted(): void {
@@ -830,7 +848,8 @@ export default class TaskSettings extends Vue {
           this.getViewKey(input.view),
           input.maxCount,
           input.filter,
-          input.order
+          input.order,
+          this.getTopicForView(input.view)
         );
       });
     if (task.modules.length > 1)
@@ -852,14 +871,16 @@ export default class TaskSettings extends Vue {
   }
 
   updateTopic(topic: Topic): void {
-    this.sessionId = topic.sessionId;
-    cashService.deregisterAllGet(this.updateTopics);
-    viewService.registerGetSessionList(
-      this.sessionId,
-      this.updateTopics,
-      EndpointAuthorisationType.MODERATOR,
-      2 * 60
-    );
+    if (this.sessionId !== topic.sessionId) {
+      this.sessionId = topic.sessionId;
+      cashService.deregisterAllGet(this.updateTopics);
+      this.viewCash = viewService.registerGetSessionList(
+        this.sessionId,
+        this.updateTopics,
+        EndpointAuthorisationType.MODERATOR,
+        2 * 60
+      );
+    }
   }
 
   updateTopics(list: View[]): void {
@@ -947,34 +968,36 @@ export default class TaskSettings extends Vue {
   }
 
   getEmptyInput(): InputData {
+    const possibleViews = this.getPossibleViews();
     return new InputData(
-      this.possibleViews.length > 0
-        ? this.getViewKey(this.possibleViews[0])
-        : '',
+      possibleViews.length > 0 ? this.getViewKey(possibleViews[0]) : '',
       null,
       Object.keys(IdeaStates),
-      'order'
+      'order',
+      possibleViews.length > 0 ? possibleViews[0].topicId : null
     );
   }
 
-  get possibleViews(): View[] {
-    const filterOptions = this.inputOptionViews.filter(
-      (view) =>
-        (this.inputFilter.types.length === 0 ||
-          this.inputFilter.types.includes(view.type.toLowerCase())) &&
-        (this.inputFilter.detailTypes.length === 0 ||
-          (view.detailType &&
-            this.inputFilter.detailTypes.includes(
-              view.detailType.toLowerCase()
-            ))) &&
-        (this.inputFilter.modules.length === 0 ||
-          this.inputFilter.modules.find((item) => view.modules.includes(item)))
+  getTopicForView(view: { id: string; type: string }): string | null {
+    const views = this.sessionViews.filter(
+      (item) => item.id === view.id && item.type === view.type
     );
-    if (this.internalTaskId)
-      return filterOptions.filter(
-        (view) => view.taskId !== this.internalTaskId
-      );
-    return filterOptions;
+    if (views.length > 0) return views[0].topicId;
+    if (this.sessionViews.length > 0) return this.sessionViews[0].topicId;
+    return null;
+  }
+
+  getInputOptionViews(topicId: string): View[] {
+    return this.sessionViews.filter((item) => item.topicId === topicId);
+  }
+
+  getPossibleViews(topicId: string | null = null): View[] {
+    if (!topicId && this.formData.input.length > 0)
+      topicId = this.formData.input[this.formData.input.length - 1].viewTopic;
+    else if (!topicId && this.possibleSessionViews.length > 0)
+      topicId = this.possibleSessionViews[0].topicId;
+    if (!topicId) return [];
+    return this.possibleSessionViews.filter((view) => view.topicId === topicId);
   }
 
   get possibleSessionViews(): View[] {
@@ -1102,20 +1125,14 @@ export default class TaskSettings extends Vue {
   }
 
   get showInput(): boolean {
-    return this.inputOption !== InputOption.NO && this.possibleViews.length > 0;
+    return (
+      this.inputOption !== InputOption.NO &&
+      this.possibleSessionViews.length > 0
+    );
   }
 
   get inputMinCount(): number {
     return this.inputOption === InputOption.YES ? 1 : 0;
-  }
-
-  updateViews(views: View[]): void {
-    this.inputOptionViews = views.filter(
-      (item) =>
-        ViewType[item.type] !== ViewType.HIERARCHY ||
-        !item.detailType ||
-        TaskType[item.detailType] !== TaskType.INFORMATION
-    );
   }
   //#endregion Input
 
@@ -1545,8 +1562,10 @@ export default class TaskSettings extends Vue {
     this.isSaving = true;
     await this.updateCustomTaskParameter();
     this.formData.parameter.input = this.formData.input.map((input) => {
-      const view = this.inputOptionViews.find(
-        (view) => this.getViewKey(view) === input.view
+      const view = this.sessionViews.find(
+        (view) =>
+          this.getViewKey(view) === input.view &&
+          view.topicId === input.viewTopic
       );
       if (view)
         return {
