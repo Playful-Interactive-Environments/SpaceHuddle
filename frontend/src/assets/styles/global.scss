@@ -202,3 +202,18 @@ form {
 .inactive {
   color: var(--color-gray-dark);
 }
+
+.markdown {
+  ol,
+  ul {
+    padding-left: 1rem;
+  }
+
+  ol {
+    list-style: lower-alpha;
+  }
+
+  ul {
+    list-style: disc;
+  }
+}

@@ -33,6 +33,7 @@
     "html2pdf.js": "^0.10.1",
     "jwt-decode": "^3.1.2",
     "matter-js": "^0.19.0",
+    "md-editor-v3": "^4.13.3",
     "mitt": "^3.0.1",
     "node-sass": "^8.0.0",
     "nosleep.js": "^0.12.0",

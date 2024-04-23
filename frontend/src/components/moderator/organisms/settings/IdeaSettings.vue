@@ -48,14 +48,36 @@
         prop="description"
         :rules="[defaultFormRules.ruleToLong(MAX_DESCRIPTION_LENGTH)]"
       >
-        <el-input
+        <MdEditor
+          v-model="formData.description"
+          language="en-US"
+          noUploadImg
+          :toolbars="[
+            'bold',
+            'italic',
+            '-',
+            'title',
+            'strikeThrough',
+            'quote',
+            'unorderedList',
+            'orderedList',
+            '-',
+            'link',
+            'image',
+            'table',
+            '-',
+            'revoke',
+            'next',
+          ]"
+        />
+        <!--<el-input
           type="textarea"
           v-model="formData.description"
           rows="4"
           :placeholder="
             $t('moderator.organism.settings.ideaSettings.descriptionExample')
           "
-        />
+        />-->
         <span
           class="info"
           :class="{
@@ -104,12 +126,14 @@ import ValidationForm, {
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { MdEditor } from 'md-editor-v3';
 
 @Options({
   components: {
     ValidationForm,
     FromSubmitItem,
     ImagePicker,
+    MdEditor,
     'my-upload': myUpload,
   },
   emits: ['update:showModal', 'updateData'],

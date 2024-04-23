@@ -19,6 +19,7 @@ import initCustomPixiRenderer from '@/utils/game/customPixiRenderer';
 import '@/assets/styles/global.scss';
 import ElementPlus from 'element-plus';
 import '@/assets/styles/element-plus.scss';
+import 'md-editor-v3/lib/style.css';
 import {
   Chart as ChartJS,
   Title,
