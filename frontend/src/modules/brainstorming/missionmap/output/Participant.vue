@@ -1144,11 +1144,6 @@ export default class Participant extends Vue {
   right: 1rem;
 }
 
-.ideaCard {
-  //max-width: 12rem;
-  //margin: auto;
-}
-
 .el-button::v-deep(.el-icon) {
   width: unset;
 }

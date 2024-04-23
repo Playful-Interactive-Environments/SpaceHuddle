@@ -1,73 +1,115 @@
 <template>
   <div class="chart_container">
-    <el-tooltip :visible="!!hoverLabel" placement="left">
-      <template #content>
-        {{ $t(`${toolTipTranslation}.${hoverLabel}`) }}
-      </template>
-      <div
-        class="label-tooltip"
-        :style="{
-          '--x': `${labelPos[0]}px`,
-          '--y': `${labelPos[1] + hoverChart * 250}px`,
-        }"
-      ></div>
-    </el-tooltip>
     <div v-for="(chartData, index) in lineChartDataList" :key="index">
-      <Line
-        :data="chartData.data"
-        :height="250"
-        :options="{
-          maintainAspectRatio: false,
-          animation: {
-            duration: 0,
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: chartData.labelColors,
+      <el-collapse>
+        <el-collapse-item :title="chartData.title">
+          <div class="cards_area columns is-mobile">
+            <div
+              v-for="element of chartData.items"
+              :key="element.idea.id"
+              class="column"
+            >
+              <IdeaCard
+                :idea="element.idea"
+                class="ideaCard"
+                :is-editable="false"
+                :show-state="false"
+                :canChangeState="false"
+                :handleEditable="false"
+                :background-color="getIdeaColor(element.idea)"
+                :authHeaderTyp="authHeaderTyp"
+              >
+                <h2 v-if="element.percentage">
+                  {{
+                    $t('module.brainstorming.missionmap.participant.yourPart')
+                  }}
+                </h2>
+                <div v-if="element.percentage" class="column">
+                  <div class="column">
+                    <font-awesome-icon icon="coins" />
+                    {{ element.points }} / {{ element.idea.parameter.points }}
+                  </div>
+                  <div class="column">{{ element.percentage }} %</div>
+                </div>
+              </IdeaCard>
+            </div>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
+      <div class="chart_area">
+        <el-tooltip
+          :visible="!!hoverLabel && index === hoverChart"
+          placement="left"
+        >
+          <template #content>
+            {{ $t(`${toolTipTranslation}.${hoverLabel}`) }}
+          </template>
+          <div
+            class="label-tooltip"
+            :style="{
+              '--x': `${labelPos[0]}px`,
+              '--y': `${labelPos[1]}px`,
+            }"
+          ></div>
+        </el-tooltip>
+        <Line
+          :data="chartData.data"
+          :height="250"
+          :options="{
+            maintainAspectRatio: false,
+            animation: {
+              duration: 0,
+            },
+            scales: {
+              x: {
+                ticks: {
+                  color: chartData.labelColors,
+                },
+                grid: {
+                  display: false,
+                },
+                title: {
+                  text: $t(
+                    'module.brainstorming.missionmap.participant.chart.x'
+                  ),
+                  display: true,
+                },
               },
-              grid: {
-                display: false,
+              y: {
+                stacked:
+                  missionProgressParameter ===
+                  MissionProgressParameter.electricity,
+                ticks: {
+                  stepSize: 1,
+                },
+                title: {
+                  text: yLabel,
+                  display: true,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                onHover: (evt, item) => handleHoverLegend(evt, item, index),
+                onLeave: handleLeaveLegend,
+                display: chartData.data.datasets.length > 1 && displayLabels,
+                position: 'right',
+                labels: {
+                  color: colorPrimary,
+                  usePointStyle: true,
+                },
               },
               title: {
-                text: $t('module.brainstorming.missionmap.participant.chart.x'),
-                display: true,
+                display: lineChartDataList.length > 1,
+                text: chartData.title,
+              },
+              annotation: {
+                annotations: chartAnnotations(chartData),
               },
             },
-            y: {
-              stacked:
-                missionProgressParameter ===
-                MissionProgressParameter.electricity,
-              ticks: {
-                stepSize: 1,
-              },
-              title: {
-                text: yLabel,
-                display: true,
-              },
-            },
-          },
-          plugins: {
-            legend: {
-              onHover: (evt, item) => handleHoverLegend(evt, item, index),
-              onLeave: handleLeaveLegend,
-              display: chartData.data.datasets.length > 1 && displayLabels,
-              position: 'right',
-              labels: {
-                color: colorPrimary,
-                usePointStyle: true,
-              },
-            },
-            title: {
-              display: lineChartDataList.length > 1,
-              text: chartData.title,
-            },
-            annotation: {
-              annotations: chartAnnotations(chartData),
-            },
-          },
-        }"
-      />
+          }"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -96,6 +138,8 @@ import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
 import { Module } from '@/types/api/Module';
+import { delay } from '@/utils/wait';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 export enum MissionProgressParameter {
   influenceAreas = 'influenceAreas',
@@ -106,6 +150,11 @@ interface LineChartData {
   title: string;
   data: ChartData;
   labelColors: string[] | string;
+  items: {
+    idea: Idea;
+    percentage: number | null;
+    points: number | null;
+  }[];
 }
 
 @Options({
@@ -118,6 +167,7 @@ interface LineChartData {
     FontAwesomeIcon,
     Bar,
     Line,
+    IdeaCard,
   },
 })
 
@@ -287,6 +337,11 @@ export default class MissionProgressChart extends Vue {
     title = 'general',
     mapOnlyOwnInfluence = false
   ): void {
+    const ideaList: {
+      idea: Idea;
+      percentage: number | null;
+      points: number | null;
+    }[] = [];
     const displayParameter =
       this.missionProgressParameter === MissionProgressParameter.influenceAreas
         ? gameConfig.parameter
@@ -358,6 +413,29 @@ export default class MissionProgressChart extends Vue {
         }
         return 0;
       };
+      ideaList.push(
+        ...ideaVotes.map((item) => {
+          const ownSum = item.ownVotes.reduce(
+            (sum, item) => sum + item.parameter.points,
+            0
+          );
+          return {
+            idea: item.idea,
+            percentage: Math.round((ownSum / item.idea.parameter.points) * 100),
+            points: ownSum,
+          };
+        })
+      );
+    } else {
+      ideaList.push(
+        ...decidedIdeas.map((item) => {
+          return {
+            idea: item,
+            points: null,
+            percentage: null,
+          };
+        })
+      );
     }
     const ideaProgress: {
       index: number;
@@ -446,12 +524,19 @@ export default class MissionProgressChart extends Vue {
         datasets: datasets,
       },
       labelColors: themeColors.getContrastColor(),
+      items: ideaList,
     });
   }
 
-  handleHoverLegend(evt: MouseEvent, item: any, chartIndex) {
+  async handleHoverLegend(
+    evt: MouseEvent,
+    item: any,
+    chartIndex
+  ): Promise<void> {
     this.hoverChart = chartIndex;
     this.labelPos = [evt.x, evt.y];
+    this.hoverLabel = null;
+    await delay(100);
     if (
       this.missionProgressParameter === MissionProgressParameter.influenceAreas
     ) {
@@ -473,6 +558,25 @@ export default class MissionProgressChart extends Vue {
 
   handleLeaveLegend() {
     this.hoverLabel = null;
+  }
+
+  getInfluenceAreasForIdea(idea: Idea): string[] {
+    const areas: string[] = [];
+    for (const parameter of Object.keys(gameConfig.parameter)) {
+      if (idea.parameter.influenceAreas[parameter] > 0) areas.push(parameter);
+    }
+    return areas;
+  }
+
+  isDecided(ideaId: string): boolean {
+    return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
+  }
+
+  getIdeaColor(idea: Idea): string {
+    if (idea.isOwn) return themeColors.getInformingColor('-light');
+    if (this.isDecided(idea.id))
+      return themeColors.getBrainstormingColor('-light');
+    return '#ffffff';
   }
 }
 </script>
@@ -504,5 +608,44 @@ export default class MissionProgressChart extends Vue {
 
 .chart_container {
   position: relative;
+}
+
+.chart_area {
+  position: relative;
+}
+
+.cards_area {
+  overflow: auto;
+}
+
+.column {
+  max-width: 10rem;
+  min-width: 10rem;
+  padding: var(--column-padding);
+}
+
+.columns {
+  --column-padding: 0.25rem;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+}
+
+.columns:not(:last-child) {
+  margin-bottom: var(--column-padding);
+}
+
+h1 {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-large);
+  text-align: center;
+  padding-bottom: 0.5rem;
+  color: var(--color-primary);
+}
+
+h2 {
+  font-weight: var(--font-weight-bold);
+  padding-bottom: 0.5rem;
+  color: var(--color-primary);
 }
 </style>

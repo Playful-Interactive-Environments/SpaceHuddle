@@ -245,7 +245,11 @@ export default class PublicScreen extends Vue {
         const dom = (this.$refs.mapSpace as any)?.$el as HTMLElement;
         this.domKey = registerDomElement(
           dom,
-          () => {
+          (targetWidth, targetHeight) => {
+            const minHeight = 300;
+            if (targetHeight < minHeight) {
+              dom.style.height = `${minHeight}px`;
+            }
             this.sizeLoaded = true;
           },
           2000

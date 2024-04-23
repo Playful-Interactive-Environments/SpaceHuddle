@@ -20,6 +20,7 @@
     "minParticipants": "Mindestanzahl der Teilnehmer",
     "spent": "ausgeben",
     "cancel": "abbrechen",
+    "yourPart": "dein Anteil",
     "finished": {
       "header": "Aufgabe abschließen",
       "text": "Möchten Sie diese Aufgabe beenden, um zur nächsten überzugehen?",
