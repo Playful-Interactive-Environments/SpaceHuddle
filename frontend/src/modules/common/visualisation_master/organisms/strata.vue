@@ -1,5 +1,12 @@
 <template>
-  <div id="strataContainer" :class="{ startStrataAnimation: releaseIdeas }">
+  <div
+    id="strataContainer"
+    :style="{
+      animation: releaseIdeas
+        ? `strataContainerScroll ${this.animationLength}s linear forwards`
+        : '',
+    }"
+  >
     <div v-if="votes[0]" id="lineContainer">
       <div
         v-for="index in 10"
@@ -12,12 +19,10 @@
       </div>
     </div>
     <div id="ideaContainer">
-      <IdeaCard
+      <div
         v-for="(vote, index) in votes"
         :key="vote.idea.id"
-        :idea="vote.idea"
-        :is-editable="false"
-        class="ideaItem"
+        class="ideaItemContainer"
         :style="{
           top: getIdeaPositionY(vote),
           left: releaseIdeas
@@ -26,8 +31,17 @@
           zIndex: Math.random() * 100,
           transition: getIdeaTransitionConfig(vote),
         }"
-        :portrait="!(vote.idea.image || vote.idea.link)"
-      />
+      >
+        <p class="score" :style="{ opacity: animationOver ? 1 : 0 }">
+          {{ vote.ratingSum }}
+        </p>
+        <IdeaCard
+          :idea="vote.idea"
+          :is-editable="false"
+          :portrait="!(vote.idea.image || vote.idea.link)"
+          class="ideaItem"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -41,7 +55,6 @@ import { VoteResult } from '@/types/api/Vote';
 import { EventType } from '@/types/enum/EventType';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as themeColors from '@/utils/themeColors';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 @Options({
@@ -64,6 +77,7 @@ export default class PublicScreen extends Vue {
 
   columns = [0, 20, 40, 60, 80];
   releaseIdeas = false;
+  animationOver = false;
   animationLength = 15;
 
   getIdeaPositionY(vote): string {
@@ -77,7 +91,9 @@ export default class PublicScreen extends Vue {
   getIdeaTransitionConfig(vote): string {
     return (
       'all ' +
-      (vote.ratingSum / this.votes[0].ratingSum - Math.random() * 0.15 + 0.075) *
+      (vote.ratingSum / this.votes[0].ratingSum -
+        Math.random() * 0.15 +
+        0.075) *
         this.animationLength +
       's linear'
     );
@@ -100,6 +116,9 @@ export default class PublicScreen extends Vue {
     this.votes = votes;
     setTimeout(() => {
       this.releaseIdeas = true;
+      setTimeout(() => {
+        this.animationOver = true;
+      }, (this.animationLength + 0.15 + 0.075) * 1000);
     }, 2500);
   }
 
@@ -123,9 +142,6 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style scoped lang="scss">
-.startStrataAnimation {
-  animation: strataContainerScroll 15s linear forwards;
-}
 #strataContainer {
   position: relative;
   width: calc(100% + (var(--side-padding) * 2));
@@ -176,31 +192,44 @@ export default class PublicScreen extends Vue {
       }
     }
   }
-  .ideaItem {
+  .ideaItemContainer {
     margin: 1.5%;
     position: absolute;
-    box-shadow: var(--color-dark-contrast) 0.2rem 0.2rem 0.4rem;
     width: 17%;
     min-width: 10rem;
     top: 100%;
+    .ideaItem {
+      box-shadow: var(--color-dark-contrast) 0.2rem 0.2rem 0.4rem;
+    }
+    .score {
+      position: absolute;
+      right: -1.25rem;
+      top: 0;
+      font-size: var(--font-size-xlarge);
+      color: white;
+      font-weight: var(--font-weight-bold);
+      text-align: left;
+      width: 1rem;
+      transition: opacity 1s ease;
+    }
   }
-
   #startButton {
     position: absolute;
     z-index: 100000;
   }
 
-  @keyframes strataContainerScroll {
-    0% {
-      transform: translateY(-78.5%);
-    }
-    100% {
-      transform: translateY(0);
-    }
-  }
-
   .ideaItem:hover {
     z-index: 10000 !important;
+  }
+}
+</style>
+<style lang="scss">
+@keyframes strataContainerScroll {
+  0% {
+    transform: translateY(-78.5%);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 </style>
