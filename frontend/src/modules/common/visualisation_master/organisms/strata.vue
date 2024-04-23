@@ -14,7 +14,13 @@
         :style="{ top: 100 - (index / 10) * 100 + '%' }"
         class="horizontalLine"
       >
-        <p>{{ (votes[0].ratingSum / 10) * index }}</p>
+        <p>
+          {{
+            Math.round(
+              ((votes[0].ratingSum / 10) * index + Number.EPSILON) * 100
+            ) / 100
+          }}
+        </p>
         <hr />
       </div>
     </div>
@@ -26,8 +32,8 @@
         :style="{
           top: getIdeaPositionY(vote),
           left: releaseIdeas
-            ? columns[index % columns.length] + '%'
-            : columns[index % columns.length] + Math.random() * 5 - 2.5 + '%',
+            ? columns[(index + columnRandomOffset) % columns.length] + '%'
+            : columns[(index + columnRandomOffset) % columns.length] + Math.random() * 5 - 2.5 + '%',
           zIndex: Math.random() * 100,
           transition: getIdeaTransitionConfig(vote),
         }"
@@ -75,7 +81,9 @@ export default class PublicScreen extends Vue {
     datasets: [],
   };
 
-  columns = [0, 20, 40, 60, 80];
+  columns = [60, 0, 80, 20, 40];
+  columnRandomOffset = Math.floor(Math.random() * 5);
+
   releaseIdeas = false;
   animationOver = false;
   animationLength = 15;
