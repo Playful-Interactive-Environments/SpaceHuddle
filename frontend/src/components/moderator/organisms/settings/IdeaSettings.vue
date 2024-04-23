@@ -52,6 +52,7 @@
           v-model="formData.description"
           language="en-US"
           noUploadImg
+          class="markdown"
           :toolbars="[
             'bold',
             'italic',

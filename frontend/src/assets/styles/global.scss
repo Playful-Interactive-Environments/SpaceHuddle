@@ -216,4 +216,32 @@ form {
   ul {
     list-style: disc;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-bold);
+  }
+
+  h1 {
+    font-size: var(--font-size-xxxxlarge);
+  }
+
+  h2 {
+    font-size: var(--font-size-xxxlarge);
+  }
+
+  h3 {
+    font-size: var(--font-size-xxlarge);
+  }
+
+  h4 {
+    font-size: var(--font-size-xlarge);
+  }
+
+  h5 {
+    font-size: var(--font-size-large);
+  }
+
+  h6 {
+    font-size: var(--font-size-default);
+  }
 }
