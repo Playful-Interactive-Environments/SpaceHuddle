@@ -54,8 +54,7 @@
           :is-selectable="false"
           :is-editable="false"
           :show-state="false"
-          :portrait="!collapsed || !(idea.image || idea.link)"
-          @update:collapse-ideas="collapsed = !collapsed"
+          :portrait="false"
         />
       </div>
     </el-space>

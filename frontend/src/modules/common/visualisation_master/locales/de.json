@@ -27,6 +27,12 @@
         "title": "Balkendiagramm",
         "description": "Daten und Abstimmungen als Balkendiagramm dargestellt"
       }
+    },
+    "strata": {
+      "description": {
+        "title": "Strata",
+        "description": "Ideen-Wettlauf zur Spitze. Die Idee mit der besten Bewertung gewinnt."
+      }
     }
   }
 }

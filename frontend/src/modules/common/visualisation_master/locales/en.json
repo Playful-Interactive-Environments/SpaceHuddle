@@ -27,6 +27,12 @@
         "title": "Bar Chart",
         "description": "data or votes displayed as a bar chart"
       }
+    },
+    "strata": {
+      "description": {
+        "title": "Strata",
+        "description": "Ideas race to the top. Highest voted idea wins."
+      }
     }
   }
 }

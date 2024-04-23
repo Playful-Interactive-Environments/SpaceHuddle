@@ -27,6 +27,13 @@
       "icon": "layer-group",
       "type": "VOTING",
       "allowTimeMod": false
+    },
+    "strata": {
+      "id": "strata",
+      "image": "strata/path",
+      "icon": "layer-group",
+      "type": "VOTING",
+      "allowTimeMod": false
     }
   }
 }

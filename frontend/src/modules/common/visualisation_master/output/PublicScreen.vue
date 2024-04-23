@@ -1,5 +1,5 @@
 <template>
-  <div class="timeControls">
+  <div class="timeControls" v-if="displayTimeMod">
     <el-button class="playPause">
       <font-awesome-icon
         v-if="paused"
@@ -12,11 +12,7 @@
         @click="paused = true"
       />
     </el-button>
-    <el-select
-      v-if="displayTimeMod"
-      class="timeModSelect"
-      v-model="timeModifier"
-    >
+    <el-select class="timeModSelect" v-model="timeModifier">
       <template v-slot:prefix>
         <font-awesome-icon icon="sort" class="el-icon" />
       </template>
@@ -47,18 +43,24 @@
       :ideas="this.ideas"
       :paused="paused"
     />
-    <BarChart
-      v-if="currentVisModule === 'barChart'"
-      :task-id="this.taskId"
-      :timeModifier="timeModifier"
-      :timerEnded="this.timerEnd"
-    />
     <infinite-scroll
       v-if="currentVisModule === 'infiniteScroll'"
       :task-id="this.taskId"
       :timeModifier="timeModifier"
       :ideas="this.ideas"
       :paused="paused"
+    />
+    <BarChart
+      v-if="currentVisModule === 'barChart'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :timerEnded="this.timerEnd"
+    />
+    <strata
+      v-if="currentVisModule === 'strata'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :timerEnded="this.timerEnd"
     />
   </div>
 </template>
@@ -79,9 +81,11 @@ import { Task } from '@/types/api/Task';
 import BarChart from '@/modules/common/visualisation_master/organisms/barChart.vue';
 import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
 import InfiniteScroll from '@/modules/common/visualisation_master/organisms/infiniteScroll.vue';
+import Strata from '@/modules/common/visualisation_master/organisms/strata.vue';
 
 @Options({
   components: {
+    Strata,
     InfiniteScroll,
     BarChart,
     CardShuffle,
