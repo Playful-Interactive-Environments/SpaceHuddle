@@ -10,6 +10,7 @@ import {
 import { apiErrorHandling } from '@/services/exception-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import app from '@/main';
+import * as env from '@/utils/env';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -39,7 +40,7 @@ const interceptorAuthHeader = (
 export const endpoint = (
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   options?: Partial<AxiosRequestConfig>,
-  baseURL = `${process.env.VUE_APP_API_PATH}`
+  baseURL = `${env.getString('VUE_APP_API_PATH')}`
 ): AxiosInstance => {
   const config = {
     baseURL: baseURL,
@@ -75,7 +76,11 @@ export const apiEndpoint = (
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   options?: Partial<AxiosRequestConfig>
 ): AxiosInstance => {
-  return endpoint(authHeaderType, options, `${process.env.VUE_APP_API_PATH}`);
+  return endpoint(
+    authHeaderType,
+    options,
+    `${env.getString('VUE_APP_API_PATH')}`
+  );
 };
 
 export const API_ENDPOINT_MODERATOR = apiEndpoint(

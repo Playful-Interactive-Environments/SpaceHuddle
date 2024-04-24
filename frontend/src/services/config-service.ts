@@ -1,9 +1,10 @@
 import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import * as env from '@/utils/env';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
 export const endpoint = (
-  baseURL = `${process.env.VUE_APP_API_PATH}`,
+  baseURL = `${env.getString('VUE_APP_API_PATH')}`,
   options?: Partial<AxiosRequestConfig>
 ): AxiosInstance => {
   const config = {

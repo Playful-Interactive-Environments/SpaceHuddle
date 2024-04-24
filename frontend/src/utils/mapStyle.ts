@@ -4,15 +4,16 @@ import * as mapStyleDark from '@/assets/map-style/dark.json';
 import * as mapStyleLight from '@/assets/map-style/light.json';
 import * as mapStyleTerrain from '@/assets/map-style/terrain.json';
 import * as mapStyleStreets from '@/assets/map-style/streets.json';
+import * as env from '@/utils/env';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 function updatePath(style: any, name: MapStyleType | null = null): any {
   style.glyphs = `${window.location.origin}/assets/fonts/{fontstack}/{range}.pbf`;
   if (name)
     style.sprite = `${window.location.origin}/assets/map-style/${name}/sprite`;
-  let tileServer = process.env.VUE_APP_TILE_SERVER;
+  let tileServer = env.getString('VUE_APP_TILE_SERVER');
   if (tileServer.includes('{key}')) {
-    tileServer = tileServer.replace('{key}', process.env.VUE_APP_MAPTILER_KEY);
+    tileServer = tileServer.replace('{key}', env.getString('VUE_APP_MAPTILER_KEY'));
   }
   style.sources.openmaptiles.url = tileServer;
   return style;
