@@ -221,7 +221,7 @@ export default class PublicScreen extends Vue {
       }
       this.votes = votes.sort((a, b) => b.ratingSum - a.ratingSum);
     } else {
-      this.votes = votes;
+      this.votes = votes.sort((a, b) => b.ratingSum - a.ratingSum);
     }
   }
 

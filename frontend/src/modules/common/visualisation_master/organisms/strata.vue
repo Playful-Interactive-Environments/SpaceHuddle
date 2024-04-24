@@ -14,19 +14,28 @@
           : '',
       }"
     >
-
+      <div class="startingLine">
+        <img
+          src="@/assets/illustrations/Ecopolis/publicScreen.png"
+          alt="Starting Line"
+        />
+      </div>
       <div v-if="votes[0]" id="lineContainer">
         <div
-          v-for="index in 10"
+          v-for="index in 11"
           :key="index"
-          :style="{ top: 100 - (index / 10) * 100 + '%' }"
+          :style="{
+            top: index != 11 ? 100 - (index / 10) * 100 + '%' : '100%',
+          }"
           class="horizontalLine"
         >
           <p>
             {{
-              Math.round(
-                ((votes[0].ratingSum / 10) * index + Number.EPSILON) * 100
-              ) / 100
+              index != 11
+                ? Math.round(
+                    ((votes[0].ratingSum / 10) * index + Number.EPSILON) * 100
+                  ) / 100
+                : 0
             }}
           </p>
           <hr />
@@ -45,7 +54,7 @@
                 Math.random() * 5 -
                 2.5 +
                 '%',
-            zIndex: Math.random() * 100,
+            zIndex: animationOver ? 100 - index : Math.random() * 100,
             transition: getIdeaTransitionConfig(vote),
           }"
         >
@@ -66,15 +75,10 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { Bar } from 'vue-chartjs';
-import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
-import { EventType } from '@/types/enum/EventType';
-import * as cashService from '@/services/cash-service';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import {Idea} from "@/types/api/Idea";
 
 @Options({
   components: {
@@ -105,7 +109,7 @@ export default class PublicScreen extends Vue {
     if (this.releaseIdeas) {
       return 100 - (vote.ratingSum / this.votes[0].ratingSum) * 100 + '%';
     } else {
-      return '95%';
+      return '100%';
     }
   }
 
@@ -177,7 +181,7 @@ export default class PublicScreen extends Vue {
     #a1d6da 80.75%,
     #a1d6da 100.75%
   );
-  transform: translateY(-78.5%);
+  transform: translateY(-86%);
 
   #ideaContainer {
     position: relative;
@@ -237,12 +241,22 @@ export default class PublicScreen extends Vue {
   .ideaItem:hover {
     z-index: 10000 !important;
   }
+
+  .startingLine {
+    position: absolute;
+    top: 99.5%;
+    width: 100%;
+    background-color: #a1d6da;
+    img {
+      width: 100%;
+    }
+  }
 }
 </style>
 <style lang="scss">
 @keyframes strataContainerScroll {
   0% {
-    transform: translateY(-78.5%);
+    transform: translateY(-86%);
   }
   100% {
     transform: translateY(0);
