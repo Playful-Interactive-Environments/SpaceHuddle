@@ -3,6 +3,9 @@
     "title": "Animation",
     "description": "Animiere Ideen"
   },
+  "moderatorConfig": {
+    "voteUseAverage": "Nimm den Durchschnitt der Abstimmungen"
+  },
   "visModules": {
     "gallery": {
       "description": {

@@ -55,12 +55,14 @@
       :task-id="this.taskId"
       :timeModifier="timeModifier"
       :timerEnded="this.timerEnd"
+      :votes="votes"
     />
     <strata
       v-if="currentVisModule === 'strata'"
       :task-id="this.taskId"
       :timeModifier="timeModifier"
       :timerEnded="this.timerEnd"
+      :votes="votes"
     />
   </div>
 </template>
@@ -82,6 +84,8 @@ import BarChart from '@/modules/common/visualisation_master/organisms/barChart.v
 import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
 import InfiniteScroll from '@/modules/common/visualisation_master/organisms/infiniteScroll.vue';
 import Strata from '@/modules/common/visualisation_master/organisms/strata.vue';
+import { VoteResult } from '@/types/api/Vote';
+import * as votingService from '@/services/voting-service';
 
 @Options({
   components: {
@@ -103,6 +107,9 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   allIdeas: Idea[] = [];
   ideas: Idea[] = [];
+  votes: VoteResult[] = [];
+
+  voteUseAverage = false;
 
   paused = false;
 
@@ -112,6 +119,7 @@ export default class PublicScreen extends Vue {
   timeModifier: number | null = 1;
   timeModifierArray: number[] = [0.25, 0.5, 0.75, 1, 1.5, 2, 4];
 
+  voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -126,6 +134,16 @@ export default class PublicScreen extends Vue {
         this.updateIdeas,
         this.authHeaderTyp,
         10
+      );
+    } else if (
+      this.currentVisModule &&
+      moduleConfig.visModules[this.currentVisModule].type === 'VOTING'
+    ) {
+      this.voteCashEntry = votingService.registerGetResult(
+        this.taskId,
+        this.updateVotes,
+        EndpointAuthorisationType.MODERATOR,
+        5
       );
     }
     taskService.registerGetTaskById(
@@ -150,6 +168,16 @@ export default class PublicScreen extends Vue {
         this.authHeaderTyp,
         10
       );
+    } else if (
+      this.currentVisModule &&
+      moduleConfig.visModules[this.currentVisModule].type === 'VOTING'
+    ) {
+      this.voteCashEntry = votingService.registerGetResult(
+        this.taskId,
+        this.updateVotes,
+        EndpointAuthorisationType.MODERATOR,
+        5
+      );
     }
   }
 
@@ -166,6 +194,7 @@ export default class PublicScreen extends Vue {
       (module) => module.name === 'visualisation_master'
     )[0];
     this.currentVisModule = visModule.parameter.visModule.id;
+    this.voteUseAverage = visModule.parameter.voteUseAverage;
   }
 
   @Watch('task.parameter.stateFilter', { immediate: true })
@@ -185,9 +214,21 @@ export default class PublicScreen extends Vue {
     this.ideas = ideas;
   }
 
+  updateVotes(votes: VoteResult[]): void {
+    if (this.voteUseAverage) {
+      for (let i = 0; i < votes.length; i++) {
+        votes[i].ratingSum = votes[i].ratingSum / votes[i].countParticipant;
+      }
+      this.votes = votes.sort((a, b) => b.ratingSum - a.ratingSum);
+    } else {
+      this.votes = votes;
+    }
+  }
+
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateVotes);
   }
 
   unmounted(): void {

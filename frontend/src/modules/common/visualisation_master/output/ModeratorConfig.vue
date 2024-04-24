@@ -1,4 +1,11 @@
 <template>
+  <el-form-item
+    :label="
+      $t('module.common.visualisation_master.moderatorConfig.voteUseAverage')
+    "
+  >
+    <el-switch v-model="modelValue.voteUseAverage" />
+  </el-form-item>
   <div class="visModules">
     <el-card
       class="visModule"
@@ -67,6 +74,11 @@ export default class ModeratorConfig extends Vue {
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
+    if (this.modelValue) {
+      if (!('voteUseAverage' in this.modelValue)) {
+        this.modelValue.voteUseAverage = false;
+      }
+    }
     this.selectedVisModule = this.modelValue.visModule;
   }
 

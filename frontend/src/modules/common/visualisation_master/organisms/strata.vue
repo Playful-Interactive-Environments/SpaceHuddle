@@ -1,52 +1,64 @@
 <template>
-  <div
-    id="strataContainer"
-    :style="{
-      animation: releaseIdeas
-        ? `strataContainerScroll ${this.animationLength}s linear forwards`
-        : '',
-    }"
-  >
-    <div v-if="votes[0]" id="lineContainer">
-      <div
-        v-for="index in 10"
-        :key="index"
-        :style="{ top: 100 - (index / 10) * 100 + '%' }"
-        class="horizontalLine"
-      >
-        <p>
-          {{
-            Math.round(
-              ((votes[0].ratingSum / 10) * index + Number.EPSILON) * 100
-            ) / 100
-          }}
-        </p>
-        <hr />
+  <div id="strataModuleContainer">
+    <el-button class="startButton" v-if="!releaseIdeas" @click="startAnimation">
+      <span>
+        <br /><font-awesome-icon class="startIcon" :icon="['fas', 'play']" />
+        <p>Start</p>
+      </span>
+    </el-button>
+    <div
+      id="strataContainer"
+      :style="{
+        animation: releaseIdeas
+          ? `strataContainerScroll ${this.animationLength}s linear forwards`
+          : '',
+      }"
+    >
+
+      <div v-if="votes[0]" id="lineContainer">
+        <div
+          v-for="index in 10"
+          :key="index"
+          :style="{ top: 100 - (index / 10) * 100 + '%' }"
+          class="horizontalLine"
+        >
+          <p>
+            {{
+              Math.round(
+                ((votes[0].ratingSum / 10) * index + Number.EPSILON) * 100
+              ) / 100
+            }}
+          </p>
+          <hr />
+        </div>
       </div>
-    </div>
-    <div id="ideaContainer">
-      <div
-        v-for="(vote, index) in votes"
-        :key="vote.idea.id"
-        class="ideaItemContainer"
-        :style="{
-          top: getIdeaPositionY(vote),
-          left: releaseIdeas
-            ? columns[(index + columnRandomOffset) % columns.length] + '%'
-            : columns[(index + columnRandomOffset) % columns.length] + Math.random() * 5 - 2.5 + '%',
-          zIndex: Math.random() * 100,
-          transition: getIdeaTransitionConfig(vote),
-        }"
-      >
-        <p class="score" :style="{ opacity: animationOver ? 1 : 0 }">
-          {{ vote.ratingSum }}
-        </p>
-        <IdeaCard
-          :idea="vote.idea"
-          :is-editable="false"
-          :portrait="!(vote.idea.image || vote.idea.link)"
-          class="ideaItem"
-        />
+      <div id="ideaContainer">
+        <div
+          v-for="(vote, index) in votes"
+          :key="vote.idea.id"
+          class="ideaItemContainer"
+          :style="{
+            top: getIdeaPositionY(vote),
+            left: releaseIdeas
+              ? columns[(index + columnRandomOffset) % columns.length] + '%'
+              : columns[(index + columnRandomOffset) % columns.length] +
+                Math.random() * 5 -
+                2.5 +
+                '%',
+            zIndex: Math.random() * 100,
+            transition: getIdeaTransitionConfig(vote),
+          }"
+        >
+          <p class="score" :style="{ opacity: animationOver ? 1 : 0 }">
+            {{ vote.ratingSum }}
+          </p>
+          <IdeaCard
+            :idea="vote.idea"
+            :is-editable="false"
+            :portrait="!(vote.idea.image || vote.idea.link)"
+            class="ideaItem"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -62,6 +74,7 @@ import { EventType } from '@/types/enum/EventType';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import {Idea} from "@/types/api/Idea";
 
 @Options({
   components: {
@@ -75,7 +88,7 @@ export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: false }) readonly timerEnded!: boolean;
-  votes: VoteResult[] = [];
+  @Prop({ default: [] }) readonly votes!: VoteResult[];
   chartData: any = {
     labels: [],
     datasets: [],
@@ -99,57 +112,52 @@ export default class PublicScreen extends Vue {
   getIdeaTransitionConfig(vote): string {
     return (
       'all ' +
-      (vote.ratingSum / this.votes[0].ratingSum -
-        Math.random() * 0.15 +
-        0.075) *
+      (vote.ratingSum / this.votes[0].ratingSum - Math.random() * 0.15 + 0.1) *
         this.animationLength +
       's linear'
     );
   }
 
-  voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
-
-  @Watch('taskId', { immediate: true })
-  reloadTaskSettings(): void {
-    this.deregisterAll();
-    this.voteCashEntry = votingService.registerGetResult(
-      this.taskId,
-      this.updateVotes,
-      EndpointAuthorisationType.MODERATOR,
-      5
-    );
-  }
-
-  updateVotes(votes: VoteResult[]): void {
-    this.votes = votes;
+  startAnimation(): void {
+    this.releaseIdeas = true;
     setTimeout(() => {
-      this.releaseIdeas = true;
-      setTimeout(() => {
-        this.animationOver = true;
-      }, (this.animationLength + 0.15 + 0.075) * 1000);
-    }, 2500);
-  }
-
-  async mounted(): Promise<void> {
-    this.eventBus.off(EventType.CHANGE_SETTINGS);
-    this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
-      if (this.taskId === taskId) {
-        this.voteCashEntry.refreshData();
-      }
-    });
-  }
-
-  deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateVotes);
-  }
-
-  unmounted(): void {
-    this.deregisterAll();
+      this.animationOver = true;
+    }, (this.animationLength + 0.15 + 0.075) * 1000);
   }
 }
 </script>
 
 <style scoped lang="scss">
+#strataModuleContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.startButton {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000000;
+  text-align: center;
+  color: white;
+  background: transparent;
+
+  p,
+  .startIcon {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  p {
+    font-size: var(--font-size-xxxlarge);
+  }
+  .startIcon {
+    font-size: var(--font-size-xxxxlarge);
+  }
+}
+
 #strataContainer {
   position: relative;
   width: calc(100% + (var(--side-padding) * 2));

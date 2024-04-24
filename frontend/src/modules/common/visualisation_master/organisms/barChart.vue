@@ -48,11 +48,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Bar } from 'vue-chartjs';
-import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
-import { EventType } from '@/types/enum/EventType';
-import * as cashService from '@/services/cash-service';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as themeColors from '@/utils/themeColors';
 
 @Options({
@@ -66,7 +62,7 @@ export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: false }) readonly timerEnded!: boolean;
-  votes: VoteResult[] = [];
+  @Prop({ default: [] }) readonly votes!: VoteResult[];
   chartData: any = {
     labels: [],
     datasets: [],
@@ -76,21 +72,8 @@ export default class PublicScreen extends Vue {
     return themeColors.getContrastColor();
   }
 
-  voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
-
-  @Watch('taskId', { immediate: true })
-  reloadTaskSettings(): void {
-    this.deregisterAll();
-    this.voteCashEntry = votingService.registerGetResult(
-      this.taskId,
-      this.updateVotes,
-      EndpointAuthorisationType.MODERATOR,
-      5
-    );
-  }
-
-  updateVotes(votes: VoteResult[]): void {
-    this.votes = votes;
+  @Watch('votes', { immediate: true })
+  onVotesChanged(): void {
     if (this.resultData) {
       this.chartData.labels = this.resultData.labels;
       this.chartData.datasets = this.resultData.datasets;
@@ -108,7 +91,7 @@ export default class PublicScreen extends Vue {
             'module.voting.default.publicScreen.chartDataLabel'
           ),
           backgroundColor: themeColors.getEvaluatingColor(),
-          data: this.votes.map((vote) => vote.detailRatingSum),
+          data: this.votes.map((vote) => vote.ratingSum),
         },
       ],
     };
@@ -122,23 +105,6 @@ export default class PublicScreen extends Vue {
         chartRef.chart.update();
       }
     }
-  }
-
-  async mounted(): Promise<void> {
-    this.eventBus.off(EventType.CHANGE_SETTINGS);
-    this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
-      if (this.taskId === taskId) {
-        this.voteCashEntry.refreshData();
-      }
-    });
-  }
-
-  deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateVotes);
-  }
-
-  unmounted(): void {
-    this.deregisterAll();
   }
 }
 </script>
