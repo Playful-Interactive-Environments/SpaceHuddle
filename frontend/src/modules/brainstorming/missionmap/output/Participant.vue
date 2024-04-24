@@ -69,8 +69,101 @@
         "
       />
     </div>
-    <draggable
+    <div
+      ref="gameContainer"
+      class="gameContainer"
       v-else-if="module && activeTab === 'measures'"
+    >
+      <div class="link submenu" @click="showSort = true">
+        <font-awesome-icon icon="sort" />
+      </div>
+      <el-carousel
+        :autoplay="false"
+        indicator-position="none"
+        arrow="always"
+        :height="`${targetHeight - 50}px`"
+      >
+        <el-carousel-item v-for="element of orderedIdeas" :key="element.id">
+          <IdeaCard
+            :idea="element"
+            class="ideaCard"
+            :is-editable="
+              element.isOwn &&
+              !element.parameter.shareData &&
+              inputManager.isCurrentIdea(element.id)
+            "
+            :show-state="false"
+            :canChangeState="false"
+            :handleEditable="false"
+            :background-color="getIdeaColor(element)"
+            :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+            :fix-height="`${targetHeight - 50}px`"
+            v-on:click="ideaClicked(element)"
+            @ideaDeleted="refreshIdeas"
+            @ideaStartEdit="editIdea(element)"
+            @click="() => (showDetails = true)"
+          >
+            <div class="columns is-mobile" v-if="element.parameter.shareData">
+              <div class="column">
+                <font-awesome-icon icon="coins" />
+                {{ element.parameter.points }}
+              </div>
+              <div class="column" @click="() => (showDetails = true)">
+                <font-awesome-icon icon="person-booth" />
+                {{ getVoteResultForIdea(element.id)?.sum }}
+              </div>
+            </div>
+            <div
+              v-if="getInfluenceAreasForIdea(element).length > 0"
+              class="columns is-mobile"
+            >
+              <div
+                class="column"
+                v-for="parameter of getInfluenceAreasForIdea(element)"
+                :key="parameter"
+                :style="{
+                  color: gameConfig.parameter[parameter].color,
+                }"
+              >
+                <font-awesome-icon
+                  :icon="gameConfig.parameter[parameter].icon"
+                />
+              </div>
+            </div>
+            <div
+              v-if="element.state.toLowerCase() === IdeaStates.THUMBS_DOWN"
+              class="rejection"
+            >
+              {{ element.parameter.reasonsForRejection }}
+            </div>
+            <div
+              v-if="
+                element.state.toLowerCase() === IdeaStates.THUMBS_UP &&
+                element.isOwn
+              "
+              class="accept"
+            >
+              <font-awesome-icon icon="thumbs-up" />
+            </div>
+          </IdeaCard>
+        </el-carousel-item>
+        <el-carousel-item>
+          <AddItem
+            v-if="module && module.parameter.allowParticipationMeasures"
+            :text="$t('module.brainstorming.missionmap.participant.add')"
+            :is-column="true"
+            @addNew="editNewImage"
+            class="ideaCard"
+          />
+        </el-carousel-item>
+      </el-carousel>
+    </div>
+  </ParticipantModuleDefaultContainer>
+  <el-dialog v-model="showSort" :module-theme="theme">
+    <template #header>
+      <h2>{{ $t('module.brainstorming.missionmap.participant.sort') }}</h2>
+    </template>
+    <draggable
       v-model="orderedIdeas"
       item-key="id"
       @end="dragDone"
@@ -82,7 +175,6 @@
           :idea="element"
           :isDraggable="true"
           :portrait="false"
-          class="ideaCard"
           :is-selectable="true"
           :isSelected="element.id === selectedIdea?.id"
           :selectionColor="selectionColor"
@@ -97,12 +189,13 @@
           :background-color="getIdeaColor(element)"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
           :showDragArea="true"
+          fix-height="7rem"
           v-on:click="ideaClicked(element)"
           @ideaDeleted="refreshIdeas"
           @ideaStartEdit="editIdea(element)"
           @click="() => (showDetails = true)"
         >
-          <div class="columns is-mobile" v-if="element.parameter.shareData">
+          <!--<div class="columns is-mobile" v-if="element.parameter.shareData">
             <div class="column">
               <font-awesome-icon icon="coins" />
               {{ element.parameter.points }}
@@ -141,19 +234,19 @@
             class="accept"
           >
             <font-awesome-icon icon="thumbs-up" />
-          </div>
+          </div>-->
         </IdeaCard>
       </template>
-      <template v-slot:footer>
+      <!--<template v-slot:footer>
         <AddItem
           v-if="module && module.parameter.allowParticipationMeasures"
           :text="$t('module.brainstorming.missionmap.participant.add')"
           :is-column="true"
           @addNew="editNewImage"
         />
-      </template>
+      </template>-->
     </draggable>
-  </ParticipantModuleDefaultContainer>
+  </el-dialog>
   <ValidationForm
     :form-data="selectedVote"
     :use-default-submit="false"
@@ -176,7 +269,7 @@
         "
         :label="$t('module.brainstorming.missionmap.participant.description')"
       >
-        <div>{{ selectedIdea?.description }}</div>
+        <vue-markdown :source="selectedIdea?.description" />
         <IdeaMediaViewer :idea="selectedIdea" fit="contain" />
       </el-form-item>
       <el-form-item
@@ -413,6 +506,10 @@ import { Session } from '@/types/api/Session';
 import * as sessionService from '@/services/session-service';
 import MissionSettings from '@/modules/brainstorming/missionmap/organisms/MissionSettings.vue';
 import IdeaMediaViewer from '@/components/moderator/molecules/IdeaMediaViewer.vue';
+import { registerDomElement } from '@/vunit';
+import { remToPx } from '@/modules/playing/moveit/utils/consts';
+import { until } from '@/utils/wait';
+import VueMarkdown from 'vue-markdown-render';
 
 interface ProgressValues {
   origin: number;
@@ -444,6 +541,7 @@ interface ProgressValues {
     ParticipantModuleDefaultContainer,
     draggable,
     AddItem,
+    VueMarkdown,
   },
 })
 
@@ -486,6 +584,7 @@ export default class Participant extends Vue {
   inputManager!: CombinedInputManager;
   activeTab = 'measures';
   startingPoints = 0;
+  showSort = false;
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -496,6 +595,8 @@ export default class Participant extends Vue {
     parameter: {},
   };
   settingsIdea = this.addIdea;
+  targetWidth = 100;
+  targetHeight = 100;
 
   get minSpentPoints(): number {
     const absoluteMinimum = 100;
@@ -905,6 +1006,30 @@ export default class Participant extends Vue {
     if (module.parameter.theme) this.theme = module.parameter.theme;
   }
 
+  domKeys: string[] = [];
+  async mounted(): Promise<void> {
+    await until(() => this.$refs.gameContainer);
+    this.domKeys.push(
+      registerDomElement(
+        this.$refs.gameContainer as HTMLElement,
+        (targetWidth, targetHeight) => {
+          this.targetWidth = targetWidth;
+          let cardWidth = targetWidth - remToPx(2);
+          if (cardWidth > remToPx(30)) cardWidth = remToPx(30);
+          if (cardWidth < 300) cardWidth = 300;
+          if (targetHeight > cardWidth / 0.7) this.targetHeight = targetHeight;
+          else this.targetHeight = cardWidth / 0.7;
+        },
+        100,
+        false,
+        () => {
+          this.targetWidth = 100;
+          this.targetHeight = 100;
+        }
+      )
+    );
+  }
+
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateModule);
@@ -1165,8 +1290,8 @@ export default class Participant extends Vue {
 }
 
 .measureList {
-  margin: 0 2rem;
-  padding-bottom: 1rem;
+  //margin: 0 2rem;
+  //padding-bottom: 1rem;
 }
 
 .module-content::v-deep(.fixed) {
@@ -1177,20 +1302,28 @@ export default class Participant extends Vue {
   margin: 0 2rem;
 }
 
+.el-card::v-deep(.card__image) {
+  max-height: 50%;
+}
+
+.landscape.el-card::v-deep(.card__image) {
+  max-height: unset;
+}
+
 [module-theme='preparation'] {
   background-image: url('@/modules/brainstorming/missionmap/assets/preparation.png');
   background-size: cover;
   background-position: center top;
 
   .el-card {
-    border-radius: 0;
+    border-radius: var(--border-radius);
     background: linear-gradient(
         color-mix(in srgb, var(--background-color) 45%, transparent),
         color-mix(in srgb, var(--background-color) 45%, transparent)
       ),
       url('@/modules/information/quiz/assets/paper.jpg');
     //filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
-    border: none;
+    border: solid var(--color-dark-contrast) 5px;
   }
 
   .el-card::v-deep(.card__image) {
@@ -1198,8 +1331,13 @@ export default class Participant extends Vue {
     border-radius: 0;
   }
 
+  .landscape.el-card::v-deep(.card__image) {
+    border-radius: calc(var(--border-radius) - 5px) 0 0
+      calc(var(--border-radius) - 5px);
+  }
+
   .el-card::v-deep(.el-card__body) {
-    border-radius: 0;
+    border-radius: var(--border-radius);
   }
 
   .statistic {
@@ -1212,7 +1350,7 @@ export default class Participant extends Vue {
   --module-color: var(--color-dark-contrast);
 }
 
-[module-theme='preparation'].module-content::v-deep(.participant-content) {
+.module-content::v-deep(.participant-content) {
   margin-bottom: -1rem;
   margin-left: -2rem;
   margin-right: -2rem;
@@ -1224,7 +1362,7 @@ export default class Participant extends Vue {
 
 [module-theme='preparation'].module-content::v-deep(.task-info) {
   padding: 1rem;
-  border-radius: 0;
+  //border-radius: 0;
   background: linear-gradient(
       color-mix(in srgb, var(--color-informing) 45%, transparent),
       color-mix(in srgb, var(--color-informing) 45%, transparent)
@@ -1246,14 +1384,24 @@ export default class Participant extends Vue {
       var(--border-radius);
     background-color: color-mix(
       in srgb,
-      var(--background-color) 60%,
+      var(--background-color) 80%,
       transparent
     );
+    border-width: 5px;
   }
 
   .el-card::v-deep(.card__image) {
     background-color: color-mix(in srgb, var(--card-color) 30%, transparent);
-    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    border-radius: 0;
+  }
+
+  .landscape.el-card::v-deep(.card__image) {
+    border-radius: calc(var(--border-radius) - 5px) 0 0
+      calc(var(--border-radius) - 5px);
+  }
+
+  .landscape.el-card::v-deep(.card__drag) {
+    border-radius: 0 calc(var(--border-radius) - 5px) 0 0;
   }
 
   .el-card::v-deep(.el-card__body) {
@@ -1275,7 +1423,7 @@ export default class Participant extends Vue {
 [module-theme='meeting'].module-content::v-deep(.task-info) {
   border-radius: var(--border-radius) var(--border-radius) var(--border-radius)
     0;
-  background-color: color-mix(in srgb, var(--color-informing) 60%, transparent);
+  background-color: color-mix(in srgb, var(--color-informing) 80%, transparent);
   border: solid 2px var(--color-gray);
   padding: 0.5rem;
 }
@@ -1326,5 +1474,16 @@ export default class Participant extends Vue {
 .el-tabs::v-deep(.el-tabs__nav-prev) {
   line-height: unset;
   font-weight: var(--font-weight-bold);
+}
+
+.ideaCard {
+  margin: 0 auto;
+  width: calc(100% - 6rem);
+  height: calc(100% - 10px);
+}
+
+.submenu {
+  margin: 0 3rem;
+  text-align: right;
 }
 </style>

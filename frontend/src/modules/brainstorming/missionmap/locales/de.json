@@ -21,6 +21,7 @@
     "spent": "ausgeben",
     "cancel": "abbrechen",
     "yourPart": "dein Anteil",
+    "sort": "Massnahmen sortieren",
     "finished": {
       "header": "Aufgabe abschließen",
       "text": "Möchten Sie diese Aufgabe beenden, um zur nächsten überzugehen?",
@@ -109,7 +110,7 @@
   },
   "enum": {
     "progress": {
-      "origin": "Ausgangssituation",
+      "origin": "Ausgang",
       "progress": "Ergebniss",
       "general": "gemeinsam",
       "own": "eigener Anteil",

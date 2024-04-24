@@ -16,9 +16,11 @@
       card__duplicate: isDuplicate,
       draggable: isDraggable,
       'idea-transform': fadeIn,
+      'fix-height': !!fixHeight,
     }"
     :body-style="{ padding: '0px' }"
     :style="{
+      '--fix-card-height': fixHeight,
       '--card-height': ideaHeight,
       '--selection-color': selectionColor,
       '--background-color': backgroundColor,
@@ -251,6 +253,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false }) shareState!: boolean;
   @Prop({ default: true }) allowImagePreview!: boolean;
   @Prop({ default: false }) showDragArea!: boolean;
+  @Prop({ default: null }) fixHeight!: string | null;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
@@ -273,7 +276,11 @@ export default class IdeaCard extends Vue {
         ? Math.abs(touchUp.clientY - this.touchDown.clientY)
         : 0;
       if (moveX < 10 && moveY < 10)
-        setTimeout(() => this.$emit('click', event), 100);
+        setTimeout(() => {
+          if (this.stopPropagationTimeStamp < Date.now() - 1000) {
+            this.$emit('click', event);
+          }
+        }, 100);
     } else {
       this.$emit('click', event);
     }
@@ -288,7 +295,9 @@ export default class IdeaCard extends Vue {
     this.$emit('sharedStatusChanged', this.shareStateValue);
   }
 
+  stopPropagationTimeStamp = 0;
   stopPropagation(event: Event) {
+    this.stopPropagationTimeStamp = Date.now();
     event.stopPropagation();
   }
 
@@ -472,7 +481,8 @@ export default class IdeaCard extends Vue {
     }
   }
 
-  collapseChanged(): void {
+  collapseChanged(event: Event): void {
+    this.stopPropagation(event);
     this.limitedTextLength = !this.limitedTextLength;
     this.$emit('update:collapseIdeas', CollapseIdeas.custom);
   }
@@ -643,6 +653,19 @@ export default class IdeaCard extends Vue {
     background-color: white;
     color: var(--color-primary);
     --margin-delta: 0px;
+  }
+}
+
+.fix-height {
+  height: var(--fix-card-height);
+  overflow: auto;
+}
+
+.fix-height.landscape {
+  overflow: unset;
+
+  .card__text {
+    overflow: auto;
   }
 }
 </style>

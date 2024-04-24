@@ -2,7 +2,13 @@
   <div class="chart_container">
     <div v-for="(chartData, index) in lineChartDataList" :key="index">
       <el-collapse>
-        <el-collapse-item :title="chartData.title">
+        <el-collapse-item
+          :title="
+            $t(
+              `module.brainstorming.missionmap.enum.progress.${chartData.title}`
+            )
+          "
+        >
           <div class="cards_area columns is-mobile">
             <div
               v-for="element of chartData.items"
@@ -18,18 +24,19 @@
                 :handleEditable="false"
                 :background-color="getIdeaColor(element.idea)"
                 :authHeaderTyp="authHeaderTyp"
+                fix-height="13rem"
               >
                 <h2 v-if="element.percentage">
                   {{
                     $t('module.brainstorming.missionmap.participant.yourPart')
                   }}
                 </h2>
-                <div v-if="element.percentage" class="column">
-                  <div class="column">
+                <div v-if="element.percentage">
+                  <div>
                     <font-awesome-icon icon="coins" />
                     {{ element.points }} / {{ element.idea.parameter.points }}
                   </div>
-                  <div class="column">{{ element.percentage }} %</div>
+                  <div>{{ element.percentage }} %</div>
                 </div>
               </IdeaCard>
             </div>
@@ -101,7 +108,9 @@
               },
               title: {
                 display: lineChartDataList.length > 1,
-                text: chartData.title,
+                text: $t(
+                  `module.brainstorming.missionmap.enum.progressLong.${chartData.title}`
+                ),
               },
               annotation: {
                 annotations: chartAnnotations(chartData),
@@ -478,7 +487,9 @@ export default class MissionProgressChart extends Vue {
     }
     const labels = ideaProgress.map((item) =>
       item.idea
-        ? item.idea.keywords
+        ? item.idea.keywords.length < 20
+          ? item.idea.keywords
+          : `${item.idea.keywords.substring(0, 18)}...`
         : this.$t('module.brainstorming.missionmap.enum.progress.origin')
     );
     const datasets = calculateChartPerParameter(
@@ -516,9 +527,7 @@ export default class MissionProgressChart extends Vue {
       }
     }
     this.lineChartDataList.push({
-      title: this.$t(
-        `module.brainstorming.missionmap.enum.progressLong.${title}`
-      ),
+      title: title,
       data: {
         labels: labels,
         datasets: datasets,
@@ -616,12 +625,12 @@ export default class MissionProgressChart extends Vue {
 
 .cards_area {
   overflow: auto;
-}
 
-.column {
-  max-width: 10rem;
-  min-width: 10rem;
-  padding: var(--column-padding);
+  > .column {
+    max-width: 10rem;
+    min-width: 10rem;
+    padding: var(--column-padding);
+  }
 }
 
 .columns {

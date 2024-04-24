@@ -21,6 +21,7 @@
     "spent": "spent",
     "cancel": "cancel",
     "yourPart": "your part",
+    "sort": "Sort measures",
     "finished": {
       "header": "finish task",
       "text": "Do you want to finish this task to move on to the next one?",
