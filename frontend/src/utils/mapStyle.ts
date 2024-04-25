@@ -13,7 +13,10 @@ function updatePath(style: any, name: MapStyleType | null = null): any {
     style.sprite = `${window.location.origin}/assets/map-style/${name}/sprite`;
   let tileServer = env.getString('VUE_APP_TILE_SERVER');
   if (tileServer.includes('{key}')) {
-    tileServer = tileServer.replace('{key}', env.getString('VUE_APP_MAPTILER_KEY'));
+    tileServer = tileServer.replace(
+      '{key}',
+      env.getString('VUE_APP_MAPTILER_KEY')
+    );
   }
   style.sources.openmaptiles.url = tileServer;
   return style;

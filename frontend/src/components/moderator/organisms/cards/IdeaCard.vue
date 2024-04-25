@@ -26,14 +26,28 @@
       '--background-color': backgroundColor,
     }"
   >
-    <IdeaMediaViewer
-      v-if="idea.image || idea.link"
-      :idea="idea"
-      :allow-image-preview="allowImagePreview"
-      css-class="card__image"
-    />
-    <div v-else class="card__image">
-      <slot name="icon"></slot>
+    <div
+      class="card__image"
+      :class="{ 'image-height': !!imageHeight }"
+      :style="{ '--image-height': imageHeight }"
+    >
+      <IdeaMediaViewer
+        v-if="idea.image || idea.link"
+        :idea="idea"
+        :allow-image-preview="allowImagePreview"
+        fit="cover"
+      />
+      <div v-else class="card__image__icon">
+        <slot name="icon"></slot>
+      </div>
+      <div
+        class="card__image__overlay"
+        @touchstart="touchStart"
+        @touchend="handleClick"
+        @click="handleClick"
+      >
+        <slot name="image_overlay"></slot>
+      </div>
     </div>
     <div
       class="card__text"
@@ -254,6 +268,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) allowImagePreview!: boolean;
   @Prop({ default: false }) showDragArea!: boolean;
   @Prop({ default: null }) fixHeight!: string | null;
+  @Prop({ default: null }) imageHeight!: string | null;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
@@ -573,13 +588,32 @@ export default class IdeaCard extends Vue {
   }
 }
 
+.card__image {
+  position: relative;
+}
+
+.card__image__overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+.el-image::v-deep(img) {
+  height: 100%;
+}
+
 .landscape::v-deep(.el-card__body) {
   display: flex;
 
   .card__image {
     width: 30%;
-    object-fit: contain;
     background-color: var(--card-color);
+    border-radius: var(--border-radius-xs) 0 0 var(--border-radius-xs);
+
+    .el-image {
+      border-radius: var(--border-radius-xs) 0 0 var(--border-radius-xs);
+    }
   }
 
   .card__text {
@@ -590,6 +624,11 @@ export default class IdeaCard extends Vue {
     border-radius: 0 var(--border-radius-xs) var(--border-radius-xs) 0;
     height: unset;
     width: 1.5rem;
+  }
+
+  .card__image__icon {
+    font-size: 3rem;
+    padding-top: 1.5rem;
   }
 }
 
@@ -667,5 +706,23 @@ export default class IdeaCard extends Vue {
   .card__text {
     overflow: auto;
   }
+}
+
+.card__image__icon {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-size: 4.5rem;
+  padding-top: 1.7rem;
+  color: var(--color-dark-contrast);
+}
+
+.image-height {
+  height: var(--image-height);
+  background-color: color-mix(
+    in srgb,
+    var(--color-dark-contrast) 20%,
+    transparent
+  );
 }
 </style>

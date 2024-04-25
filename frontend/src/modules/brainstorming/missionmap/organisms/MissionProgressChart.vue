@@ -25,7 +25,31 @@
                 :background-color="getIdeaColor(element.idea)"
                 :authHeaderTyp="authHeaderTyp"
                 fix-height="13rem"
+                image-height="33%"
               >
+                <template #icon>
+                  <font-awesome-icon icon="person-booth" />
+                </template>
+                <template #image_overlay>
+                  <div
+                    class="media image_overlay"
+                    v-if="getInfluenceAreasForIdea(element.idea).length > 0"
+                  >
+                    <div class="media-content"></div>
+                    <div class="media-right">
+                      <font-awesome-icon
+                        v-for="parameter of getInfluenceAreasForIdea(
+                          element.idea
+                        )"
+                        :key="parameter"
+                        :style="{
+                          color: gameConfig.parameter[parameter].color,
+                        }"
+                        :icon="gameConfig.parameter[parameter].icon"
+                      />
+                    </div>
+                  </div>
+                </template>
                 <h2 v-if="element.percentage">
                   {{
                     $t('module.brainstorming.missionmap.participant.yourPart')
@@ -656,5 +680,35 @@ h2 {
   font-weight: var(--font-weight-bold);
   padding-bottom: 0.5rem;
   color: var(--color-primary);
+}
+
+.ideaCard {
+  border: solid var(--color-dark-contrast) 3px;
+}
+
+.ideaCard::v-deep(.card__image__icon) {
+  font-size: 1.5rem;
+}
+
+.image_overlay {
+  padding: 0.2rem;
+  background-color: color-mix(
+    in srgb,
+    var(--color-dark-contrast) 60%,
+    transparent
+  );
+
+  .media-content {
+    color: white;
+    padding-left: 0.5rem;
+  }
+
+  .media-right {
+    text-align: right;
+  }
+
+  svg {
+    padding-right: 0.5rem;
+  }
 }
 </style>

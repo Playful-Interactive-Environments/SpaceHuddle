@@ -2,6 +2,7 @@
   <el-image
     v-if="idea?.image"
     :src="idea?.image"
+    class="image"
     :class="cssClass"
     alt=""
     :preview-src-list="[idea?.image]"
@@ -19,6 +20,7 @@
   <el-image
     v-else-if="idea?.link && !idea?.image"
     :src="idea?.link"
+    class="image"
     :class="cssClass"
     alt=""
     :preview-src-list="allowImagePreview ? [idea?.link] : []"
@@ -58,5 +60,11 @@ export default class IdeaMediaViewer extends Vue {
   iframe {
     object-fit: contain;
   }
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 </style>

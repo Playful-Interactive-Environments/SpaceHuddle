@@ -98,12 +98,35 @@
             :background-color="getIdeaColor(element)"
             :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
             :fix-height="`${targetHeight - 50}px`"
+            image-height="33%"
             v-on:click="ideaClicked(element)"
             @ideaDeleted="refreshIdeas"
             @ideaStartEdit="editIdea(element)"
             @click="() => (showDetails = true)"
           >
-            <div class="columns is-mobile" v-if="element.parameter.shareData">
+            <template #icon>
+              <font-awesome-icon icon="person-booth" />
+            </template>
+            <template #image_overlay>
+              <div class="media image_overlay">
+                <div class="media-content">
+                  <font-awesome-icon icon="coins" />
+                  {{ getVoteResultForIdea(element.id)?.sum }} /
+                  {{ element.parameter.points }}
+                </div>
+                <div class="media-right">
+                  <font-awesome-icon
+                    v-for="parameter of getInfluenceAreasForIdea(element)"
+                    :key="parameter"
+                    :style="{
+                      color: gameConfig.parameter[parameter].color,
+                    }"
+                    :icon="gameConfig.parameter[parameter].icon"
+                  />
+                </div>
+              </div>
+            </template>
+            <!--<div class="columns is-mobile" v-if="element.parameter.shareData">
               <div class="column">
                 <font-awesome-icon icon="coins" />
                 {{ element.parameter.points }}
@@ -129,7 +152,7 @@
                   :icon="gameConfig.parameter[parameter].icon"
                 />
               </div>
-            </div>
+            </div>-->
             <div
               v-if="element.state.toLowerCase() === IdeaStates.THUMBS_DOWN"
               class="rejection"
@@ -147,9 +170,10 @@
             </div>
           </IdeaCard>
         </el-carousel-item>
-        <el-carousel-item>
+        <el-carousel-item
+          v-if="module && module.parameter.allowParticipationMeasures"
+        >
           <AddItem
-            v-if="module && module.parameter.allowParticipationMeasures"
             :text="$t('module.brainstorming.missionmap.participant.add')"
             :is-column="true"
             @addNew="editNewImage"
@@ -195,6 +219,9 @@
           @ideaStartEdit="editIdea(element)"
           @click="() => (showDetails = true)"
         >
+          <template #icon>
+            <font-awesome-icon icon="person-booth" />
+          </template>
           <!--<div class="columns is-mobile" v-if="element.parameter.shareData">
             <div class="column">
               <font-awesome-icon icon="coins" />
@@ -421,23 +448,44 @@
     <IdeaCard
       class="ideaCard"
       :idea="selectedIdea"
-      :is-selectable="true"
-      :selectionColor="selectionColor"
       :is-editable="
         selectedIdea.isOwn && inputManager.isCurrentIdea(selectedIdea.id)
       "
       :show-state="false"
       :canChangeState="false"
       :handleEditable="false"
-      :portrait="false"
       :background-color="getIdeaColor(selectedIdea)"
       :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+      :fix-height="`${targetHeight - 50}px`"
+      image-height="33%"
       v-on:click="ideaClicked(selectedIdea)"
       @ideaDeleted="refreshIdeas"
       @ideaStartEdit="editIdea(selectedIdea)"
       @click="() => (showDetails = true)"
     >
-      <div class="columns is-mobile" v-if="selectedIdea.parameter.shareData">
+      <template #icon>
+        <font-awesome-icon icon="person-booth" />
+      </template>
+      <template #image_overlay>
+        <div class="media image_overlay">
+          <div class="media-content">
+            <font-awesome-icon icon="coins" />
+            {{ getVoteResultForIdea(selectedIdea.id)?.sum }} /
+            {{ selectedIdea.parameter.points }}
+          </div>
+          <div class="media-right">
+            <font-awesome-icon
+              v-for="parameter of getInfluenceAreasForIdea(selectedIdea)"
+              :key="parameter"
+              :style="{
+                color: gameConfig.parameter[parameter].color,
+              }"
+              :icon="gameConfig.parameter[parameter].icon"
+            />
+          </div>
+        </div>
+      </template>
+      <!--<div class="columns is-mobile" v-if="selectedIdea.parameter.shareData">
         <div class="column">
           <font-awesome-icon icon="coins" />
           {{ selectedIdea.parameter.points }}
@@ -461,7 +509,7 @@
         >
           <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
         </div>
-      </div>
+      </div>-->
     </IdeaCard>
   </el-dialog>
 </template>
@@ -1246,6 +1294,9 @@ export default class Participant extends Vue {
 .idea-card-overlay {
   background-color: unset;
   box-shadow: unset;
+  width: calc(100% - 6rem);
+  max-width: calc(100% - 6rem);
+  min-width: unset;
 
   .el-dialog__header {
     padding: unset;
@@ -1317,13 +1368,13 @@ export default class Participant extends Vue {
 
   .el-card {
     border-radius: var(--border-radius);
+    border: solid var(--color-dark-contrast) 5px;
     background: linear-gradient(
         color-mix(in srgb, var(--background-color) 45%, transparent),
         color-mix(in srgb, var(--background-color) 45%, transparent)
       ),
       url('@/modules/information/quiz/assets/paper.jpg');
     //filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
-    border: solid var(--color-dark-contrast) 5px;
   }
 
   .el-card::v-deep(.card__image) {
@@ -1476,14 +1527,49 @@ export default class Participant extends Vue {
   font-weight: var(--font-weight-bold);
 }
 
+.el-carousel {
+  .ideaCard {
+    margin: 0 auto;
+    width: calc(100% - 6rem);
+    height: calc(100% - 10px);
+  }
+}
+
 .ideaCard {
-  margin: 0 auto;
-  width: calc(100% - 6rem);
-  height: calc(100% - 10px);
+  border-radius: var(--border-radius);
+  border: solid var(--color-dark-contrast) 5px;
+}
+
+.idea-card-overlay {
+  .ideaCard {
+    width: 100%;
+  }
 }
 
 .submenu {
   margin: 0 3rem;
   text-align: right;
+}
+
+.image_overlay {
+  padding: 0.2rem;
+  background-color: color-mix(
+    in srgb,
+    var(--color-dark-contrast) 60%,
+    transparent
+  );
+
+  .media-content {
+    color: white;
+    padding-left: 0.5rem;
+  }
+
+  .media-right {
+    text-align: right;
+  }
+
+  svg {
+    padding-right: 0.5rem;
+  }
 }
 </style>
