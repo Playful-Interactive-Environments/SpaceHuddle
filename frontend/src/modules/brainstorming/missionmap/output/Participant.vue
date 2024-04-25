@@ -1295,7 +1295,7 @@ export default class Participant extends Vue {
   background-color: unset;
   box-shadow: unset;
   width: calc(100% - 6rem);
-  max-width: calc(100% - 6rem);
+  max-width: 30rem;
   min-width: unset;
 
   .el-dialog__header {
@@ -1303,7 +1303,7 @@ export default class Participant extends Vue {
   }
 
   .el-dialog__body {
-    padding: 0.5rem;
+    padding: unset;
   }
 }
 </style>
@@ -1536,6 +1536,7 @@ export default class Participant extends Vue {
 }
 
 .ideaCard {
+  max-width: 30rem;
   border-radius: var(--border-radius);
   border: solid var(--color-dark-contrast) 5px;
 }
@@ -1543,6 +1544,8 @@ export default class Participant extends Vue {
 .idea-card-overlay {
   .ideaCard {
     width: 100%;
+    max-height: calc(100vh - var(--el-dialog-margin-top) - 7.5rem);
+    margin-bottom: 0;
   }
 }
 
