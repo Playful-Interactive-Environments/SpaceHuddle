@@ -366,12 +366,12 @@ export default class IdeaCard extends Vue {
       setTimeout(() => {
         let isLongText = false;
         const titleControl: HTMLElement = this.$refs.title as HTMLElement;
-        if (titleControl) {
+        if (titleControl && !this.fixHeight) {
           if (titleControl.clientHeight > 70) isLongText = true;
         }
         const descriptionControl: HTMLElement = this.$refs
           .description as HTMLElement;
-        if (descriptionControl) {
+        if (descriptionControl && !this.fixHeight) {
           if (descriptionControl.clientHeight > 70) isLongText = true;
         }
         this.isLongText = isLongText;
