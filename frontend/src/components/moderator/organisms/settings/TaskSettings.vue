@@ -974,7 +974,7 @@ export default class TaskSettings extends Vue {
       null,
       Object.keys(IdeaStates),
       'order',
-      possibleViews.length > 0 ? possibleViews[0].topicId : null
+      possibleViews.length > 0 ? possibleViews[0].topicId : this.topicId
     );
   }
 
@@ -994,6 +994,11 @@ export default class TaskSettings extends Vue {
   getPossibleViews(topicId: string | null = null): View[] {
     if (!topicId && this.formData.input.length > 0)
       topicId = this.formData.input[this.formData.input.length - 1].viewTopic;
+    else if (
+      !topicId &&
+      this.possibleSessionViews.find((item) => item.topicId === this.topicId)
+    )
+      topicId = this.topicId;
     else if (!topicId && this.possibleSessionViews.length > 0)
       topicId = this.possibleSessionViews[0].topicId;
     if (!topicId) return [];
