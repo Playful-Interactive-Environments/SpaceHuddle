@@ -21,7 +21,7 @@ export const QuizStateProperty: { [name: string]: { time: number } } = {
   [QuestionState.ACTIVE_LAST_CHANGE]: { time: 0 },
   [QuestionState.DONE_THANKS]: { time: 10 },
   [QuestionState.DONE_WAIT]: { time: 0 },
-  [QuestionState.RESULT_ANSWER]: { time: 5 },
-  [QuestionState.RESULT_EXPLANATION]: { time: 5 },
+  [QuestionState.RESULT_ANSWER]: { time: 10 },
+  [QuestionState.RESULT_EXPLANATION]: { time: 10 },
   [QuestionState.RESULT_STATISTICS]: { time: 0 },
 };

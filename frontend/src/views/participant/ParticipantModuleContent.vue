@@ -293,7 +293,6 @@ export default class ParticipantModuleContent extends Vue {
   updateTask(task: Task): void {
     if (!this.task) {
       this.task = task;
-      if (task) this.timeLeft = timerService.getRemainingTime(task);
       if (task?.modules) task.modules.forEach((module) => this.setIcon(module));
       this.loadUsedModules();
       this.moduleNameClick(this.moduleNames[0]);
@@ -304,6 +303,7 @@ export default class ParticipantModuleContent extends Vue {
         2 * 60
       );
     }
+    if (task) this.timeLeft = timerService.getRemainingTime(task);
 
     if (
       !this.isSyncedWithPublicScreen &&
@@ -430,6 +430,11 @@ export default class ParticipantModuleContent extends Vue {
   position: absolute;
   top: 1rem;
   right: 2rem;
+}
+
+.right:not(:last-child) {
+  top: 1rem;
+  right: 4.2rem;
 }
 
 .timer {

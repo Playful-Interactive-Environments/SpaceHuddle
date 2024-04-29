@@ -47,6 +47,9 @@
         >
           <font-awesome-icon icon="infinity" />
         </el-button>
+        <el-button type="info" @click="setTimeLimit(true, 60)">
+          1:00
+        </el-button>
         <el-button type="info" @click="setTimeLimit(true, 5 * 60)">
           5:00
         </el-button>

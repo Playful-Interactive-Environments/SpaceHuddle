@@ -60,7 +60,9 @@
         plugins: {
           legend: {
             display:
-              showLegend && questionnaireType !== QuestionnaireType.SURVEY,
+              showLegend &&
+              (questionnaireType !== QuestionnaireType.SURVEY ||
+                chartData.datasets.length > 1),
             position: 'top',
             align: 'end',
             labels: {
@@ -158,22 +160,59 @@ export default class QuizResult extends Vue {
 
   get legend(): ChartLegend[] {
     const legend: ChartLegend[] = [];
-    if (this.questionnaireType !== QuestionnaireType.QUIZ) {
-      const labelResult = (this as any).$t(
-        'module.information.quiz.publicScreen.chartDataLabelResult'
-      );
-      legend.push({
-        color: themeColors.getYellowColor(),
-        name: labelResult,
-        conditionAnswer: () => true,
-        conditionQuestion: (idea) =>
-          this.questionnaireType === QuestionnaireType.SURVEY ||
-          !idea.parameter.hasAnswer,
-      });
-    }
+    if (this.questionType === QuestionType.ORDER) {
+      const color1 = new Color(themeColors.getGreenColor());
+      const color2 = new Color(themeColors.getRedColor());
+      const minVote = this.voteResult.sort((a, b) => {
+        if (a.idea && b.idea)
+          return (a.idea.order as number) - (b.idea.order as number);
+        else if (b.idea) return 1;
+        return 0;
+      })[0];
+      const min = minVote ? (minVote.idea.order as number) : 0;
+      const maxVote = this.voteResult.sort((a, b) => {
+        if (a.idea && b.idea)
+          return (b.idea.order as number) - (a.idea.order as number);
+        else if (b.idea) return 0;
+        return 1;
+      })[0];
+      const max = maxVote
+        ? (maxVote.idea.order as number)
+        : this.voteResult.length - 1;
+      for (let i = min; i <= max; i++) {
+        const color = (
+          color1.mix(color2, (1 / (max + 1)) * (i + 1), {
+            space: 'lch',
+            outputSpace: 'srgb',
+          }) as any
+        ).coords as number[];
+        let hexColor = '#';
+        color.forEach(
+          (coord) => (hexColor += Math.round(coord * 255).toString(16))
+        );
+        legend.push({
+          color: hexColor,
+          name: (i + 1).toString(),
+          conditionAnswer: (vote) => (vote as VoteResultDetail).rating === i,
+          conditionQuestion: () => true,
+        });
+      }
+    } else {
+      if (this.questionnaireType !== QuestionnaireType.QUIZ) {
+        const labelResult = (this as any).$t(
+          'module.information.quiz.publicScreen.chartDataLabelResult'
+        );
+        legend.push({
+          color: themeColors.getYellowColor(),
+          name: labelResult,
+          conditionAnswer: () => true,
+          conditionQuestion: (idea) =>
+            this.questionnaireType === QuestionnaireType.SURVEY ||
+            !idea.parameter.hasAnswer,
+        });
+      }
 
-    if (this.questionnaireType !== QuestionnaireType.SURVEY) {
-      if (this.questionType !== QuestionType.ORDER) {
+      if (this.questionnaireType !== QuestionnaireType.SURVEY) {
         const labelCorrect = (this as any).$t(
           'module.information.quiz.publicScreen.chartDataLabelCorrect'
         );
@@ -196,45 +235,6 @@ export default class QuizResult extends Vue {
             this.questionnaireType === QuestionnaireType.QUIZ ||
             idea.parameter.hasAnswer,
         });
-      } else {
-        const color1 = new Color(themeColors.getGreenColor());
-        const color2 = new Color(themeColors.getRedColor());
-        const minVote = this.voteResult.sort((a, b) => {
-          if (a.idea && b.idea)
-            return (a.idea.order as number) - (b.idea.order as number);
-          else if (b.idea) return 1;
-          return 0;
-        })[0];
-        const min = minVote ? (minVote.idea.order as number) : 0;
-        const maxVote = this.voteResult.sort((a, b) => {
-          if (a.idea && b.idea)
-            return (b.idea.order as number) - (a.idea.order as number);
-          else if (b.idea) return 0;
-          return 1;
-        })[0];
-        const max = maxVote
-          ? (maxVote.idea.order as number)
-          : this.voteResult.length - 1;
-        for (let i = min; i <= max; i++) {
-          const color = (
-            color1.mix(color2, (1 / (max + 1)) * (i + 1), {
-              space: 'lch',
-              outputSpace: 'srgb',
-            }) as any
-          ).coords as number[];
-          let hexColor = '#';
-          color.forEach(
-            (coord) => (hexColor += Math.round(coord * 255).toString(16))
-          );
-          legend.push({
-            color: hexColor,
-            name: (i + 1).toString(),
-            conditionAnswer: (vote) => (vote as VoteResultDetail).rating === i,
-            conditionQuestion: (idea) =>
-              this.questionnaireType === QuestionnaireType.QUIZ ||
-              idea.parameter.hasAnswer,
-          });
-        }
       }
     }
     return legend;

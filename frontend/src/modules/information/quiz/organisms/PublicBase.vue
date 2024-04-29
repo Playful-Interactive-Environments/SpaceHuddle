@@ -648,6 +648,15 @@ export default class PublicBase extends Vue {
     this.checkState(true);
   }
 
+  oldQuestionState: QuestionState = this.questionState;
+  @Watch('questionState', { immediate: true })
+  onQuestionStateChanged(
+    newState: QuestionState,
+    oldState: QuestionState
+  ): void {
+    this.oldQuestionState = oldState;
+  }
+
   oldIsActive = false;
   emitedPublicQuestionId: string | null = null;
   async checkState(staticUpdate = false): Promise<void> {
@@ -744,17 +753,18 @@ export default class PublicBase extends Vue {
       this.$emit('changePublicQuestion', this.activeQuestion);
     }
 
-    this.emitPublicAnswers();
+    this.emitPublicAnswers(this.oldQuestionState === this.questionState);
   }
 
-  emitPublicAnswers(): void {
+  emitPublicAnswers(checkOnlyIfNewId = true): void {
     const isVotingQuestion =
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
       QuestionResultStorage.VOTING;
     if (
       this.publicQuestion &&
       (!isVotingQuestion || this.publicAnswers.length > 0) &&
-      this.emitedPublicQuestionId !== this.publicQuestion.question.id
+      (this.emitedPublicQuestionId !== this.publicQuestion.question.id ||
+        !checkOnlyIfNewId)
     ) {
       this.emitedPublicQuestionId = this.publicQuestion.question.id;
       if (isVotingQuestion) {
