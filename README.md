@@ -1,6 +1,10 @@
 # SpaceHuddle
 SpaceHuddle: Game Assisted Brainstorming. A new approach to brainstorming with multiple people.
 
+## SpaceHuddle Version
+Version: 0.2.0
+Datum: 29.04.2024
+
 ## SpaceHuddle API
 
 SpaceHuddle uses a REST API for exchanging data between the different parts of the application (backend, moderator, client). The API's code is located in the `api` directory.
@@ -11,7 +15,7 @@ The SpaceHuddle API requires the following setup:
 
 - a web server: tested with [Apache 2.4](https://httpd.apache.org/),
 - an SQL database instance: tested with [MariaDB 10.4](https://mariadb.org/),
-- [PHP 8.0](https://www.php.net/),
+- [PHP 8.1](https://www.php.net/),
 - [Composer](https://getcomposer.org/) dependency manager.
 
 ### Installation and running of the API
@@ -53,10 +57,44 @@ To test for a *participant*, use the following steps:
 
 The SpaceHuddle-API is built on the following technologies. Visit the websites to learn more about their use.
 
-- PHP 8.0: programming language `https://www.php.net/`
+- PHP 8.1: programming language `https://www.php.net/`
 - Slim: micro framework for PHP `https://www.slimframework.com/`
 - CakePHP: database query framework `https://cakephp.org/`
 - Swagger-PHP: REST API documentation `https://zircote.github.io/swagger-php/`
+
+### Database model
+User administration
+- user: User data for registered moderators and co-moderators.
+- participant: Participants taking part in the session.
+- session_role: Role in a session as moderators or co-moderators.
+
+Tutorial
+- tutorial: Which explanatory text has already been read by the user.
+- tutorial_participant: Which explanatory text has already been read by the participant.
+
+Tracking
+- task_participant_state: How often was the task performed by the participant? Was the task completed?
+- task_participant_iteration: How did the individual run go? Was the round won?
+- task_participant_iteration_step: Which steps were completed within the round?
+
+Session
+- session: A session defines a bundle of topics on tasks for an event which are to be worked on by a joint group of participants.
+
+Topic
+- topic: A session can consist of several topics. Topics organize a session to ensure a better overview.
+
+Task
+- task: A topic can consist of several tasks.
+- selection: A selection is a special task that makes a choice from existing inputs (ideas).
+
+Module
+- module: A task must consist of a main module and any number of add-ons. The main module defines which task is to be performed (brainstorming, categorization, evaluation, selection). The add ons define whether a special visualization or game components are desired.
+
+Idea
+- idea: Tasks generate ideas (brainstorming) or use ideas as input for further processing in a (selection, categorization or evaluation).
+- selection_idea: Defines a list of existing ideas for a selection.
+- hierarchy: Categorizes the existing ideas.
+- Vote: Evaluates the existing ideas.
 
 ## SpaceHuddle frontend
 
@@ -102,16 +140,19 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
 - MapLibre: map engine `https://maplibre.org/`
 - MapTiler: map styles `https://www.maptiler.com/`
 - OSRM: open source routing machine `http://project-osrm.org/`
+- PixiJS: 2d webgl renderer `https://pixijs.com/`
 - Turf: geospatial analysis `http://turfjs.org/`
 
 ### Develop your own modules
 
-1. Navigate to the folder `frontend/src/modules` and choose one of the following 5 subdirectory depending on the module type to be developed.
+1. Navigate to the folder `frontend/src/modules` and choose one of the following subdirectory depending on the module type to be developed.
    1. information: information phase preceding the brainstorming (e.g. inspirational material, explaining the initial situation, evaluating the initial state (quiz, survey)).
    2. brainstorming: idea collection
    3. categorisation: structuring ideas
    4. selection: restrict ideas for further use
    5. voting: evaluate ideas
+   6. playing: ice breaker games
+   7. common: General module overlapping visualization components for the public screen.
 2. Create your own module subdirectory in the desired type folder.
 3. Configure module
    1. Create `config.json` file within your module folder
@@ -147,18 +188,22 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
          "moderatorConfig": {
             "...": "...",
             "...": "..."
+         },
+         "statistic": {
+            "...": "...",
+            "...": "..."
          }
       }
       ```
-   4. The sections `publicScreen`, `participant`, `moderatorContent`, `moderatorConfig` are optional and should only help to structure the code.
+   4. The sections `publicScreen`, `participant`, `moderatorContent`, `moderatorConfig`, `statistic` are optional and should only help to structure the code.
    5. Replace the `"..."` information with your own content.
    6. The translation text can be embedded in the vue code as follows.
       ```
       $t('module.!moduletype!.!modulename!.!outputType!.!translationKey!')
       ```
-      - `!moduletype!`: Specifies the name of the module type folder (`selection`, `categorisation`, `brainstorming`, `information`, `voting`)
+      - `!moduletype!`: Specifies the name of the module type folder (`selection`, `categorisation`, `brainstorming`, `information`, `voting`, `playing`, `common`)
       - `!modulename!`: Specifies the name of the module folder
-      - `!outputType!`: Specifies the view name (`publicScreen`, `participant`, `moderatorContent`, `moderatorConfig`)
+      - `!outputType!`: Specifies the view name (`publicScreen`, `participant`, `moderatorContent`, `moderatorConfig`, `statistic`)
       - `!translationKey!`: Specifies the translation key
 5. Develop your module.
    1. Create a `output` folder within your module folder.
@@ -347,6 +392,31 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         @Prop() readonly taskId!: string;
         @Prop({ default: EndpointAuthorisationType.MODERATOR })
         authHeaderTyp!: EndpointAuthorisationType;
+      }
+      </script>
+
+      <style lang="scss" scoped>
+      !scss section!
+      </style>
+      ```
+   5. Create a `ModuleStatistic.vue` file in the `output` folder if you need an individual statistic for your module that differs from the default view.
+      In the following example, replace the information between ! and !, and expand the functionality according to individual needs.
+      ```
+      <template>
+        <div></div>
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop } from 'vue-property-decorator';
+      
+      @Options({
+        components: {},
+      })
+      
+      /* eslint-disable @typescript-eslint/no-explicit-any*/
+      export default class ModuleStatistic extends Vue {
+        @Prop() readonly taskId!: string;
       }
       </script>
 
