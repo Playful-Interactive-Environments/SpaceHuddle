@@ -783,6 +783,17 @@ class SessionRepository implements RepositoryInterface
             $connectionKey
         );
 
+        if ($newId) {
+            $this->queryFactory->newInsert(
+                'clone_helper',
+                [
+                    'target_id' => $newId,
+                    'source_id' => $oldId,
+                    'table_name' => $this->getEntityName()
+                ]
+            )->execute();
+        }
+
         if ($cloneDependencies && $newId) {
             $this->cloneDependencies($oldId, $newId);
         }
@@ -827,6 +838,111 @@ class SessionRepository implements RepositoryInterface
                 }
             }
         }
+
+        $rows_task = $this->queryFactory->newSelect("task")
+            ->select([
+                "task.id",
+            ])
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->andWhere([
+                "topic.session_id" => $newId,
+            ])
+            ->execute()
+            ->fetchAll("assoc");
+        if (is_array($rows_task) and sizeof($rows_task) > 0) {
+            $taskRepository = new TaskRepository($this->queryFactory);
+            $taskRepository->setAuthorisation($this->getAuthorisation());
+            foreach ($rows_task as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $taskId = $reader->findString("id");
+                $taskRepository->correctParameter($taskId);
+            }
+        }
+
+        $this->cleanupCloneHelper($newId);
+    }
+
+    private function cleanupCloneHelper(string $newId): void {
+        /*$subQueryIdeas = $this->queryFactory->newSelect("selection_view")
+            ->select(["selection_view.id"])
+            ->innerJoin("topic", "topic.id = selection_view.topic_id")
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("selection_view.id", "clone_helper.target_id");
+            })
+            ->andWhere(["topic.session_id" => $newId]);
+        $this->queryFactory->newDelete("clone_helper")
+            ->where(function ($exp, $q) use ($subQueryIdeas) {
+                return $exp->exists($subQueryIdeas);
+            })->execute();*/
+
+        $subQuery = $this->queryFactory->newSelect("idea")
+            ->select(["idea.id"])
+            ->innerJoin("task", "task.id = idea.task_id")
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("idea.id", "clone_helper.target_id");
+            })
+            ->andWhere(["topic.session_id" => $newId]);
+        $this->queryFactory->newDelete("clone_helper")
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->andWhere(["table_name = 'idea'"])->execute();
+
+        $subQuery = $this->queryFactory->newSelect("module")
+            ->select(["module.id"])
+            ->innerJoin("task", "task.id = module.task_id")
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("module.id", "clone_helper.target_id");
+            })
+            ->andWhere(["topic.session_id" => $newId]);
+        $this->queryFactory->newDelete("clone_helper")
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->andWhere(["table_name = 'module'"])->execute();
+
+        $subQuery = $this->queryFactory->newSelect("task")
+            ->select(["task.id"])
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("task.id", "clone_helper.target_id");
+            })
+            ->andWhere(["topic.session_id" => $newId]);
+        $this->queryFactory->newDelete("clone_helper")
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->andWhere(["table_name = 'task'"])->execute();
+
+        $subQuery = $this->queryFactory->newSelect("selection")
+            ->select(["selection.id"])
+            ->innerJoin("topic", "topic.id = selection.topic_id")
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("selection.id", "clone_helper.target_id");
+            })
+            ->andWhere(["topic.session_id" => $newId]);
+        $this->queryFactory->newDelete("clone_helper")
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->andWhere(["table_name = 'selection'"])->execute();
+
+        $subQuery = $this->queryFactory->newSelect("topic")
+            ->select(["topic.id"])
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("topic.id", "clone_helper.target_id");
+            })
+            ->andWhere(["topic.session_id" => $newId]);
+        $this->queryFactory->newDelete("clone_helper")
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->andWhere(["table_name = 'topic'"])->execute();
+
+        $this->queryFactory->newDelete("clone_helper")
+            ->andWhere(["table_name = 'session'", "target_id" => $newId])->execute();
     }
 
     /**

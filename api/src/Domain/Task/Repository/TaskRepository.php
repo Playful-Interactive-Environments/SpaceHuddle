@@ -627,6 +627,61 @@ class TaskRepository implements RepositoryInterface
     }
 
     /**
+     * correct task parameter after cloning
+     * @param string $taskId task id
+     */
+    public function correctParameter(string $taskId): void
+    {
+        $parameter = $this->queryFactory->newSelect("task")
+            ->select([
+                "parameter"
+            ])
+            ->andWhere([
+                "id" => $taskId,
+            ])
+            ->execute()
+            ->fetchColumn(0);
+
+        if (!is_string($parameter) || strlen($parameter) === 0) {
+            return;
+        }
+
+        $newSessionId = $this->queryFactory->newSelect("task")
+            ->select([
+                "topic.session_id"
+            ])
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->andWhere([
+                "task.id" => $taskId,
+            ])
+            ->execute()
+            ->fetchColumn(0);
+
+        $query = $this->queryFactory->newSelect("clone_helper");
+        $query->select([
+            "clone_helper.*"
+        ])
+            ->innerJoin("selection_view", "clone_helper.target_id = selection_view.id")
+            ->innerJoin("topic", "topic.id = selection_view.topic_id")
+            ->andWhere(["topic.session_id" => $newSessionId]);
+        $rows_input_mapping = $query->execute()->fetchAll("assoc");
+
+        if (is_array($rows_input_mapping) and sizeof($rows_input_mapping) > 0) {
+            foreach ($rows_input_mapping as $mappingItem) {
+                $reader = new ArrayReader($mappingItem);
+                $targetId = $reader->findString("target_id");
+                $sourceId = $reader->findString("source_id");
+                $parameter = str_replace($sourceId, $targetId, $parameter);
+            }
+        }
+
+        $this->queryFactory
+            ->newUpdate("task", ["parameter" => $parameter])
+            ->andWhere(["id" => $taskId])
+            ->execute();
+    }
+
+    /**
      * List of columns to be cloned
      * @return array<string> The array
      */

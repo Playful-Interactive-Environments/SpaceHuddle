@@ -346,6 +346,16 @@ CREATE TABLE `tutorial_participant` (
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- Tabellenstruktur für Tabelle `clone_helper`
+--
+
+CREATE TABLE `clone_helper` (
+                                `target_id` CHAR(36) NOT NULL,
+                                `source_id` CHAR(36) NOT NULL,
+                                `table_name` VARCHAR(255) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
 -- Indizes der exportierten Tabellen
 --
 
@@ -495,6 +505,11 @@ ALTER TABLE `tutorial` ADD PRIMARY KEY(`user_id`, `step`, `type`);
 -- Indizes für die Tabelle `tutorial_participant`
 --
 ALTER TABLE `tutorial_participant` ADD PRIMARY KEY(`participant_id`, `step`, `type`);
+
+--
+-- Indizes für die Tabelle `clone_helper`
+--
+ALTER TABLE `clone_helper` ADD PRIMARY KEY(`target_id`);
 
 --
 -- Constraints der exportierten Tabellen

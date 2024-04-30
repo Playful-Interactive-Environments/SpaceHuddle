@@ -844,36 +844,48 @@ class TopicRepository implements RepositoryInterface
             ])
             ->execute()
             ->fetchAll("assoc");
-        $taskMapping = [];
-        $taskParameter = [];
+        $taskMappingList = [];
+        //$taskMapping = [];
+        //$taskParameter = [];
         if (is_array($rows_task) and sizeof($rows_task) > 0) {
             foreach ($rows_task as $resultItem) {
                 $reader = new ArrayReader($resultItem);
                 $oldTaskId = $reader->findString("id");
                 if ($oldTaskId) {
                     $newTaskId = $taskRepository->clone($oldTaskId, $newId);
-                    $taskMapping[$oldTaskId] = $newTaskId;
-                    $taskParameter[$newTaskId] = $reader->findString("parameter");
+                    array_push($taskMappingList, $newTaskId);
+                    //$taskMapping[$oldTaskId] = $newTaskId;
+                    //$taskParameter[$newTaskId] = $reader->findString("parameter");
                 }
             }
         }
 
         // Correct all parameters of tasks
-        foreach ($taskParameter as $newTaskId => $parameter) {
+        foreach ($taskMappingList as $key) {
+            $taskRepository->correctParameter($key);
+        }
+        /*foreach ($taskParameter as $newTaskId => $parameter) {
             if (!is_string($parameter) || strlen($parameter) === 0) {
                 continue;
             }
+            echo "$newTaskId:\n";
+            echo json_encode($parameter);
+            echo "\n\n";
             foreach ($taskMapping as $oldTaskId => $replaceTaskId) {
                 $parameter = str_replace($oldTaskId, $replaceTaskId, $parameter);
             }
+            echo json_encode($parameter);
+            echo "\n\n";
             foreach ($selectionMapping as $oldId => $replaceSelectionId) {
                 $parameter = str_replace($oldId, $replaceSelectionId, $parameter);
             }
+            echo json_encode($parameter);
+            echo "\n\n";
             $this->queryFactory
                 ->newUpdate("task", ["parameter" => $parameter])
                 ->andWhere(["id" => $newTaskId])
                 ->execute();
-        }
+        }*/
     }
 
     /**

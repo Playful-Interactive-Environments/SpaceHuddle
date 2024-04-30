@@ -25,6 +25,17 @@ trait CloneTrait
             $newParentId
         );
 
+        if ($newId) {
+            $this->queryFactory->newInsert(
+                'clone_helper',
+                [
+                'target_id' => $newId,
+                'source_id' => $oldId,
+                'table_name' => $this->getEntityName()
+                ]
+            )->execute();
+        }
+
         if ($cloneDependencies && $newId) {
             $this->cloneDependencies($oldId, $newId);
         }
