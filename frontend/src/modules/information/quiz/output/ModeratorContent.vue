@@ -680,15 +680,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         QuestionResultStorage.VOTING
       ) {
         this.formData.answers.forEach((answer) => {
-          if (answer.id) hierarchyService.putHierarchy(answer);
-          else {
+          if (answer.id) {
+            if (answer.description) answer.keywords = answer.description;
+            hierarchyService.putHierarchy(answer);
+          } else {
             answer.parentId = this.formData.question.id;
             hierarchyService
               .postHierarchy(this.taskId, {
                 parentId: answer.parentId,
-                keywords: answer.description
-                  ? answer.description
-                  : answer.keywords,
+                keywords: answer.description ?? answer.keywords,
                 description: answer.description,
                 link: answer.link,
                 image: answer.image,
@@ -743,7 +743,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           answer.parentId = question.id;
           await hierarchyService.postHierarchy(this.taskId, {
             parentId: answer.parentId,
-            keywords: answer.description ? answer.description : answer.keywords,
+            keywords: answer.description ?? answer.keywords,
             description: answer.description,
             link: answer.link,
             image: answer.image,
