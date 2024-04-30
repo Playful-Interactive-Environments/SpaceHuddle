@@ -436,6 +436,7 @@ h3 {
 
     .el-scrollbar::v-deep(.el-scrollbar__wrap) {
       padding: 0 var(--side-padding);
+      scroll-behavior: smooth;
     }
 
     .el-scrollbar::v-deep(.el-scrollbar__view) {
