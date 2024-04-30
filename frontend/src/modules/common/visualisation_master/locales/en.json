@@ -36,6 +36,12 @@
         "title": "Strata",
         "description": "Ideas race to the top. Highest voted idea wins."
       }
+    },
+    "podium": {
+      "description": {
+        "title": "Podium",
+        "description": "Ideas ranked on a podium."
+      }
     }
   }
 }

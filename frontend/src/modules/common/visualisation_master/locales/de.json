@@ -36,6 +36,12 @@
         "title": "Strata",
         "description": "Ideen-Wettlauf zur Spitze. Die Idee mit der besten Bewertung gewinnt."
       }
+    },
+    "podium": {
+      "description": {
+        "title": "Podest",
+        "description": "Ideen nach Bewertung platziert auf einem Podest."
+      }
     }
   }
 }
