@@ -34,6 +34,13 @@
       "icon": "layer-group",
       "type": "VOTING",
       "allowTimeMod": false
+    },
+    "podium": {
+      "id": "podium",
+      "image": "podium/path",
+      "icon": "layer-group",
+      "type": "VOTING",
+      "allowTimeMod": false
     }
   }
 }
