@@ -51,8 +51,8 @@
             left: releaseIdeas
               ? columns[(index + columnRandomOffset) % columns.length] + '%'
               : columns[(index + columnRandomOffset) % columns.length] +
-                Math.random() * 5 -
-                2.5 +
+                Math.random() * 3 -
+                1.5 +
                 '%',
             zIndex: animationOver ? 100 - index : Math.random() * 100,
             transition: getIdeaTransitionConfig(vote),
@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import {Prop, Watch} from 'vue-property-decorator';
 import { Bar } from 'vue-chartjs';
 import { VoteResult } from '@/types/api/Vote';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
@@ -105,7 +105,7 @@ export default class PublicScreen extends Vue {
   animationOver = false;
   animationLength = 15;
 
-  getIdeaPositionY(vote): string {
+  getIdeaPositionY(vote: VoteResult): string {
     if (this.releaseIdeas) {
       return 100 - (vote.ratingSum / this.votes[0].ratingSum) * 100 + '%';
     } else {

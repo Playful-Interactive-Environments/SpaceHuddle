@@ -64,6 +64,13 @@
       :timerEnded="this.timerEnd"
       :votes="votes"
     />
+    <podium
+      v-if="currentVisModule === 'podium'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :timerEnded="this.timerEnd"
+      :votes="votes"
+    />
   </div>
 </template>
 
@@ -86,9 +93,11 @@ import InfiniteScroll from '@/modules/common/visualisation_master/organisms/infi
 import Strata from '@/modules/common/visualisation_master/organisms/strata.vue';
 import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
+import Podium from "@/modules/common/visualisation_master/organisms/podium.vue";
 
 @Options({
   components: {
+    Podium,
     Strata,
     InfiniteScroll,
     BarChart,
@@ -219,10 +228,14 @@ export default class PublicScreen extends Vue {
       for (let i = 0; i < votes.length; i++) {
         votes[i].ratingSum = votes[i].ratingSum / votes[i].countParticipant;
       }
-      this.votes = votes.sort((a, b) => b.ratingSum - a.ratingSum);
-    } else {
-      this.votes = votes.sort((a, b) => b.ratingSum - a.ratingSum);
     }
+    this.votes = votes.sort((a, b) => {
+      if (a.ratingSum === b.ratingSum) {
+        return a.idea.keywords.localeCompare(b.idea.keywords);
+      } else {
+        return b.ratingSum - a.ratingSum;
+      }
+    });;
   }
 
   deregisterAll(): void {
