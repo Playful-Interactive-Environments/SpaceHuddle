@@ -39,6 +39,13 @@ class IdeaAbstract
     public ?string $link;
 
     /**
+     * Link to an image that describes the idea.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $image;
+
+    /**
      * Variable json parameters depending on the task type.
      * @var object|null
      * @OA\Property(type="object", format="json")
@@ -63,6 +70,7 @@ class IdeaAbstract
         $this->description = $reader->findString("description");
         $this->keywords = $reader->findString("keywords");
         $this->link = $reader->findString("link");
+        $this->image = $reader->findString("image");
         $this->parameter = (object)json_decode($reader->findString("parameter") ?? "{}");
         $this->order = $reader->findInt("order");
     }
