@@ -60,6 +60,15 @@
     </el-space>
     <div id="submitScreen" v-if="submitScreen">
       <span>{{ $t('module.voting.vote.participant.thanksIndividual') }}</span>
+      <br />
+      <el-button
+        type="primary"
+        class="el-button--submit"
+        native-type="submit"
+        @click="$router.back()"
+      >
+        {{ $t('module.voting.vote.participant.back') }}
+      </el-button>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>

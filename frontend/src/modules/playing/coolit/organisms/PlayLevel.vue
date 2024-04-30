@@ -121,8 +121,8 @@
               :textures="lightningStylesheets.animations['lightning']"
               :animation-speed="0.15"
               :height="gameHeight"
-              :x="gameWidth/2"
-              :y="gameHeight/2"
+              :x="gameWidth / 2"
+              :y="gameHeight / 2"
               :anchor="[0.5, 0.5]"
               playing
               :loop="true"
@@ -138,7 +138,7 @@
                 hail.startTime + minExtremeWeatherTime < Date.now()
               "
             />
-<!--            <animated-sprite
+            <!--<animated-sprite
               ref="cloud"
               v-if="cloudStylesheets"
               :textures="cloudStylesheets.animations['cloud']"
@@ -1442,7 +1442,10 @@ export default class PlayLevel extends Vue {
         this.cloudStylesheets = sheet;
       });
     pixiUtil
-      .loadTexture('/assets/games/coolit/city/lightning.json', this.textureToken)
+      .loadTexture(
+        '/assets/games/coolit/city/lightning.json',
+        this.textureToken
+      )
       .then((sheet) => {
         this.lightningStylesheets = sheet;
       });
@@ -2157,7 +2160,6 @@ export default class PlayLevel extends Vue {
       this.darkOverlayAlpha <= 0.3
     ) {
       this.darkOverlayAlpha += 0.01;
-
     } else if (
       !this.hail.frequency &&
       !this.snow.frequency &&

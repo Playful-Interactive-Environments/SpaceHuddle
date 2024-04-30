@@ -9,7 +9,8 @@
   },
   "participant": {
     "thanks": "thanks for the vote",
-    "waiting": "stay tuned: ideas will soon be released for voting"
+    "waiting": "stay tuned: ideas will soon be released for voting",
+    "back": "finalize"
   },
   "moderatorContent": {
   },

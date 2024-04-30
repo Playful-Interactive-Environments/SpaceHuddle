@@ -47,8 +47,17 @@
       ></el-rate>
     </div>
 
-    <div v-if="finished">
+    <div class="finished" v-if="finished">
       {{ $t('module.voting.default.participant.thanks') }}
+      <br />
+      <el-button
+        type="primary"
+        class="el-button--submit"
+        native-type="submit"
+        @click="$router.back()"
+      >
+        {{ $t('module.voting.default.participant.back') }}
+      </el-button>
     </div>
     <div v-if="waiting">
       {{ $t('module.voting.default.participant.waiting') }}
@@ -617,5 +626,9 @@ div#loadingScreen > span#loading::v-deep(.path) {
 
 .el-rate.ratingStars::v-deep(path) {
   color: var(--color-evaluating);
+}
+
+.finished {
+  text-align: center;
 }
 </style>

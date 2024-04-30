@@ -13,6 +13,7 @@
     "imageKeywords": "image caption",
     "saveQuestion": "Do you want to save your selection?",
     "yes": "yes",
-    "no": "no"
+    "no": "no",
+    "back": "finalize"
   }
 }

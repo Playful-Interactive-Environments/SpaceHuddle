@@ -45,8 +45,6 @@ import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as themeColors from '@/utils/themeColors';
-import * as taskService from '@/services/task-service';
-import { Task } from '@/types/api/Task';
 
 @Options({
   components: {
