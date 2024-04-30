@@ -235,7 +235,7 @@ export default class PublicScreen extends Vue {
       } else {
         return b.ratingSum - a.ratingSum;
       }
-    });;
+    });
   }
 
   deregisterAll(): void {
