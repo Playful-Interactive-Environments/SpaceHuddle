@@ -185,7 +185,10 @@
   </ParticipantModuleDefaultContainer>
   <el-dialog v-model="showSort" :module-theme="theme">
     <template #header>
-      <h2>{{ $t('module.brainstorming.missionmap.participant.sort') }}</h2>
+      <h2>
+        <font-awesome-icon icon="sort" />&nbsp;
+        {{ $t('module.brainstorming.missionmap.participant.sort') }}
+      </h2>
     </template>
     <draggable
       v-model="orderedIdeas"
@@ -292,7 +295,7 @@
       <el-form-item
         class="descending"
         v-if="
-          selectedIdea?.description || selectedIdea.image || selectedIdea.link
+          selectedIdea?.description || selectedIdea?.image || selectedIdea?.link
         "
         :label="$t('module.brainstorming.missionmap.participant.description')"
       >
@@ -367,6 +370,7 @@
         prop="explanation"
       >
         <el-button
+          class="explanationOption"
           style="width: 100%; justify-content: left"
           v-for="(explanation, index) of selectedIdea?.parameter
             .explanationList"
@@ -439,7 +443,7 @@
   >
   </MissionSettings>
   <el-dialog
-    v-if="activeTab === 'map'"
+    v-if="activeTab === 'map' && selectedIdea"
     v-model="showSelectedIdea"
     :with-header="false"
     :show-close="false"
@@ -449,7 +453,7 @@
       class="ideaCard"
       :idea="selectedIdea"
       :is-editable="
-        selectedIdea.isOwn && inputManager.isCurrentIdea(selectedIdea.id)
+        selectedIdea?.isOwn && inputManager.isCurrentIdea(selectedIdea?.id)
       "
       :show-state="false"
       :canChangeState="false"
@@ -470,8 +474,8 @@
         <div class="media image_overlay">
           <div class="media-content">
             <font-awesome-icon icon="coins" />
-            {{ getVoteResultForIdea(selectedIdea.id)?.sum }} /
-            {{ selectedIdea.parameter.points }}
+            {{ getVoteResultForIdea(selectedIdea?.id)?.sum }} /
+            {{ selectedIdea?.parameter.points }}
           </div>
           <div class="media-right">
             <font-awesome-icon
@@ -632,7 +636,7 @@ export default class Participant extends Vue {
   inputManager!: CombinedInputManager;
   activeTab = 'measures';
   startingPoints = 0;
-  showSort = false;
+  showSort = true;
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -775,6 +779,20 @@ export default class Participant extends Vue {
     if (this.selectedIdea) {
       this.loadSelectedVote();
       if (this.activeTab === 'map') this.showSelectedIdea = true;
+    }
+  }
+
+  @Watch('showSelectedIdea', { immediate: true })
+  onShowSelectedIdeaChanged(): void {
+    if (!this.showSelectedIdea && this.activeTab === 'map') {
+      this.selectedIdea = null;
+    }
+  }
+
+  @Watch('activeTab', { immediate: true })
+  onActiveTabChanged(): void {
+    if (!this.showSelectedIdea && this.activeTab === 'map') {
+      this.selectedIdea = null;
     }
   }
 
@@ -1291,7 +1309,7 @@ export default class Participant extends Vue {
 </script>
 
 <style lang="scss">
-.idea-card-overlay {
+.participant-background .idea-card-overlay {
   background-color: unset;
   box-shadow: unset;
   width: calc(100% - 6rem);
@@ -1544,7 +1562,7 @@ export default class Participant extends Vue {
 .idea-card-overlay {
   .ideaCard {
     width: 100%;
-    max-height: calc(100vh - var(--el-dialog-margin-top) - 7.5rem);
+    max-height: calc(100vh - var(--el-dialog-margin-top) - 10rem);
     margin-bottom: 0;
   }
 }
@@ -1574,5 +1592,10 @@ export default class Participant extends Vue {
   svg {
     padding-right: 0.5rem;
   }
+}
+
+.explanationOption {
+  text-align: left;
+  height: unset;
 }
 </style>

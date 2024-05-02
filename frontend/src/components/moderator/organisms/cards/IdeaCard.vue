@@ -558,6 +558,7 @@ export default class IdeaCard extends Vue {
 
   &__text {
     padding: 14px;
+    flex-grow: 1;
   }
 
   &__title {
@@ -600,11 +601,22 @@ export default class IdeaCard extends Vue {
 }
 
 .el-image::v-deep(img) {
+  width: unset;
+}
+
+.el-image::v-deep(> img) {
   height: 100%;
+  width: 100%;
+}
+
+.el-card::v-deep(.el-card__body) {
+  display: flex;
+  flex-direction: column;
 }
 
 .landscape::v-deep(.el-card__body) {
   display: flex;
+  flex-direction: row;
 
   .card__image {
     width: 30%;
@@ -628,7 +640,7 @@ export default class IdeaCard extends Vue {
 
   .card__image__icon {
     font-size: 3rem;
-    padding-top: 1.5rem;
+    padding-top: 0;
   }
 }
 
@@ -715,6 +727,9 @@ export default class IdeaCard extends Vue {
   font-size: 4.5rem;
   padding-top: 1.7rem;
   color: var(--color-dark-contrast);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .image-height {

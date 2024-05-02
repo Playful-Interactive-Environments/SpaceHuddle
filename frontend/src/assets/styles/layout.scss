@@ -204,6 +204,10 @@
 
 .participant-background {
   background-color: var(--color-background);
+
+  .el-dialog {
+    max-width: 45rem;
+  }
 }
 
 .full-height {
