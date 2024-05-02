@@ -49,7 +49,7 @@
         ).length > 0
       "
       id="revealOtherVotes"
-      :style="{ opacity: ended ? 1 : 0 }"
+      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none' }"
     >
       <a href="#otherVotesContainer" class="revealButton">
         Other ideas
@@ -64,7 +64,7 @@
       "
       id="otherVotesContainer"
       class="columnLayout"
-      :style="{ opacity: ended ? 1 : 0 }"
+      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none' }"
     >
       <IdeaCard
         v-for="vote in this.votes.filter(
