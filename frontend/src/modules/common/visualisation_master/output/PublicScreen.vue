@@ -220,7 +220,7 @@ export default class PublicScreen extends Vue {
         this.task?.parameter.stateFilter.includes(d.state)
       );
     }
-    this.ideas = ideas;
+    this.ideas = ideas.filter((d) => !d.parameter.questionType);
   }
 
   updateVotes(votes: VoteResult[]): void {
