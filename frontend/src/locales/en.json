@@ -43,8 +43,8 @@
       "validationErrors": "Not all input fields are valid. Please check your input."
     },
     "route": {
-      "authorisationExpired": "Authorisation has expired.",
-      "incorrectAuthorisationType": "Incorrect authorisation type."
+      "authorisationExpired": "Please log in again -  your login has timed out. ",
+      "incorrectAuthorisationType": "Incorrect authorisation type. Please log in again."
     },
     "gui": {
       "copyToClipboard": "Could not copy to clipboard."

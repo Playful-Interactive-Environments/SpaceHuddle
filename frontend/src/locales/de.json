@@ -43,8 +43,8 @@
       "validationErrors": "Nicht alle Eingabefelder sind gültig. Bitte überprüfen Sie Ihre Eingabe."
     },
     "route": {
-      "authorisationExpired": "Autorisierung ist abgelaufen.",
-      "incorrectAuthorisationType": "Falsche Autorisierungsart."
+      "authorisationExpired": "Bitte neu einloggen - ihr Login ist abgelaufen.",
+      "incorrectAuthorisationType": "Falsche Autorisierungsart. Bitte neu einloggen."
     },
     "gui": {
       "copyToClipboard": "Konnte nicht in Zwischenablage gespeichert werden."
