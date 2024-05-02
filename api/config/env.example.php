@@ -17,6 +17,7 @@
  * shared with all project collaborators.
  */
 
+$settings["jwt"]["issuer"] = "localhost";
 $settings["jwt"]["private_key"] = file_get_contents(__DIR__ . "/../resources/keys/private.pem");
 $settings["jwt"]["public_key"] = file_get_contents(__DIR__ . "/../resources/keys/public.pem");
 
@@ -49,3 +50,6 @@ $settings["smtp"] = [
     "username" => "my-username",
     "password" => "my-username-password",
 ];
+
+// Mocked Logger settings
+$settings["logger"]["level"] = \Monolog\Logger::INFO;

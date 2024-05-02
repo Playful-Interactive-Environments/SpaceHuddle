@@ -15,7 +15,7 @@ The SpaceHuddle API requires the following setup:
 
 - a web server: tested with [Apache 2.4](https://httpd.apache.org/),
 - an SQL database instance: tested with [MariaDB 10.4](https://mariadb.org/),
-- [PHP 8.1](https://www.php.net/),
+- [PHP 8.2](https://www.php.net/),
 - [Composer](https://getcomposer.org/) dependency manager.
 
 ### Installation and running of the API
@@ -57,7 +57,7 @@ To test for a *participant*, use the following steps:
 
 The SpaceHuddle-API is built on the following technologies. Visit the websites to learn more about their use.
 
-- PHP 8.1: programming language `https://www.php.net/`
+- PHP 8.2: programming language `https://www.php.net/`
 - Slim: micro framework for PHP `https://www.slimframework.com/`
 - CakePHP: database query framework `https://cakephp.org/`
 - Swagger-PHP: REST API documentation `https://zircote.github.io/swagger-php/`
