@@ -41,10 +41,17 @@
         <slot name="icon"></slot>
       </div>
       <div
+        v-if="imageOverlayIsClickable"
         class="card__image__overlay"
         @touchstart="touchStart"
         @touchend="handleClick"
         @click="handleClick"
+      >
+        <slot name="image_overlay"></slot>
+      </div>
+      <div
+        v-else
+        class="card__image__overlay"
       >
         <slot name="image_overlay"></slot>
       </div>
@@ -265,6 +272,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) portrait!: boolean;
   @Prop({ default: true }) showKeyword!: boolean;
   @Prop({ default: false }) shareState!: boolean;
+  @Prop({ default: true }) imageOverlayIsClickable!: boolean;
   @Prop({ default: true }) allowImagePreview!: boolean;
   @Prop({ default: false }) showDragArea!: boolean;
   @Prop({ default: null }) fixHeight!: string | null;

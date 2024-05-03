@@ -216,6 +216,7 @@
           :background-color="getIdeaColor(element)"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
           :showDragArea="true"
+          :image-overlay-is-clickable="false"
           fix-height="7rem"
           v-on:click="ideaClicked(element)"
           @ideaDeleted="refreshIdeas"
@@ -224,6 +225,18 @@
         >
           <template #icon>
             <font-awesome-icon icon="person-booth" />
+          </template>
+          <template #image_overlay>
+            <el-rate
+              v-if="element.id in ideaRate && module?.parameter"
+              v-model="ideaRate[element.id]"
+              :max="
+                module.parameter.maxRatingStars
+                  ? module.parameter.maxRatingStars
+                  : 3
+              "
+              @change="saveRate(element)"
+            ></el-rate>
           </template>
           <!--<div class="columns is-mobile" v-if="element.parameter.shareData">
             <div class="column">
@@ -352,7 +365,7 @@
           {{ $t('module.brainstorming.missionmap.participant.maxSpent') }}
         </el-button>
       </el-form-item>
-      <el-form-item
+      <!--<el-form-item
         :label="$t('module.brainstorming.missionmap.participant.rate')"
         prop="points"
       >
@@ -364,7 +377,7 @@
               : 3
           "
         ></el-rate>
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item
         :label="$t('module.brainstorming.missionmap.participant.explanation')"
         prop="explanation"
@@ -632,6 +645,7 @@ export default class Participant extends Vue {
   };
   trackingManager!: TrackingManager;
   orderedIdeas: Idea[] = [];
+  ideaRate: { [key: string]: number } = {};
   theme = '';
   inputManager!: CombinedInputManager;
   activeTab = 'measures';
@@ -864,12 +878,18 @@ export default class Participant extends Vue {
     this.orderedIdeas = [
       ...this.ideas, //.filter((idea) => idea.parameter.shareData),
     ];
+    for (const idea of this.ideas) {
+      if (idea.id in this.ideaRate) this.ideaRate[idea.id] = 0;
+    }
     this.sortIdeasByVote();
     this.calculateDecidedIdeas();
   }
 
   updateVotes(): void {
     this.votes = this.inputManager.votes;
+    for (const vote of this.votes) {
+      if (vote.rating !== null) this.ideaRate[vote.ideaId] = vote.rating;
+    }
     this.updateVoteResult(this.inputManager.votingResult);
     this.sortIdeasByVote();
   }
@@ -893,10 +913,14 @@ export default class Participant extends Vue {
           const vote = this.votes.find((vote) => vote.ideaId === idea.id);
           return {
             idea: idea,
+            rate: vote ? vote.rating : 0,
             order: vote ? vote.detailRating : 0,
           };
         })
-        .sort((a, b) => a.order - b.order)
+        .sort((a, b) => {
+          if (a.order !== b.order) return a.order - b.order;
+          return b.rate - a.rate;
+        })
         .map((item) => item.idea);
       this.orderedIdeas = [
         ...this.ideas, // .filter((idea) => idea.parameter.shareData),
@@ -1193,32 +1217,53 @@ export default class Participant extends Vue {
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
   async dragDone(): Promise<void> {
-    for (const [index, idea] of this.orderedIdeas.entries()) {
-      const vote = this.getCurrentVoteForIdea(idea.id);
-      if (!vote) {
-        votingService
-          .postVote(this.taskId, {
-            ideaId: idea.id,
-            rating: 0,
-            detailRating: index,
-            parameter: {
-              points: 0,
-              explanation: '',
-              explanationIndex: -1,
-            },
-          })
-          .then((vote) => {
-            this.votes.push(vote);
-            this.inputManager.refreshVotes();
-          });
-      } else {
-        vote.detailRating = index;
-        votingService.putVote(vote).then(() => {
-          this.inputManager.refreshVotes();
-        });
-      }
+    for (const [index, item] of this.orderedIdeas.entries()) {
+      await this.saveRate(item, index);
     }
     this.sortVisibleIdeas();
+  }
+
+  async saveRate(idea: Idea, index: number | null = null): Promise<void> {
+    const sort = index === null;
+    if (index === null)
+      index = this.orderedIdeas.findIndex((item) => idea.id === item.id);
+    const rate = this.ideaRate[idea.id];
+    const vote = this.getCurrentVoteForIdea(idea.id);
+    let indexChanged = false;
+    if (!vote) {
+      indexChanged = true;
+      await votingService
+        .postVote(this.taskId, {
+          ideaId: idea.id,
+          rating: rate,
+          detailRating: index,
+          parameter: {
+            points: 0,
+            explanation: '',
+            explanationIndex: -1,
+          },
+        })
+        .then((vote) => {
+          this.votes.push(vote);
+          this.inputManager.refreshVotes();
+        });
+    } else {
+      if (vote.rating !== rate) {
+        indexChanged = true;
+        index = this.orderedIdeas.findIndex(
+          (item) => this.ideaRate[idea.id] > this.ideaRate[item.id]
+        );
+      }
+      vote.detailRating = index;
+      vote.rating = rate;
+      votingService.putVote(vote).then(() => {
+        this.inputManager.refreshVotes();
+      });
+    }
+    if (sort && indexChanged) {
+      this.sortIdeasByVote();
+      this.dragDone();
+    }
   }
 
   editNewImage(): void {
@@ -1597,5 +1642,17 @@ export default class Participant extends Vue {
 .explanationOption {
   text-align: left;
   height: unset;
+}
+
+.landscape::v-deep(.card__image__overlay) {
+  top: unset;
+  bottom: 0;
+  text-align: center;
+  border-radius: 0 0 0 var(--border-radius-xs);
+  background-color: color-mix(
+    in srgb,
+    var(--color-dark-contrast) 60%,
+    transparent
+  );
 }
 </style>
