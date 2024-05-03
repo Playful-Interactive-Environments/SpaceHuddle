@@ -81,7 +81,7 @@
         :autoplay="false"
         indicator-position="none"
         arrow="always"
-        :height="`${targetHeight - 50}px`"
+        height="100%"
       >
         <el-carousel-item v-for="element of orderedIdeas" :key="element.id">
           <IdeaCard
@@ -650,7 +650,7 @@ export default class Participant extends Vue {
   inputManager!: CombinedInputManager;
   activeTab = 'measures';
   startingPoints = 0;
-  showSort = true;
+  showSort = false;
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -875,11 +875,13 @@ export default class Participant extends Vue {
   updateIdeas(): void {
     const ideas = this.inputManager.ideas;
     this.ideas = ideas.filter((idea) => idea.parameter.shareData || idea.isOwn);
+    if (this.orderedIdeas.length === 0 && this.ideas.length > 0)
+      this.showSort = true;
     this.orderedIdeas = [
       ...this.ideas, //.filter((idea) => idea.parameter.shareData),
     ];
     for (const idea of this.ideas) {
-      if (idea.id in this.ideaRate) this.ideaRate[idea.id] = 0;
+      if (!(idea.id in this.ideaRate)) this.ideaRate[idea.id] = 0;
     }
     this.sortIdeasByVote();
     this.calculateDecidedIdeas();
@@ -888,7 +890,12 @@ export default class Participant extends Vue {
   updateVotes(): void {
     this.votes = this.inputManager.votes;
     for (const vote of this.votes) {
-      if (vote.rating !== null) this.ideaRate[vote.ideaId] = vote.rating;
+      if (!(vote.ideaId in this.ideaRate)) {
+        if (vote.rating !== null) this.ideaRate[vote.ideaId] = vote.rating;
+        else this.ideaRate[vote.ideaId] = 0;
+      } else if (this.ideaRate[vote.ideaId] === 0 && vote.rating !== null) {
+        this.ideaRate[vote.ideaId] = vote.rating;
+      }
     }
     this.updateVoteResult(this.inputManager.votingResult);
     this.sortIdeasByVote();
@@ -922,6 +929,8 @@ export default class Participant extends Vue {
           return b.rate - a.rate;
         })
         .map((item) => item.idea);
+      if (this.orderedIdeas.length === 0 && this.ideas.length > 0)
+        this.showSort = true;
       this.orderedIdeas = [
         ...this.ideas, // .filter((idea) => idea.parameter.shareData),
       ];
@@ -1107,8 +1116,8 @@ export default class Participant extends Vue {
           let cardWidth = targetWidth - remToPx(2);
           if (cardWidth > remToPx(30)) cardWidth = remToPx(30);
           if (cardWidth < 300) cardWidth = 300;
-          if (targetHeight > cardWidth / 0.7) this.targetHeight = targetHeight;
-          else this.targetHeight = cardWidth / 0.7;
+          //if (targetHeight > cardWidth / 0.7) this.targetHeight = targetHeight;
+          //else this.targetHeight = cardWidth / 0.7;
         },
         100,
         false,
@@ -1221,48 +1230,60 @@ export default class Participant extends Vue {
       await this.saveRate(item, index);
     }
     this.sortVisibleIdeas();
+    await this.inputManager.refreshVotes();
   }
 
   async saveRate(idea: Idea, index: number | null = null): Promise<void> {
+    const getRateIndex = (): number => {
+      const rateLowerIndex = this.orderedIdeas.findIndex(
+        (item) =>
+          this.ideaRate[item.id] < this.ideaRate[idea.id] && item.id !== idea.id
+      );
+      const rateGreaterIndex = this.orderedIdeas.findIndex(
+        (item) =>
+          this.ideaRate[item.id] >= this.ideaRate[idea.id] &&
+          item.id !== idea.id
+      );
+      if (rateGreaterIndex === -1) return 0;
+      if (rateLowerIndex === -1) return this.orderedIdeas.length;
+      return rateLowerIndex;
+    };
+
     const sort = index === null;
     if (index === null)
       index = this.orderedIdeas.findIndex((item) => idea.id === item.id);
     const rate = this.ideaRate[idea.id];
-    const vote = this.getCurrentVoteForIdea(idea.id);
+    let vote = this.getCurrentVoteForIdea(idea.id);
     let indexChanged = false;
     if (!vote) {
       indexChanged = true;
-      await votingService
-        .postVote(this.taskId, {
-          ideaId: idea.id,
-          rating: rate,
-          detailRating: index,
-          parameter: {
-            points: 0,
-            explanation: '',
-            explanationIndex: -1,
-          },
-        })
-        .then((vote) => {
-          this.votes.push(vote);
-          this.inputManager.refreshVotes();
-        });
+      index = getRateIndex();
+      vote = await votingService.postVote(this.taskId, {
+        ideaId: idea.id,
+        rating: rate,
+        detailRating: index,
+        parameter: {
+          points: 0,
+          explanation: '',
+          explanationIndex: -1,
+        },
+      });
+      this.votes.push(vote);
+      this.inputManager.currentVotes.push(vote);
     } else {
       if (vote.rating !== rate) {
         indexChanged = true;
-        index = this.orderedIdeas.findIndex(
-          (item) => this.ideaRate[idea.id] > this.ideaRate[item.id]
-        );
+        index = getRateIndex();
       }
-      vote.detailRating = index;
-      vote.rating = rate;
-      votingService.putVote(vote).then(() => {
-        this.inputManager.refreshVotes();
-      });
+      if (vote.rating !== rate || vote.detailRating !== index) {
+        vote.detailRating = index;
+        vote.rating = rate;
+        await votingService.putVote(vote);
+      }
     }
     if (sort && indexChanged) {
       this.sortIdeasByVote();
-      this.dragDone();
+      await this.dragDone();
     }
   }
 
@@ -1654,5 +1675,13 @@ export default class Participant extends Vue {
     var(--color-dark-contrast) 60%,
     transparent
   );
+}
+
+.el-carousel {
+  height: calc(100% - 1.5rem);
+}
+
+.gameContainer {
+  height: 100%;
 }
 </style>
