@@ -9,66 +9,33 @@
     ref="ideaSettings"
   >
     <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.points')"
-      :prop="`parameter.points`"
-    >
-      <el-slider
-        v-model="idea.parameter.points"
-        :min="500"
-        :max="10000"
-        :step="500"
-        :show-stops="true"
-        :marks="calculateMarks(1000, 10000, 1000)"
-      />
-    </el-form-item>
-    <!--<el-form-item
+      v-if="authHeaderTyp === EndpointAuthorisationType.PARTICIPANT"
       :label="
-        $t('module.brainstorming.missionmap.moderatorContent.minParticipants')
+        $t('module.brainstorming.missionmap.moderatorContent.mapLocation')
       "
-      :prop="`parameter.minParticipants`"
+      :prop="`parameter.mapLocation`"
     >
-      <el-slider
-        v-model="idea.parameter.minParticipants"
-        :min="2"
-        :max="30"
-        :step="1"
-        :show-stops="true"
-        :marks="calculateMarks(5, 30, 5)"
-      />
+      <div style="height: var(--map-settings-height)">
+        <mgl-map
+          :center="mapCenter"
+          :zoom="mapZoom"
+          :double-click-zoom="false"
+          @map:load="onLoad"
+        >
+          <CustomMapMarker
+            :coordinates="convertCoordinates(idea.parameter.position)"
+            :draggable="true"
+            v-on:dragend="positionChanged"
+          >
+            <template v-slot:icon>
+              <font-awesome-icon icon="location-crosshairs" class="pin" />
+            </template>
+          </CustomMapMarker>
+
+          <mgl-navigation-control position="bottom-left" />
+        </mgl-map>
+      </div>
     </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.minPoints')"
-      :prop="`parameter.minPoints`"
-    >
-      <el-slider
-        v-model="idea.parameter.minPoints"
-        :min="100"
-        :max="idea.parameter.maxPoints"
-        :step="100"
-        :show-stops="true"
-        :marks="calculateMarks(100, idea.parameter.maxPoints, 100, 10)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.maxPoints')"
-      :prop="`parameter.maxPoints`"
-    >
-      <el-slider
-        v-model="idea.parameter.maxPoints"
-        :min="idea.parameter.minPoints"
-        :max="idea.parameter.points"
-        :step="100"
-        :show-stops="true"
-        :marks="
-          calculateMarks(
-            idea.parameter.minPoints,
-            idea.parameter.points,
-            100,
-            10
-          )
-        "
-      />
-    </el-form-item>-->
     <el-form-item
       v-for="parameter of Object.keys(gameConfig.parameter)"
       :key="parameter"
@@ -300,6 +267,67 @@
       </div>
     </el-form-item>
     <el-form-item
+      :label="
+        $t('module.brainstorming.missionmap.moderatorContent.minParticipants')
+      "
+      :prop="`parameter.minParticipants`"
+    >
+      <el-slider
+        v-model="idea.parameter.minParticipants"
+        :min="2"
+        :max="30"
+        :step="1"
+        :show-stops="true"
+        :marks="calculateMarks(5, 30, 5)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorContent.points')"
+      :prop="`parameter.points`"
+    >
+      <el-slider
+        v-model="idea.parameter.points"
+        :min="500"
+        :max="10000"
+        :step="500"
+        :show-stops="true"
+        :marks="calculateMarks(1000, 10000, 1000)"
+      />
+    </el-form-item>
+    <!--<el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorContent.minPoints')"
+      :prop="`parameter.minPoints`"
+    >
+      <el-slider
+        v-model="idea.parameter.minPoints"
+        :min="100"
+        :max="idea.parameter.maxPoints"
+        :step="100"
+        :show-stops="true"
+        :marks="calculateMarks(100, idea.parameter.maxPoints, 100, 10)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorContent.maxPoints')"
+      :prop="`parameter.maxPoints`"
+    >
+      <el-slider
+        v-model="idea.parameter.maxPoints"
+        :min="idea.parameter.minPoints"
+        :max="idea.parameter.points"
+        :step="100"
+        :show-stops="true"
+        :marks="
+          calculateMarks(
+            idea.parameter.minPoints,
+            idea.parameter.points,
+            100,
+            10
+          )
+        "
+      />
+    </el-form-item>-->
+    <el-form-item
       v-if="authHeaderTyp === EndpointAuthorisationType.MODERATOR"
       :label="
         $t('module.brainstorming.missionmap.moderatorContent.explanation')
@@ -379,34 +407,6 @@
             )
           "
         />
-      </div>
-    </el-form-item>
-    <el-form-item
-      v-if="authHeaderTyp === EndpointAuthorisationType.PARTICIPANT"
-      :label="
-        $t('module.brainstorming.missionmap.moderatorContent.mapLocation')
-      "
-      :prop="`parameter.mapLocation`"
-    >
-      <div style="height: var(--map-settings-height)">
-        <mgl-map
-          :center="mapCenter"
-          :zoom="mapZoom"
-          :double-click-zoom="false"
-          @map:load="onLoad"
-        >
-          <CustomMapMarker
-            :coordinates="convertCoordinates(idea.parameter.position)"
-            :draggable="true"
-            v-on:dragend="positionChanged"
-          >
-            <template v-slot:icon>
-              <font-awesome-icon icon="location-crosshairs" class="pin" />
-            </template>
-          </CustomMapMarker>
-
-          <mgl-navigation-control position="bottom-left" />
-        </mgl-map>
       </div>
     </el-form-item>
   </IdeaSettings>
