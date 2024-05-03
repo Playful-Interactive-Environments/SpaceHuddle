@@ -1116,8 +1116,8 @@ export default class Participant extends Vue {
           let cardWidth = targetWidth - remToPx(2);
           if (cardWidth > remToPx(30)) cardWidth = remToPx(30);
           if (cardWidth < 300) cardWidth = 300;
-          //if (targetHeight > cardWidth / 0.7) this.targetHeight = targetHeight;
-          //else this.targetHeight = cardWidth / 0.7;
+          if (targetHeight > cardWidth / 0.7) this.targetHeight = targetHeight;
+          else this.targetHeight = cardWidth / 0.7;
         },
         100,
         false,
@@ -1235,7 +1235,7 @@ export default class Participant extends Vue {
 
   async saveRate(idea: Idea, index: number | null = null): Promise<void> {
     const getRateIndex = (): number => {
-      const rateLowerIndex = this.orderedIdeas.findIndex(
+      let rateLowerIndex = this.orderedIdeas.findIndex(
         (item) =>
           this.ideaRate[item.id] < this.ideaRate[idea.id] && item.id !== idea.id
       );
@@ -1244,8 +1244,15 @@ export default class Participant extends Vue {
           this.ideaRate[item.id] >= this.ideaRate[idea.id] &&
           item.id !== idea.id
       );
+      const rateIndex = this.orderedIdeas.findIndex(
+        (item) =>
+          this.ideaRate[item.id] === this.ideaRate[idea.id] &&
+          item.id !== idea.id
+      );
       if (rateGreaterIndex === -1) return 0;
-      if (rateLowerIndex === -1) return this.orderedIdeas.length;
+      if (rateLowerIndex === -1) rateLowerIndex = this.orderedIdeas.length;
+      if (index && index >= rateIndex - 1 && index <= rateLowerIndex)
+        return index;
       return rateLowerIndex;
     };
 
