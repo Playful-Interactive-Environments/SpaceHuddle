@@ -54,7 +54,7 @@
           :is-selectable="false"
           :is-editable="false"
           :show-state="false"
-          :portrait="false"
+          :portrait="isMobile"
         />
       </div>
     </el-space>
@@ -139,6 +139,10 @@ export default class Participant extends Vue {
 
   QuestionType = QuestionType;
   submitScreen = false;
+
+  get isMobile(): boolean {
+    return window.innerWidth < 600;
+  }
 
   hasAnswer(): boolean {
     return this.hasQuestionAnCorrectAnswer(this.activeQuestion);
