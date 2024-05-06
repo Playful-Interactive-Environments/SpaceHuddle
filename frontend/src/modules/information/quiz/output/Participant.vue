@@ -300,7 +300,7 @@
         $t('module.information.quiz.participant.thanksIndividual')
       }}</span>
       <span id="ScoreString" v-if="showSummery && quizQuestionCount > 0">{{
-        getScoreString
+        scoreString
       }}</span>
     </div>
     <div id="submitScreen" v-if="activeAnswer.isSaved">
@@ -407,6 +407,7 @@ export default class Participant extends Vue {
     selectionList: [],
     isSaved: false,
   };
+  ownAnswerList: { [key: string]: string } = {};
 
   QuestionPhase = QuestionPhase;
   QuestionType = QuestionType;
@@ -455,6 +456,46 @@ export default class Participant extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
     );
+    hierarchyService.registerGetList(
+      this.taskId,
+      'all',
+      this.updateHierarchy,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    votingService.registerGetVotes(
+      this.taskId,
+      this.updateOwnVoteAnswerList,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
+  hierarchyList: Hierarchy[] = [];
+  updateHierarchy(hierarchyList: Hierarchy[]): void {
+    this.hierarchyList = hierarchyList;
+    const inputList = hierarchyList.filter((item) => item.isOwn);
+    for (const input of inputList) {
+      const parentId = input.parentId;
+      if (parentId) {
+        if (this.ownAnswerList[parentId])
+          this.ownAnswerList[parentId] += `, ${input.keywords}`;
+        else this.ownAnswerList[parentId] = input.keywords;
+      }
+    }
+  }
+
+  updateOwnVoteAnswerList(votes: Vote[]): void {
+    for (const vote of votes.sort((a, b) => a.rating - b.rating)) {
+      const parentId = this.hierarchyList.find(
+        (item) => item.id === vote.ideaId
+      )?.parentId;
+      if (parentId) {
+        if (this.ownAnswerList[parentId])
+          this.ownAnswerList[parentId] += `, ${vote.ideaId}`;
+        else this.ownAnswerList[parentId] = vote.ideaId;
+      }
+    }
   }
 
   async handleOrderChange(): Promise<void> {
@@ -534,7 +575,7 @@ export default class Participant extends Vue {
     return false;
   }
 
-  get getScoreString(): string {
+  get scoreString(): string {
     return this.score + '/' + this.quizQuestionCount;
   }
 
@@ -813,6 +854,9 @@ export default class Participant extends Vue {
       hierarchyService.refreshCash(this.taskId, this.activeQuestionId);
       hasChanges = true;
     }
+    this.ownAnswerList[this.activeQuestionId] = answerValue
+      ? answerValue.toString()
+      : '';
     return hasChanges;
   }
 
@@ -856,6 +900,8 @@ export default class Participant extends Vue {
         hasChanges = true;
       }
     }
+    this.ownAnswerList[this.activeQuestionId] =
+      this.activeAnswer.selectionList.join(', ');
     return hasChanges;
   }
 
@@ -865,10 +911,12 @@ export default class Participant extends Vue {
   }
 
   showSavingState = false;
+  goForward = true;
   async goToNextQuestion(
     event: PointerEvent | null,
     initData = false
   ): Promise<void> {
+    this.goForward = true;
     this.showSavingState = true;
     await this.logInfo();
     this.initData = initData;
@@ -928,6 +976,7 @@ export default class Participant extends Vue {
   }
 
   async goToPreviousQuestion(): Promise<void> {
+    this.goForward = false;
     this.showSavingState = true;
     this.initData = false;
     this.checkScore();
@@ -1015,6 +1064,7 @@ export default class Participant extends Vue {
         this.reloadAnswers();
       }
       this.activeQuestion = question;
+      this.skipDependenceQuestions();
     }
   }
 
@@ -1406,12 +1456,27 @@ export default class Participant extends Vue {
     }
   }
 
+  skipDependenceQuestions(): void {
+    if (this.activeQuestion) {
+      const dependence = this.activeQuestion.parameter.dependence;
+      const dependenceValue = this.activeQuestion.parameter.dependenceValue;
+      if (dependence) {
+        if (this.ownAnswerList[dependence] !== dependenceValue) {
+          if (this.goForward) this.goToNextQuestion(null, true);
+          else this.goToPreviousQuestion();
+        }
+      }
+    }
+  }
+
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateAnswers);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateQuestions);
+    cashService.deregisterAllGet(this.updateHierarchy);
+    cashService.deregisterAllGet(this.updateOwnVoteAnswerList);
   }
 
   unmounted(): void {

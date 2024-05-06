@@ -71,6 +71,59 @@
         v-on:submitDataValid="saveQuestion"
       >
         <el-form-item
+          class="dependence"
+          v-if="editQuestionIndex > 1"
+          :label="$t('module.information.quiz.moderatorContent.dependence')"
+          prop="dependence"
+        >
+          <el-select
+            v-model="formData.question.parameter.dependence"
+            class="question"
+            :class="{
+              'select--fullwidth': !formData.question.parameter.dependence,
+            }"
+          >
+            <el-option
+              :value="null"
+              :label="$t('module.information.quiz.moderatorContent.none')"
+            >
+            </el-option>
+            <el-option
+              v-for="(question, index) in questions.slice(
+                0,
+                editQuestionIndex - 1
+              )"
+              :key="question.question.id"
+              :value="question.question.id"
+              :label="`${index + 1}. ${question.question.keywords}`"
+            >
+            </el-option>
+          </el-select>
+          <el-select
+            v-model="formData.question.parameter.dependenceValue"
+            class="answer"
+            v-if="
+              formData.question.parameter.dependence && dependencyIsVoteType()
+            "
+          >
+            <el-option
+              v-for="(answer, index) in possibleAnswers.filter(
+                (item) =>
+                  item.parentId === formData.question.parameter.dependence
+              )"
+              :key="answer.id"
+              :value="answer.id"
+              :label="`${index + 1}. ${answer.keywords}`"
+            >
+            </el-option>
+          </el-select>
+          <el-input
+            class="answer"
+            v-else-if="formData.question.parameter.dependence"
+            v-model="formData.question.parameter.dependenceValue"
+          />
+        </el-form-item>
+        <el-form-item
           v-if="moduleQuestionnaireType === QuestionnaireType.TALK"
           :label="$t('module.information.quiz.moderatorContent.hasAnswer')"
           prop="hasAnswer"
@@ -387,6 +440,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   task: Task | null = null;
   sessionId!: string;
   questions: Question[] = [];
+  possibleAnswers: Hierarchy[] = [];
   publicQuestion: Question | null = null;
   publicTask: Task | null = null;
   editQuestion: Question | null = null;
@@ -443,6 +497,18 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return QuestionnaireType.SURVEY;
   }
 
+  dependencyIsVoteType(): boolean {
+    const dependencyQuestionType = this.questions.find(
+      (item) => item.question.id === this.formData.question.parameter.dependence
+    )?.questionType;
+    if (dependencyQuestionType)
+      return (
+        getQuestionResultStorageFromQuestionType(dependencyQuestionType) ===
+        QuestionResultStorage.VOTING
+      );
+    return false;
+  }
+
   questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -450,6 +516,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.task = null;
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateQuestions);
+    cashService.deregisterAllGet(this.updateHierarchy);
     cashService.deregisterAllGet(this.updateFinalResult);
     taskService.registerGetTaskById(this.taskId, this.updateTask);
     this.questionCash = hierarchyService.registerGetQuestions(
@@ -458,6 +525,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       EndpointAuthorisationType.MODERATOR,
       20
     );
+    hierarchyService.registerGetList(
+      this.taskId,
+      'all',
+      this.updateHierarchy,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
+  updateHierarchy(hierarchyList: Hierarchy[]): void {
+    this.possibleAnswers = hierarchyList;
   }
 
   @Watch('publicQuestion', { immediate: true })
@@ -486,6 +564,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       question: Object.assign({}, question.question),
       answers: question.answers.map((answer) => Object.assign({}, answer)),
     };
+    if (!this.formData.question.parameter.dependence) {
+      this.formData.question.parameter.dependence = null;
+      this.formData.question.parameter.dependenceValue = null;
+    }
     if (Object.hasOwn(question.question.parameter, 'hasAnswer'))
       this.hasAnswer = question.question.parameter.hasAnswer;
   }
@@ -1045,7 +1127,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       imageTimestamp: null,
       parameter: forAnswer
         ? { isCorrect: false }
-        : { questionType: QuestionType.MULTIPLECHOICE },
+        : {
+            questionType: QuestionType.MULTIPLECHOICE,
+            dependence: null,
+            dependenceValue: null,
+          },
       order: order,
       isOwn: false,
       childCount: 0,
@@ -1073,6 +1159,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     cashService.deregisterAllGet(this.updateHierarchyResult);
     cashService.deregisterAllGet(this.updatePublicTask);
     cashService.deregisterAllGet(this.updateQuestions);
+    cashService.deregisterAllGet(this.updateHierarchy);
     cashService.deregisterAllGet(this.updateFinalResult);
     cashService.deregisterAllGet(this.updateParentVotes);
   }
@@ -1184,5 +1271,20 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 .ghost {
   background-color: var(--color-dark-contrast);
   color: white;
+}
+
+.dependence {
+  .question {
+    width: 60%;
+  }
+
+  .select--fullwidth {
+    width: 100%;
+  }
+
+  .answer {
+    padding-left: 0.5rem;
+    width: 40%;
+  }
 }
 </style>

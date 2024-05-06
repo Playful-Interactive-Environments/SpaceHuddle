@@ -28,7 +28,9 @@
     "submit": "speichern",
     "addAnswer": "Antwort hinzufügen",
     "noQuestionSelected": "Keine Frage ausgewählt.",
-    "hasAnswer": "hat ein korrekte Antwort"
+    "hasAnswer": "hat ein korrekte Antwort",
+    "dependence": "Abhängigkeit",
+    "none": "keine"
   },
   "publicScreen": {
     "chartDataLabelCorrect": "Richtig",

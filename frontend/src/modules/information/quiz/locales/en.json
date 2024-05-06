@@ -28,7 +28,9 @@
     "submit": "save",
     "addAnswer": "add answer",
     "noQuestionSelected": "No question selected.",
-    "hasAnswer": "has correct answer"
+    "hasAnswer": "has correct answer",
+    "dependence": "dependence",
+    "none": "none"
   },
   "publicScreen": {
     "chartDataLabelCorrect": "correct",

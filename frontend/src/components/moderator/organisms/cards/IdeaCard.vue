@@ -49,10 +49,7 @@
       >
         <slot name="image_overlay"></slot>
       </div>
-      <div
-        v-else
-        class="card__image__overlay"
-      >
+      <div v-else class="card__image__overlay">
         <slot name="image_overlay"></slot>
       </div>
     </div>
