@@ -325,6 +325,25 @@
           {{ $t('module.brainstorming.missionmap.participant.points') }}
         </template>
         <div class="pointsInfo">
+          {{
+            $t('module.brainstorming.missionmap.participant.minParticipants')
+          }}:
+          {{ selectedIdea?.parameter.minParticipants }}
+          <font-awesome-icon icon="user" />
+        </div>
+        <div class="pointsInfo">
+          {{
+            $t('module.brainstorming.missionmap.participant.countParticipants')
+          }}:
+          {{
+            selectedVote.participantCount +
+            (selectedVote.previousSpendPoints === 0 && selectedVote.points > 0
+              ? 1
+              : 0)
+          }}
+          <font-awesome-icon icon="user" />
+        </div>
+        <div class="pointsInfo">
           {{ $t('module.brainstorming.missionmap.participant.target') }}:
           {{ selectedIdea?.parameter.points }}
           <font-awesome-icon icon="coins" />
@@ -334,12 +353,6 @@
           {{ selectedVote.previousSpendTotalPoints + selectedVote.points }}
           <font-awesome-icon icon="person-booth" />
         </div>
-        <!--<div class="pointsInfo">
-          {{
-            $t('module.brainstorming.missionmap.participant.minParticipants')
-          }}:
-          {{ selectedIdea?.parameter.minParticipants }}
-        </div>-->
         <div class="pointsInfo">
           {{ $t('module.brainstorming.missionmap.participant.own') }}:
           {{ selectedVote.previousSpendPoints + selectedVote.points }}
@@ -642,6 +655,7 @@ export default class Participant extends Vue {
     previousInputSpendPoints: 0,
     previousSpendTotalPoints: 0,
     spentPoints: 0,
+    participantCount: 0,
   };
   trackingManager!: TrackingManager;
   orderedIdeas: Idea[] = [];
@@ -937,26 +951,42 @@ export default class Participant extends Vue {
     }
   }
 
-  async saveVoting(saveOnlyPointChanges = false): Promise<void> {
+  async saveVoting(savePointChanges = false): Promise<void> {
     const trackVote = async (vote: Vote, points: number): Promise<void> => {
-      await this.trackingManager.createInstanceStepPoints(
-        vote.ideaId,
-        TaskParticipantIterationStepStatesType.NEUTRAL,
-        saveOnlyPointChanges
-          ? {
-              points: this.selectedVote.spentPoints,
-            }
-          : {
-              rating: this.selectedVote.rate,
-              order: this.selectedVote.order,
-              points: this.selectedVote.spentPoints,
-              explanation: this.selectedVote.explanation,
-              explanationIndex: this.selectedVote.explanationIndex,
-            },
-        points,
-        this.selectedVote.spentPoints,
-        true
-      );
+      let trackStep = true;
+      if (this.trackingManager.iterationStep) {
+        if (!savePointChanges) {
+          trackStep =
+            this.trackingManager.iterationStep.parameter.rating !==
+              this.selectedVote.rate ||
+            this.trackingManager.iterationStep.parameter.order !==
+              this.selectedVote.order ||
+            this.trackingManager.iterationStep.parameter.explanation !==
+              this.selectedVote.explanation ||
+            this.trackingManager.iterationStep.parameter.explanationIndex !==
+              this.selectedVote.explanationIndex;
+        }
+      }
+      if (trackStep) {
+        await this.trackingManager.createInstanceStepPoints(
+          vote.ideaId,
+          TaskParticipantIterationStepStatesType.NEUTRAL,
+          savePointChanges
+            ? {
+                points: this.selectedVote.spentPoints,
+              }
+            : {
+                rating: this.selectedVote.rate,
+                order: this.selectedVote.order,
+                points: 0,
+                explanation: this.selectedVote.explanation,
+                explanationIndex: this.selectedVote.explanationIndex,
+              },
+          points,
+          savePointChanges ? this.selectedVote.spentPoints : 0,
+          true
+        );
+      }
       if (
         this.trackingManager.iteration &&
         this.trackingManager.iteration.state ===
@@ -992,7 +1022,7 @@ export default class Participant extends Vue {
         votingService
           .postVote(
             this.taskId,
-            saveOnlyPointChanges
+            savePointChanges
               ? {
                   ideaId: this.selectedIdea.id,
                   rating: 0,
@@ -1009,10 +1039,7 @@ export default class Participant extends Vue {
                   rating: this.selectedVote.rate,
                   detailRating: this.selectedVote.order,
                   parameter: {
-                    points:
-                      this.selectedVote.previousSpendPoints -
-                      this.selectedVote.previousInputSpendPoints +
-                      this.selectedVote.points,
+                    points: 0,
                     explanation: this.selectedVote.explanation,
                     explanationIndex: this.selectedVote.explanationIndex,
                   },
@@ -1021,7 +1048,7 @@ export default class Participant extends Vue {
           .then(async (vote) => {
             trackVote(vote, points);
             this.votes.push(vote);
-            if (!saveOnlyPointChanges) {
+            if (!savePointChanges) {
               await this.inputManager.refreshVotes();
               this.loadSelectedVote();
             } else {
@@ -1050,7 +1077,7 @@ export default class Participant extends Vue {
         ) {
           points += 10;
         }
-        if (saveOnlyPointChanges) {
+        if (savePointChanges) {
           vote.parameter.points =
             this.selectedVote.previousSpendPoints -
             this.selectedVote.previousInputSpendPoints +
@@ -1069,14 +1096,14 @@ export default class Participant extends Vue {
         }
         votingService.putVote(vote).then(async () => {
           trackVote(vote, points);
-          if (!saveOnlyPointChanges) {
+          if (!savePointChanges) {
             await this.inputManager.refreshVotes();
             this.loadSelectedVote();
           }
         });
       }
     }
-    if (!saveOnlyPointChanges) this.showDetails = false;
+    if (!savePointChanges) this.showDetails = false;
   }
 
   @Watch('showDetails', { immediate: true })
@@ -1167,7 +1194,7 @@ export default class Participant extends Vue {
     this.selectedIdea = idea;
   }
 
-  reset(previousSpendTotalPoints = 0): void {
+  reset(previousSpendTotalPoints = 0, participantCount = 0): void {
     this.selectedVote = {
       rate: 0,
       order: 0,
@@ -1178,6 +1205,7 @@ export default class Participant extends Vue {
       previousSpendTotalPoints: previousSpendTotalPoints,
       previousInputSpendPoints: 0,
       spentPoints: 0,
+      participantCount: participantCount,
     };
   }
 
@@ -1205,6 +1233,7 @@ export default class Participant extends Vue {
             previousSpendTotalPoints: voteResult.sum,
             previousInputSpendPoints: inputVote.parameter.points,
             spentPoints: 0,
+            participantCount: voteResult.count,
           };
         } else {
           this.selectedVote = {
@@ -1217,9 +1246,10 @@ export default class Participant extends Vue {
             previousSpendTotalPoints: voteResult.sum,
             previousInputSpendPoints: 0,
             spentPoints: 0,
+            participantCount: voteResult.count,
           };
         }
-      } else if (voteResult) this.reset(voteResult.sum);
+      } else if (voteResult) this.reset(voteResult.sum, voteResult.count);
       else this.reset();
     }
   }
