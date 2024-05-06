@@ -211,7 +211,7 @@ class HierarchyRepository implements RepositoryInterface
             "idea.task_id" => $taskId
         ];
         if (isset($hierarchyParentId)) {
-            $conditions["hierarchy.category_idea_id"] = $hierarchyParentId;
+            if ($hierarchyParentId != "all") $conditions["hierarchy.category_idea_id"] = $hierarchyParentId;
         } else {
             array_push($conditions, "hierarchy.category_idea_id IS NULL");
         }
