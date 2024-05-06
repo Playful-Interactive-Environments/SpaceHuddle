@@ -43,8 +43,8 @@
     "submit": "Save",
     "waiting": "Please wait. Questions and answers are being loaded.",
     "imageKeywords": "image caption",
-    "good": "very good",
-    "bad": "very bad"
+    "good": "fully applies",
+    "bad": "strongly disagree"
   },
   "enum": {
     "questionType": {

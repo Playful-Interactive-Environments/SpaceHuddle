@@ -43,8 +43,8 @@
     "submit": "Speichern",
     "waiting": "Bitte warten. Fragen und Antworten werden geladen.",
     "imageKeywords": "Bildbeschreibung",
-    "good": "sehr gut",
-    "bad": "sehr schlect"
+    "good": "trifft voll zu",
+    "bad": "trifft nicht zu"
   },
   "enum": {
     "questionType": {
