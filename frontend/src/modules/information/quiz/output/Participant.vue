@@ -1458,10 +1458,10 @@ export default class Participant extends Vue {
 
   skipDependenceQuestions(): void {
     if (this.activeQuestion) {
-      const dependence = this.activeQuestion.parameter.dependence;
+      const dependency = this.activeQuestion.parameter.dependency;
       const dependenceValue = this.activeQuestion.parameter.dependenceValue;
-      if (dependence) {
-        if (this.ownAnswerList[dependence] !== dependenceValue) {
+      if (dependency) {
+        if (this.ownAnswerList[dependency] !== dependenceValue) {
           if (this.goForward) this.goToNextQuestion(null, true);
           else this.goToPreviousQuestion();
         }

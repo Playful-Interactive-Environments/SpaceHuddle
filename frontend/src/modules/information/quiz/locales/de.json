@@ -29,7 +29,7 @@
     "addAnswer": "Antwort hinzufügen",
     "noQuestionSelected": "Keine Frage ausgewählt.",
     "hasAnswer": "hat ein korrekte Antwort",
-    "dependence": "Abhängigkeit",
+    "dependency": "Abhängigkeit",
     "none": "keine"
   },
   "publicScreen": {

@@ -71,16 +71,16 @@
         v-on:submitDataValid="saveQuestion"
       >
         <el-form-item
-          class="dependence"
+          class="dependency"
           v-if="editQuestionIndex > 1"
-          :label="$t('module.information.quiz.moderatorContent.dependence')"
-          prop="dependence"
+          :label="$t('module.information.quiz.moderatorContent.dependency')"
+          prop="dependency"
         >
           <el-select
-            v-model="formData.question.parameter.dependence"
+            v-model="formData.question.parameter.dependency"
             class="question"
             :class="{
-              'select--fullwidth': !formData.question.parameter.dependence,
+              'select--fullwidth': !formData.question.parameter.dependency,
             }"
           >
             <el-option
@@ -103,13 +103,13 @@
             v-model="formData.question.parameter.dependenceValue"
             class="answer"
             v-if="
-              formData.question.parameter.dependence && dependencyIsVoteType()
+              formData.question.parameter.dependency && dependencyIsVoteType()
             "
           >
             <el-option
               v-for="(answer, index) in possibleAnswers.filter(
                 (item) =>
-                  item.parentId === formData.question.parameter.dependence
+                  item.parentId === formData.question.parameter.dependency
               )"
               :key="answer.id"
               :value="answer.id"
@@ -119,7 +119,7 @@
           </el-select>
           <el-input
             class="answer"
-            v-else-if="formData.question.parameter.dependence"
+            v-else-if="formData.question.parameter.dependency"
             v-model="formData.question.parameter.dependenceValue"
           />
         </el-form-item>
@@ -499,7 +499,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   dependencyIsVoteType(): boolean {
     const dependencyQuestionType = this.questions.find(
-      (item) => item.question.id === this.formData.question.parameter.dependence
+      (item) => item.question.id === this.formData.question.parameter.dependency
     )?.questionType;
     if (dependencyQuestionType)
       return (
@@ -510,6 +510,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
+  hierarchyCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -525,11 +526,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       EndpointAuthorisationType.MODERATOR,
       20
     );
-    hierarchyService.registerGetList(
+    this.hierarchyCash = hierarchyService.registerGetList(
       this.taskId,
       'all',
       this.updateHierarchy,
-      EndpointAuthorisationType.PARTICIPANT,
+      EndpointAuthorisationType.MODERATOR,
       60 * 60
     );
   }
@@ -564,8 +565,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       question: Object.assign({}, question.question),
       answers: question.answers.map((answer) => Object.assign({}, answer)),
     };
-    if (!this.formData.question.parameter.dependence) {
-      this.formData.question.parameter.dependence = null;
+    if (!this.formData.question.parameter.dependency) {
+      this.formData.question.parameter.dependency = null;
       this.formData.question.parameter.dependenceValue = null;
     }
     if (Object.hasOwn(question.question.parameter, 'hasAnswer'))
@@ -746,6 +747,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   deleteAnswer(answer: Hierarchy): void {
     if (answer.id) {
       hierarchyService.deleteHierarchy(answer.id);
+      const index = this.possibleAnswers.findIndex(
+        (item) => item.id === answer.id
+      );
+      if (index > -1) this.possibleAnswers.splice(index, 1);
     }
     const index = this.formData.answers.indexOf(answer);
     this.formData.answers.splice(index, 1);
@@ -765,6 +770,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           if (answer.id) {
             if (answer.description) answer.keywords = answer.description;
             hierarchyService.putHierarchy(answer);
+            const index = this.possibleAnswers.findIndex(
+              (item) => item.id === answer.id
+            );
+            this.possibleAnswers[index].keywords = answer.keywords;
+            this.possibleAnswers[index].description = answer.description;
           } else {
             answer.parentId = this.formData.question.id;
             hierarchyService
@@ -779,6 +789,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
               })
               .then((hierarchy) => {
                 answer.id = hierarchy.id;
+                this.possibleAnswers.push(hierarchy);
               });
           }
         });
@@ -790,12 +801,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         ) === QuestionResultStorage.VOTING
       ) {
         for (const answer of this.editQuestion.answers) {
-          if (answer.id)
+          if (answer.id) {
             await hierarchyService.deleteHierarchy(
               answer.id,
               EndpointAuthorisationType.MODERATOR,
               false
             );
+            const index = this.possibleAnswers.findIndex(
+              (item) => item.id === answer.id
+            );
+            if (index > -1) this.possibleAnswers.splice(index, 1);
+          }
         }
       }
       this.editQuestion = {
@@ -823,15 +839,19 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       ) {
         for (const answer of this.formData.answers) {
           answer.parentId = question.id;
-          await hierarchyService.postHierarchy(this.taskId, {
-            parentId: answer.parentId,
-            keywords: answer.description ?? answer.keywords,
-            description: answer.description,
-            link: answer.link,
-            image: answer.image,
-            parameter: answer.parameter,
-            order: answer.order,
-          });
+          await hierarchyService
+            .postHierarchy(this.taskId, {
+              parentId: answer.parentId,
+              keywords: answer.description ?? answer.keywords,
+              description: answer.description,
+              link: answer.link,
+              image: answer.image,
+              parameter: answer.parameter,
+              order: answer.order,
+            })
+            .then((hierarchy) => {
+              this.possibleAnswers.push(hierarchy);
+            });
         }
         this.questionCash.refreshData().then(() => {
           this.setupEmptyQuestion();
@@ -861,6 +881,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (this.formData.question.id) {
       hierarchyService.clone(this.formData.question.id).then(() => {
         this.questionCash.refreshData();
+        this.hierarchyCash.refreshData();
       });
     }
   }
@@ -1129,7 +1150,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         ? { isCorrect: false }
         : {
             questionType: QuestionType.MULTIPLECHOICE,
-            dependence: null,
+            dependency: null,
             dependenceValue: null,
           },
       order: order,
@@ -1273,7 +1294,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   color: white;
 }
 
-.dependence {
+.dependency {
   .question {
     width: 60%;
   }
