@@ -1,6 +1,6 @@
 <template>
   <div id="podiumVisContainer">
-    <div class="buttonContainer">
+    <div class="buttonContainer" v-if="!ended">
       <el-button
         class="startButton"
         v-if="!started && this.topVotes[0]"
@@ -67,7 +67,7 @@
         ).length > 0
       "
       id="revealOtherVotes"
-      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none' }"
+      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none', display: ended ? 'flex' : 'none' }"
     >
       <a href="#otherVotesContainer" class="revealButton">
         Other ideas
@@ -82,7 +82,7 @@
       "
       id="otherVotesContainer"
       class="columnLayout"
-      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none' }"
+      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none', display: ended ? 'block' : 'none'  }"
     >
       <IdeaCard
         v-for="vote in this.votes.filter(
@@ -166,7 +166,9 @@ export default class PublicScreen extends Vue {
     } else {
       if (this.order[index] >= this.moderatedIndex) {
         if (this.moderatedIndex <= 0) {
-          this.ended = true;
+          setTimeout(() => {
+            this.ended = true;
+          }, 500);
         }
         return (this.order[index] / this.voteSets.length) * 40 + '%';
       } else {
