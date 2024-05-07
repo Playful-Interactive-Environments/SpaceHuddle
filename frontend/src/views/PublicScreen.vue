@@ -68,6 +68,7 @@
       <el-main class="public-screen__main">
         <div ref="scrollContent"></div>
         <el-scrollbar
+          class="module-content"
           native
           :height="`calc(100vh - ${topContentPosition}px - 0.1rem)`"
         >
@@ -591,5 +592,10 @@ h3 {
 
 .process-timeline-container {
   max-width: calc(var(--app-width) - 2rem);
+}
+
+.module-content::v-deep(.el-scrollbar__view) {
+  display: flex;
+  flex-direction: column;
 }
 </style>
