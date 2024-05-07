@@ -201,6 +201,9 @@ export default class PublicScreen extends Vue {
           );
         }
       }
+      if (!this.started && !this.ended) {
+        this.moderatedIndex = this.topVotes.length;
+      }
     }
   }
 }
