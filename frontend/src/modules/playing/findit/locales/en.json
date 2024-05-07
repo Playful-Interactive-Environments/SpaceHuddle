@@ -6,7 +6,9 @@
   "moderatorConfig": {
     "mapSection": "map section",
     "replayable": "replayable",
-    "showTutorialOnlyOnce": "show tutorial only once"
+    "showTutorialOnlyOnce": "show tutorial only once",
+    "placeables": "weather",
+    "all": "all"
   },
   "moderatorContent": {
     "tabs": {

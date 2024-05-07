@@ -10,11 +10,14 @@
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
     <SelectState
-      v-if="gameStep === GameStep.Select && gameState === GameState.Game"
+      v-if="
+        gameStep === GameStep.Select && gameState === GameState.Game && module
+      "
       :task-id="taskId"
       :gameConfig="gameConfig"
       :tracking-manager="trackingManager"
       :open-high-score="levelDone"
+      :placeables="module.parameter.placeables"
       @selectionDone="levelSelected"
     />
     <LevelBuilder

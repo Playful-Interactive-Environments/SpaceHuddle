@@ -1,6 +1,40 @@
 <template>
   <div>
     <el-form-item
+      :label="$t('module.playing.findit.moderatorConfig.placeables')"
+      :prop="`${rulePropPath}.placeables`"
+    >
+      <el-select v-model="modelValue.placeables">
+        <el-option
+          value=""
+          :label="$t('module.playing.findit.moderatorConfig.all')"
+        />
+        <el-option
+          v-for="configType of Object.keys(gameConfig)"
+          :key="configType"
+          :value="configType"
+          :style="{
+            color: getSettingsForLevelType(gameConfig, configType).color,
+          }"
+          :label="
+            $t(
+              `module.playing.findit.participant.placeables.${configType}.name`
+            )
+          "
+        >
+          <font-awesome-icon
+            :icon="getSettingsForLevelType(gameConfig, configType).icon"
+          />
+          &nbsp;
+          {{
+            $t(
+              `module.playing.findit.participant.placeables.${configType}.name`
+            )
+          }}
+        </el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item
       :label="$t('module.playing.findit.moderatorConfig.replayable')"
       :prop="`${rulePropPath}.replayable`"
     >
@@ -24,6 +58,8 @@ import defaultLevelConfig from '@/modules/playing/findit/data/defaultLevels.json
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
+import * as configParameter from '@/utils/game/configParameter';
 
 @Options({
   components: {},
@@ -39,10 +75,17 @@ export default class ModeratorConfig extends Vue implements CustomInit {
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   @Prop({ default: {} }) formData!: any;
+  gameConfig = gameConfig;
+
+  getSettingsForLevel = configParameter.getSettingsForLevel;
+  getSettingsForLevelType = configParameter.getSettingsForLevelType;
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
     if (this.modelValue) {
+      if (!('placeables' in this.modelValue)) {
+        this.modelValue.placeables = '';
+      }
       if (!('replayable' in this.modelValue)) {
         this.modelValue.replayable = true;
       }

@@ -6,7 +6,9 @@
   "moderatorConfig": {
     "mapSection": "Kartenabschnitt",
     "replayable": "mehrfach spielbar",
-    "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen"
+    "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen",
+    "placeables": "Wetter",
+    "all": "Alle"
   },
   "moderatorContent": {
     "tabs": {

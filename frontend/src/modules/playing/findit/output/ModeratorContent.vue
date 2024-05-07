@@ -195,7 +195,7 @@
       @updateData="addData"
     >
       <el-form-item
-        v-if="!settingsIdea.id"
+        v-if="!settingsIdea.id && placeableList.length > 1"
         :label="$t('module.playing.findit.moderatorContent.levelType')"
         :prop="`parameter.type`"
       >
@@ -204,7 +204,7 @@
           v-on:change="onTypeChanged"
         >
           <el-option
-            v-for="configType of Object.keys(gameConfig)"
+            v-for="configType of placeableList"
             :key="configType"
             :value="configType"
             :style="{
@@ -335,6 +335,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
   LevelWorkflowType = LevelWorkflowType;
 
+  get placeableList(): string[] {
+    if (this.module && this.module.parameter.placeables) {
+      return Object.keys(this.gameConfig).filter(
+        (item) => item === this.module?.parameter.placeables
+      );
+    }
+    return Object.keys(this.gameConfig);
+  }
+
   get showStatistic(): boolean {
     return !!this.activeStatisticIdeaId;
   }
@@ -409,6 +418,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     else {
       this.module = task.modules.find((t) => t.name === 'findit');
     }
+    emptyParameter.type = this.placeableList[0];
   }
 
   updateIdeas(ideas: Idea[]): void {

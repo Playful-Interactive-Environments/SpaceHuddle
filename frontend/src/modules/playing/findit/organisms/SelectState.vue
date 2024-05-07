@@ -9,10 +9,10 @@
           {{ $t('participant.molecules.moduleInfo.prev') }}</el-button
         >
         <div
-          v-for="configType of Object.keys(gameConfig)"
+          v-for="configType of placeableList"
           :key="configType"
           :style="{
-            height: 100 / Object.keys(gameConfig).length + '%',
+            height: 100 / placeableList.length + '%',
             color: getSettingsForLevelType(gameConfig, configType).color,
             backgroundImage:
               'url(' +
@@ -24,7 +24,7 @@
         >
           <div
             class="selectionWhite"
-            :style="{ height: 100 / Object.keys(gameConfig).length + '%' }"
+            :style="{ height: 100 / placeableList.length + '%' }"
           ></div>
           <font-awesome-icon
             :icon="getSettingsForLevelType(gameConfig, configType).icon"
@@ -151,6 +151,7 @@ export default class SelectState extends Vue {
   @Prop({ default: {} }) readonly gameConfig!: any;
   @Prop() readonly trackingManager!: TrackingManager;
   @Prop({ default: true }) readonly openHighScore!: boolean;
+  @Prop({ default: '' }) readonly placeables!: string;
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
@@ -163,6 +164,12 @@ export default class SelectState extends Vue {
 
   get maxLevelPoints(): number {
     return this.trackingManager.getStarPoints(3);
+  }
+
+  get placeableList(): string[] {
+    return Object.keys(this.gameConfig).filter(
+      (item) => !this.placeables || item === this.placeables
+    );
   }
 
   getPointsForLevel(ideaId: string): number {
