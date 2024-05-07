@@ -60,6 +60,9 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 @Options({
   components: {
@@ -83,6 +86,7 @@ export default class Participant extends Vue {
   showIdeaSettings = false;
   EndpointAuthorisationType = EndpointAuthorisationType;
   selectedIdea: Idea | null = null;
+  trackingManager!: TrackingManager;
 
   addIdea: any = {
     keywords: '',
@@ -95,6 +99,9 @@ export default class Participant extends Vue {
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {}, true, 100);
+    }
     this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
@@ -140,8 +147,28 @@ export default class Participant extends Vue {
     this.showIdeaSettings = true;
   }
 
-  addData(newIdea: Idea): void {
+  async addData(newIdea: Idea): Promise<void> {
     if (!this.settingsIdea.id) this.ideas.push(newIdea);
+    if (this.trackingManager) {
+      await this.trackingManager.createInstanceStepPoints(
+        newIdea.id,
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        {
+          keywords: newIdea.keywords,
+        },
+        10,
+        null,
+        true,
+        false,
+        () => true
+      );
+      await this.trackingManager.saveIteration(
+        null,
+        TaskParticipantIterationStatesType.PARTICIPATED,
+        null,
+        true
+      );
+    }
   }
 
   get moduleName(): string {
@@ -193,6 +220,7 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+    if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 }
 </script>

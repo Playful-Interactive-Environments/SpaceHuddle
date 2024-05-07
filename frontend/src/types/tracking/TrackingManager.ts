@@ -37,7 +37,7 @@ export class TrackingManager {
   finalStepList: TaskParticipantIterationStep[] = [];
   state: TaskParticipantState | null = null;
   readonly pointsPerStar = 100;
-  readonly maxPoints = 1000;
+  maxPoints = 1000;
   callbackUpdateState: (() => void) | null = null;
   callbackUpdateIterationList: (() => void) | null = null;
   callbackUpdateStepList: (() => void) | null = null;
@@ -51,8 +51,10 @@ export class TrackingManager {
   constructor(
     taskId: string,
     initInstanceContent: any,
-    pullFinalSteps = false
+    pullFinalSteps = false,
+    maxPoints = 1000
   ) {
+    this.maxPoints = maxPoints;
     this.taskId = taskId;
     this.deregisterAll();
     taskParticipantService.registerGetList(

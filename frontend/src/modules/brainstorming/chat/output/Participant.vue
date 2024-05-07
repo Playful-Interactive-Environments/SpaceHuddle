@@ -190,6 +190,9 @@ import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 import DrawingUpload from '@/components/shared/organisms/DrawingUpload.vue';
 import * as cashService from '@/services/cash-service';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 @Options({
   components: {
@@ -215,10 +218,14 @@ export default class Participant extends Vue {
   showDrawingDialog = false;
   base64ImageUrl: string | null = null;
   EndpointAuthorisationType = EndpointAuthorisationType;
+  trackingManager!: TrackingManager;
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {}, true, 100);
+    }
     this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
@@ -276,12 +283,33 @@ export default class Participant extends Vue {
     this.scrollToBottom(0);
     if (this.newIdea.keywords) {
       ideaService.postIdea(this.taskId, this.newIdea).then(
-        (queryResult) => {
+        async (queryResult) => {
           if (queryResult) {
             this.newIdea = {};
             this.ideas.push(queryResult);
             const scrollIsBottom = this.scrollIsBottom();
             if (scrollIsBottom) this.scrollToBottom();
+
+            if (this.trackingManager) {
+              await this.trackingManager.createInstanceStepPoints(
+                queryResult.id,
+                TaskParticipantIterationStepStatesType.NEUTRAL,
+                {
+                  keywords: queryResult.keywords,
+                },
+                10,
+                null,
+                true,
+                false,
+                () => true
+              );
+              await this.trackingManager.saveIteration(
+                null,
+                TaskParticipantIterationStatesType.PARTICIPATED,
+                null,
+                true
+              );
+            }
           }
         },
         (error) => {
@@ -391,6 +419,7 @@ export default class Participant extends Vue {
   unmounted(): void {
     this.deregisterAll();
     window.removeEventListener('imageLoaded', this.imageLoaded);
+    if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 }
 </script>

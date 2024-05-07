@@ -243,6 +243,9 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 import * as cashService from '@/services/cash-service';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 @Options({
   components: {
@@ -267,6 +270,7 @@ export default class Participant extends Vue {
   ideas: Idea[] = [];
   showHistory = false;
   base64ImageUrl: string | null = null;
+  trackingManager!: TrackingManager;
 
   MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
   MAX_DESCRIPTION_LENGTH = MAX_DESCRIPTION_LENGTH;
@@ -293,6 +297,9 @@ export default class Participant extends Vue {
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {}, true, 100);
+    }
     this.deregisterAll();
     this.ideaCash = ideaService.registerGetIdeasForTask(
       this.taskId,
@@ -353,6 +360,7 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+    if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
   get keywordsEmpty(): boolean {
@@ -398,7 +406,7 @@ export default class Participant extends Vue {
           : null,
       })
       .then(
-        (queryResult) => {
+        async (queryResult) => {
           this.reset();
           ElMessage({
             message: this.$t('info.postIdea', [queryResult.keywords]),
@@ -407,6 +415,27 @@ export default class Participant extends Vue {
             showClose: true,
           });
           this.ideas.splice(0, 0, queryResult);
+
+          if (this.trackingManager) {
+            await this.trackingManager.createInstanceStepPoints(
+              queryResult.id,
+              TaskParticipantIterationStepStatesType.NEUTRAL,
+              {
+                keywords: queryResult.keywords,
+              },
+              10,
+              null,
+              true,
+              false,
+              () => true
+            );
+            await this.trackingManager.saveIteration(
+              null,
+              TaskParticipantIterationStatesType.PARTICIPATED,
+              null,
+              true
+            );
+          }
         },
         (error) => {
           this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
