@@ -1,15 +1,35 @@
 <template>
   <div id="podiumVisContainer">
-    <el-button
-      class="startButton"
-      v-if="!started && this.topVotes[0]"
-      @click="startAnimation"
-    >
-      <span>
-        <br /><font-awesome-icon class="startIcon" :icon="['fas', 'play']" />
-        <p>Start</p>
-      </span>
-    </el-button>
+    <div class="buttonContainer">
+      <el-button
+        class="startButton"
+        v-if="!started && this.topVotes[0]"
+        @click="startAnimation"
+      >
+        <span>
+          <br /><font-awesome-icon class="startIcon" :icon="['fas', 'play']" />
+          <p>Start full animation</p>
+        </span>
+      </el-button>
+      <el-button
+        class="startButton"
+        v-if="!started && this.topVotes[0]"
+        @click="startModeratedAnimation"
+      >
+        <span>
+          <br /><font-awesome-icon class="startIcon" :icon="['fas', 'play']" />
+          <p>Start moderated flow</p>
+        </span>
+      </el-button>
+      <el-button
+        class="nextButton"
+        v-if="started && moderatedFlow && moderatedIndex > 0"
+        @click="moderatedIndex -= 1"
+      >
+        <font-awesome-icon class="startIcon" :icon="['fas', 'play']" />
+        <p>Next</p>
+      </el-button>
+    </div>
     <div id="topVotesContainer">
       <div
         v-for="(voteSet, index) in topVotes"
@@ -20,9 +40,7 @@
           transition: getIdeaTransitionConfig(
             topVotes.length - this.order[index] - 1
           ),
-          marginTop: started
-            ? (this.order[index] / voteSets.length) * 40 + '%'
-            : '100%',
+          marginTop: getTopMargin(index),
           pointerEvents: ended ? 'all' : 'none',
         }"
       >
@@ -113,11 +131,18 @@ export default class PublicScreen extends Vue {
   voteSets: number[] = [];
   order: number[] = [];
 
+  moderatedFlow = false;
+  moderatedIndex = this.topAmount;
+
   getIdeaTransitionConfig(index: number): string {
     if (this.ended) {
       return 'all ' + this.animationLength / 2 + 's ease';
     } else {
-      return 'all ' + this.animationLength + 's ease ' + index + 's';
+      if (!this.moderatedFlow) {
+        return 'all ' + this.animationLength + 's ease ' + index + 's';
+      } else {
+        return 'all ' + this.animationLength + 's ease';
+      }
     }
   }
 
@@ -126,6 +151,28 @@ export default class PublicScreen extends Vue {
     setTimeout(() => {
       this.ended = true;
     }, (this.voteSets.length + this.animationLength) * 1000);
+  }
+
+  startModeratedAnimation(): void {
+    this.started = true;
+    this.moderatedFlow = true;
+  }
+
+  getTopMargin(index: number): string {
+    if (!this.moderatedFlow) {
+      return this.started
+        ? (this.order[index] / this.voteSets.length) * 40 + '%'
+        : '100%';
+    } else {
+      if (this.order[index] >= this.moderatedIndex) {
+        if (this.moderatedIndex <= 0) {
+          this.ended = true;
+        }
+        return (this.order[index] / this.voteSets.length) * 40 + '%';
+      } else {
+        return '100%';
+      }
+    }
   }
 
   @Watch('votes', { immediate: true })
@@ -164,10 +211,6 @@ export default class PublicScreen extends Vue {
   height: 100%;
 }
 .startButton {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
   z-index: 1000000;
   text-align: center;
   color: var(--color-dark-contrast);
@@ -186,6 +229,36 @@ export default class PublicScreen extends Vue {
     font-size: var(--font-size-xxxxlarge);
   }
 }
+
+.nextButton {
+  z-index: 1000000;
+  text-align: center;
+  color: var(--color-dark-contrast);
+  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  p {
+    font-size: var(--font-size-xlarge);
+    margin-left: .5rem;
+  }
+  .startIcon {
+    font-size: var(--font-size-xxlarge);
+  }
+}
+
+.buttonContainer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+  height: 80%;
+}
+
 #topVotesContainer {
   position: relative;
   display: flex;

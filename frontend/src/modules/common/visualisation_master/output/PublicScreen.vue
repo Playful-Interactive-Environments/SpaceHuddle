@@ -93,7 +93,7 @@ import InfiniteScroll from '@/modules/common/visualisation_master/organisms/infi
 import Strata from '@/modules/common/visualisation_master/organisms/strata.vue';
 import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
-import Podium from "@/modules/common/visualisation_master/organisms/podium.vue";
+import Podium from '@/modules/common/visualisation_master/organisms/podium.vue';
 
 @Options({
   components: {
