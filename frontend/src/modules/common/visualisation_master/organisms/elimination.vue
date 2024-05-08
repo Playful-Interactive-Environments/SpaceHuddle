@@ -6,11 +6,12 @@
         <p>Start</p>
       </span>
     </el-button>
-    <div class="numbers" v-if="this.votes.length > 0" :style="{ opacity: displayNumbers ? 100 : 0 }">
+    <div class="numbers" v-if="this.votes.length > 0">
       <div
         class="num"
         v-for="num in this.bestIdeaCount"
         :key="'ratingNum' + num"
+        :id="'ratingNum' + num"
         :style="{
           width: 100 / this.bestIdeaCount + '%',
         }"
@@ -111,6 +112,7 @@ export default class PublicScreen extends Vue {
 
   positionCountdown(index: number): void {
     const idea = document.getElementById(this.votes[index].idea.id + '');
+    const num = document.getElementById('ratingNum' + (index + 1));
     if (index >= 0) {
       setTimeout(() => {
         if (idea) {
@@ -118,6 +120,9 @@ export default class PublicScreen extends Vue {
           idea.style.left = (100 / this.bestIdeaCount) * index + '%';
           idea.style.width = 100 / this.bestIdeaCount - 2 + '%';
           idea.style.margin = '0 1%';
+          if (num) {
+            num.style.opacity = '100';
+          }
         }
         if (index > 0) {
           this.positionCountdown(index - 1);
@@ -188,11 +193,12 @@ export default class PublicScreen extends Vue {
   align-items: center;
   width: 100%;
   height: fit-content;
-  transition: opacity 1s ease;
   .num {
     font-size: var(--font-size-xxxxlarge);
     font-weight: var(--font-weight-bold);
     text-align: center;
+    transition: opacity 1s ease;
+    opacity: 0;
   }
 }
 
