@@ -81,17 +81,12 @@ import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as votingService from '@/services/voting-service';
-import { Vote } from '@/types/api/Vote';
-import PublicBase from '@/modules/information/quiz/organisms/PublicBase.vue';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
-import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 import { QuestionType } from '@/modules/information/quiz/types/Question';
 import { Hierarchy } from '@/types/api/Hierarchy';
-import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import * as cashService from '@/services/cash-service';
-import draggable from 'vuedraggable';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
@@ -106,11 +101,7 @@ import EndpointType from '@/types/enum/EndpointType';
 @Options({
   components: {
     IdeaCard,
-    ImagePicker,
-    QuizResult,
     ParticipantModuleDefaultContainer,
-    PublicBase,
-    draggable,
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -134,8 +125,6 @@ export default class Participant extends Vue {
 
   trackingManager!: TrackingManager;
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
-  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
-  collapsed = true;
 
   QuestionType = QuestionType;
   submitScreen = false;
@@ -587,200 +576,9 @@ label {
   padding-top: 1rem;
 }
 
-.orderDraggable {
-  background-color: var(--color-background);
-  padding: 1rem;
-  cursor: move;
-  margin: 1rem 0;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-
-  img {
-    margin: -1rem;
-  }
-}
-
-.orderDraggable h2 {
-  font-weight: bold;
-}
-
 .ghost {
   background-color: var(--color-dark-contrast);
   color: white;
-}
-
-[module-theme='paper'] {
-  background-image: url('@/modules/information/quiz/assets/clipboard.png');
-  background-size: cover;
-  background-position: center top;
-
-  .el-space .questionInfo {
-    padding: 0.5rem;
-    background: linear-gradient(
-        color-mix(in srgb, white 45%, transparent),
-        color-mix(in srgb, white 45%, transparent)
-      ),
-      url('@/modules/information/quiz/assets/paper.jpg');
-    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
-    color: var(--color-dark-contrast);
-  }
-
-  .el-space .el-button,
-  .orderDraggable,
-  .el-slider,
-  .el-rate,
-  .el-input-number,
-  .el-textarea::v-deep(.el-textarea__inner) {
-    border-radius: 0;
-    background: linear-gradient(
-        color-mix(in srgb, var(--color-informing) 45%, transparent),
-        color-mix(in srgb, var(--color-informing) 45%, transparent)
-      ),
-      url('@/modules/information/quiz/assets/paper.jpg');
-    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
-    color: var(--color-dark-contrast);
-    border: none;
-  }
-
-  .el-slider {
-    padding: 1.5rem 1.5rem 3rem 1.5rem;
-  }
-
-  .el-rate {
-    padding: 1.5rem;
-  }
-
-  .el-input-number::v-deep(.el-input-number__decrease),
-  .el-input-number::v-deep(.el-input-number__increase) {
-    background-color: color-mix(
-      in srgb,
-      var(--el-fill-color-light) 60%,
-      transparent
-    );
-    border-radius: 0;
-  }
-
-  .el-input-number::v-deep(.el-input__wrapper) {
-    background-color: transparent;
-    border-radius: 0;
-  }
-
-  .el-rate::v-deep(.el-rate__item) {
-    color: var(--color-dark-contrast);
-  }
-
-  .el-slider::v-deep(.el-slider__marks-text) {
-    color: var(--color-dark-contrast);
-  }
-
-  #submitScreen {
-    background: linear-gradient(
-        color-mix(in srgb, var(--color-informing) 45%, transparent),
-        color-mix(in srgb, var(--color-informing) 45%, transparent)
-      ),
-      url('@/modules/information/quiz/assets/paper.jpg');
-    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
-    padding: 1rem;
-  }
-}
-
-[module-theme='paper'].module-content::v-deep(.media) {
-  --module-color: var(--color-dark-contrast);
-}
-
-[module-theme='paper'].module-content::v-deep(.fixed) {
-  margin: 0 -2rem -1rem -2rem;
-  padding: 1rem 2rem;
-  width: calc(100% + 4rem);
-}
-
-[module-theme='interview'] {
-  background-image: url('@/modules/information/quiz/assets/lectern.png'),
-    url('@/modules/information/quiz/assets/stage.png');
-  background-position: center bottom, left top;
-  background-repeat: no-repeat;
-  background-size: contain, cover;
-
-  .el-space .questionInfo {
-    border-radius: var(--border-radius) var(--border-radius)
-      var(--border-radius) 0;
-    background-color: color-mix(
-      in srgb,
-      var(--color-informing) 60%,
-      transparent
-    );
-    border: solid 2px var(--color-gray);
-    padding: 0.5rem;
-  }
-
-  .el-space .el-button,
-  .orderDraggable,
-  .el-slider,
-  .el-rate,
-  .el-input-number,
-  .el-textarea::v-deep(.el-textarea__inner) {
-    border-radius: var(--border-radius) var(--border-radius) 0
-      var(--border-radius);
-    background-color: color-mix(
-      in srgb,
-      var(--color-background) 60%,
-      transparent
-    );
-    border: solid 2px var(--color-gray);
-    color: var(--color-dark-contrast);
-  }
-
-  .el-slider {
-    padding: 1.5rem 1.5rem 3rem 1.5rem;
-  }
-
-  .el-rate {
-    padding: 1.5rem;
-  }
-
-  .el-rate::v-deep(.el-rate__item) {
-    color: var(--color-dark-contrast);
-  }
-
-  .el-slider::v-deep(.el-slider__marks-text) {
-    color: var(--color-dark-contrast);
-  }
-
-  .el-input-number::v-deep(.el-input-number__decrease),
-  .el-input-number::v-deep(.el-input-number__increase) {
-    background-color: color-mix(
-      in srgb,
-      var(--el-fill-color-light) 60%,
-      transparent
-    );
-  }
-
-  .el-input-number::v-deep(.el-input-number__decrease) {
-    border-radius: var(--border-radius) 0 0 var(--border-radius);
-  }
-
-  .el-input-number::v-deep(.el-input-number__increase) {
-    border-radius: 0 calc(var(--border-radius) - 3px) 0 0;
-  }
-
-  .el-input-number::v-deep(.el-input__wrapper) {
-    background-color: transparent;
-    border-radius: var(--border-radius) var(--border-radius) 0
-      var(--border-radius);
-  }
-
-  #submitScreen {
-    border-radius: var(--border-radius) var(--border-radius)
-      var(--border-radius) 0;
-    background-color: color-mix(
-      in srgb,
-      var(--color-informing) 60%,
-      transparent
-    );
-    border: solid 2px var(--color-gray);
-    padding: 1rem;
-  }
 }
 
 .votable {
@@ -801,11 +599,5 @@ label {
   border: none;
   margin-right: 0.5rem;
   margin-left: 0;
-}
-
-[module-theme='interview'].module-content::v-deep(.fixed) {
-  margin: 0 -2rem -1rem -2rem;
-  padding: 1rem 2rem;
-  width: calc(100% + 4rem);
 }
 </style>
