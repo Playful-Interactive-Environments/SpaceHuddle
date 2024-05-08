@@ -72,7 +72,7 @@
       :votes="votes"
     />
     <elimination
-      v-if="currentVisModule === 'tombola'"
+      v-if="currentVisModule === 'elimination'"
       :task-id="this.taskId"
       :timeModifier="timeModifier"
       :timerEnded="this.timerEnd"
