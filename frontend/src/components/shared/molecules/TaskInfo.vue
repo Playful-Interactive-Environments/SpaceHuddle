@@ -43,7 +43,7 @@
           </h3>
         </template>
         <div class="task-info">
-          {{ description }}
+          <markdown-render :source="description" />
         </div>
       </el-collapse-item>
     </el-collapse>
@@ -62,7 +62,7 @@
       :class="{ twoLineText: shortenDescription }"
       v-if="description && !collapseDescription"
     >
-      {{ description }}
+      <markdown-render :source="description" />
     </p>
   </div>
 </template>
@@ -78,9 +78,10 @@ import { getModulesForTaskType } from '@/modules';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
 
 @Options({
-  components: {},
+  components: { MarkdownRender },
 })
 export default class TaskInfo extends Vue {
   @Prop() taskId!: string;
@@ -187,7 +188,7 @@ export default class TaskInfo extends Vue {
     margin: 0.2rem 0 0.1rem;
   }
 
-  &__description {
+  &__description .markdown p {
     margin-top: 0.5rem;
     line-height: 1.2;
     text-align: left;

@@ -2,19 +2,19 @@
   <PublicHeader />
   <div class="imprint">
     <h1>{{ $t('shared.view.imprint.imprint') }}</h1>
-    <vue-markdown :source="imprint.imprint" />
+    <markdown-render :source="imprint.imprint" />
 
     <h2>{{ $t('shared.view.imprint.owner') }}</h2>
-    <vue-markdown :source="imprint.owner" />
+    <markdown-render :source="imprint.owner" />
 
     <h2>{{ $t('shared.view.imprint.rights') }}</h2>
-    <vue-markdown :source="imprint.rights" />
+    <markdown-render :source="imprint.rights" />
 
     <h2>{{ $t('shared.view.imprint.support') }}</h2>
-    <vue-markdown :source="imprint.support" />
+    <markdown-render :source="imprint.support" />
 
     <h2>{{ $t('shared.view.imprint.liability') }}</h2>
-    <vue-markdown :source="imprint.liability" /><!---->
+    <markdown-render :source="imprint.liability" />
   </div>
   <footer>
     <footer>
@@ -28,13 +28,13 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import PublicHeader from '@/components/moderator/organisms/layout/PublicHeader.vue';
-import VueMarkdown from 'vue-markdown-render';
 import { apiExecuteGet } from '@/services/config-service';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
 
 @Options({
   components: {
+    MarkdownRender,
     PublicHeader,
-    VueMarkdown,
   },
 })
 export default class Imprint extends Vue {

@@ -312,7 +312,7 @@
         "
         :label="$t('module.brainstorming.missionmap.participant.description')"
       >
-        <vue-markdown :source="selectedIdea?.description" />
+        <markdown-render :source="selectedIdea?.description" />
         <IdeaMediaViewer :idea="selectedIdea" fit="contain" />
       </el-form-item>
       <el-form-item
@@ -587,7 +587,7 @@ import IdeaMediaViewer from '@/components/moderator/molecules/IdeaMediaViewer.vu
 import { registerDomElement } from '@/vunit';
 import { remToPx } from '@/modules/playing/moveit/utils/consts';
 import { until } from '@/utils/wait';
-import VueMarkdown from 'vue-markdown-render';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
 
 interface ProgressValues {
   origin: number;
@@ -609,6 +609,7 @@ interface ProgressValues {
     },
   },
   components: {
+    MarkdownRender,
     IdeaMediaViewer,
     MissionSettings,
     MissionProgressChart,
@@ -619,7 +620,6 @@ interface ProgressValues {
     ParticipantModuleDefaultContainer,
     draggable,
     AddItem,
-    VueMarkdown,
   },
 })
 

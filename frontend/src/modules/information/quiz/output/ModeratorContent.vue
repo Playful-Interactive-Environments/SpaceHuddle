@@ -194,15 +194,29 @@
             </el-form-item>
             <el-form-item
               :label="
-                $t('module.information.quiz.moderatorContent.explanation')
+                $t('module.information.quiz.moderatorContent.detailInfos')
               "
               :prop="`question.description`"
               :rules="[defaultFormRules.ruleToLong(1000)]"
             >
-              <el-input
+              <MarkdownEditor
                 v-model="formData.question.description"
-                type="textarea"
-                rows="3"
+                :placeholder="
+                  $t(
+                    'module.information.quiz.moderatorContent.detailInfosExample'
+                  )
+                "
+              />
+            </el-form-item>
+            <el-form-item
+              :label="
+                $t('module.information.quiz.moderatorContent.explanation')
+              "
+              :prop="`question.parameter.explanation`"
+              :rules="[defaultFormRules.ruleToLong(1000)]"
+            >
+              <MarkdownEditor
+                v-model="formData.question.parameter.explanation"
                 :placeholder="
                   $t(
                     'module.information.quiz.moderatorContent.explanationExample'
@@ -418,9 +432,11 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import Highscore from '@/modules/information/quiz/organisms/Highscore.vue';
 import { until } from '@/utils/wait';
+import MarkdownEditor from '@/components/shared/molecules/MarkdownEditor.vue';
 
 @Options({
   components: {
+    MarkdownEditor,
     Highscore,
     ImagePicker,
     ValidationForm,

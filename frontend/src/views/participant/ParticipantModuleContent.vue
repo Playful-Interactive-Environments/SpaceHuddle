@@ -65,7 +65,7 @@
           {{ task.name }}
         </h1>
         <p>
-          {{ task.description }}
+          <markdown-render class="markdown" :source="task.description" />
         </p>
       </div>
     </participant-tutorial>
@@ -109,6 +109,7 @@ import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { RouteName } from '@/types/enum/RouteName';
 import { Session } from '@/types/api/Session';
 import ParticipantTutorial from '@/components/participant/molecules/ParticipantTutorial.vue';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
 
 enum ModuleDisplayState {
   tutorial = 'tutorial',
@@ -117,6 +118,7 @@ enum ModuleDisplayState {
 
 @Options({
   components: {
+    MarkdownRender,
     ParticipantTutorial,
     Timer,
     ParticipantDefaultContainer,

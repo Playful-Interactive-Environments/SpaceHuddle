@@ -376,10 +376,8 @@
             prop="description"
             :rules="[defaultFormRules.ruleToLong(1000)]"
           >
-            <el-input
-              type="textarea"
+            <MarkdownEditor
               v-model="formData.description"
-              rows="3"
               :placeholder="
                 $t(
                   'moderator.organism.settings.taskSettings.descriptionExample'
@@ -572,6 +570,7 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { until } from '@/utils/wait';
 import * as topicService from '@/services/topic-service';
 import { Topic } from '@/types/api/Topic';
+import MarkdownEditor from '@/components/shared/molecules/MarkdownEditor.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -690,6 +689,7 @@ enum InputOption {
     FromSubmitItem,
     ModuleCard,
     AddItem,
+    MarkdownEditor,
     TaskParameterComponent: getEmptyComponent(),
   },
   emits: ['taskUpdated', 'showTimerSettings', 'update:showModal'],

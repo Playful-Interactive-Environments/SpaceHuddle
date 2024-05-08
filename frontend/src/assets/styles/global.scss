@@ -244,4 +244,9 @@ form {
   h6 {
     font-size: var(--font-size-default);
   }
+
+  img {
+    max-height: 10rem;
+    padding: 0.1rem;
+  }
 }

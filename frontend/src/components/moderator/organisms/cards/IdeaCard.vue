@@ -68,8 +68,7 @@
           <span v-if="idea.count > 1" class="idea-count">
             {{ idea.count }}x
           </span>
-          <vue-markdown
-            class="markdown"
+          <markdown-render
             :source="
               hasKeywords && (showKeyword || !idea.description)
                 ? idea.keywords
@@ -186,7 +185,7 @@
             (limitedTextLength && !ignoreLimitedDescriptionLength),
         }"
       >
-        <vue-markdown class="markdown" :source="idea.description" />
+        <markdown-render class="markdown" :source="idea.description" />
       </div>
       <div
         v-if="isLongText && !cutLongTexts && !ignoreLimitedDescriptionLength"
@@ -227,7 +226,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as themeColors from '@/utils/themeColors';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import IdeaMediaViewer from '@/components/moderator/molecules/IdeaMediaViewer.vue';
-import VueMarkdown from 'vue-markdown-render';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
 
 export enum CollapseIdeas {
   collapseAll = 'collapseAll',
@@ -236,7 +235,12 @@ export enum CollapseIdeas {
 }
 
 @Options({
-  components: { IdeaMediaViewer, ToolTip, IdeaSettings, VueMarkdown },
+  components: {
+    MarkdownRender,
+    IdeaMediaViewer,
+    ToolTip,
+    IdeaSettings,
+  },
   emits: [
     'ideaDeleted',
     'ideaStartEdit',

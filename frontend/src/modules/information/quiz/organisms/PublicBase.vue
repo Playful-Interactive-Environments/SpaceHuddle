@@ -25,27 +25,31 @@
         css-class="question-image"
       />
       <div class="question">
+        {{ publicQuestion.question.order + 1 }}.
         {{ publicQuestion.question.keywords }}
       </div>
+      <el-space v-if="publicQuestion.question.description" class="questionInfo">
+        <markdown-render :source="publicQuestion.question.description" />
+      </el-space>
       <slot name="answers"></slot>
     </el-space>
   </div>
   <div v-if="(showExplanation || showStatistics) && publicQuestion">
-    <span class="explanation result">
+    <div class="explanation result question">
       {{ publicQuestion.question.order + 1 }}.
       {{ publicQuestion.question.keywords }}
-    </span>
+    </div>
   </div>
-  <div
+  <el-space
     v-if="
       publicQuestion &&
       publicQuestion.question &&
       (showExplanation || showStatistics)
     "
-    class="explanation"
+    class="explanation questionInfo"
   >
-    {{ publicQuestion.question.description }}
-  </div>
+    <markdown-render :source="publicQuestion.question.parameter.explanation" />
+  </el-space>
   <div v-if="showStatistics && publicQuestion">
     <QuizResult
       :voteResult="voteResult"
@@ -118,6 +122,7 @@ import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipant
 import Highscore from '@/modules/information/quiz/organisms/Highscore.vue';
 import { TimelineArea } from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
 import MediaViewer from '@/components/moderator/molecules/MediaViewer.vue';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -128,6 +133,7 @@ export interface PublicAnswerData {
 
 @Options({
   components: {
+    MarkdownRender,
     MediaViewer,
     Highscore,
     QuizResult,
@@ -720,7 +726,7 @@ export default class PublicBase extends Vue {
           QuizStateProperty[QuestionState.RESULT_ANSWER].time
         ) {
           this.statePointer = 0;
-          this.questionState = this.publicQuestion?.question.description
+          this.questionState = this.publicQuestion?.question.parameter.explanation
             ? QuestionState.RESULT_EXPLANATION
             : QuestionState.RESULT_STATISTICS;
         }
@@ -829,8 +835,11 @@ export default class PublicBase extends Vue {
 
 .explanation {
   width: 100%;
-  text-align: justify;
-  white-space: pre-line;
+
+  .markdown p {
+    text-align: justify;
+    white-space: pre-line;
+  }
 }
 
 .result {
@@ -847,8 +856,28 @@ export default class PublicBase extends Vue {
   object-fit: contain;
 }
 
+.el-space.questionInfo {
+  margin-bottom: 0.5rem;
+
+  .markdown {
+    max-height: 30rem;
+    overflow-y: auto;
+  }
+}
+
 [module-theme='paper'] {
   .question {
+    padding: 0.5rem;
+    background: linear-gradient(
+        color-mix(in srgb, white 45%, transparent),
+        color-mix(in srgb, white 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    color: var(--color-dark-contrast);
+  }
+
+  .el-space.questionInfo {
     padding: 0.5rem;
     background: linear-gradient(
         color-mix(in srgb, white 45%, transparent),
@@ -864,6 +893,17 @@ export default class PublicBase extends Vue {
   .question {
     border-radius: var(--border-radius) var(--border-radius)
       var(--border-radius) 0;
+    background-color: color-mix(
+      in srgb,
+      var(--color-informing) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    padding: 0.5rem;
+  }
+
+  .el-space.questionInfo {
+    border-radius: var(--border-radius) var(--border-radius) var(--border-radius) 0;
     background-color: color-mix(
       in srgb,
       var(--color-informing) 60%,

@@ -287,12 +287,6 @@
             :disabled="quizState === QuestionState.RESULT_ANSWER"
           ></el-input>
         </div>
-        <el-space
-          v-else-if="activeQuestionType === QuestionType.INFO"
-          class="questionInfo"
-        >
-          {{ activeQuestion.description }}
-        </el-space>
       </template>
     </PublicBase>
     <div id="submitScreen" v-if="submitScreen">
@@ -352,6 +346,7 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { delay, until } from '@/utils/wait';
 import IdeaMediaViewer from '@/components/moderator/molecules/IdeaMediaViewer.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
 
 interface AnswerValue {
   numValue: number | null;
@@ -364,6 +359,7 @@ interface AnswerValue {
 
 @Options({
   components: {
+    MarkdownRender,
     FontAwesomeIcon,
     IdeaMediaViewer,
     ImagePicker,
@@ -1763,17 +1759,6 @@ label {
   background-size: cover;
   background-position: center top;
 
-  .el-space .questionInfo {
-    padding: 0.5rem;
-    background: linear-gradient(
-        color-mix(in srgb, white 45%, transparent),
-        color-mix(in srgb, white 45%, transparent)
-      ),
-      url('@/modules/information/quiz/assets/paper.jpg');
-    //filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
-    color: var(--color-dark-contrast);
-  }
-
   .el-space .el-button,
   .orderDraggable,
   .el-slider,
@@ -1849,18 +1834,6 @@ label {
   background-position: center bottom, left top;
   background-repeat: no-repeat;
   background-size: contain, cover;
-
-  .el-space .questionInfo {
-    border-radius: var(--border-radius) var(--border-radius)
-      var(--border-radius) 0;
-    background-color: color-mix(
-      in srgb,
-      var(--color-informing) 60%,
-      transparent
-    );
-    border: solid 2px var(--color-gray);
-    padding: 0.5rem;
-  }
 
   .el-space .el-button,
   .orderDraggable,
@@ -1946,5 +1919,9 @@ label {
   display: inline-block;
   width: 100%;
   text-align: center;
+}
+
+.module-content::v-deep(.participant-content) {
+  padding-bottom: 1rem;
 }
 </style>
