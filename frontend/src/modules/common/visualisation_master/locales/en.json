@@ -10,25 +10,25 @@
     "gallery": {
       "description": {
         "title": "Gallery",
-        "description": "Show items as gallery"
+        "description": "Show items as gallery."
       }
     },
     "cardShuffle": {
       "description": {
         "title": "Card Shuffle",
-        "description": "Show ideas as a card shuffle animation"
+        "description": "Show ideas as a card shuffle animation."
       }
     },
     "infiniteScroll": {
       "description": {
         "title": "Infinite Scrolling",
-        "description": "Ideas are scrolled infinitely"
+        "description": "Ideas are scrolled infinitely."
       }
     },
     "barChart": {
       "description": {
         "title": "Bar Chart",
-        "description": "data or votes displayed as a bar chart"
+        "description": "data or votes displayed as a bar chart."
       }
     },
     "strata": {
@@ -41,6 +41,12 @@
       "description": {
         "title": "Podium",
         "description": "Ideas ranked on a podium."
+      }
+    },
+    "elimination": {
+      "description": {
+        "title": "Elimination",
+        "description": "The best ideas remain."
       }
     }
   }

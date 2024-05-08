@@ -41,6 +41,13 @@
       "icon": "layer-group",
       "type": "VOTING",
       "allowTimeMod": false
+    },
+    "elimination": {
+      "id": "elimination",
+      "image": "elimination/path",
+      "icon": "layer-group",
+      "type": "VOTING",
+      "allowTimeMod": false
     }
   }
 }

@@ -71,6 +71,13 @@
       :timerEnded="this.timerEnd"
       :votes="votes"
     />
+    <elimination
+      v-if="currentVisModule === 'tombola'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :timerEnded="this.timerEnd"
+      :votes="votes"
+    />
   </div>
 </template>
 
@@ -94,9 +101,11 @@ import Strata from '@/modules/common/visualisation_master/organisms/strata.vue';
 import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
 import Podium from '@/modules/common/visualisation_master/organisms/podium.vue';
+import Elimination from '@/modules/common/visualisation_master/organisms/elimination.vue';
 
 @Options({
   components: {
+    Elimination,
     Podium,
     Strata,
     InfiniteScroll,
