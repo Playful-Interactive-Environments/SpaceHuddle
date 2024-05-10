@@ -40,9 +40,9 @@
     },
     "cards": {
       "kg": "kg",
-      "kw": "kw",
+      "kwh": "kwh",
       "years": "years",
-      "kl": "kl",
+      "l": "l",
       "price": "€",
       "conditions": {
         "brandNew": "brand new",

@@ -11,9 +11,9 @@
     "rating": "Wie viele Sterne haben die Nutzer mit ihren Punkten erreicht?",
     "pointsSpent": "Wie viele Punkte wurden ausgegeben?",
     "co2": "Wie viel CO² wurde ausgestoßen? (kg)",
-    "electricity": "Wie viel Energie wurde benötigt? (kw)",
+    "electricity": "Wie viel Energie wurde benötigt? (kwh)",
     "lifetime": "Was war die aufgerechnete Lebenszeit der gekauften Objekte? (years)",
-    "water": "Wie viel Wasser wurde verbraucht? (kl)",
+    "water": "Wie viel Wasser wurde verbraucht? (l)",
     "money": "Wie viel Geld wurde ausgegeben? (€)",
     "winReason": "Wegen welchem Grund haben die Nutzer gewonnen?",
     "cardsPlayed": "Wie viele Karten wurden in einer Runde gespielt?"
@@ -40,9 +40,9 @@
     },
     "cards": {
       "kg": "kg",
-      "kw": "kw",
+      "kwh": "kwh",
       "years": "Jahre",
-      "kl": "kl",
+      "l": "l",
       "price": "€",
       "conditions": {
         "brandNew": "brandneu",

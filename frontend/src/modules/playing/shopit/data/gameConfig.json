@@ -18,7 +18,7 @@
           "CO2": 8,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 5,
           "category": "clothing",
           "condition": 2
@@ -28,7 +28,7 @@
           "CO2": 9,
           "energy": 10,
           "lifetime": 3,
-          "water": 4,
+          "water": 4000,
           "money": 20,
           "category": "clothing",
           "condition": 2
@@ -38,7 +38,7 @@
           "CO2": 10,
           "energy": 10,
           "lifetime": 10,
-          "water": 4,
+          "water": 4000,
           "money": 40,
           "category": "clothing",
           "condition": 1
@@ -48,7 +48,7 @@
           "CO2": 11,
           "energy": 10,
           "lifetime": 2,
-          "water": 4,
+          "water": 4000,
           "money": 30,
           "category": "clothing",
           "condition": 2
@@ -58,7 +58,7 @@
           "CO2": 12,
           "energy": 10,
           "lifetime": 6,
-          "water": 4,
+          "water": 4000,
           "money": 60,
           "category": "clothing",
           "condition": 2
@@ -68,7 +68,7 @@
           "CO2": 13,
           "energy": 10,
           "lifetime": 15,
-          "water": 4,
+          "water": 4000,
           "money": 100,
           "category": "clothing",
           "condition": 1
@@ -78,7 +78,7 @@
           "CO2": 14,
           "energy": 10,
           "lifetime": 2,
-          "water": 4,
+          "water": 4000,
           "money": 20,
           "category": "clothing",
           "condition": 2
@@ -88,7 +88,7 @@
           "CO2": 15,
           "energy": 10,
           "lifetime": 4,
-          "water": 4,
+          "water": 4000,
           "money": 60,
           "category": "clothing",
           "condition": 1
@@ -98,7 +98,7 @@
           "CO2": 16,
           "energy": 10,
           "lifetime": 10,
-          "water": 4,
+          "water": 4000,
           "money": 120,
           "category": "clothing",
           "condition": 1
@@ -116,7 +116,7 @@
           "CO2": 8,
           "energy": 10,
           "lifetime": 1.5,
-          "water": 4,
+          "water": 4000,
           "money": 150,
           "category": "electronics",
           "condition": 2
@@ -126,7 +126,7 @@
           "CO2": 9,
           "energy": 10,
           "lifetime": 3,
-          "water": 4,
+          "water": 4000,
           "money": 500,
           "category": "electronics",
           "condition": 1
@@ -136,7 +136,7 @@
           "CO2": 10,
           "energy": 10,
           "lifetime": 6,
-          "water": 4,
+          "water": 4000,
           "money": 1200,
           "category": "electronics",
           "condition": 1
@@ -146,7 +146,7 @@
           "CO2": 11,
           "energy": 10,
           "lifetime": 2,
-          "water": 4,
+          "water": 4000,
           "money": 600,
           "category": "electronics",
           "condition": 2
@@ -156,7 +156,7 @@
           "CO2": 12,
           "energy": 10,
           "lifetime": 3,
-          "water": 4,
+          "water": 4000,
           "money": 1200,
           "category": "electronics",
           "condition": 2
@@ -166,7 +166,7 @@
           "CO2": 13,
           "energy": 10,
           "lifetime": 5,
-          "water": 4,
+          "water": 4000,
           "money": 2000,
           "category": "electronics",
           "condition": 1
@@ -176,7 +176,7 @@
           "CO2": 14,
           "energy": 10,
           "lifetime": 4,
-          "water": 4,
+          "water": 4000,
           "money": 30,
           "category": "electronics",
           "condition": 2
@@ -186,7 +186,7 @@
           "CO2": 15,
           "energy": 10,
           "lifetime": 6,
-          "water": 4,
+          "water": 4000,
           "money": 80,
           "category": "electronics",
           "condition": 1
@@ -196,7 +196,7 @@
           "CO2": 16,
           "energy": 10,
           "lifetime": 15,
-          "water": 4,
+          "water": 4000,
           "money": 140,
           "category": "electronics",
           "condition": 1
@@ -214,7 +214,7 @@
           "CO2": 8,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 1,
           "category": "food",
           "condition": 1
@@ -224,7 +224,7 @@
           "CO2": 9,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 3,
           "category": "food",
           "condition": 2
@@ -234,7 +234,7 @@
           "CO2": 10,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 2,
           "category": "food",
           "condition": 1
@@ -244,7 +244,7 @@
           "CO2": 11,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 6,
           "category": "food",
           "condition": 2
@@ -254,7 +254,7 @@
           "CO2": 12,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 3,
           "category": "food",
           "condition": 1
@@ -264,7 +264,7 @@
           "CO2": 13,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 5,
           "category": "food",
           "condition": 1
@@ -274,7 +274,7 @@
           "CO2": 14,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 8,
           "category": "food",
           "condition": 2
@@ -284,7 +284,7 @@
           "CO2": 15,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 7,
           "category": "food",
           "condition": 1
@@ -294,7 +294,7 @@
           "CO2": 16,
           "energy": 10,
           "lifetime": 1,
-          "water": 4,
+          "water": 4000,
           "money": 10,
           "category": "food",
           "condition": 2

@@ -80,7 +80,6 @@
       >
       <el-button id="skip" @click="$emit('playFinished')">
         {{ $t('module.playing.shopit.participant.skip') }}
-        skip
       </el-button>
     </div>
   </div>
@@ -134,7 +133,7 @@ export default class TutorialGame extends Vue {
       {
         name: 'electricity',
         icon: 'bolt',
-        unit: 'kw',
+        unit: 'kwh',
         num: this.energy,
         iconChosen: '',
         filled: false,
@@ -152,7 +151,7 @@ export default class TutorialGame extends Vue {
       {
         name: 'water',
         icon: 'droplet',
-        unit: 'kl',
+        unit: 'l',
         num: this.water,
         iconChosen: '',
         filled: false,

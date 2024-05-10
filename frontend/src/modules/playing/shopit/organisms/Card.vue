@@ -10,7 +10,7 @@
     </li>
     <li>
       {{ energy
-      }}<span>{{ $t('module.playing.shopit.participant.cards.kw') }}</span>
+      }}<span>{{ $t('module.playing.shopit.participant.cards.kwh') }}</span>
     </li>
     <li>
       {{ lifetime
@@ -18,7 +18,7 @@
     </li>
     <li>
       {{ water
-      }}<span>{{ $t('module.playing.shopit.participant.cards.kl') }}</span>
+      }}<span>{{ $t('module.playing.shopit.participant.cards.l') }}</span>
     </li>
     <li>
       {{ money
