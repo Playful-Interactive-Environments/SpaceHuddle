@@ -82,7 +82,11 @@
       "
       id="otherVotesContainer"
       class="columnLayout"
-      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none', display: ended ? 'block' : 'none'  }"
+      :style="{
+        opacity: ended ? 1 : 0,
+        pointerEvents: ended ? 'all' : 'none',
+        display: ended ? 'block' : 'none',
+      }"
     >
       <IdeaCard
         v-for="vote in this.votes.filter(

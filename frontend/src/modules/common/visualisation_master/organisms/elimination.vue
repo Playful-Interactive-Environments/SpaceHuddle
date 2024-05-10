@@ -29,6 +29,37 @@
         class="ideaItem"
       />
     </div>
+    <div
+      v-if="this.votes.slice(bestIdeaCount).length > 0"
+      id="revealOtherVotes"
+      :style="{
+        opacity: ended ? 1 : 0,
+        pointerEvents: ended ? 'all' : 'none',
+        display: ended ? 'flex' : 'none',
+      }"
+    >
+      <a href="#otherVotesContainer" class="revealButton">
+        Other ideas
+        <br /><font-awesome-icon :icon="['fas', 'chevron-down']" />
+      </a>
+    </div>
+    <div
+      v-if="this.votes.slice(bestIdeaCount).length > 0"
+      id="otherVotesContainer"
+      class="columnLayout"
+      :style="{
+        opacity: ended ? 1 : 0,
+        pointerEvents: ended ? 'all' : 'none',
+        display: ended ? 'block' : 'none',
+      }"
+    >
+      <IdeaCard
+        v-for="vote in this.votes.slice(bestIdeaCount)"
+        :key="vote.idea.id"
+        :idea="vote.idea"
+        :is-editable="false"
+      />
+    </div>
   </div>
 </template>
 
@@ -227,6 +258,47 @@ export default class PublicScreen extends Vue {
   .startIcon {
     font-size: var(--font-size-xxxxlarge);
   }
+}
+
+#revealOtherVotes {
+  width: 100%;
+  height: 10%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: -2rem 1rem 1rem;
+
+  .revealButton {
+    z-index: 1000000;
+    text-align: center;
+    color: var(--color-dark-contrast-light);
+    background: transparent;
+    p,
+    .startIcon {
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+    p {
+      font-size: var(--el-font-size-medium);
+    }
+    .startIcon {
+      font-size: var(--font-size-xxxxlarge);
+    }
+  }
+}
+
+#otherVotesContainer {
+  width: 100%;
+  column-width: 15rem;
+  column-gap: 1rem;
+  column-fill: balance;
+}
+
+#otherVotesContainer,
+#revealOtherVotes {
+  transition: all 1s ease;
 }
 </style>
 <style lang="scss"></style>
