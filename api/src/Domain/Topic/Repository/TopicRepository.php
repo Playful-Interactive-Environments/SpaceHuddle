@@ -798,6 +798,51 @@ class TopicRepository implements RepositoryInterface
             ->fetch("assoc")["maxOrder"];
         return $maxOrder ?? 0;
     }
+    /**
+     * Clone entity row.
+     * @param string $oldId Old table primary key
+     * @param string | null $newParentId New parent key value to be inserted
+     * @param bool $cloneDependencies If false, ignore cloneDependencies function
+     * @return string | null The new created entity id
+     */
+    public function clone(string $oldId, ?string $newParentId = null, bool $cloneDependencies = true): ?string
+    {
+        $newId = $this->queryFactory->newClone(
+            $this->getEntityName(),
+            ["id" => $oldId],
+            $this->cloneColumns(),
+            $this->parentIdName,
+            $newParentId
+        );
+
+        $selectParentId = $this->queryFactory->newQuery()->from($this->getEntityName())
+            ->select([$this->parentIdName])
+            ->where(["id" => $oldId]);
+
+        $select = $this->queryFactory->newQuery()->from($this->getEntityName())
+            ->select(["(count(*) - 1) as count"])
+            ->where([$this->parentIdName => $selectParentId]);
+
+        $this->queryFactory->newUpdate($this->getEntityName(), ["order" => $select])
+            ->andWhere(["id" => $newId])
+            ->execute();
+
+        if ($newId) {
+            $this->queryFactory->newInsert(
+                'clone_helper',
+                [
+                    'target_id' => $newId,
+                    'source_id' => $oldId,
+                    'table_name' => $this->getEntityName()
+                ]
+            )->execute();
+        }
+
+        if ($cloneDependencies && $newId) {
+            $this->cloneDependencies($oldId, $newId);
+        }
+        return $newId;
+    }
 
     /**
      * Include dependent data.
