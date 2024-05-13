@@ -440,7 +440,7 @@ class SessionRepository implements RepositoryInterface
             $this->queryFactory->newInsert("session_role", [
                 "session_id" => $id,
                 "user_id" => $parameter->userId,
-                "role" => strtoupper(SessionRoleType::MODERATOR)
+                "role" => strtoupper(SessionRoleType::OWNER)
             ])->execute();
         }
     }

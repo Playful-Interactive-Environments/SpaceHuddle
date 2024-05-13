@@ -26,7 +26,7 @@ class SessionUpdater
         array $data
     ): array|object|null {
         $result = $this->genericService($data);
-        $result->role = strtoupper(SessionRoleType::MODERATOR);
+        //$result->role = strtoupper(SessionRoleType::MODERATOR);
         return $result;
     }
 }

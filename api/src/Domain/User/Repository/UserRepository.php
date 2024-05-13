@@ -169,7 +169,10 @@ final class UserRepository implements RepositoryInterface
     {
         $query = $this->queryFactory->newSelect("session_role");
         $query->select(["session_id"]);
-        $query->andWhere(["user_id" => $id, "role" => strtoupper(SessionRoleType::MODERATOR)]);
+        $query->andWhere([
+            "user_id" => $id,
+            "role in" => [strtoupper(SessionRoleType::OWNER), strtoupper(SessionRoleType::MODERATOR)]
+        ]);
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
@@ -179,7 +182,10 @@ final class UserRepository implements RepositoryInterface
 
                 $query = $this->queryFactory->newSelect("session_role");
                 $query->select(["session_id"]);
-                $query->andWhere(["session_id" => $sessionId, "role" => strtoupper(SessionRoleType::MODERATOR)]);
+                $query->andWhere([
+                    "session_id" => $sessionId,
+                    "role in" => [strtoupper(SessionRoleType::OWNER), strtoupper(SessionRoleType::MODERATOR)]
+                ]);
                 $itemCount = $query->execute()->rowCount();
 
                 if ($itemCount === 1) {

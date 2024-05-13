@@ -16,6 +16,9 @@ use App\Data\AuthorisationType;
 class SessionRoleType
 {
     /** @var string */
+    public const OWNER = "owner";
+
+    /** @var string */
     public const MODERATOR = "moderator";
 
     /** @var string */
