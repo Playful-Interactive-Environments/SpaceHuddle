@@ -884,12 +884,16 @@ export default class TaskSettings extends Vue {
   }
 
   updateTopics(list: View[]): void {
-    this.sessionViews = list.filter(
-      (item) =>
-        ViewType[item.type] !== ViewType.HIERARCHY ||
-        !item.detailType ||
-        TaskType[item.detailType] !== TaskType.INFORMATION
-    );
+    if (list) {
+      this.sessionViews = list.filter(
+        (item) =>
+          ViewType[item.type] !== ViewType.HIERARCHY ||
+          !item.detailType ||
+          TaskType[item.detailType] !== TaskType.INFORMATION
+      );
+    } else {
+      this.sessionViews = [];
+    }
     this.updateAvailableTopics();
   }
 
