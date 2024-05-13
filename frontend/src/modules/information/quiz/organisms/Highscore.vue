@@ -16,12 +16,17 @@
             display: displayLabels,
             ticks: {
               color: contrastColor,
-              stepSize: 1,
+              precision: 0,
             },
             grid: {
               display: false,
             },
             stacked: true,
+          },
+          x: {
+            ticks: {
+              precision: 0,
+            },
           },
         },
         plugins: {

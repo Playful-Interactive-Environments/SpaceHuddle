@@ -1,4 +1,5 @@
 <template>
+  <Highscore :task-id="taskId" />
   <Bar
     v-for="(chartData, index) in barChartDataList"
     :key="index"
@@ -23,7 +24,7 @@
         y: {
           ticks: {
             color: contrastColor,
-            stepSize: 1,
+            precision: 0,
           },
           stacked: chartData.stacked,
         },
@@ -62,7 +63,7 @@
         y: {
           ticks: {
             color: contrastColor,
-            stepSize: 1,
+            precision: 0,
           },
         },
       },
@@ -104,9 +105,10 @@ import {
   MovingType,
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
+import Highscore from '@/modules/playing/moveit/organisms/Highscore.vue';
 
 @Options({
-  components: { Bar, Line },
+  components: { Highscore, Bar, Line },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/

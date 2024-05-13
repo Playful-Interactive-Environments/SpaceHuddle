@@ -147,7 +147,7 @@ $--font-size: (
         background-color: var(--color-background);
         --el-dialog-padding-primary: #{$dialog-padding};
         max-width: 60rem;
-        width: fit-content;
+        //width: fit-content;
 
         &__title {
                 font-weight: var(--font-weight-semibold);

@@ -726,7 +726,8 @@ export default class PublicBase extends Vue {
           QuizStateProperty[QuestionState.RESULT_ANSWER].time
         ) {
           this.statePointer = 0;
-          this.questionState = this.publicQuestion?.question.parameter.explanation
+          this.questionState = this.publicQuestion?.question.parameter
+            .explanation
             ? QuestionState.RESULT_EXPLANATION
             : QuestionState.RESULT_STATISTICS;
         }
@@ -903,7 +904,8 @@ export default class PublicBase extends Vue {
   }
 
   .el-space.questionInfo {
-    border-radius: var(--border-radius) var(--border-radius) var(--border-radius) 0;
+    border-radius: var(--border-radius) var(--border-radius)
+      var(--border-radius) 0;
     background-color: color-mix(
       in srgb,
       var(--color-informing) 60%,

@@ -111,7 +111,7 @@
                   missionProgressParameter ===
                   MissionProgressParameter.electricity,
                 ticks: {
-                  stepSize: 1,
+                  precision: 0,
                 },
                 title: {
                   text: yLabel,

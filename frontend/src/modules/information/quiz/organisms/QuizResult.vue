@@ -49,7 +49,7 @@
           x: {
             ticks: {
               color: contrastColor,
-              stepSize: 1,
+              precision: 0,
             },
             grid: {
               display: false,

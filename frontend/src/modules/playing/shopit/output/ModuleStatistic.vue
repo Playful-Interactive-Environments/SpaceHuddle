@@ -1,4 +1,5 @@
 <template>
+  <Highscore :task-id="taskId" />
   <Bar
     v-for="(chartData, index) in barChartDataList"
     :key="index"
@@ -23,7 +24,7 @@
         y: {
           ticks: {
             color: contrastColor,
-            stepSize: 1,
+            precision: 0,
           },
           stacked: chartData.stacked,
         },
@@ -54,9 +55,10 @@ import { calculateChartPerParameter } from '@/utils/statistic';
 import * as themeColors from '@/utils/themeColors';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
 import * as cashService from '@/services/cash-service';
+import Highscore from '@/modules/playing/shopit/organisms/Highscore.vue';
 
 @Options({
-  components: { Bar, Line },
+  components: { Bar, Line, Highscore },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleStatistic extends Vue {
@@ -150,7 +152,8 @@ export default class ModuleStatistic extends Vue {
       });
     }
   }
-//TODO Object bug in statistic
+
+  //TODO Object bug in statistic
   calculatePointsSpentChart(): void {
     if (this.steps) {
       const avatarList = this.getAvatarList(this.steps);

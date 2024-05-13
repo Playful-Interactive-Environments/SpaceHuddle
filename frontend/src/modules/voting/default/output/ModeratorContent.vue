@@ -19,7 +19,7 @@
         y: {
           ticks: {
             color: contrastColor,
-            stepSize: 1,
+            precision: 0,
           },
         },
       },

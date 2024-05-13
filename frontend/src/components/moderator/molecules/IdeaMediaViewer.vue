@@ -72,5 +72,4 @@ export default class IdeaMediaViewer extends Vue {
   max-height: 70% !important;
   max-width: 70% !important;
 }
-
 </style>
