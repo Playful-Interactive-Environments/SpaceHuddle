@@ -480,7 +480,10 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   get isModerator(): boolean {
-    return this.sessionRole === UserType.MODERATOR;
+    return (
+      this.sessionRole === UserType.MODERATOR ||
+      this.sessionRole === UserType.OWNER
+    );
   }
 
   get activeTaskIndex(): number {

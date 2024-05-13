@@ -83,6 +83,7 @@ export default class ModeratorSessionOverview extends Vue {
   filter: SessionFilterData = { ...defaultFilterData };
   errors: string[] = [];
   sessionCash!: cashService.SimplifiedCashEntry<Session[]>;
+
   async mounted(): Promise<void> {
     this.sessionCash = sessionService.registerGetList(
       this.updateSessions,
@@ -90,18 +91,27 @@ export default class ModeratorSessionOverview extends Vue {
       2 * 60
     );
   }
+
+  @Watch('filter.role', { immediate: true })
+  onRoleFilterChanged(): void {
+    this.updateFilteredSessions(this.sessions);
+  }
+
   @Watch('filter.textFilter', { immediate: true })
   onTextFilterChanged(): void {
     this.updateFilteredSessions(this.sessions);
   }
+
   @Watch('filter.orderType', { immediate: true })
   onOrderTypeChanged(): void {
     this.updateFilteredSessions(this.sessions);
   }
+
   @Watch('filter.orderAsc', { immediate: true })
   onOrderAscChanged(): void {
     this.updateFilteredSessions(this.sessions);
   }
+
   @Watch('filter.subjects', { immediate: true })
   onSubjectsChanged(): void {
     if (this.filter.subjects?.length === 0) {
@@ -109,6 +119,7 @@ export default class ModeratorSessionOverview extends Vue {
     }
     this.updateFilteredSessions(this.sessions);
   }
+
   updateSessions(): void {
     this.sessions = this.sessionCash.data;
     this.filteredSessions = this.sessions;
@@ -116,6 +127,7 @@ export default class ModeratorSessionOverview extends Vue {
       this.updateFilteredSessions(this.sessions);
     }
   }
+
   updateFilteredSessions(sessions: Session[]): void {
     const orderType = this.filter.orderType;
     const dataList = sessionService.getOrderGroups(
@@ -132,17 +144,20 @@ export default class ModeratorSessionOverview extends Vue {
         this.filteredSessions = sessionService.filterSessions(
           dataList[orderType.toUpperCase()].sessions,
           this.filter.textFilter,
-          this.filter.subjects
+          this.filter.subjects,
+          this.filter.role
         );
         break;
       default:
         this.filteredSessions = this.sessions;
     }
   }
+
   resetFilters(): void {
     this.filter.textFilter = '';
     this.filter.subjects = null;
   }
+
   refreshSessions(): void {
     this.sessionCash.refreshData();
   }

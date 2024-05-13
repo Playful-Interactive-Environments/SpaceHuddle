@@ -629,7 +629,9 @@
     },
     "userType": {
       "FACILITATOR": "Co-Moderator",
-      "MODERATOR": "Moderator"
+      "MODERATOR": "Moderator",
+      "OWNER": "Eigentümer",
+      "ALL": "Alle"
     },
     "locale": {
       "en": "Englisch",

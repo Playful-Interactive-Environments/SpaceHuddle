@@ -105,7 +105,10 @@ export default class SessionCard extends Vue {
   sessionRole = '';
 
   get isModerator(): boolean {
-    return this.sessionRole === UserType.MODERATOR;
+    return (
+      this.sessionRole === UserType.MODERATOR ||
+      this.sessionRole === UserType.OWNER
+    );
   }
 
   stopPropagation(event: Event) {

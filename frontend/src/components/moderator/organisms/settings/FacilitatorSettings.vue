@@ -216,7 +216,9 @@ export default class FacilitatorSettings extends Vue {
   }
 
   updateRole(roles: SessionRole[]): void {
-    this.roles = roles.filter((role) => role.username !== this.own);
+    this.roles = roles.filter(
+      (role) => role.username !== this.own && role.role !== UserType.OWNER
+    );
   }
 
   deregisterAll(): void {

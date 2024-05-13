@@ -332,7 +332,8 @@ export const getOrderGroups = (
 export const filterSessions = (
   sessionList: Session[],
   textFilter: string,
-  subjects: string[] | null
+  subjects: string[] | null,
+  role: string | null
 ): Session[] => {
   if (subjects !== null) {
     const tempList: Session[] = [];
@@ -351,6 +352,9 @@ export const filterSessions = (
         session.title.toLowerCase().includes(textFilter.toLowerCase()) ||
         session.description.toLowerCase().includes(textFilter.toLowerCase())
     );
+  }
+  if (role) {
+    sessionList = sessionList.filter((session) => session.role === role);
   }
   return sessionList;
 };

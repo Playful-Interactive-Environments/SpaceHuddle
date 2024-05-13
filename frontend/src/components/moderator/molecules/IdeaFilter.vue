@@ -185,7 +185,10 @@ export default class IdeaFilter extends Vue {
       if (task.parameter && 'syncUserId' in task.parameter) {
         this.syncUserId = task.parameter.syncUserId;
       } else {
-        if (this.sessionRole === UserType.MODERATOR) {
+        if (
+          this.sessionRole === UserType.MODERATOR ||
+          this.sessionRole === UserType.OWNER
+        ) {
           this.syncUserId = this.ownUserId;
         }
       }

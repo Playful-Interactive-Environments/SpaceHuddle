@@ -629,7 +629,9 @@
     },
     "userType": {
       "FACILITATOR": "facilitator",
-      "MODERATOR": "moderator"
+      "MODERATOR": "moderator",
+      "OWNER": "owner",
+      "ALL": "all"
     },
     "locale": {
       "en": "english",

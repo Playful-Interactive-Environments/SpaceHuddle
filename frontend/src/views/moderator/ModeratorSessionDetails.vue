@@ -246,7 +246,10 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   get isModerator(): boolean {
-    return this.sessionRole === UserType.MODERATOR;
+    return (
+      this.sessionRole === UserType.MODERATOR ||
+      this.sessionRole === UserType.OWNER
+    );
   }
 
   get isExpired(): boolean {

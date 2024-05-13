@@ -2,6 +2,20 @@
   <div class="level filter_options">
     <div class="level-right">
       <div class="level-item">
+        <el-select v-model="modelValue.role" size="large">
+          <template #prefix>
+            <font-awesome-icon icon="filter" />
+          </template>
+          <el-option
+            v-for="usertype in UserTypeList"
+            :key="usertype"
+            :value="usertype"
+            :label="$t(`enum.userType.${usertype ?? 'ALL'}`)"
+          >
+          </el-option>
+        </el-select>
+      </div>
+      <div class="level-item">
         <el-input
           v-model="modelValue.textFilter"
           :placeholder="
@@ -25,7 +39,7 @@
           size="large"
         >
           <template #prefix>
-            <font-awesome-icon icon="sort" class="el-icon" />
+            <font-awesome-icon icon="filter" />
           </template>
           <el-option
             v-for="subject in subjectList"
@@ -88,12 +102,14 @@ import * as sessionService from '@/services/session-service';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import UserType from '@/types/enum/UserType';
 
 export interface SessionFilterData {
   orderType: string;
   orderAsc: boolean;
   textFilter: string;
   subjects: string[] | null;
+  role: string | null;
 }
 
 export const defaultFilterData: SessionFilterData = {
@@ -101,6 +117,7 @@ export const defaultFilterData: SessionFilterData = {
   orderAsc: false,
   textFilter: '',
   subjects: null,
+  role: null,
 };
 
 @Options({
@@ -115,6 +132,16 @@ export default class SessionFilter extends Vue {
   sessionSortOrderOptions: SessionSortOrderOption[] = [];
   subjectList: string[] = [];
   subjectCash!: cashService.SimplifiedCashEntry<string[]>;
+
+  get UserTypeList(): (string | null)[] {
+    const list: (string | null)[] = [null];
+    list.push(
+      ...Object.keys(UserType).filter(
+        (item) => item !== UserType.PARTICIPANT.toUpperCase()
+      )
+    );
+    return list;
+  }
 
   mounted(): void {
     this.sessionSortOrderOptions = sessionService.getSessionSortOrderOptions();
