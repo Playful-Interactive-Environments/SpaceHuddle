@@ -59,7 +59,7 @@
           }"
         >
           <p class="score" :style="{ opacity: animationOver ? 1 : 0 }">
-            {{ vote.ratingSum }}
+            {{ Math.round((vote.ratingSum + Number.EPSILON) * 100) / 100 }}
           </p>
           <IdeaCard
             :idea="vote.idea"
