@@ -165,7 +165,8 @@ hr {
 .cardImage {
   z-index: 0;
   position: absolute;
-  width: 70%;
+  max-width: 70%;
+  max-height: 80%;
   bottom: 0;
   right: 0;
   margin: 2.7%;
