@@ -16,7 +16,7 @@
           width: 100 / this.bestIdeaCount + '%',
         }"
       >
-        <p>{{ this.votes[num - 1].ratingSum }}</p>
+        <p>{{ Math.round((this.votes[num - 1].ratingSum + Number.EPSILON) * 100) / 100 }}</p>
       </div>
     </div>
     <div class="tombolaIdeas" :style="{ opacity: loaded ? 100 : 0 }">
@@ -148,6 +148,7 @@ export default class PublicScreen extends Vue {
           idea.style.left = (100 / this.bestIdeaCount) * index + '%';
           idea.style.width = 100 / this.bestIdeaCount - 2 + '%';
           idea.style.margin = '0 1%';
+          idea.style.zIndex = '';
           if (num) {
             num.style.opacity = '100';
           }

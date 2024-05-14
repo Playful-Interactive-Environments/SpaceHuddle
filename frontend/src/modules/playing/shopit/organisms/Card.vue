@@ -169,7 +169,7 @@ hr {
   max-height: 80%;
   bottom: 0;
   right: 0;
-  margin: 2.7%;
+  margin: 2.6%;
 }
 
 .sparkle {
