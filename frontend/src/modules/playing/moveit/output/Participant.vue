@@ -43,6 +43,7 @@
       :trackingData="trackingData"
       :tracking-manager="trackingManager"
       :vehicle="vehicle"
+      :is-saving="isSaving"
       @finished="resultFinished"
     />
     <el-button
@@ -313,29 +314,29 @@ export default class Participant extends Vue {
     });
     this.particleState = {
       carbonDioxide: {
-        totalCount: 18,
-        collectedCount: 15,
+        totalCount: 0,
+        collectedCount: 0,
         timelineOutside: [],
         timelineCollected: [],
         timelineInput: [],
       },
       dust: {
-        totalCount: 10,
-        collectedCount: 9,
+        totalCount: 0,
+        collectedCount: 0,
         timelineOutside: [],
         timelineCollected: [],
         timelineInput: [],
       },
       methane: {
-        totalCount: 12,
-        collectedCount: 9,
+        totalCount: 0,
+        collectedCount: 0,
         timelineOutside: [],
         timelineCollected: [],
         timelineInput: [],
       },
       microplastic: {
-        totalCount: 5,
-        collectedCount: 1,
+        totalCount: 0,
+        collectedCount: 0,
         timelineOutside: [],
         timelineCollected: [],
         timelineInput: [],
@@ -492,9 +493,11 @@ export default class Participant extends Vue {
     this.stepTime = Date.now();
   }
 
+  isSaving = false;
   async cleanupFinished(particleState: {
     [key: string]: ParticleState;
   }): Promise<void> {
+    this.isSaving = true;
     this.particleState = particleState;
     this.gameStep = GameStep.Result;
     this.gameState = GameState.Info;
@@ -539,10 +542,11 @@ export default class Participant extends Vue {
       } else this.trackingManager.setFinishedState(this.module);
     }
     this.stepTime = Date.now();
-    this.saveHighScore();
+    await this.saveHighScore();
+    this.isSaving = false;
   }
 
-  saveHighScore(): void {
+  async saveHighScore(): Promise<void> {
     const particleStateSum = particleStateUtil.particleStateSum(
       this.particleState
     );
@@ -572,7 +576,7 @@ export default class Participant extends Vue {
           highScore.parameter.consumption = consumption(this.trackingData);
           highScore.parameter.persons = persons(this.trackingData);
         }
-        votingService.putVote(highScore).then(() => {
+        await votingService.putVote(highScore).then(() => {
           cashService.refreshCash(
             `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
           );
@@ -590,7 +594,7 @@ export default class Participant extends Vue {
         consumption: consumption(this.trackingData),
         persons: persons(this.trackingData),
       };
-      votingService
+      await votingService
         .postVote(this.taskId, {
           rating: successRate,
           detailRating: successStatus,

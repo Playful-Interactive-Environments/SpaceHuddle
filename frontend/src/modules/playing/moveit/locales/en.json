@@ -22,8 +22,8 @@
     "confirm": "Continue",
     "historyEmpty": "This vehicle has not yet been driven",
     "drivingStats": {
-      "maxSpeed": "Maximum speed",
-      "avgSpeed": "Average speed",
+      "maxSpeed": "maximum speed",
+      "avgSpeed": "average speed",
       "consumption": "consumption",
       "distance": "travel distance",
       "persons": "persons",

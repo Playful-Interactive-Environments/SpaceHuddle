@@ -727,8 +727,13 @@ export default class CleanUpParticles extends Vue {
   }
 
   outsideDrawingSpace(particleObject: GameObject): void {
-    particleObject.physcics.moveToPool();
-    this.particleState[particleObject.options.name as string].outsideCount++;
+    if (
+      particleObject.physcics.body.collisionFilter.mask ===
+      this.particleCategory
+    ) {
+      particleObject.physcics.moveToPool();
+      this.particleState[particleObject.options.name as string].outsideCount++;
+    }
   }
 
   isPartOfChainChanged(

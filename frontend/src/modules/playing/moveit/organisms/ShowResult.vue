@@ -249,7 +249,11 @@
             {{ $t(`module.playing.moveit.participant.result.collected`) }}
           </div>
           <div class="continue">
-            <el-button type="primary" @click="$emit('finished')">
+            <el-button
+              type="primary"
+              @click="$emit('finished')"
+              v-loading="isSaving"
+            >
               {{ $t('module.playing.moveit.participant.confirm') }}
             </el-button>
           </div>
@@ -362,6 +366,7 @@ export default class ShowResult extends Vue {
   readonly particleState!: {
     [key: string]: ParticleState;
   };
+  @Prop({ default: false }) readonly isSaving!: boolean;
   particleVisualisation: {
     [key: string]: { coordinates: [number, number]; type: string }[];
   } = {};

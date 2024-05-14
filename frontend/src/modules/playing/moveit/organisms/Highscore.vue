@@ -19,27 +19,51 @@
             <th />
             <th />
             <th>
-              {{
-                $t('module.playing.moveit.participant.drivingStats.collected')
-              }}
+              <el-tooltip
+                :content="
+                  $t('module.playing.moveit.participant.drivingStats.collected')
+                "
+              >
+                <font-awesome-icon icon="atom" />
+              </el-tooltip>
             </th>
             <th>
-              {{
-                $t('module.playing.moveit.participant.drivingStats.avgSpeed')
-              }}
+              <el-tooltip
+                :content="
+                  $t('module.playing.moveit.participant.drivingStats.avgSpeed')
+                "
+              >
+                <font-awesome-icon icon="gauge" />
+              </el-tooltip>
             </th>
             <th>
-              {{
-                $t('module.playing.moveit.participant.drivingStats.maxSpeed')
-              }}
+              <el-tooltip
+                :content="
+                  $t('module.playing.moveit.participant.drivingStats.maxSpeed')
+                "
+              >
+                <font-awesome-icon icon="gauge-high" />
+              </el-tooltip>
             </th>
             <th>
-              {{
-                $t('module.playing.moveit.participant.drivingStats.consumption')
-              }}
+              <el-tooltip
+                :content="
+                  $t(
+                    'module.playing.moveit.participant.drivingStats.consumption'
+                  )
+                "
+              >
+                <font-awesome-icon icon="gas-pump" />
+              </el-tooltip>
             </th>
-            <th>
-              {{ $t('module.playing.moveit.participant.drivingStats.persons') }}
+            <th v-if="category === 'bus'">
+              <el-tooltip
+                :content="
+                  $t('module.playing.moveit.participant.drivingStats.persons')
+                "
+              >
+                <font-awesome-icon icon="people-group" />
+              </el-tooltip>
             </th>
           </tr>
           <tr
@@ -76,7 +100,7 @@
                 {{ $t('module.playing.moveit.enums.units.liters') }}
               </span>
             </td>
-            <td>
+            <td v-if="category === 'bus'">
               {{ Math.round(entry.value.persons) }}
             </td>
             <td>
@@ -113,6 +137,7 @@ import { VoteParameterResult } from '@/types/api/Vote';
 import * as cashService from '@/services/cash-service';
 import * as votingService from '@/services/voting-service';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface HighscoreData {
   [key: string]: {
@@ -129,7 +154,7 @@ interface HighscoreData {
 }
 
 @Options({
-  components: {},
+  components: { FontAwesomeIcon },
 })
 export default class Highscore extends Vue {
   @Prop() readonly taskId!: string;

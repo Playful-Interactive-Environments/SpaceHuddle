@@ -22,7 +22,8 @@ export function successStatus(particleState: {
   [key: string]: ParticleState;
 }): number {
   const sum = particleStateSum(particleState);
-  return (sum.collectedCount / sum.totalCount) * 100;
+  if (sum.totalCount > 0) return (sum.collectedCount / sum.totalCount) * 100;
+  return 0;
 }
 
 export function successStatusText(particleState: {
