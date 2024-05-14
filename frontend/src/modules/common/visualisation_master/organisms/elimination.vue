@@ -86,8 +86,6 @@ export default class PublicScreen extends Vue {
 
   loaded = false;
 
-  topVotes: VoteResult[] = [];
-
   started = false;
   ended = false;
   displayNumbers = false;
@@ -95,7 +93,6 @@ export default class PublicScreen extends Vue {
   animationLength = 2;
 
   intervalPositions = -1;
-  intervalOpacity = -1;
 
   bestIdeaCount = 5;
 

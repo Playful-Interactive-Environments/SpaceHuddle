@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { Bar } from 'vue-chartjs';
 import { VoteResult } from '@/types/api/Vote';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';

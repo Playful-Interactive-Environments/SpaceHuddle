@@ -209,7 +209,7 @@
         "spritesheet": "/assets/games/shopit/cards/food.json"
       },
       "items": {
-        "vegetarian-1": {
+        "apple": {
           "cost": 8,
           "CO2": 8,
           "energy": 10,
@@ -219,7 +219,7 @@
           "category": "food",
           "condition": 1
         },
-        "vegetarian-2": {
+        "bottleDrink": {
           "cost": 9,
           "CO2": 9,
           "energy": 10,
@@ -229,7 +229,7 @@
           "category": "food",
           "condition": 2
         },
-        "vegetarian-3": {
+        "salad": {
           "cost": 10,
           "CO2": 10,
           "energy": 10,
@@ -239,7 +239,7 @@
           "category": "food",
           "condition": 1
         },
-        "meat-1": {
+        "avocado": {
           "cost": 11,
           "CO2": 11,
           "energy": 10,
@@ -249,7 +249,7 @@
           "category": "food",
           "condition": 2
         },
-        "meat-2": {
+        "mango": {
           "cost": 12,
           "CO2": 12,
           "energy": 10,
@@ -259,7 +259,7 @@
           "category": "food",
           "condition": 1
         },
-        "meat-3": {
+        "petDrink": {
           "cost": 13,
           "CO2": 13,
           "energy": 10,
@@ -269,7 +269,7 @@
           "category": "food",
           "condition": 1
         },
-        "coffee-1": {
+        "canDrink": {
           "cost": 14,
           "CO2": 14,
           "energy": 10,
@@ -279,7 +279,7 @@
           "category": "food",
           "condition": 2
         },
-        "coffee-2": {
+        "meatloafRoll": {
           "cost": 15,
           "CO2": 15,
           "energy": 10,
@@ -289,7 +289,7 @@
           "category": "food",
           "condition": 1
         },
-        "coffee-3": {
+        "schnitzel": {
           "cost": 16,
           "CO2": 16,
           "energy": 10,
