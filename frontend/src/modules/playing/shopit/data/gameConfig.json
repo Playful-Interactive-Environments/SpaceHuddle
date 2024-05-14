@@ -19,7 +19,7 @@
           "energy": 40,
           "lifetime": 3,
           "water": 4000,
-          "money": 25,
+          "money": 26,
           "category": "clothing",
           "condition": 2
         },
@@ -29,7 +29,7 @@
           "energy": 25,
           "lifetime": 3,
           "water": 3500,
-          "money": 30,
+          "money": 16,
           "category": "clothing",
           "condition": 2
         },
@@ -39,7 +39,7 @@
           "energy": 20,
           "lifetime": 3,
           "water": 2700,
-          "money": 15,
+          "money": 8,
           "category": "clothing",
           "condition": 2
         },
@@ -49,7 +49,7 @@
           "energy": 150,
           "lifetime": 10,
           "water": 4000,
-          "money": 130,
+          "money": 155,
           "category": "clothing",
           "condition": 1
         },
@@ -59,7 +59,7 @@
           "energy": 80,
           "lifetime": 15,
           "water": 3500,
-          "money": 140,
+          "money": 75,
           "category": "clothing",
           "condition": 1
         },
@@ -69,7 +69,7 @@
           "energy": 50,
           "lifetime": 10,
           "water": 2700,
-          "money": 100,
+          "money": 40,
           "category": "clothing",
           "condition": 1
         },
@@ -79,7 +79,7 @@
           "energy": 100,
           "lifetime": 2,
           "water": 4000,
-          "money": 40,
+          "money": 42,
           "category": "clothing",
           "condition": 1
         },
@@ -89,7 +89,7 @@
           "energy": 50,
           "lifetime": 3,
           "water": 3500,
-          "money": 30,
+          "money": 23,
           "category": "clothing",
           "condition": 1
         },
@@ -99,7 +99,7 @@
           "energy": 35,
           "lifetime": 2,
           "water": 2700,
-          "money": 10,
+          "money": 12,
           "category": "clothing",
           "condition": 1
         }
@@ -117,7 +117,7 @@
           "energy": 30,
           "lifetime": 1.5,
           "water": 4000,
-          "money": 150,
+          "money": 33,
           "category": "electronics",
           "condition": 2
         },
@@ -127,7 +127,7 @@
           "energy": 120,
           "lifetime": 3,
           "water": 4000,
-          "money": 500,
+          "money": 150,
           "category": "electronics",
           "condition": 2
         },
@@ -137,7 +137,7 @@
           "energy": 100,
           "lifetime": 6,
           "water": 4000,
-          "money": 1200,
+          "money": 500,
           "category": "electronics",
           "condition": 2
         },
@@ -147,7 +147,7 @@
           "energy": 250,
           "lifetime": 2,
           "water": 8000,
-          "money": 600,
+          "money": 50,
           "category": "electronics",
           "condition": 1
         },
@@ -157,7 +157,7 @@
           "energy": 1200,
           "lifetime": 3,
           "water": 11000,
-          "money": 1200,
+          "money": 300,
           "category": "electronics",
           "condition": 1
         },
@@ -167,7 +167,7 @@
           "energy": 450,
           "lifetime": 5,
           "water": 14000,
-          "money": 2000,
+          "money": 700,
           "category": "electronics",
           "condition": 1
         },
@@ -177,7 +177,7 @@
           "energy": 110,
           "lifetime": 4,
           "water": 8000,
-          "money": 30,
+          "money": 210,
           "category": "electronics",
           "condition": 1
         },
@@ -187,7 +187,7 @@
           "energy": 650,
           "lifetime": 6,
           "water": 11000,
-          "money": 80,
+          "money": 1000,
           "category": "electronics",
           "condition": 1
         },
@@ -197,7 +197,7 @@
           "energy": 230,
           "lifetime": 15,
           "water": 14000,
-          "money": 140,
+          "money": 1700,
           "category": "electronics",
           "condition": 1
         }
@@ -215,7 +215,7 @@
           "energy": 0.2,
           "lifetime": -1,
           "water": 70,
-          "money": 1,
+          "money": 1.2,
           "category": "food",
           "condition": 2
         },
@@ -225,7 +225,7 @@
           "energy": 30,
           "lifetime": 5,
           "water": 15,
-          "money": 3,
+          "money": 23.5,
           "category": "food",
           "condition": 2
         },
@@ -235,7 +235,7 @@
           "energy": 0.3,
           "lifetime": -1,
           "water": 250,
-          "money": 2,
+          "money": 2.3,
           "category": "food",
           "condition": 2
         },
@@ -245,7 +245,7 @@
           "energy": 0.5,
           "lifetime": -1,
           "water": 2000,
-          "money": 6,
+          "money": 2.1,
           "category": "food",
           "condition": 1
         },
@@ -255,7 +255,7 @@
           "energy": 0.4,
           "lifetime": -1,
           "water": 2000,
-          "money": 3,
+          "money": 2.4,
           "category": "food",
           "condition": 1
         },
@@ -265,7 +265,7 @@
           "energy": 0.7,
           "lifetime": 0.01,
           "water": 2,
-          "money": 5,
+          "money": 0.5,
           "category": "food",
           "condition": 1
         },
@@ -275,7 +275,7 @@
           "energy": 12,
           "lifetime": 0.001,
           "water": 3,
-          "money": 8,
+          "money": 0.5,
           "category": "food",
           "condition": 2
         },
@@ -285,7 +285,7 @@
           "energy": 6,
           "lifetime": -1,
           "water": 10000,
-          "money": 7,
+          "money": 3.5,
           "category": "food",
           "condition": 2
         },
@@ -295,7 +295,7 @@
           "energy": 8,
           "lifetime": -1,
           "water": 12500,
-          "money": 10,
+          "money": 9,
           "category": "food",
           "condition": 1
         }
