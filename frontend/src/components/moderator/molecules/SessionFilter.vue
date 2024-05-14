@@ -10,7 +10,7 @@
             v-for="usertype in UserTypeList"
             :key="usertype"
             :value="usertype"
-            :label="$t(`enum.userType.${usertype ?? 'ALL'}`)"
+            :label="$t(`enum.userType.${usertype ? usertype : 'ALL'}`)"
           >
           </el-option>
         </el-select>
@@ -109,7 +109,7 @@ export interface SessionFilterData {
   orderAsc: boolean;
   textFilter: string;
   subjects: string[] | null;
-  role: string | null;
+  role: string;
 }
 
 export const defaultFilterData: SessionFilterData = {
@@ -117,7 +117,7 @@ export const defaultFilterData: SessionFilterData = {
   orderAsc: false,
   textFilter: '',
   subjects: null,
-  role: null,
+  role: '',
 };
 
 @Options({
@@ -133,8 +133,8 @@ export default class SessionFilter extends Vue {
   subjectList: string[] = [];
   subjectCash!: cashService.SimplifiedCashEntry<string[]>;
 
-  get UserTypeList(): (string | null)[] {
-    const list: (string | null)[] = [null];
+  get UserTypeList(): string[] {
+    const list: string[] = [''];
     list.push(
       ...Object.keys(UserType).filter(
         (item) => item !== UserType.PARTICIPANT.toUpperCase()
