@@ -422,7 +422,7 @@ export default class PlayState extends Vue {
         electricityCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
         electricityCard.infoKey = 'electricity';
       }
-      if (this.ownCardsPlayed[i].lifetime < lifetime) {
+      if (this.ownCardsPlayed[i].lifetime < lifetime && this.ownCardsPlayed[i].lifetime > -1) {
         lifetime = this.ownCardsPlayed[i].lifetime;
         lifetimeCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
         lifetimeCard.infoKey = 'lifetime';

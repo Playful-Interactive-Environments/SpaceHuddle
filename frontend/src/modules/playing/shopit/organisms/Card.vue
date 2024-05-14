@@ -4,23 +4,23 @@
       {{ cost }}
       <hr />
     </li>
-    <li>
+    <li v-if="CO2 > -1">
       {{ CO2
       }}<span>{{ $t('module.playing.shopit.participant.cards.kg') }}</span>
     </li>
-    <li>
+    <li v-if="energy > -1">
       {{ energy
       }}<span>{{ $t('module.playing.shopit.participant.cards.kwh') }}</span>
     </li>
-    <li>
+    <li v-if="lifetime > -1">
       {{ lifetime
       }}<span>{{ $t('module.playing.shopit.participant.cards.years') }}</span>
     </li>
-    <li>
+    <li v-if="water > -1">
       {{ water
       }}<span>{{ $t('module.playing.shopit.participant.cards.l') }}</span>
     </li>
-    <li>
+    <li v-if="money > -1">
       {{ money
       }}<span>{{ $t('module.playing.shopit.participant.cards.price') }}</span>
     </li>
@@ -47,12 +47,12 @@ import { Prop } from 'vue-property-decorator';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 
 export default class Card extends Vue {
-  @Prop({ default: 0 }) readonly cost!: number;
-  @Prop({ default: 0 }) readonly CO2!: number;
-  @Prop({ default: 0 }) readonly energy!: number;
-  @Prop({ default: 0 }) readonly lifetime!: number;
-  @Prop({ default: 0 }) readonly water!: number;
-  @Prop({ default: 0 }) readonly money!: number;
+  @Prop({ default: -1 }) readonly cost!: number;
+  @Prop({ default: -1 }) readonly CO2!: number;
+  @Prop({ default: -1 }) readonly energy!: number;
+  @Prop({ default: -1 }) readonly lifetime!: number;
+  @Prop({ default: -1 }) readonly water!: number;
+  @Prop({ default: -1 }) readonly money!: number;
   @Prop({ default: '' }) readonly category!: string;
   @Prop({ default: 2 }) readonly condition!: number;
   @Prop({ default: '' }) readonly cardName!: string;
@@ -70,7 +70,7 @@ export default class Card extends Vue {
         ? 'module.playing.shopit.participant.cards.conditions.regional'
         : 'module.playing.shopit.participant.cards.conditions.2ndHand'
       : category === 'food'
-      ? 'module.playing.shopit.participant.cards.conditions.exotic'
+      ? 'module.playing.shopit.participant.cards.conditions.supraRegional'
       : 'module.playing.shopit.participant.cards.conditions.brandNew';
   }
 }
