@@ -477,7 +477,6 @@ export default class CollectedState extends Vue {
   --end-objects-width: var(--game-area-width);
   --end-objects-height: calc(var(--game-area-height) * 0.32 - 3rem);
 
-  position: relative;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -492,6 +491,14 @@ export default class CollectedState extends Vue {
   margin: 2rem 0;
   background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
   outline: 0.5rem solid var(--color-primary);
+
+  .el-image {
+    display: flex;
+  }
+
+  .el-image::v-deep(.el-image__inner) {
+    height: auto;
+  }
 }
 
 .endObject {
@@ -647,9 +654,7 @@ export default class CollectedState extends Vue {
 }
 
 .objectName {
-  position: absolute;
   text-align: center;
-  top: 0.2rem;
   text-transform: capitalize;
 }
 
