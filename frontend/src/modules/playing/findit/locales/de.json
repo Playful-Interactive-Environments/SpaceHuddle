@@ -109,6 +109,12 @@
         }
       }
     },
+    "collectKey": {
+      "dispose": "entsorgen",
+      "recycle": "recyceln",
+      "leave": "lassen",
+      "rescue": "retten"
+    },
     "returnToMenu": "Zurück zum Menü.",
     "categorisationButtons": {
       "flammable": "Brandgefahr",

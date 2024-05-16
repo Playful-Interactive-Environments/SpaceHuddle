@@ -24,99 +24,160 @@
         {{ $t('module.playing.findit.participant.lostText') }}
       </p>
     </div>
-    <div class="endObjects" v-if="this.endObjects.length !== 0">
-      <div
-        v-for="object in endObjects"
-        :key="object.name"
-        :id="object.name"
-        class="endObject"
-        :class="{
-          endObjectCorrect: isCorrectClassified(object.name),
-          endObjectIncorrect:
-            !isCorrectClassified(object.name) && isClassified(object.name),
-        }"
-        @click="activeObjectChanged(object, object.name, true)"
-      >
-        <p class="objectName">
-          {{
-            $t(
-              `module.playing.findit.participant.placeables.${levelType}.${
-                object.type
-              }.${getExplanationKey(object)}.name`
-            )
-          }}
-        </p>
-        <img
-          v-if="
-            levelTypeImages[object.type] &&
-            levelTypeImages[object.type][object.name]
-          "
-          :src="levelTypeImages[object.type][object.name]"
-          :alt="object.name"
-          class="endObjectSprites"
-        />
-        <font-awesome-icon
-          :icon="gameConfig[levelType].categories[object.type].settings.icon"
-          class="categoryIcon"
+    <draggable
+      class="endObjects"
+      v-if="this.endObjects.length !== 0"
+      v-model="endObjects"
+      group="item"
+      item-key="name"
+    >
+      <template v-slot:item="{ element }">
+        <div
+          :id="`${element.type}#${element.name}`"
+          class="endObject"
           :class="{
-            correctClassificationIcon: isCorrectClassified(object.name),
-            wrongClassificationIcon:
-              isClassified(object.name) && !isCorrectClassified(object.name),
+            objectContainerActive: activeObjectId === element.name,
           }"
-          v-if="this.classified.includes(object.name)"
-        />
-      </div>
-    </div>
-    <div class="score heading--medium" v-if="this.activeObject !== null">
-      <p>
-        <span
-          >{{ this.correctClassified.length }} /
-          {{ this.endObjects.length }}</span
+          @click="activeObjectChanged(element, element.name, true)"
+          @touchstart="activeObjectChanged(element, element.name, true)"
         >
+          <p class="objectName">
+            {{
+              $t(
+                `module.playing.findit.participant.placeables.${levelType}.${
+                  element.type
+                }.${getExplanationKey(element)}.name`
+              )
+            }}
+          </p>
+          <el-image
+            v-if="
+              levelTypeImages[element.type] &&
+              levelTypeImages[element.type][element.name]
+            "
+            :src="levelTypeImages[element.type][element.name]"
+            :alt="element.name"
+            class="endObjectSprites"
+            fit="contain"
+          />
+        </div>
+      </template>
+    </draggable>
+    <div class="score heading--medium">
+      <p>
+        <span>
+          {{ this.correctClassified.length }}
+          <font-awesome-icon icon="circle-check" />
+          / {{ this.endObjectCount }}
+          <font-awesome-icon icon="trophy" />
+        </span>
       </p>
     </div>
-    <h2 class="heading heading--medium" v-if="this.activeObject !== null">
-      {{
-        $t(
-          `module.playing.findit.participant.placeables.${levelType}.${
-            this.activeObject.type
-          }.${getExplanationKey(this.activeObject)}.name`
-        )
-      }}
-    </h2>
-    <div class="classificationButtons" v-if="this.endObjects.length !== 0">
+    <div class="classificationButtons grid" v-if="this.endObjectCount !== 0">
       <el-button
         v-for="key in this.collectKeys"
         :key="key"
-        :id="key"
-        class="classificationButton"
-        @click="checkType(key, this.activeObjectId)"
-        >{{ key }}</el-button
+        class="classificationButton -date-table-cell__text"
+        @click="checkType(key, activeObjectId, activeObject?.type)"
       >
+        <draggable
+          :id="key"
+          v-model="collectedItem[key]"
+          item-key="name"
+          group="item"
+          class="classifiedObject"
+          handle=".handle"
+          @add="addToClassification(key, $event)"
+        >
+          <template #header>
+            <div class="classificationType">
+              <font-awesome-icon :icon="getClassificationIcon(key)" />
+              {{ $t(`module.playing.findit.participant.collectKey.${key}`) }}
+            </div>
+          </template>
+          <template v-slot:item="{ element }">
+            <div
+              :id="`${element.type}#${element.name}`"
+              class="endObject"
+              :class="{
+                endObjectCorrect: isCorrectClassified(element.name),
+                endObjectIncorrect:
+                  !isCorrectClassified(element.name) &&
+                  isClassified(element.name),
+              }"
+            >
+              <el-image
+                v-if="
+                  levelTypeImages[element.type] &&
+                  levelTypeImages[element.type][element.name]
+                "
+                :src="levelTypeImages[element.type][element.name]"
+                :alt="element.name"
+                fit="contain"
+              />
+            </div>
+          </template>
+        </draggable>
+      </el-button>
     </div>
-    <div class="infoText" v-if="this.endObjects.length !== 0">
-      <p
-        class="marginTop"
+    <el-dialog v-if="activeObject" v-model="showInfo">
+      <template #header>
+        <p
+          class="objectName"
+          :class="{
+            correctClassificationIcon: isCorrectClassified(activeObject.name),
+            wrongClassificationIcon:
+              isClassified(activeObject.name) &&
+              !isCorrectClassified(activeObject.name),
+          }"
+        >
+          <font-awesome-icon
+            :icon="
+              gameConfig[levelType].categories[activeObject.type].settings.icon
+            "
+          />
+          {{
+            $t(
+              `module.playing.findit.participant.placeables.${levelType}.${
+                activeObject.type
+              }.${getExplanationKey(activeObject)}.name`
+            )
+          }}
+        </p>
+      </template>
+      <el-image
         v-if="
-          this.activeObject !== null &&
-          this.classified.includes(this.activeObjectId)
+          levelTypeImages[activeObject.type] &&
+          levelTypeImages[activeObject.type][activeObject.name]
         "
-      >
-        {{
-          $t(
-            `module.playing.findit.participant.placeables.${levelType}.${
-              this.activeObject.type
-            }.${getExplanationKey(this.activeObject)}.description`
-          )
-        }}
-      </p>
-    </div>
+        :src="levelTypeImages[activeObject.type][activeObject.name]"
+        :alt="activeObject.name"
+        fit="contain"
+      />
+      <div class="infoText" v-if="this.endObjectCount !== 0">
+        <p
+          class="marginTop"
+          v-if="
+            this.activeObject !== null &&
+            this.classified.includes(this.activeObjectId)
+          "
+        >
+          {{
+            $t(
+              `module.playing.findit.participant.placeables.${levelType}.${
+                this.activeObject.type
+              }.${getExplanationKey(this.activeObject)}.description`
+            )
+          }}
+        </p>
+      </div>
+    </el-dialog>
     <el-button
       class="el-button--submit returnButton"
       @click="this.$emit('replayFinished', classified, correctClassified)"
       v-if="
         endObjects.map((x) => x.name).every((x) => classified.includes(x)) ||
-        this.endObjects.length === 0
+        this.endObjectCount === 0
       "
     >
       {{ $t('module.playing.findit.participant.returnToMenu') }}
@@ -134,9 +195,11 @@ import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
+import draggable from 'vuedraggable';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
-  components: {},
+  components: { FontAwesomeIcon, draggable },
   emits: ['replayFinished'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -153,14 +216,17 @@ export default class CollectedState extends Vue {
   textureToken = pixiUtil.createLoadingToken();
 
   endObjects: placeable.PlaceableBase[] = [];
+  endObjectCount = 0;
   activeObjectId = '';
   activeObject: placeable.PlaceableBase | null = null;
+  showInfo = false;
 
   correctClassified: string[] = [];
   classified: string[] = [];
   gameConfig = gameConfig;
 
   collectKeys: string[] = [];
+  collectedItem: { [key: string]: placeable.PlaceableBase[] } = {};
 
   //#region get / set
   get hasWon(): boolean {
@@ -187,23 +253,31 @@ export default class CollectedState extends Vue {
     return Array.from(new Set(keys)).filter((d) => d != null);
   }
 
-  checkType(key: string, id: string) {
-    if (this.activeObject) {
+  checkType(key: string, objectId: string, objectType: string) {
+    const index = this.endObjects.findIndex((item) => item.name === objectId);
+    if (index > -1) {
+      this.collectedItem[key].push(this.endObjects[index]);
+      this.endObjects.splice(index, 1);
+    }
+    if (objectType) {
       if (
-        gameConfig[this.levelType].categories[this.activeObject.type].items[
-          this.activeObject.name
-        ].collectKey === key
+        gameConfig[this.levelType].categories[objectType].items[objectId]
+          .collectKey === key
       ) {
         if (
-          !this.classified.includes(id) &&
-          !this.correctClassified.includes(id)
+          !this.classified.includes(objectId) &&
+          !this.correctClassified.includes(objectId)
         ) {
-          this.correctClassified.push(id);
-          this.classified.push(id);
+          this.correctClassified.push(objectId);
+          this.classified.push(objectId);
+          this.showInfo = true;
           return true;
         }
       }
-      if (!this.classified.includes(id)) this.classified.push(id);
+      if (!this.classified.includes(objectId)) {
+        this.classified.push(objectId);
+        this.showInfo = true;
+      }
       return false;
     }
   }
@@ -238,6 +312,20 @@ export default class CollectedState extends Vue {
       }
       return false;
     });
+  }
+
+  getClassificationIcon(key: string): string {
+    switch (key) {
+      case 'dispose':
+        return 'dumpster';
+      case 'recycle':
+        return 'recycle';
+      case 'leave':
+        return 'tree';
+      case 'rescue':
+        return 'truck-medical';
+    }
+    return 'dumpster';
   }
   //#endregion get / set
 
@@ -280,14 +368,14 @@ export default class CollectedState extends Vue {
   domKey = '';
   mounted(): void {
     this.endObjects = this.shuffle(this.getEndObjects());
-    if (this.endObjects.length > 0) {
+    this.endObjectCount = this.endObjects.length;
+    if (this.endObjectCount > 0) {
       this.collectKeys = this.getCollectKeys();
+      for (const key of this.collectKeys) {
+        this.collectedItem[key] = [];
+      }
       this.activeObject = this.endObjects[0];
       this.activeObjectId = this.endObjects[0].name;
-      /*const element = document.getElementById(this.activeObjectId);
-      if (element) {
-        element.classList.add('objectContainerActive');
-      }*/
       this.activeObjectChanged(this.activeObject, this.activeObjectId);
     }
     this.domKey = registerDomElement(
@@ -311,16 +399,11 @@ export default class CollectedState extends Vue {
 
   //#region interaction
   activeObjectChanged(object, id, scroll = false) {
-    let element = document.getElementById(this.activeObjectId);
-    if (element) {
-      element.classList.remove('objectContainerActive');
-    }
-    this.activeObjectId = id;
-    this.activeObject = object;
-    element = document.getElementById(id);
-    if (element) {
-      element.classList.add('objectContainerActive');
-      if (scroll) {
+    if (this.activeObjectId !== id) {
+      this.activeObjectId = id;
+      this.activeObject = object;
+      const element = document.getElementById(`${object.type}#${id}`);
+      if (element && scroll) {
         element.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
@@ -334,6 +417,11 @@ export default class CollectedState extends Vue {
     const placeableConfig =
       gameConfig[this.levelType].categories[object.type].items[object.name];
     return placeableConfig.explanationKey;
+  }
+
+  addToClassification(cagegory: string, event: CustomEvent): void {
+    const id = (event as any).item.id;
+    this.checkType(cagegory, id.split('#')[1], id.split('#')[0]);
   }
   //#endregion interaction
 
@@ -387,33 +475,34 @@ export default class CollectedState extends Vue {
 
 .endObjects {
   --end-objects-width: var(--game-area-width);
-  --end-objects-height: calc(var(--game-area-height) * 0.32);
+  --end-objects-height: calc(var(--game-area-height) * 0.32 - 3rem);
 
   position: relative;
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  height: 32%;
+  //height: 32%;
   width: 100%;
+  min-height: var(--end-objects-height);
   z-index: 10;
   overflow-x: scroll;
   overflow-y: hidden;
   -ms-overflow-style: none; /* IE and Edge */
   //scrollbar-width: none; /* Firefox */
   margin: 2rem 0;
-  background-color: var(--color-brown-xlight);
-  outline: 0.5rem solid var(--color-brown);
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  outline: 0.5rem solid var(--color-primary);
 }
 
 .endObject {
   --end-object-width: calc((var(--end-objects-width) - 1rem) / 3);
-  --end-object-height: calc((var(--end-objects-height) - 5rem));
+  --end-object-height: calc((var(--end-objects-height) - 2rem));
 
   position: relative;
-  margin: 1rem;
+  margin: 1.5rem 0.5rem 0.5rem 0.5rem;
   transition: 0.3s;
   padding: 0.5rem;
-  border: 0.3rem solid var(--color-brown);
+  border: 0.3rem solid var(--color-primary);
   background-color: var(--color-background);
   border-radius: var(--border-radius-small);
   height: var(--end-object-height);
@@ -424,6 +513,11 @@ export default class CollectedState extends Vue {
   justify-content: center;
   align-items: center;
   flex: 0 0 auto;
+
+  .el-image {
+    width: 100%;
+    height: 100%;
+  }
 }
 .endObjectCorrect {
   background-color: var(--color-brainstorming-light);
@@ -437,6 +531,7 @@ export default class CollectedState extends Vue {
   z-index: 2;
   transform: translateY(-1rem);
   transition: 0.3s;
+  border-color: var(--color-playing);
 }
 
 .endObjectSprites {
@@ -450,7 +545,8 @@ export default class CollectedState extends Vue {
 
 .marginTop {
   margin-top: 1rem;
-  padding: 0 1rem;
+  //padding: 0 1rem;
+  text-align: left;
 }
 
 .returnButton {
@@ -459,22 +555,22 @@ export default class CollectedState extends Vue {
 }
 
 .infoText {
-  height: 2rem;
-  transition: 0.3s;
+  //height: 2rem;
+  //transition: 0.3s;
 }
 
 .classificationButtons {
   width: 100%;
-  display: flex;
+  /*display: flex;
   justify-content: center;
   align-content: center;
-  flex-direction: row;
+  flex-direction: row;*/
   padding: 0 0.3rem;
 }
 
 .classificationButton {
-  width: 40%;
-  height: 3rem;
+  width: 100%;
+  height: 6.5rem;
   border: 3px solid var(--color-dark-contrast);
   color: var(--color-dark-contrast);
   margin: 0.3rem;
@@ -482,6 +578,64 @@ export default class CollectedState extends Vue {
   font-size: var(--font-size-default);
   font-weight: var(--font-weight-semibold);
   background-color: var(--color-background);
+  padding: 0;
+  position: relative;
+  transform: translate(0, 0);
+
+  .classifiedObject {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding-top: 2.5rem;
+  }
+
+  .endObject {
+    margin: 0.1rem;
+    --end-object-width: 3rem;
+    --end-object-height: 3rem;
+    border: 1px solid var(--color-primary);
+
+    .objectName {
+      visibility: hidden;
+    }
+
+    .endObjectSprites {
+      max-height: unset;
+      max-width: unset;
+      margin: unset;
+    }
+  }
+
+  .objectContainerActive {
+    transform: unset;
+  }
+}
+
+.el-dialog {
+  .objectName {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-large);
+    padding-top: 1rem;
+  }
+
+  .el-image {
+    width: 100%;
+    height: 30vh;
+  }
+}
+
+.classificationButton::v-deep(> span) {
+  //display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.classifiedObject {
+  //width: 40%;
+  margin: 0 0.1rem;
 }
 
 .wrongClassificationIcon {
@@ -492,18 +646,23 @@ export default class CollectedState extends Vue {
   color: var(--color-brainstorming);
 }
 
-.categoryIcon {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  width: 2rem;
-  height: 2rem;
-}
-
 .objectName {
   position: absolute;
   text-align: center;
   top: 0.2rem;
   text-transform: capitalize;
+}
+
+.classificationType {
+  --inner-border-radius: calc(var(--border-radius-small) - 5px);
+  padding-top: 0.8rem;
+  width: calc(100% - 2px);
+  text-align: center;
+  padding-bottom: 0.5rem;
+  position: fixed;
+  top: 0;
+  z-index: 10;
+  background-color: var(--color-background);
+  border-radius: var(--inner-border-radius) var(--inner-border-radius) 0 0;
 }
 </style>

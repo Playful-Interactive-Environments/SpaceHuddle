@@ -109,6 +109,12 @@
         }
       }
     },
+    "collectKey": {
+      "dispose": "dispose",
+      "recycle": "recycle",
+      "leave": "leave",
+      "rescue": "rescue"
+    },
     "returnToMenu": "Return to Menu.",
     "categorisationButtons": {
       "flammable": "fire hazard",
