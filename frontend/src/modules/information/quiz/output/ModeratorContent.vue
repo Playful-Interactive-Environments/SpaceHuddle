@@ -124,7 +124,10 @@
           />
         </el-form-item>
         <el-form-item
-          v-if="moduleQuestionnaireType === QuestionnaireType.TALK"
+          v-if="
+            moduleQuestionnaireType === QuestionnaireType.TALK &&
+            canChangeHasAnswer
+          "
           :label="$t('module.information.quiz.moderatorContent.hasAnswer')"
           prop="hasAnswer"
         >
@@ -486,6 +489,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return this.questionnaireType === QuestionnaireType.QUIZ
       ? QuizQuestionType
       : SurveyQuestionType;
+  }
+
+  get canChangeHasAnswer(): boolean {
+    return QuizQuestionType.includes(this.formData.questionType);
   }
 
   get correctFormAnswer(): Hierarchy | undefined {
