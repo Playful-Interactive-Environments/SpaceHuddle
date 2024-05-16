@@ -12,7 +12,7 @@ $danger: red;
 $widescreen-enabled: false;
 $fullhd-enabled: false;
 
-@import "../../../node_modules/bulma/bulma.sass";
+@import "../../../node_modules/bulma/bulma.scss";
 
 .media .media {
   border-top: unset;

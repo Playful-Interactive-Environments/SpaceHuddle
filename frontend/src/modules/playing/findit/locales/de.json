@@ -26,9 +26,9 @@
     "play": "Start",
     "newLevel": "neues Level erstellen",
     "lotText": "Du hast leider zu lange ein gefährliches Objekt nicht gefunden, das nun einen Schaden verursacht hat. Du hast verloren, bitte versuche es noch einmal.",
-    "win": "Du hast gewonnen!",
+    "win": "Geschafft!",
     "winText": "Du hast es geschafft, die Umwelt vor den gefährlichen Objekten zu schützen!",
-    "lost": "Du hast verloren.",
+    "lost": "Nicht rechtzeitig!",
     "tutorial": {
       "placing": "Level bauen:\nKlicke auf einen beliebige Stelle in der Szene um eine Auswahl an Objekten zu bekommen. Wähle eines der Objekte aus um es an dem ausgewählten Ort zu platzieren.\nVerschiebe das Objekt durch drag and drop und Drehe, skaliere und lösche das ausgewählte Objekt durch klick auf die Buttons in der Symbolleiste.",
       "finding": "Suchen:\nDiese Szene ist nicht so harmlos wie sie scheint!\nAn manchen Orten verstecken sich gefährliche Objekte, die früher oder später eine Katastrophe verursachen könnten. Sammle diese Objekte mit einem Klick ein und verhindere eine große Katastrophe, bevor es zu spät ist!\nBenutze die Lupe, um hinter Bäume und andere Objekte zu schauen."
@@ -108,6 +108,12 @@
           }
         }
       }
+    },
+    "collectKey": {
+      "dispose": "entsorgen",
+      "recycle": "recyceln",
+      "leave": "lassen",
+      "rescue": "retten"
     },
     "returnToMenu": "Zurück zum Menü.",
     "categorisationButtons": {

@@ -23,9 +23,9 @@
   },
   "participant": {
     "lostText": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",
-    "win": "You won!",
+    "win": "Completed!",
     "winText": "You managed to save the environment from the hazardous objects!",
-    "lost": "You lost.",
+    "lost": "Not in time!",
     "newLevel": "create new level",
     "place": "Place",
     "play": "Start",
@@ -108,6 +108,12 @@
           }
         }
       }
+    },
+    "collectKey": {
+      "dispose": "dispose",
+      "recycle": "recycle",
+      "leave": "leave",
+      "rescue": "rescue"
     },
     "returnToMenu": "Return to Menu.",
     "categorisationButtons": {
