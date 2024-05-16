@@ -625,7 +625,7 @@ export default class CollectedState extends Vue {
   .objectName {
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-large);
-    padding-top: 1rem;
+    //padding-top: 1rem;
   }
 
   .el-image {
