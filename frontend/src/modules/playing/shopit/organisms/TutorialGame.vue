@@ -76,7 +76,7 @@
           this.properties.filter((property) => property.correct).length < 5
         "
         @click="$emit('playFinished')"
-        >Continue</el-button
+        >{{ $t('module.playing.shopit.participant.skip') }}</el-button
       >
       <el-button id="skip" @click="$emit('playFinished')">
         {{ $t('module.playing.shopit.participant.skip') }}
@@ -180,7 +180,7 @@ export default class TutorialGame extends Vue {
         ? 'module.playing.shopit.participant.cards.conditions.regional'
         : 'module.playing.shopit.participant.cards.conditions.2ndHand'
       : category === 'food'
-      ? 'module.playing.shopit.participant.cards.conditions.exotic'
+      ? 'module.playing.shopit.participant.cards.conditions.supraRegional'
       : 'module.playing.shopit.participant.cards.conditions.brandNew';
   }
 
