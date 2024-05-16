@@ -605,15 +605,15 @@ export default class CollectedState extends Vue {
     --end-object-height: 3rem;
     border: 1px solid var(--color-primary);
 
-    .objectName {
-      visibility: hidden;
-    }
-
     .endObjectSprites {
       max-height: unset;
       max-width: unset;
       margin: unset;
     }
+  }
+
+  .objectName {
+    display: none;
   }
 
   .objectContainerActive {
