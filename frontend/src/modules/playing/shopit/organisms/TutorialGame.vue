@@ -76,7 +76,7 @@
           this.properties.filter((property) => property.correct).length < 5
         "
         @click="$emit('playFinished')"
-        >{{ $t('module.playing.shopit.participant.skip') }}</el-button
+        >{{ $t('module.playing.shopit.participant.continueButton') }}</el-button
       >
       <el-button id="skip" @click="$emit('playFinished')">
         {{ $t('module.playing.shopit.participant.skip') }}
