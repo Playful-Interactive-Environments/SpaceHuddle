@@ -1364,11 +1364,11 @@ export default class TaskSettings extends Vue {
   }
 
   get displayModuleList(): ModuleTaskProperty[] {
-    const moduleNames = this.hideNotUsesModules
+    let moduleNames = this.hideNotUsesModules
       ? this.usedModuleList
       : this.possibleModuleTaskList;
     if (this.moduleSearch) {
-      return moduleNames.filter((module) => {
+      moduleNames = moduleNames.filter((module) => {
         const name = (this as any).$t(
           `module.${module.taskType.toLowerCase()}.${
             module.moduleName
@@ -1376,6 +1376,17 @@ export default class TaskSettings extends Vue {
         );
         return name.toLowerCase().includes(this.moduleSearch.toLowerCase());
       });
+    }
+    if (this.task) {
+      moduleNames = moduleNames.filter(
+        (module) =>
+          module.active ||
+          this.formData.moduleListAddOn.find(
+            (item) =>
+              item.moduleName === module.moduleName &&
+              item.taskType === module.taskType
+          )
+      );
     }
     return moduleNames;
   }
