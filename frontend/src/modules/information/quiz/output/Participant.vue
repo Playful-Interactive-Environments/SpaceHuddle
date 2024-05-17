@@ -179,7 +179,7 @@
           </draggable>
         </el-space>
         <div v-else-if="activeQuestionType === QuestionType.RATING">
-          0 <font-awesome-icon :icon="['far', 'star']" /> =
+          1 <font-awesome-icon icon="star" /> =
           {{ $t('module.information.quiz.participant.bad') }}
           <br />
           {{ activeQuestion.parameter.maxValue }}
@@ -1923,5 +1923,23 @@ label {
 
 .module-content::v-deep(.participant-content) {
   padding-bottom: 1rem;
+}
+
+.el-rate {
+  //margin-top: 1rem;
+  flex-wrap: wrap;
+  height: unset;
+}
+
+.el-rate::v-deep(.el-icon) {
+  height: 2.5em;
+  width: 2.5em;
+  margin-top: 1rem;
+  margin-right: 0.8rem;
+
+  svg {
+    height: 2.5em;
+    width: 2.5em;
+  }
 }
 </style>
