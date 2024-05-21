@@ -15,7 +15,7 @@
       "items": {
         "shoes-3": {
           "cost": 8,
-          "CO2": 8,
+          "CO2": 3,
           "energy": 40,
           "lifetime": 3,
           "water": 4000,
@@ -25,7 +25,7 @@
         },
         "pants-3": {
           "cost": 9,
-          "CO2": 9,
+          "CO2": 2,
           "energy": 25,
           "lifetime": 3,
           "water": 3500,
@@ -35,7 +35,7 @@
         },
         "shirt-3": {
           "cost": 10,
-          "CO2": 10,
+          "CO2": 2,
           "energy": 20,
           "lifetime": 3,
           "water": 2700,
@@ -45,7 +45,7 @@
         },
         "shoes-2": {
           "cost": 11,
-          "CO2": 11,
+          "CO2": 22,
           "energy": 150,
           "lifetime": 10,
           "water": 4000,
@@ -55,7 +55,7 @@
         },
         "pants-2": {
           "cost": 12,
-          "CO2": 12,
+          "CO2": 8,
           "energy": 80,
           "lifetime": 15,
           "water": 3500,
@@ -65,7 +65,7 @@
         },
         "shirt-2": {
           "cost": 13,
-          "CO2": 13,
+          "CO2": 4,
           "energy": 50,
           "lifetime": 10,
           "water": 2700,
@@ -75,7 +75,7 @@
         },
         "shoes-1": {
           "cost": 14,
-          "CO2": 14,
+          "CO2": 12,
           "energy": 100,
           "lifetime": 2,
           "water": 4000,
@@ -85,7 +85,7 @@
         },
         "pants-1": {
           "cost": 15,
-          "CO2": 15,
+          "CO2": 5,
           "energy": 50,
           "lifetime": 3,
           "water": 3500,
@@ -95,7 +95,7 @@
         },
         "shirt-1": {
           "cost": 16,
-          "CO2": 16,
+          "CO2": 3,
           "energy": 35,
           "lifetime": 2,
           "water": 2700,
@@ -113,7 +113,7 @@
       "items": {
         "headphones-3": {
           "cost": 8,
-          "CO2": 8,
+          "CO2": 5,
           "energy": 30,
           "lifetime": 1.5,
           "water": 4000,
@@ -123,7 +123,7 @@
         },
         "phone-3": {
           "cost": 9,
-          "CO2": 9,
+          "CO2": 12,
           "energy": 120,
           "lifetime": 3,
           "water": 4000,
@@ -133,7 +133,7 @@
         },
         "laptop-3": {
           "cost": 10,
-          "CO2": 10,
+          "CO2": 50,
           "energy": 100,
           "lifetime": 6,
           "water": 4000,
@@ -143,7 +143,7 @@
         },
         "headphones-2": {
           "cost": 11,
-          "CO2": 11,
+          "CO2": 15,
           "energy": 250,
           "lifetime": 2,
           "water": 8000,
@@ -153,7 +153,7 @@
         },
         "phone-2": {
           "cost": 12,
-          "CO2": 12,
+          "CO2": 65,
           "energy": 1200,
           "lifetime": 3,
           "water": 11000,
@@ -163,7 +163,7 @@
         },
         "laptop-2": {
           "cost": 13,
-          "CO2": 13,
+          "CO2": 400,
           "energy": 450,
           "lifetime": 5,
           "water": 14000,
@@ -173,7 +173,7 @@
         },
         "headphones-1": {
           "cost": 14,
-          "CO2": 14,
+          "CO2": 8,
           "energy": 110,
           "lifetime": 4,
           "water": 8000,
@@ -183,7 +183,7 @@
         },
         "phone-1": {
           "cost": 15,
-          "CO2": 15,
+          "CO2": 30,
           "energy": 650,
           "lifetime": 6,
           "water": 11000,
@@ -193,7 +193,7 @@
         },
         "laptop-1": {
           "cost": 16,
-          "CO2": 16,
+          "CO2": 250,
           "energy": 230,
           "lifetime": 15,
           "water": 14000,
