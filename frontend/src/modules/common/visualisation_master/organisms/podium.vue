@@ -41,7 +41,13 @@
             topVotes.length - this.order[index] - 1
           ),
           marginTop: getTopMargin(index),
-          pointerEvents: ended ? 'all' : 'none',
+          pointerEvents: moderatedFlow
+            ? moderatedIndex <= index
+              ? 'all'
+              : 'none'
+            : ended
+            ? 'all'
+            : 'none',
         }"
       >
         <div
@@ -134,6 +140,7 @@ export default class PublicScreen extends Vue {
 
   voteSets: number[] = [];
   order: number[] = [];
+  revealedVoteIndexes: number[] = [];
 
   moderatedFlow = false;
   moderatedIndex = this.topAmount;
