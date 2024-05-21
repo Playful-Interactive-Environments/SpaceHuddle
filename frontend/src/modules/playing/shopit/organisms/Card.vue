@@ -110,9 +110,8 @@ hr {
 .cardCondition {
   color: var(--color-brown);
   position: absolute;
-  top: 0;
-  right: 0;
-  margin: 5%;
+  top: 1rem;
+  right: 5%;
   text-align: right;
   font-size: var(--font-size-xsmall);
   font-weight: var(--font-weight-bold);

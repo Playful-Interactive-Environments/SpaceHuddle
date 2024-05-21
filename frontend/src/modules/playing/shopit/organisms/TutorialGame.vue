@@ -72,6 +72,7 @@
     <div class="TutGameButtons">
       <el-button
         type="primary"
+        id="continue"
         :disabled="
           this.properties.filter((property) => property.correct).length < 5
         "
@@ -451,8 +452,12 @@ hr {
   height: 10%;
   width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
+  #continue {
+    position: absolute;
+    left: 2rem;
+  }
   #skip {
     position: absolute;
     right: 2rem;
