@@ -19,7 +19,7 @@
         :change="false"
         :update="true"
       />
-      <PlayerTypeResult v-else :task-id="taskId" />
+      <PlayerTypeResult v-else :task-id="taskId" :show-exception="true" />
     </div>
 
     <ProcessTimeline
