@@ -30,7 +30,14 @@
         },
         plugins: {
           legend: {
-            display: false,
+            display: true,
+            position: 'top',
+            align: 'end',
+            labels: {
+              boxWidth: 30,
+              boxHeight: 30,
+              color: contrastColor,
+            },
           },
         },
       }"
@@ -96,13 +103,16 @@ export default class PlayerTypeResult extends Vue {
   }
 
   playerTypeCount: { [key: string]: number } = {};
+  playerTypeCountSecondary: { [key: string]: number } = {};
   updateState(result: TaskParticipantState[]): void {
     for (const playerType of Object.values(PlayerType)) {
       this.playerTypeCount[playerType] = 0;
+      this.playerTypeCountSecondary[playerType] = 0;
     }
     for (const state of result) {
       if (state.parameter.playerTypes) {
         this.playerTypeCount[state.parameter.playerTypes[0]] += 1;
+        this.playerTypeCountSecondary[state.parameter.playerTypes[1]] += 1;
       }
     }
     if (this.resultData) {
@@ -115,7 +125,16 @@ export default class PlayerTypeResult extends Vue {
   get resultData(): any {
     const datasets = [
       {
+        label: this.$t('module.information.brainhex.participant.primary'),
         data: Object.values(this.playerTypeCount),
+        borderRadius: 5,
+        borderSkipped: false,
+        backgroundColor: themeColors.getGreenColor(),
+        color: themeColors.getContrastColor(),
+      },
+      {
+        label: this.$t('module.information.brainhex.participant.secondary'),
+        data: Object.values(this.playerTypeCountSecondary),
         borderRadius: 5,
         borderSkipped: false,
         backgroundColor: themeColors.getYellowColor(),
@@ -123,7 +142,9 @@ export default class PlayerTypeResult extends Vue {
       },
     ];
     return {
-      labels: Object.keys(this.playerTypeCount).map((item) => this.$t(`module.information.brainhex.enum.playerType.${item}`)),
+      labels: Object.keys(this.playerTypeCount).map((item) =>
+        this.$t(`module.information.brainhex.enum.playerType.${item}`)
+      ),
       datasets: datasets,
     };
   }
