@@ -162,7 +162,7 @@ export default class PublicBase extends Vue {
   publicQuestion: Question | null = null;
   voteResult: VoteResult[] = [];
   moduleQuestionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
-  moderatedQuestionFlow = true;
+  moderatedQuestionFlow = false;
 
   questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
   statePointer = 0;

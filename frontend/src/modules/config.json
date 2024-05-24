@@ -106,6 +106,15 @@
              "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "common/visualisation_master"  
        },  
+       "brainhex": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "brainhex",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": false,  
+           "path": "information/brainhex"  
+       },  
        "default": {  
            "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  

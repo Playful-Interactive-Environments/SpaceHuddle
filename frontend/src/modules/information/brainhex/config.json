@@ -1,0 +1,8 @@
+{
+  "icon": "brainhex",
+  "iconPrefix": "fac",
+  "type": "main",
+  "input": "no",
+  "syncPublicParticipant": false,
+  "finishManuel": false
+}

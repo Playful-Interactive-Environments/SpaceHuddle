@@ -140,7 +140,7 @@
             :animation="150"
             class="el-steps el-steps--horizontal media-content"
             :item-key="keyPropertyName"
-            handle=".processIcon"
+            handle=".dragIcon"
             @end="dragDone"
           >
             <template #item="{ element, index }">
@@ -196,10 +196,15 @@
                       <span @click="itemClicked(element)">
                         <font-awesome-icon
                           class="processIcon"
+                          :class="{ dragIcon: canDrag }"
                           v-if="contentListIcon(element)"
                           :icon="contentListIcon(element)"
                         />
-                        <span v-else class="processIcon withoutIcon">
+                        <span
+                          v-else
+                          class="processIcon withoutIcon"
+                          :class="{ dragIcon: canDrag }"
+                        >
                           {{ index + 1 }}
                         </span>
                       </span>
@@ -426,6 +431,7 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: 'processTimeline' }) readonly translationModuleName!: string;
   @Prop({ default: TimerEntity.TASK }) entityName!: string;
   @Prop({ default: false }) readonly readonly!: boolean;
+  @Prop({ default: true }) readonly canDrag!: boolean;
   @Prop({ default: true }) readonly canDisablePublicTimeline!: boolean;
   @Prop({ default: false }) readonly canDisableResult!: boolean;
   @Prop({ default: false }) readonly canUseOtherPublicScreenTopic!: boolean;
@@ -904,8 +910,11 @@ export default class ProcessTimeline extends Vue {
   }
 }
 
-.processIcon {
+.dragIcon {
   cursor: grab;
+}
+
+.processIcon {
   position: absolute;
   left: 50%;
   top: 50%;

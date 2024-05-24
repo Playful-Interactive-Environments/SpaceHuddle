@@ -1,0 +1,143 @@
+{
+  "questions": [
+    {
+      "question": "Exploring to see what you can find.",
+      "type": "rating",
+      "playerType": "Seeker"
+    },
+    {
+      "question": "Frantically escaping from a terrifying foe.",
+      "type": "rating",
+      "playerType": "Survivor"
+    },
+    {
+      "question": "Working out how to crack a challenging puzzle.",
+      "type": "rating",
+      "playerType": "Mastermind"
+    },
+    {
+      "question": "The struggle to difficult boss.",
+      "type": "rating",
+      "playerType": "Conqueror"
+    },
+    {
+      "question": "Playing in a group, online or in the same room.",
+      "type": "rating",
+      "playerType": "Socialiser"
+    },
+    {
+      "question": "Responding quickly to an exciting situation.",
+      "type": "rating",
+      "playerType": "Daredevil"
+    },
+    {
+      "question": "Picking up every single collectible in an area.",
+      "type": "rating",
+      "playerType": "Achiever"
+    },
+    {
+      "question": "Looking around just to enjoy the scenery.",
+      "type": "rating",
+      "playerType": "Seeker"
+    },
+    {
+      "question": "Being in control at high speed.",
+      "type": "rating",
+      "playerType": "Daredevil"
+    },
+    {
+      "question": "Devising a promising strategy when deciding what to try next.",
+      "type": "rating",
+      "playerType": "Mastermind"
+    },
+    {
+      "question": "Feeling relief when you escape to a safe area.",
+      "type": "rating",
+      "playerType": "Survivor"
+    },
+    {
+      "question": "Taking on a strong opponent when playing against a human player in a versus match.",
+      "type": "rating",
+      "playerType": "Conqueror"
+    },
+    {
+      "question": "Talking with other players, online or in the same room.",
+      "type": "rating",
+      "playerType": "Socialiser"
+    },
+    {
+      "question": "Finding what you need to complete a collection.",
+      "type": "rating",
+      "playerType": "Achiever"
+    },
+    {
+      "question": "Hanging from a high ledge.",
+      "type": "rating",
+      "playerType": "Daredevil"
+    },
+    {
+      "question": "Wondering what's behind a locked door.",
+      "type": "rating",
+      "playerType": "Seeker"
+    },
+    {
+      "question": "Feeling scared, terrified or disturbed.",
+      "type": "rating",
+      "playerType": "Survivor"
+    },
+    {
+      "question": "Working out what to do on your own.",
+      "type": "rating",
+      "playerType": "Mastermind"
+    },
+    {
+      "question": "Completing a punishing challenge after failing many times.",
+      "type": "rating",
+      "playerType": "Conqueror"
+    },
+    {
+      "question": "Co-operating with strangers.",
+      "type": "rating",
+      "playerType": "Socialiser"
+    },
+    {
+      "question": "Getting 100% (completing everything in a game).",
+      "type": "rating",
+      "playerType": "Achiever"
+    },
+    {
+      "question": "Arrange the following experiences into a sequence from best to worst.",
+      "type": "order",
+      "options": [
+        {
+          "answer": "A moment of jaw-dropping wonder or beauty.",
+          "playerType": "Seeker"
+        },
+        {
+          "answer": "An experience of primeval terror that blows your mind.",
+          "playerType": "Survivor"
+        },
+        {
+          "answer": "A moment of breathtaking speed or vertigo.",
+          "playerType": "Daredevil"
+        },
+        {
+          "answer": "The moment when the solution to a difficult puzzle clicks in your mind.",
+          "playerType": "Mastermind"
+        },
+        {
+          "answer": "A moment of hard-fought victory.",
+          "playerType": "Conqueror"
+        },
+        {
+          "answer": "A moment when you feel an intense sense of unity with another player.",
+          "playerType": "Socialiser"
+        },
+        {
+          "answer": "A moment of completeness that you have strived for.",
+          "playerType": "Achiever"
+        }
+      ]
+    }
+  ]
+}
