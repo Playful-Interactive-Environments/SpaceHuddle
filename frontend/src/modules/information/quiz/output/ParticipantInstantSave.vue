@@ -1270,11 +1270,11 @@ export default class Participant extends Vue {
   }
 
   updateStoredAnswers(): void {
-    this.loadProgress();
+    this.loadProgress(true);
   }
 
   storedProgressLoaded = false;
-  loadProgress(): void {
+  loadProgress(changeState = false): void {
     if (this.storedProgressLoaded || this.voteResults.length > 0) return;
     const questionCount = this.questions.length;
     const stepCount = this.trackingManager.finalStepList.length;
@@ -1298,6 +1298,8 @@ export default class Participant extends Vue {
       }
       this.activeQuestionIndex = activeIndex;
       this.calculateScore();
+      this.storedProgressLoaded = true;
+    } else if (changeState && questionCount > 0 && this.trackingManager) {
       this.storedProgressLoaded = true;
     }
   }
