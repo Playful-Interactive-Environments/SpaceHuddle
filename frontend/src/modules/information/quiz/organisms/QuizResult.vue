@@ -180,16 +180,11 @@ export default class QuizResult extends Vue {
         ? (maxVote.idea.order as number)
         : this.voteResult.length - 1;
       for (let i = min; i <= max; i++) {
-        const color = (
-          color1.mix(color2, (1 / (max + 1)) * (i + 1), {
-            space: 'lch',
-            outputSpace: 'srgb',
-          }) as any
-        ).coords as number[];
-        let hexColor = '#';
-        color.forEach(
-          (coord) => (hexColor += Math.round(coord * 255).toString(16))
-        );
+        const color = color1.mix(color2, (1 / max) * i, {
+          space: 'lch',
+          outputSpace: 'srgb',
+        }) as any;
+        const hexColor = color.toString({ format: 'hex', collapse: false });
         legend.push({
           color: hexColor,
           name: (i + 1).toString(),
