@@ -181,7 +181,7 @@ export default class QuizResult extends Vue {
         : this.voteResult.length - 1;
       for (let i = min; i <= max; i++) {
         const color = (
-          color1.mix(color2, (1 / max) * i, {
+          color1.mix(color2, (1 / (max + 1)) * (i + 1), {
             space: 'lch',
             outputSpace: 'srgb',
           }) as any
