@@ -117,8 +117,7 @@ export default class PlayerTypeResult extends Vue {
       this.playerTypeCountHate[playerType] = 0;
       this.playerTypeCombinedCount[playerType] = {};
       for (const playerType2 of Object.values(PlayerType)) {
-        if (playerType !== playerType2)
-          this.playerTypeCombinedCount[playerType][playerType2] = 0;
+        this.playerTypeCombinedCount[playerType][playerType2] = 0;
       }
     }
     for (const state of result) {
