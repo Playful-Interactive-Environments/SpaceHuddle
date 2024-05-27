@@ -175,13 +175,15 @@ export default class PublicScreen extends Vue {
         ? (this.order[index] / this.voteSets.length) * 40 + '%'
         : '100%';
     } else {
-      if (this.order[index] >= this.moderatedIndex) {
+      if (this.order[index] > this.moderatedIndex) {
         if (this.moderatedIndex <= 0) {
           setTimeout(() => {
             this.ended = true;
           }, 500);
         }
         return (this.order[index] / this.voteSets.length) * 40 + '%';
+      } else if (this.order[index] === this.moderatedIndex) {
+        return '0%';
       } else {
         return '100%';
       }
