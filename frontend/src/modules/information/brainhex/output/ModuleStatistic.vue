@@ -1,4 +1,5 @@
 <template>
+  <PlayerTypeResult :task-id="taskId" :show-exception="true" />
   <PlayerTypeResult :task-id="taskId" :show-all="true" />
   <Bar
     v-for="(chartData, index) in barChartDataList"
