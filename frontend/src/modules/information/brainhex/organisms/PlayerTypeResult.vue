@@ -59,6 +59,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { PlayerType } from '@/modules/information/brainhex/types/PlayerType';
 import Color from 'colorjs.io';
+import { getRandomColorList } from '@/utils/colors';
 
 @Options({
   components: {
@@ -72,6 +73,7 @@ export default class PlayerTypeResult extends Vue {
   @Prop({ default: false }) readonly update!: boolean;
   @Prop({ default: false }) readonly showException!: boolean;
   @Prop({ default: false }) readonly showAll!: boolean;
+  @Prop({ default: false }) readonly showDetails!: boolean;
 
   chartData: any = {
     labels: [],
@@ -107,14 +109,23 @@ export default class PlayerTypeResult extends Vue {
   }
 
   playerTypeCount: { [key: string]: number[] } = {};
+  playerTypeCombinedCount: { [key: string]: { [key: string]: number } } = {};
   playerTypeCountHate: { [key: string]: number } = {};
   updateState(result: TaskParticipantState[]): void {
     for (const playerType of Object.values(PlayerType)) {
       this.playerTypeCount[playerType] = [0, 0, 0, 0, 0, 0, 0];
       this.playerTypeCountHate[playerType] = 0;
+      this.playerTypeCombinedCount[playerType] = {};
+      for (const playerType2 of Object.values(PlayerType)) {
+        if (playerType !== playerType2)
+          this.playerTypeCombinedCount[playerType][playerType2] = 0;
+      }
     }
     for (const state of result) {
       if (state.parameter.playerTypes) {
+        this.playerTypeCombinedCount[state.parameter.playerTypes[0]][
+          state.parameter.playerTypes[1]
+        ] += 1;
         for (let i = 0; i < Object.keys(PlayerType).length; i++) {
           this.playerTypeCount[state.parameter.playerTypes[i]][i] += 1;
         }
@@ -134,7 +145,25 @@ export default class PlayerTypeResult extends Vue {
 
   get resultData(): any {
     const datasets: any[] = [];
-    if (this.showAll) {
+    if (this.showDetails) {
+      const randomColors = getRandomColorList(7);
+      let index = 0;
+      for (const playerType of Object.values(PlayerType)) {
+        datasets.push({
+          label: this.$t(
+            `module.information.brainhex.enum.playerType.${playerType}`
+          ),
+          data: Object.keys(this.playerTypeCombinedCount).map(
+            (item) => this.playerTypeCombinedCount[item][playerType]
+          ),
+          borderRadius: 5,
+          borderSkipped: false,
+          backgroundColor: randomColors[index],
+          color: themeColors.getContrastColor(),
+        });
+        index++;
+      }
+    } else if (this.showAll) {
       const rateColors: string[] = [];
       const color1 = new Color(themeColors.getGreenColor());
       const color2 = new Color(themeColors.getRedColor());

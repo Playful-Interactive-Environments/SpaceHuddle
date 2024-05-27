@@ -1,6 +1,7 @@
 <template>
   <PlayerTypeResult :task-id="taskId" :show-exception="true" />
   <PlayerTypeResult :task-id="taskId" :show-all="true" />
+  <PlayerTypeResult :task-id="taskId" :show-details="true" />
   <Bar
     v-for="(chartData, index) in barChartDataList"
     :key="index"
