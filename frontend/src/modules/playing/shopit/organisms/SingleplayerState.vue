@@ -145,116 +145,179 @@
     </TransitionGroup>
   </div>
   <div
-    class="gameArea result"
+    class="resultArea"
     :style="{ height: height }"
-    v-if="playStateType === PlayStateType.win"
   >
-    <h2 class="heading heading--medium">
-      {{ $t('module.playing.shopit.participant.win') }}
-    </h2>
-    <p v-if="reason === 'category'">
-      {{ $t('module.playing.shopit.participant.winCategories') }}
-    </p>
-    <p v-if="reason === 'points'">
-      {{ $t('module.playing.shopit.participant.winPoints') }}
-    </p>
-    <p class="marginTop">
-      {{ $t('module.playing.shopit.participant.endCards') }}
-    </p>
-    <div class="endCards">
-      <div
-        v-for="card in endCardsOverview"
-        :key="card.infoKey"
-        :id="card.infoKey"
-        class="endCard"
-        :style="{
-          backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
-        }"
-        @click="activeCardChanged(card, card.infoKey, true)"
-      >
-        <Card
-          :cost="card.cost"
-          :CO2="card.CO2"
-          :energy="card.energy"
-          :lifetime="card.lifetime"
-          :water="card.water"
-          :money="card.money"
-          :category="card.category"
-          :condition="card.condition"
-          :cardName="card.name"
-        />
-        <p class="CardDescription">{{ card.infoKey }}</p>
+    <div class="result" v-if="playStateType === PlayStateType.win">
+      <h2 class="heading heading--medium">
+        {{ $t('module.playing.shopit.participant.win') }}
+      </h2>
+      <p v-if="reason === 'category'">
+        {{ $t('module.playing.shopit.participant.winCategories') }}
+      </p>
+      <p v-if="reason === 'points'">
+        {{ $t('module.playing.shopit.participant.winPoints') }}
+      </p>
+      <p class="marginTop">
+        {{ $t('module.playing.shopit.participant.endCards') }}
+      </p>
+      <div class="endCards">
+        <div
+          v-for="card in endCardsOverview"
+          :key="card.infoKey"
+          :id="card.infoKey"
+          class="endCard"
+          :style="{
+            backgroundImage:
+              'url(' + gameConfig.gameValues.cardBackground + ')',
+          }"
+          @click="activeCardChanged(card, card.infoKey, true)"
+        >
+          <Card
+            :cost="card.cost"
+            :CO2="card.CO2"
+            :energy="card.energy"
+            :lifetime="card.lifetime"
+            :water="card.water"
+            :money="card.money"
+            :category="card.category"
+            :condition="card.condition"
+            :cardName="card.name"
+          />
+          <p class="CardDescription">{{ card.infoKey }}</p>
+        </div>
       </div>
-    </div>
-    <div class="infoText">
-      <p class="marginTop" v-show="this.activeCardId !== ''">
+      <div class="infoText">
+        <!--      <p class="marginTop" v-show="this.activeCardId !== ''">
         {{
           $t(
-            'module.playing.shopit.participant.endCardTexts.' +
-              this.activeCardId
+              'module.playing.shopit.participant.endCardTexts.' +
+              this.activeCard.category
           )
         }}
-      </p>
-    </div>
-    <el-button class="el-button--submit returnButton" @click="finished">
-      {{ $t('module.playing.shopit.participant.returnToMenu') }}
-    </el-button>
-  </div>
-  <div
-    class="gameArea result"
-    :style="{ height: height }"
-    v-if="playStateType === PlayStateType.lost"
-  >
-    <h2 class="heading heading--medium">
-      {{ $t('module.playing.shopit.participant.lost') }}
-    </h2>
-    <p v-if="reason === 'category'">
-      {{ $t('module.playing.shopit.participant.lostCategories') }}
-    </p>
-    <p v-if="reason === 'points'">
-      {{ $t('module.playing.shopit.participant.lostPoints') }}
-    </p>
-    <p class="marginTop">
-      {{ $t('module.playing.shopit.participant.endCards') }}
-    </p>
-    <div class="endCards">
-      <div
-        v-for="card in endCardsOverview"
-        :key="card.infoKey"
-        :id="card.infoKey"
-        class="endCard"
-        :style="{
-          backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
-        }"
-        @click="activeCardChanged(card, card.infoKey, true)"
-      >
-        <Card
-          :cost="card.cost"
-          :CO2="card.CO2"
-          :energy="card.energy"
-          :lifetime="card.lifetime"
-          :water="card.water"
-          :money="card.money"
-          :category="card.category"
-          :condition="card.condition"
-          :cardName="card.name"
-        />
-        <p class="CardDescription">{{ card.infoKey }}</p>
+      </p>-->
+        <p class="marginTop">
+          {{
+            $t(
+              'module.playing.shopit.participant.' +
+                this.activeCard.category +
+                'EndCardTexts.header'
+            )
+          }}
+        </p>
+        <ul class="marginTop">
+          <li v-for="text in getTips(this.activeCard.category)" :key="text">
+            {{ text }}
+          </li>
+        </ul>
+        <p class="marginTop">
+          {{
+            $t(
+              'module.playing.shopit.participant.' +
+                this.activeCard.category +
+                'EndCardTexts.description'
+            )
+          }}
+        </p>
+        <p class="marginTop">
+          {{
+            $t(
+              'module.playing.shopit.participant.' +
+                this.activeCard.category +
+                'EndCardTexts.shop-it-tip'
+            )
+          }}
+        </p>
       </div>
+      <el-button class="el-button--submit returnButton" @click="finished">
+        {{ $t('module.playing.shopit.participant.returnToMenu') }}
+      </el-button>
     </div>
-    <div class="infoText">
-      <p class="marginTop" v-show="this.activeCardId !== ''">
+    <div class="result" v-if="playStateType === PlayStateType.lost">
+      <h2 class="heading heading--medium">
+        {{ $t('module.playing.shopit.participant.lost') }}
+      </h2>
+      <p v-if="reason === 'category'">
+        {{ $t('module.playing.shopit.participant.lostCategories') }}
+      </p>
+      <p v-if="reason === 'points'">
+        {{ $t('module.playing.shopit.participant.lostPoints') }}
+      </p>
+      <p class="marginTop">
+        {{ $t('module.playing.shopit.participant.endCards') }}
+      </p>
+      <div class="endCards">
+        <div
+          v-for="card in endCardsOverview"
+          :key="card.infoKey"
+          :id="card.infoKey"
+          class="endCard"
+          :style="{
+            backgroundImage:
+              'url(' + gameConfig.gameValues.cardBackground + ')',
+          }"
+          @click="activeCardChanged(card, card.infoKey, true)"
+        >
+          <Card
+            :cost="card.cost"
+            :CO2="card.CO2"
+            :energy="card.energy"
+            :lifetime="card.lifetime"
+            :water="card.water"
+            :money="card.money"
+            :category="card.category"
+            :condition="card.condition"
+            :cardName="card.name"
+          />
+          <p class="CardDescription">{{ card.infoKey }}</p>
+        </div>
+      </div>
+      <div class="infoText">
+        <!--      <p class="marginTop" v-show="this.activeCardId !== ''">
         {{
           $t(
-            'module.playing.shopit.participant.endCardTexts.' +
-              this.activeCardId
+              'module.playing.shopit.participant.endCardTexts.' +
+              this.activeCard.category
           )
         }}
-      </p>
+      </p>-->
+        <p class="marginTop">
+          {{
+            $t(
+              'module.playing.shopit.participant.' +
+                this.activeCard.category +
+                'EndCardTexts.header'
+            )
+          }}
+        </p>
+        <ul class="marginTop">
+          <li v-for="text in getTips(this.activeCard.category)" :key="text">
+            {{ text }}
+          </li>
+        </ul>
+        <p class="marginTop">
+          {{
+            $t(
+              'module.playing.shopit.participant.' +
+                this.activeCard.category +
+                'EndCardTexts.description'
+            )
+          }}
+        </p>
+        <p class="marginTop">
+          {{
+            $t(
+              'module.playing.shopit.participant.' +
+                this.activeCard.category +
+                'EndCardTexts.shop-it-tip'
+            )
+          }}
+        </p>
+      </div>
+      <el-button class="el-button--submit returnButton" @click="finished">
+        {{ $t('module.playing.shopit.participant.returnToMenu') }}
+      </el-button>
     </div>
-    <el-button class="el-button--submit returnButton" @click="finished">
-      {{ $t('module.playing.shopit.participant.returnToMenu') }}
-    </el-button>
   </div>
 </template>
 
@@ -338,6 +401,21 @@ export default class PlayState extends Vue {
   win = false;
   gameEnded = false;
 
+  getTips(category = '') {
+    const tipsArray: string[] = [];
+    for (let i = 1; i <= 3; i++) {
+      tipsArray.push(
+        this.$t(
+          'module.playing.shopit.participant.' +
+            category +
+            'EndCardTexts.tips.' +
+            i
+        )
+      );
+    }
+    return tipsArray;
+  }
+
   preloadAllSprites(cards) {
     for (let i = 0; i < cards.length; i++) {
       this.preloadImage(this.cardSpriteFolder + cards[i].name + '.png');
@@ -401,7 +479,8 @@ export default class PlayState extends Vue {
 
   calculateMostExpensiveCards() {
     const cards: any = [];
-    let co2Card: any = [];
+
+    /*let co2Card: any = [];
     let electricityCard: any = [];
     let lifetimeCard: any = [];
     let waterCard: any = [];
@@ -410,8 +489,9 @@ export default class PlayState extends Vue {
     let electricity = 0;
     let lifetime = 1000;
     let water = 0;
-    let money = 0;
-    for (let i = 0; i < this.ownCardsPlayed.length; i++) {
+    let money = 0;*/
+
+    /*for (let i = 0; i < this.ownCardsPlayed.length; i++) {
       if (this.ownCardsPlayed[i].CO2 > co2) {
         co2 = this.ownCardsPlayed[i].CO2;
         co2Card = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
@@ -422,7 +502,7 @@ export default class PlayState extends Vue {
         electricityCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
         electricityCard.infoKey = 'electricity';
       }
-      if (this.ownCardsPlayed[i].lifetime < lifetime && this.ownCardsPlayed[i].lifetime > -1) {
+      if (this.ownCardsPlayed[i].lifetime < lifetime) {
         lifetime = this.ownCardsPlayed[i].lifetime;
         lifetimeCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
         lifetimeCard.infoKey = 'lifetime';
@@ -437,12 +517,66 @@ export default class PlayState extends Vue {
         moneyCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
         moneyCard.infoKey = 'money';
       }
-    }
-    cards.push(co2Card);
+    }*/
+    /*cards.push(co2Card);
     cards.push(electricityCard);
     cards.push(lifetimeCard);
     cards.push(waterCard);
-    cards.push(moneyCard);
+    cards.push(moneyCard);*/
+
+    const clothing = this.ownCardsPlayed.filter(
+      (card) => card.category === 'clothing'
+    );
+    const electronics = this.ownCardsPlayed.filter(
+      (card) => card.category === 'electronics'
+    );
+    const food = this.ownCardsPlayed.filter((card) => card.category === 'food');
+
+    let clothingItem: any = [];
+    let electronicsItem: any = [];
+    let foodItem: any = [];
+    clothingItem.cost = 0;
+    electronicsItem.cost = 0;
+    foodItem.cost = 0;
+
+    for (const card of clothing) {
+      if (clothingItem.cost < card.cost) {
+        clothingItem = card;
+      }
+    }
+    for (const card of electronics) {
+      if (electronicsItem.cost < card.cost) {
+        electronicsItem = card;
+      }
+    }
+    for (const card of food) {
+      if (foodItem.cost < card.cost) {
+        foodItem = card;
+      }
+    }
+
+    if (clothingItem) {
+      clothingItem.infoKey = this.$t(
+        'module.playing.shopit.participant.cardCategories.clothing'
+      );
+    }
+
+    if (electronicsItem) {
+      electronicsItem.infoKey = this.$t(
+        'module.playing.shopit.participant.cardCategories.electronics'
+      );
+    }
+
+    if (foodItem) {
+      foodItem.infoKey = this.$t(
+        'module.playing.shopit.participant.cardCategories.food'
+      );
+    }
+
+    cards.push(clothingItem);
+    cards.push(electronicsItem);
+    cards.push(foodItem);
+
     return cards;
   }
 
@@ -644,7 +778,7 @@ export default class PlayState extends Vue {
     return boolArray;
   }
 
-  activeCardChanged(card, id, scroll = false) {
+  activeCardChanged(card: any, id: string, scroll = false) {
     let element = document.getElementById(this.activeCardId);
     if (element) {
       element.classList.remove('cardContainerActive');
@@ -660,7 +794,6 @@ export default class PlayState extends Vue {
         element.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
-          inline: 'center',
         });
       }
     }
@@ -816,16 +949,6 @@ export default class PlayState extends Vue {
   text-align: center;
   font-size: var(--font-size-xxlarge);
   color: white;
-}
-
-.result {
-  font-size: var(--font-size-xxlarge);
-  display: flex;
-  align-items: center;
-  span {
-    width: 100%;
-    text-align: center;
-  }
 }
 
 .opponentHand {
@@ -1162,7 +1285,14 @@ p.gameKey {
   position: absolute;
 }
 
+.resultArea {
+  position: relative;
+  overflow-y: scroll;
+  height: 100%;
+}
+
 .result {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1170,6 +1300,21 @@ p.gameKey {
   font-size: var(--font-size-default);
   text-align: center;
   padding-top: 2rem;
+  background-color: var(--color-background);
+  overflow-y: scroll !important;
+
+  span {
+    width: 100%;
+    text-align: center;
+  }
+  .infoText {
+    height: fit-content;
+    text-align: left;
+    ul {
+      list-style-type: circle;
+      padding-left: 3rem;
+    }
+  }
 }
 
 .endCards {
@@ -1177,7 +1322,7 @@ p.gameKey {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  height: 32%;
+  height: 20rem;
   width: 100%;
   z-index: 10;
   overflow-x: scroll;
@@ -1187,6 +1332,10 @@ p.gameKey {
   background-color: var(--color-brown-xlight);
   outline: 0.5rem solid var(--color-brown);
   margin: 1rem 0;
+}
+
+.endCards::-webkit-scrollbar {
+  display: none;
 }
 
 .endCard {
@@ -1217,7 +1366,6 @@ p.gameKey {
 }
 
 .returnButton {
-  position: absolute;
-  bottom: 2rem;
+  margin: 2rem;
 }
 </style>

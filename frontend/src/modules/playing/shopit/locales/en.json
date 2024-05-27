@@ -76,7 +76,40 @@
       "electricity": "Manufacturing a t-shirt involves different processes such as knitting & weaving, wet treatment or confectioning. These processes require about 10 Kwh of energy.",
       "lifetime": "A shirts durability can be attributed often times by both the quality of the dress shirt and the amount of times it's been laundered. Some shirts last 6 months, others 2-5 years or longer.",
       "water": "With the production of cotton, it takes about 2,700 liters of water to make just one t-shirt , which is enough water for one person to drink for 900 days.",
-      "money": "On average, a basic plain t-shirt can range from 5€ to 30€, while designer or branded t-shirts can cost anywhere from 30€ to 100€ or more."
+      "money": "On average, a basic plain t-shirt can range from 5€ to 30€, while designer or branded t-shirts can cost anywhere from 30€ to 100€ or more.",
+      "clothing": "c",
+      "electronics": "e",
+      "food": "f"
+    },
+    "clothingEndCardTexts": {
+      "header": "Did you know that the fashion industry produces about 10 percent of the annual global carbon dioxide emissions?",
+      "tips": {
+        "1": "Professionals buy high-quality clothing that lasts longer!",
+        "2": "Professionals shop secondhand or used clothing!",
+        "3": "Professionals buy clothing minimally – only the pieces they really need!"
+      },
+      "shop-it-tip": "Pay attention to the labels on the cards – used clothing usually shows more favorable results in all categories (CO2, energy, lifespan, water, money) compared to brand new textiles.",
+      "description": "The high carbon dioxide emissions of the fashion industry are caused, for example, by the manufacture and production of garments. This requires a variety of processes (e.g., growing cotton, fibers, fabric production, dyeing and printing textiles, etc.), which are energy and water-intensive and lead to high CO2 exchange. Additionally, our clothes often travel a long way before they end up in our closets. Even worse is that we often don't wear our clothes for long and instead quickly replace them with new pieces. This not only harms the environment but also our wallets, as frequently buying new textiles is expensive."
+    },
+    "electronicsEndCardTexts": {
+      "header": "Did you know that in 2023, over 60 million tons of electronic waste were produced worldwide?",
+      "tips": {
+        "1": "Professionals have defective electronic devices repaired instead of discarding them! If repair is no longer possible, the electronic waste is taken to the recycling center (ASZ) so that valuable materials can be used for new devices (recycling)!",
+        "2": "Professionals do not need many different and not always the latest electronic devices!",
+        "3": "Professionals buy “refurbed” (i.e., refurbished/overhauled) devices at a lower price!"
+      },
+      "shop-it-tip": "Pay attention to the labels on the cards – used electronic devices usually show more favorable results in all categories (CO2, energy, lifespan, water, money) compared to brand new electronic devices.",
+      "description": "The huge amount of electronic waste last year is not surprising when you consider that the consumption of electronic devices, such as smartphones, laptops, tablets, TVs, etc., has drastically increased for years. Continuously new, better devices are developed, and everything is increasingly digitized, making it difficult to do without electronic devices. Additionally, electronic devices are becoming increasingly short-lived, breaking down after only a short time of use. Repairs are often not worthwhile as they can be almost as expensive as buying a new device. The production of electronic devices requires many natural resources and also produces high CO2 emissions, e.g., by burning fossil fuels. All this just for the devices to end up in the trash after a short time. These facts are anything but climate-friendly."
+    },
+    "foodEndCardTexts": {
+      "header": "Did you know that not only does your body react to the food you eat, but you also influence our climate?",
+      "tips": {
+        "1": "Professionals buy regional & seasonal products!",
+        "2": "Professionals mainly consume plant-based foods!",
+        "3": "Professionals make sure not to waste food!"
+      },
+      "shop-it-tip": "Pay attention to the labels on the cards – regional foods are usually better for your CO2 balance than supra-regional foods.",
+      "description": "The more regional & seasonal the products we consume, the fewer transport routes are required and the less CO2 emissions are produced. When we consume non-seasonal foods, they often have a long transport route and a high energy demand to produce them outside their natural growing season. Additionally, it is climate-friendly to consume animal products (e.g., meat, fish, dairy products, etc.) with care, as livestock farming significantly contributes to greenhouse gas emissions. It is also important to consider that every product produced consumes resources and burdens our earth with CO2 emissions. It would be a shame if it ended up in the trash."
     },
     "cardProperties": {
       "CO²": "CO²",
@@ -84,6 +117,11 @@
       "lifetime": "Lifetime",
       "water": "Water",
       "money": "Money"
+    },
+    "cardCategories": {
+      "clothing": "Clothing",
+      "electronics": "Electronics",
+      "food": "Food"
     },
     "highscore": {
       "header": "highscore",
