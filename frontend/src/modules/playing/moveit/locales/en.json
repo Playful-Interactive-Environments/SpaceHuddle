@@ -186,7 +186,7 @@
         "e-car": "E-car"
       },
       "motorcycle": {
-        "category": "motorcycle",
+        "category": "two-wheeler",
         "moped": "moped",
         "e-moped": "E-moped",
         "motorcycle": "motorcycle",
@@ -201,6 +201,9 @@
         "category": "bus",
         "bus": "bus",
         "e-bus": "E-bus"
+      },
+      "bike": {
+        "category": "bike"
       }
     },
     "fuel": {
@@ -223,10 +226,10 @@
   },
   "statistic": {
     "rating": "How many times how many points were scored?",
-    "vehicleCategory": "Which vehicle category were used how often in which run?",
-    "vehicleType": "Which vehicle types were used how often in which run?",
-    "navigationType": "Which navigation types were used how often per user?",
-    "movingType": "Which moving types were used how often per user?",
+    "vehicleCategory": "Which vehicle category were used how often?",
+    "vehicleType": "Which vehicle types were used how often?",
+    "navigationType": "Which navigation types were used how often?",
+    "movingType": "Which moving types were used how often?",
     "stops": "How many times did the driver stop while driving?",
     "persons": "How many people were on the bus?",
     "speed": {

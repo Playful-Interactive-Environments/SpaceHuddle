@@ -151,7 +151,10 @@ export default class LevelStatistic extends Vue {
       (value) => Math.round((value / 60000) * 100),
       'winPoints'
     );
-    this.calculateStateParameterChartPerLevel('temperatureRise');
+    this.calculateStateParameterChartPerLevel(
+      'temperatureRise',
+      (value) => `${value} °C`
+    );
     this.calculateStateParameterChartPerTemperatureRise('moleculeHitCount');
     this.calculateStateParameterChartPerTemperatureRise(
       'moleculeState',
@@ -300,7 +303,9 @@ export default class LevelStatistic extends Vue {
           (convert
             ? convert(item.parameter.state[parameter])
             : item.parameter.state[parameter]) === value,
-        filter
+        filter,
+        (list) => list.length,
+        (parameter) => `${parameter} °C`
       );
       this.barChartDataList.push({
         title: this.$t(`module.playing.coolit.statistic.${title ?? parameter}`),

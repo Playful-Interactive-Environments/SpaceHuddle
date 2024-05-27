@@ -17,7 +17,7 @@ export function calculateChartPerIteration(
   getIterationNo: (item: any) => number,
   containsToLoop: (item: any, label: any) => boolean,
   containsToChart: ((item: any) => boolean) | null = null,
-  maxIterations = 10
+  maxIterations = 0
 ): ChartDataset[] {
   const chartDataList = containsToChart
     ? dataList.filter((item) => containsToChart(item))
@@ -87,17 +87,15 @@ export function calculateChartPerParameter(
     list
   ) => list.length,
   parameterToString: (parameter: any) => string = (parameter) =>
-    parameter.toString()
+    parameter.toString(),
+  maxDatasets = 5
 ): ChartDataset[] {
   const chartDataList = containsToChart
     ? dataList.filter((item) => containsToChart(item))
     : dataList;
   if (chartDataList.length === 0) return [];
   const datasets: ChartDataset[] = [];
-  for (const [index, parameter] of parameterList.entries()) {
-    const subset = chartDataList.filter((item) =>
-      containsToParameter(item, parameter)
-    );
+  const addDataset = (subset: any[], index: number, parameter: any): void => {
     const dataset = {
       label: parameterToString(parameter),
       borderColor: colorList[index],
@@ -119,6 +117,16 @@ export function calculateChartPerParameter(
       dataset.data.push(calculation(loopSet, loopItem, parameter));
     }
     datasets.push(dataset as ChartDataset);
+  };
+  if (parameterList.length <= maxDatasets) {
+    for (const [index, parameter] of parameterList.entries()) {
+      const subset = chartDataList.filter((item) =>
+        containsToParameter(item, parameter)
+      );
+      addDataset(subset, index, parameter);
+    }
+  } else {
+    addDataset(chartDataList, 0, {});
   }
   return datasets;
 }

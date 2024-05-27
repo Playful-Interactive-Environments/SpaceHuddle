@@ -186,7 +186,7 @@
         "e-car": "E-Auto"
       },
       "motorcycle": {
-        "category": "Motorrad",
+        "category": "Zweirad",
         "moped": "Moped",
         "e-moped": "Elektroroller",
         "motorcycle": "Motorrad",
@@ -201,6 +201,9 @@
         "category": "Bus",
         "bus": "Bus",
         "e-bus": "Elektrobus"
+      },
+      "bike": {
+        "category": "Fahrrad"
       }
     },
     "fuel": {
@@ -223,10 +226,10 @@
   },
   "statistic": {
     "rating": "Wie oft wurden wie viele Punkte erzielt?",
-    "vehicleCategory": "Welche Fahrzeugtypen wurden wie oft in welchem Durchlauf eingesetzt?",
-    "vehicleType": "Welche Fahrzeugkategorien wurden wie oft in welchem Durchlauf eingesetzt?",
-    "navigationType": "Welche Navigationsmodus wurden wie oft pro User eingesetzt?",
-    "movingType": "Welche Bewegungsmodus wurden wie oft pro User eingesetzt?",
+    "vehicleCategory": "Welche Fahrzeugtypen wurden wie oft eingesetzt?",
+    "vehicleType": "Welche Fahrzeugkategorien wurden wie oft eingesetzt?",
+    "navigationType": "Welche Navigationsmodus wurden wie oft eingesetzt?",
+    "movingType": "Welche Bewegungsmodus wurden wie oft eingesetzt?",
     "stops": "Wie oft hat der Fahrer während der Fahrt angehalten?",
     "persons": "Wie viele Personen befanden sich im Bus?",
     "speed": {

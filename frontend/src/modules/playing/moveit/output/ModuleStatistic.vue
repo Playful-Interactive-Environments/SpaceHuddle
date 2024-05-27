@@ -106,6 +106,7 @@ import {
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
 import Highscore from '@/modules/playing/moveit/organisms/Highscore.vue';
+import { Vehicle } from '@/modules/playing/moveit/types/Vehicle';
 
 @Options({
   components: { Highscore, Bar, Line },
@@ -165,6 +166,18 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
+  isSameVehicle(vehicle1: Vehicle, vehicle2: Vehicle): boolean {
+    return vehicleCalculation.isSameCategory(vehicle1, vehicle2);
+    //return vehicleCalculation.isSameVehicle(vehicle1, vehicle2);
+  }
+
+  vehicleToString(vehicle: Vehicle): string {
+    return this.$t(
+      `module.playing.moveit.enums.vehicles.${vehicle.category}.category`
+    );
+    //return vehicleCalculation.vehicleToString(vehicle);
+  }
+
   getVehicleList(
     filter: ((item) => boolean) | null = null
   ): vehicleCalculation.Vehicle[] {
@@ -173,9 +186,7 @@ export default class ModuleStatistic extends Vue {
       .map((item) => item.parameter.vehicle)
       .filter(
         (value, index, array) =>
-          array.findIndex((item) =>
-            vehicleCalculation.isSameVehicle(item, value)
-          ) === index
+          array.findIndex((item) => this.isSameVehicle(item, value)) === index
       )
       .sort((a, b) => vehicleCalculation.vehicleCompare(a, b));
   }
@@ -223,12 +234,12 @@ export default class ModuleStatistic extends Vue {
         [...Array(4).keys()],
         this.colorList,
         (item, parameter) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
+          this.isSameVehicle(item.parameter.vehicle, parameter),
         (item, stars) =>
           item.parameter.rate === stars && item.parameter.rate != -1,
         null,
         (list) => list.length,
-        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
+        (vehicle) => this.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.moveit.statistic.rating'),
@@ -271,15 +282,14 @@ export default class ModuleStatistic extends Vue {
     if (this.steps) {
       const vehicleList = this.getVehicleList();
       const labels: string[] = vehicleList.map((item) =>
-        vehicleCalculation.vehicleToString(item)
+        this.vehicleToString(item)
       );
       const datasets = calculateChartPerIteration(
         this.steps,
         vehicleList,
         this.replayColors,
         (item) => item.iteration - 1,
-        (item, vehicle) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
+        (item, vehicle) => this.isSameVehicle(item.parameter.vehicle, vehicle)
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.moveit.statistic.vehicleType'),
@@ -385,12 +395,12 @@ export default class ModuleStatistic extends Vue {
         labels,
         this.colorList,
         (item, parameter) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
+          this.isSameVehicle(item.parameter.vehicle, parameter),
         (item, parameterValue) =>
           item.parameter.drive[parameterName] === parameterValue,
         filter,
         (list) => list.length,
-        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
+        (vehicle) => this.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(`module.playing.moveit.statistic.${parameterName}`),
@@ -478,9 +488,9 @@ export default class ModuleStatistic extends Vue {
       }
       const filter = (item) =>
         item.parameter.drive && item.parameter.drive.calcSpeed;
-      const labels: string[] = this.steps
+      const labels: number[] = this.steps
         .filter((item) => filter(item))
-        .map((item) => item.parameter.drive.calcSpeed)
+        .map((item) => Math.round(item.parameter.drive.calcSpeed))
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
       const vehicleList = this.getVehicleList(filter);
@@ -490,11 +500,11 @@ export default class ModuleStatistic extends Vue {
         labels,
         this.colorList,
         (item, parameter) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
+          this.isSameVehicle(item.parameter.vehicle, parameter),
         (item, calcSpeed) => item.parameter.drive.calcSpeed === calcSpeed,
         filter,
         (list) => list.length,
-        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
+        (vehicle) => this.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(`module.playing.moveit.statistic.speed.${type}`),
@@ -511,9 +521,13 @@ export default class ModuleStatistic extends Vue {
   calculateTimeChart(timeType: string): void {
     if (this.steps) {
       const filter = (item) => item.parameter[timeType];
+      const accuracy = 10;
       const labels: number[] = this.steps
         .filter((item) => filter(item))
-        .map((item) => Math.round(item.parameter[timeType] / 1000))
+        .map(
+          (item) =>
+            Math.round(item.parameter[timeType] / 1000 / accuracy) * accuracy
+        )
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
       const vehicleList = this.getVehicleList(filter);
@@ -523,11 +537,13 @@ export default class ModuleStatistic extends Vue {
         labels,
         this.colorList,
         (item, parameter) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
-        (item, time) => Math.round(item.parameter[timeType] / 1000) === time,
+          this.isSameVehicle(item.parameter.vehicle, parameter),
+        (item, time) =>
+          Math.round(item.parameter[timeType] / 1000 / accuracy) * accuracy ===
+          time,
         filter,
         (list) => list.length,
-        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
+        (vehicle) => this.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(`module.playing.moveit.statistic.${timeType}`),
@@ -561,12 +577,12 @@ export default class ModuleStatistic extends Vue {
         labels,
         this.colorList,
         (item, parameter) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
+          this.isSameVehicle(item.parameter.vehicle, parameter),
         null,
         filter,
         (list, label) =>
           getCalculationForType(calculationType)(mapToValue(list, label)),
-        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
+        (vehicle) => this.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(
@@ -610,12 +626,12 @@ export default class ModuleStatistic extends Vue {
         labels,
         this.colorList,
         (item, parameter) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
+          this.isSameVehicle(item.parameter.vehicle, parameter),
         null,
         filter,
         (list, label) =>
           getCalculationForType(calculationType)(mapToValue(list, label)),
-        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
+        (vehicle) => this.vehicleToString(vehicle)
       );
       this.lineChartDataList.push({
         title: this.$t(

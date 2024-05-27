@@ -9,6 +9,10 @@ export function isSameVehicle(vehicle1: Vehicle, vehicle2: Vehicle): boolean {
   );
 }
 
+export function isSameCategory(vehicle1: Vehicle, vehicle2: Vehicle): boolean {
+  return vehicle1.category === vehicle2.category;
+}
+
 export function vehicleToString(vehicle: Vehicle): string {
   return `${vehicle.category} - ${vehicle.type}`;
 }
