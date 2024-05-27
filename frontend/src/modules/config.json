@@ -111,6 +111,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
              "icon": "brainhex",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": false,  
            "path": "information/brainhex"  

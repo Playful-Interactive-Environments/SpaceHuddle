@@ -4,6 +4,7 @@
     "description": "Find out your BrainHex class."
   },
   "moderatorContent": {
+    "order": "order"
   },
   "publicScreen": {
   },

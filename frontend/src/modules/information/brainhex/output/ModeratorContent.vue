@@ -3,6 +3,25 @@
     <h1 class="heading heading--medium">
       {{ $t('module.information.brainhex.description.title') }}
     </h1>
+    <div class="question" v-if="editQuestion">
+      {{ editQuestion.question.order + 1 }}.
+      {{
+        $t(
+          `module.information.brainhex.questions.${editQuestion.question.description
+            .replaceAll('.', '')
+            .replaceAll("'", '')}`
+        )
+      }}
+    </div>
+    <div v-if="editQuestion">
+      {{
+        $t(
+          `module.information.brainhex.enum.playerType.${
+            surveyConfig.questions[editQuestion.question.order].playerType
+          }`
+        )
+      }}
+    </div>
 
     <div id="QuizDiv">
       <QuizResult
@@ -36,7 +55,18 @@
       :canDisableResult="true"
       :contentListIcon="(item) => null"
       :getKey="(item) => item.id"
-      :getTitle="(item) => item.keywords"
+      :getTitle="
+        (item) => {
+          if (surveyConfig.questions[item.order].playerType) {
+            return $t(
+              `module.information.brainhex.enum.playerType.${
+                surveyConfig.questions[item.order].playerType
+              }`
+            );
+          }
+          return $t(`module.information.brainhex.moderatorContent.order`);
+        }
+      "
       :getTimerEntity="(item) => task"
       :itemIsEquals="
         (a, b) => (!a && !b) || (a && b && a.question.id === b.question.id)
@@ -50,16 +80,6 @@
       @changePublicScreen="changePublicScreen"
     >
     </ProcessTimeline>
-  </div>
-  <div class="question" v-if="editQuestion">
-    {{ editQuestion.question.order + 1 }}.
-    {{
-      $t(
-        `module.information.brainhex.questions.${editQuestion.question.description
-          .replaceAll('.', '')
-          .replaceAll("'", '')}`
-      )
-    }}
   </div>
 </template>
 
@@ -103,6 +123,7 @@ import { until } from '@/utils/wait';
 import MarkdownEditor from '@/components/shared/molecules/MarkdownEditor.vue';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import PlayerTypeResult from '@/modules/information/brainhex/organisms/PlayerTypeResult.vue';
+import surveyConfig from '@/modules/information/brainhex/data/survey.json';
 
 @Options({
   components: {
@@ -136,6 +157,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   TimelineArea = TimelineArea;
   TimerEntity = TimerEntity;
   votes: VoteResult[] = [];
+  surveyConfig = surveyConfig;
 
   questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
   @Watch('taskId', { immediate: true })

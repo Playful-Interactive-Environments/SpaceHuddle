@@ -58,6 +58,7 @@ import * as taskParticipantService from '@/services/task-participant-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { PlayerType } from '@/modules/information/brainhex/types/PlayerType';
+import Color from 'colorjs.io';
 
 @Options({
   components: {
@@ -70,6 +71,7 @@ export default class PlayerTypeResult extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: false }) readonly update!: boolean;
   @Prop({ default: false }) readonly showException!: boolean;
+  @Prop({ default: false }) readonly showAll!: boolean;
 
   chartData: any = {
     labels: [],
@@ -121,8 +123,6 @@ export default class PlayerTypeResult extends Vue {
             this.playerTypeCountHate[item] += 1;
           }
         }
-        //this.playerTypeCount[state.parameter.playerTypes[0]] += 1;
-        //this.playerTypeCountSecondary[state.parameter.playerTypes[1]] += 1;
       }
     }
     if (this.resultData) {
@@ -133,66 +133,69 @@ export default class PlayerTypeResult extends Vue {
   }
 
   get resultData(): any {
-    /*const rateColors: string[] = [];
-    const color1 = new Color(themeColors.getGreenColor());
-    const color2 = new Color(themeColors.getRedColor());
-    const min = 0;
-    const max = 6;
-    for (let i = min; i <= max; i++) {
-      const color = color1.mix(color2, (1 / max) * i, {
-        space: 'lch',
-        outputSpace: 'srgb',
-      }) as any;
-      const hexColor = color.toString({ format: 'hex', collapse: false });
-      rateColors.push(hexColor);
-    }
-
     const datasets: any[] = [];
-    for (let i = 0; i < Object.keys(PlayerType).length; i++) {
-      datasets.push({
-        label: i + 1,
-        data: Object.keys(this.playerTypeCount).map(
-          (item) => this.playerTypeCount[item][i]
-        ),
-        borderRadius: 5,
-        borderSkipped: false,
-        backgroundColor: rateColors[i],
-        color: themeColors.getContrastColor(),
-      });
-    }*/
-    const datasets: any[] = [
-      {
-        label: this.$t('module.information.brainhex.participant.primary'),
-        data: Object.keys(this.playerTypeCount).map(
-          (item) => this.playerTypeCount[item][0]
-        ),
-        borderRadius: 5,
-        borderSkipped: false,
-        backgroundColor: themeColors.getGreenColor(),
-        color: themeColors.getContrastColor(),
-      },
-      {
-        label: this.$t('module.information.brainhex.participant.secondary'),
-        data: Object.keys(this.playerTypeCount).map(
-          (item) => this.playerTypeCount[item][1]
-        ),
-        borderRadius: 5,
-        borderSkipped: false,
-        backgroundColor: themeColors.getYellowColor(),
-        color: themeColors.getContrastColor(),
-      },
-    ];
-    if (this.showException) {
-      datasets.push({
-        label: this.$t('module.information.brainhex.participant.exception'),
-        data: Object.keys(this.playerTypeCount).map(
-          (item) => this.playerTypeCountHate[item]
-        ),
-        borderRadius: 5,
-        borderSkipped: false,
-        backgroundColor: themeColors.getRedColor(),
-        color: themeColors.getContrastColor(),
-      });
+    if (this.showAll) {
+      const rateColors: string[] = [];
+      const color1 = new Color(themeColors.getGreenColor());
+      const color2 = new Color(themeColors.getRedColor());
+      const min = 0;
+      const max = 6;
+      for (let i = min; i <= max; i++) {
+        const color = color1.mix(color2, (1 / max) * i, {
+          space: 'lch',
+          outputSpace: 'srgb',
+        }) as any;
+        const hexColor = color.toString({ format: 'hex', collapse: false });
+        rateColors.push(hexColor);
+      }
+
+      for (let i = 0; i < Object.keys(PlayerType).length; i++) {
+        datasets.push({
+          label: i + 1,
+          data: Object.keys(this.playerTypeCount).map(
+            (item) => this.playerTypeCount[item][i]
+          ),
+          borderRadius: 5,
+          borderSkipped: false,
+          backgroundColor: rateColors[i],
+          color: themeColors.getContrastColor(),
+        });
+      }
+    } else {
+      datasets.push(
+        {
+          label: this.$t('module.information.brainhex.participant.primary'),
+          data: Object.keys(this.playerTypeCount).map(
+            (item) => this.playerTypeCount[item][0]
+          ),
+          borderRadius: 5,
+          borderSkipped: false,
+          backgroundColor: themeColors.getGreenColor(),
+          color: themeColors.getContrastColor(),
+        },
+        {
+          label: this.$t('module.information.brainhex.participant.secondary'),
+          data: Object.keys(this.playerTypeCount).map(
+            (item) => this.playerTypeCount[item][1]
+          ),
+          borderRadius: 5,
+          borderSkipped: false,
+          backgroundColor: themeColors.getYellowColor(),
+          color: themeColors.getContrastColor(),
+        }
+      );
+      if (this.showException) {
+        datasets.push({
+          label: this.$t('module.information.brainhex.participant.exception'),
+          data: Object.keys(this.playerTypeCount).map(
+            (item) => this.playerTypeCountHate[item]
+          ),
+          borderRadius: 5,
+          borderSkipped: false,
+          backgroundColor: themeColors.getRedColor(),
+          color: themeColors.getContrastColor(),
+        });
+      }
     }
     return {
       labels: Object.keys(this.playerTypeCount).map((item) =>
