@@ -226,6 +226,7 @@
   },
   "statistic": {
     "rating": "Wie oft wurden wie viele Punkte erzielt?",
+    "avatar": "Wie oft hat welcher Benutzer einen Level gespielt?",
     "vehicleCategory": "Welche Fahrzeugtypen wurden wie oft eingesetzt?",
     "vehicleType": "Welche Fahrzeugkategorien wurden wie oft eingesetzt?",
     "navigationType": "Welche Navigationsmodus wurden wie oft eingesetzt?",

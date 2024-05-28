@@ -197,6 +197,7 @@ export default class ModuleStatistic extends Vue {
     this.barChartDataList = [];
     this.lineChartDataList = [];
     this.calculateStarsChart();
+    this.calculateAvatarChart();
     this.calculateVehicleCategoryChart();
     this.calculateVehicleTypeChart();
     this.calculateNavigationTypeChart();
@@ -250,6 +251,44 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
+      });
+    }
+  }
+
+  calculateAvatarChart(): void {
+    if (this.steps) {
+      const participants = this.steps
+        .map((item) => item.avatar)
+        .filter(
+          (value, index, array) =>
+            array.findIndex(
+              (item) =>
+                item.color === value.color && item.symbol === value.symbol
+            ) === index
+        );
+      const labels: string[] = participants.map(
+        (participant) => AvatarUnicode[participant.symbol]
+      );
+      const labelColors: string[] = participants.map(
+        (participant) => participant.color
+      );
+      const datasets = calculateChartPerIteration(
+        this.steps,
+        participants,
+        this.replayColors,
+        (item) => item.iteration - 1,
+        (item, participant) =>
+          item.avatar.color === participant.color &&
+          item.avatar.symbol === participant.symbol
+      );
+      this.barChartDataList.push({
+        title: this.$t(`module.playing.moveit.statistic.avatar`),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: labelColors,
         stacked: true,
       });
     }
