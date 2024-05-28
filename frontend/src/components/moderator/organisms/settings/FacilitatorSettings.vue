@@ -231,9 +231,7 @@ export default class FacilitatorSettings extends Vue {
     }
     this.noOwner = !roles.find((role) => role.role === UserType.OWNER);
     this.roles = roles.filter(
-      (role) =>
-        (role.username !== this.own || this.noOwner) &&
-        role.role !== UserType.OWNER
+      (role) => role.username !== this.own && role.role !== UserType.OWNER
     );
   }
 
