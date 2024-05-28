@@ -167,7 +167,8 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, pointsSpent) => item.parameter.game.pointsSpent === pointsSpent,
+        (item, pointsSpent) =>
+          this.convert(item.parameter.game.pointsSpent) === pointsSpent,
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]
@@ -197,7 +198,7 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, co2) => item.parameter.game.co2 === co2,
+        (item, co2) => this.convert(item.parameter.game.co2) === co2,
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]
@@ -227,7 +228,8 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, electricity) => item.parameter.game.electricity === electricity,
+        (item, electricity) =>
+          this.convert(item.parameter.game.electricity) === electricity,
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]
@@ -257,7 +259,8 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, lifetime) => item.parameter.game.lifetime === lifetime,
+        (item, lifetime) =>
+          this.convert(item.parameter.game.lifetime) === lifetime,
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]
@@ -287,7 +290,7 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, water) => item.parameter.game.water === water,
+        (item, water) => this.convert(item.parameter.game.water) === water,
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]
@@ -317,7 +320,7 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, money) => item.parameter.game.money === money,
+        (item, money) => this.convert(item.parameter.game.money) === money,
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]
@@ -397,9 +400,13 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
+  convert(value: number, accuracy = 10): number {
+    return Math.round(value / accuracy) * accuracy;
+  }
+
   getPointsSpent() {
     return this.steps
-      .map((item) => item.parameter.game.pointsSpent)
+      .map((item) => this.convert(item.parameter.game.pointsSpent))
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
   }
@@ -412,35 +419,35 @@ export default class ModuleStatistic extends Vue {
 
   getCO2() {
     return this.steps
-      .map((item) => item.parameter.game.co2)
+      .map((item) => this.convert(item.parameter.game.co2))
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
   }
 
   getElectricity() {
     return this.steps
-      .map((item) => item.parameter.game.electricity)
+      .map((item) => this.convert(item.parameter.game.electricity))
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
   }
 
   getLifetime() {
     return this.steps
-      .map((item) => item.parameter.game.lifetime)
+      .map((item) => this.convert(item.parameter.game.lifetime))
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
   }
 
   getWater() {
     return this.steps
-      .map((item) => item.parameter.game.water)
+      .map((item) => this.convert(item.parameter.game.water))
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
   }
 
   getMoney() {
     return this.steps
-      .map((item) => item.parameter.game.money)
+      .map((item) => this.convert(item.parameter.game.money))
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
   }
