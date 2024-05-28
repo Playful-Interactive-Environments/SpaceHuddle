@@ -78,14 +78,7 @@
       :timerEnded="this.timerEnd"
       :votes="votes"
     />
-    <snakes
-      v-if="currentVisModule === 'snakes'"
-      :task-id="this.taskId"
-      :timeModifier="timeModifier"
-      :timerEnded="this.timerEnd"
-      :ideas="this.ideas"
-      :paused="paused"
-    />
+
   </div>
 </template>
 
@@ -113,11 +106,11 @@ import * as votingService from '@/services/voting-service';
 import Podium from '@/modules/common/visualisation_master/organisms/podium.vue';
 import Elimination from '@/modules/common/visualisation_master/organisms/elimination.vue';
 import * as viewService from '@/services/view-service';
-import Snakes from '@/modules/common/visualisation_master/organisms/snakes.vue';
+
 
 @Options({
   components: {
-    Snakes,
+
     Elimination,
     Podium,
     Strata,
