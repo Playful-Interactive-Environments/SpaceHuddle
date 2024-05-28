@@ -1,5 +1,5 @@
 <template>
-  <div class="timeControls" v-if="displayTimeMod">
+  <div class="timeControls" v-if="displayTimeMod" :style="{ opacity: timeModifierVisible ? 1 : 0 }">
     <el-button class="playPause">
       <font-awesome-icon
         v-if="paused"
@@ -78,6 +78,14 @@
       :timerEnded="this.timerEnd"
       :votes="votes"
     />
+    <snakes
+      v-if="currentVisModule === 'snakes'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :timerEnded="this.timerEnd"
+      :ideas="this.ideas"
+      :paused="paused"
+    />
   </div>
 </template>
 
@@ -87,7 +95,9 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import IdeaSortOrder, {
+  IdeaSortOrderHierarchy,
+} from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
@@ -102,9 +112,12 @@ import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
 import Podium from '@/modules/common/visualisation_master/organisms/podium.vue';
 import Elimination from '@/modules/common/visualisation_master/organisms/elimination.vue';
+import * as viewService from '@/services/view-service';
+import Snakes from '@/modules/common/visualisation_master/organisms/snakes.vue';
 
 @Options({
   components: {
+    Snakes,
     Elimination,
     Podium,
     Strata,
@@ -136,8 +149,12 @@ export default class PublicScreen extends Vue {
 
   timeModifier: number | null = 1;
   timeModifierArray: number[] = [0.25, 0.5, 0.75, 1, 1.5, 2, 4];
+  timeModifierVisible = false;
+  timeModifierHide = 0;
+  timeModifierHidingTime = 2000;
 
   voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
+  outputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -162,6 +179,19 @@ export default class PublicScreen extends Vue {
         this.updateVotes,
         EndpointAuthorisationType.MODERATOR,
         5
+      );
+    } else if (
+      this.currentVisModule &&
+      moduleConfig.visModules[this.currentVisModule].type === 'CATEGORISATION'
+    ) {
+      this.outputCash = viewService.registerGetInputIdeas(
+        this.taskId,
+        IdeaSortOrderHierarchy,
+        this.taskId,
+        this.updateCategorisedIdeas,
+        EndpointAuthorisationType.MODERATOR,
+        10,
+        'categorised::'
       );
     }
     taskService.registerGetTaskById(
@@ -195,6 +225,19 @@ export default class PublicScreen extends Vue {
         this.updateVotes,
         EndpointAuthorisationType.MODERATOR,
         5
+      );
+    } else if (
+      this.currentVisModule &&
+      moduleConfig.visModules[this.currentVisModule].type === 'CATEGORISATION'
+    ) {
+      this.outputCash = viewService.registerGetInputIdeas(
+        this.taskId,
+        IdeaSortOrderHierarchy,
+        this.taskId,
+        this.updateCategorisedIdeas,
+        EndpointAuthorisationType.MODERATOR,
+        10,
+        'categorised::'
       );
     }
   }
@@ -247,6 +290,12 @@ export default class PublicScreen extends Vue {
     });
   }
 
+  updateCategorisedIdeas(ideas: Idea[]): void {
+    this.ideas = ideas;
+    console.log('categorised Ideas:');
+    console.log(this.ideas);
+  }
+
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateTask);
@@ -257,13 +306,19 @@ export default class PublicScreen extends Vue {
     this.deregisterAll();
   }
 
-  menuItemSelected(command: string): void {
-    switch (command) {
-      case 'edit':
-        break;
-      case 'delete':
-        break;
-    }
+  mounted(): void {
+    document.addEventListener('mousemove', this.handleMouseMove);
+    this.timeModifierHide = setTimeout(() => {
+      this.timeModifierVisible = false;
+    }, this.timeModifierHidingTime);
+  }
+
+  handleMouseMove() {
+    this.timeModifierVisible = true;
+    clearTimeout(this.timeModifierHide);
+    this.timeModifierHide = setTimeout(() => {
+      this.timeModifierVisible = false;
+    }, this.timeModifierHidingTime);
   }
 }
 </script>
@@ -333,6 +388,7 @@ export default class PublicScreen extends Vue {
   flex-direction: row;
   justify-content: right;
   align-items: center;
+  transition: opacity 0.3s ease;
 }
 
 .timeModSelect {
