@@ -179,14 +179,16 @@ export default class ModuleStatistic extends Vue {
   }
 
   getVehicleList(
-    filter: ((item) => boolean) | null = null
+    filter: ((item) => boolean) | null = null,
+    isSameVehicle: (vehicle1: Vehicle, vehicle2: Vehicle) => boolean = this
+      .isSameVehicle
   ): vehicleCalculation.Vehicle[] {
     const subset = filter ? this.steps.filter(filter) : this.steps;
     return subset
       .map((item) => item.parameter.vehicle)
       .filter(
         (value, index, array) =>
-          array.findIndex((item) => this.isSameVehicle(item, value)) === index
+          array.findIndex((item) => isSameVehicle(item, value)) === index
       )
       .sort((a, b) => vehicleCalculation.vehicleCompare(a, b));
   }
@@ -269,7 +271,9 @@ export default class ModuleStatistic extends Vue {
       this.barChartDataList.push({
         title: this.$t('module.playing.moveit.statistic.vehicleCategory'),
         data: {
-          labels: labels,
+          labels: labels.map((item) =>
+            this.$t(`module.playing.moveit.enums.vehicles.${item}.category`)
+          ),
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
@@ -280,16 +284,20 @@ export default class ModuleStatistic extends Vue {
 
   calculateVehicleTypeChart(): void {
     if (this.steps) {
-      const vehicleList = this.getVehicleList();
+      const vehicleList = this.getVehicleList(
+        null,
+        vehicleCalculation.isSameVehicle
+      );
       const labels: string[] = vehicleList.map((item) =>
-        this.vehicleToString(item)
+        vehicleCalculation.vehicleToString(item)
       );
       const datasets = calculateChartPerIteration(
         this.steps,
         vehicleList,
         this.replayColors,
         (item) => item.iteration - 1,
-        (item, vehicle) => this.isSameVehicle(item.parameter.vehicle, vehicle)
+        (item, vehicle) =>
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.moveit.statistic.vehicleType'),

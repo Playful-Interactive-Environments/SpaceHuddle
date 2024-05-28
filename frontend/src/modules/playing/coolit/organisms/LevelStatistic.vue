@@ -134,6 +134,8 @@ export default class LevelStatistic extends Vue {
   }
 
   calculateCharts(): void {
+    const accuracyTime = 10;
+    const accuracyMolecule = 5;
     this.barChartDataList = [];
     if (!this.ideaId) {
       this.calculateLevelChartPerState();
@@ -143,43 +145,75 @@ export default class LevelStatistic extends Vue {
     this.calculateAvatarChart();
     this.calculateStateParameterChartPerLevel(
       'normalisedTime',
-      (value) => Math.round(value / 1000),
+      (value) => {
+        const count = value / 1000;
+        if (count > 120) return 120;
+        return Math.round(count / accuracyTime) * accuracyTime;
+      },
       'time'
     );
     this.calculateStateParameterChartPerLevel(
       'normalisedTime',
-      (value) => Math.round((value / 60000) * 100),
+      (value) => {
+        const count = (value / 60000) * 100;
+        if (count > 200) return 200;
+        return Math.round(count / accuracyTime) * accuracyTime;
+      },
       'winPoints'
     );
     this.calculateStateParameterChartPerLevel(
       'temperatureRise',
-      (value) => `${value} °C`
+      (value) => `${value} °C`,
+      null,
+      false
     );
-    this.calculateStateParameterChartPerTemperatureRise('moleculeHitCount');
+    this.calculateStateParameterChartPerTemperatureRise(
+      'moleculeHitCount',
+      (value) => {
+        if (value > 40) return 40;
+        return Math.round(value / accuracyMolecule) * accuracyMolecule;
+      }
+    );
     this.calculateStateParameterChartPerTemperatureRise(
       'moleculeState',
-      (value) =>
-        Object.values(value).reduce(
+      (value) => {
+        const count = Object.values(value).reduce(
           (sum, item: any) => sum + item.movedCount,
           0
-        ),
+        ) as number;
+        if (count > 30) return 30;
+        return Math.round(count / accuracyMolecule) * accuracyMolecule;
+      },
       'moleculeMovedCount'
     );
     this.calculateStateParameterChartPerTemperatureRise(
       'moleculeState',
-      (value) =>
-        Object.values(value).reduce(
+      (value) => {
+        const count = Object.values(value).reduce(
           (sum, item: any) => sum + item.decreaseCount,
           0
-        ),
+        ) as number;
+        if (count > 20) return 20;
+        return Math.round(count / accuracyMolecule) * accuracyMolecule;
+      },
       'moleculeDecreaseCount'
     );
-    this.calculateStateParameterChartPerLevel('obstacleHitCount');
-    this.calculateStateParameterChartPerLevel('regionHitCount');
-    this.calculateStateParameterChartPerLevel('rayCount');
-    this.calculateStateParameterChartPerLevel('temperature', (value) =>
-      Math.round(value)
-    );
+    this.calculateStateParameterChartPerLevel('obstacleHitCount', (value) => {
+      if (value > 50) return 50;
+      return Math.round(value / accuracyMolecule) * accuracyMolecule;
+    });
+    this.calculateStateParameterChartPerLevel('regionHitCount', (value) => {
+      if (value > 20) return 20;
+      return Math.round(value / accuracyMolecule) * accuracyMolecule;
+    });
+    this.calculateStateParameterChartPerLevel('rayCount', (value) => {
+      if (value > 60) return 60;
+      return Math.round(value / accuracyMolecule) * accuracyMolecule;
+    });
+    this.calculateStateParameterChartPerLevel('temperature', (value) => {
+      if (value > 50) return 50;
+      return Math.round(value / accuracyMolecule) * accuracyMolecule;
+    });
   }
 
   calculateLevelChartPerState(): void {
@@ -208,7 +242,8 @@ export default class LevelStatistic extends Vue {
   calculateStateParameterChartPerLevel(
     parameter: string,
     convert: ((value: any) => any) | null = null,
-    title: string | null = null
+    title: string | null = null,
+    rangeLabel = true
   ): void {
     if (this.ideas && this.steps) {
       const filter = (item) =>
@@ -254,10 +289,18 @@ export default class LevelStatistic extends Vue {
           (value) => value.keywords
         );
       }
+      let displayLabels: (number | string)[] = labels;
+      if (rangeLabel) {
+        displayLabels = labels.map((item, index) =>
+          index < labels.length - 1
+            ? `${item} - ${labels[index + 1] - 1}`
+            : `>= ${item}`
+        );
+      }
       this.barChartDataList.push({
         title: this.$t(`module.playing.coolit.statistic.${title ?? parameter}`),
         data: {
-          labels: labels,
+          labels: displayLabels,
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
@@ -310,7 +353,11 @@ export default class LevelStatistic extends Vue {
       this.barChartDataList.push({
         title: this.$t(`module.playing.coolit.statistic.${title ?? parameter}`),
         data: {
-          labels: labels,
+          labels: labels.map((item, index) =>
+            index < labels.length - 1
+              ? `${item} - ${labels[index + 1] - 1}`
+              : `>= ${item}`
+          ),
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),

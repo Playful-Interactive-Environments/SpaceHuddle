@@ -354,7 +354,8 @@ export default class ModuleStatistic extends Vue {
       (item, idea) => item.ideaId === idea.id,
       null,
       (list) => list.length,
-      (parameter) => parameter + 1
+      (parameter) => parameter + 1,
+      20
     );
     const typeName = this.$t(
       `module.brainstorming.missionmap.statistic.${type}`
