@@ -73,6 +73,11 @@
                 :value="UserType.MODERATOR"
                 :label="$t(`enum.userType.${UserType.MODERATOR}`)"
               />
+              <el-option
+                v-if="noOwner"
+                :value="UserType.OWNER"
+                :label="$t(`enum.userType.${UserType.OWNER}`)"
+              />
             </el-select>
           </span>
           <span style="margin-right: 0">
@@ -158,6 +163,8 @@ export default class FacilitatorSettings extends Vue {
   session!: Session;
   roles: SessionRole[] = [];
   own = '';
+  ownRole = '';
+  noOwner = false;
 
   formData: ValidationData = {
     email: '',
@@ -216,8 +223,17 @@ export default class FacilitatorSettings extends Vue {
   }
 
   updateRole(roles: SessionRole[]): void {
+    if (this.own) {
+      const role = roles.find((role) => role.username === this.own);
+      if (role) {
+        this.ownRole = role.role;
+      }
+    }
+    this.noOwner = !roles.find((role) => role.role === UserType.OWNER);
     this.roles = roles.filter(
-      (role) => role.username !== this.own && role.role !== UserType.OWNER
+      (role) =>
+        (role.username !== this.own || this.noOwner) &&
+        role.role !== UserType.OWNER
     );
   }
 
