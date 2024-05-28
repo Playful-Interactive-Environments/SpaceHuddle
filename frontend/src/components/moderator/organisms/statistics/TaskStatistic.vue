@@ -30,6 +30,10 @@
         legend: {
           display: false,
         },
+        title: {
+          display: true,
+          text: $t('moderator.organism.statistics.participantActivity'),
+        },
       },
     }"
   />

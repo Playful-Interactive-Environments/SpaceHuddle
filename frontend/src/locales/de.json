@@ -339,6 +339,9 @@
           "deactivateTopic": "Thema deaktivieren"
         }
       },
+      "statistics": {
+        "participantActivity": "Teilnehmeraktivität"
+      },
       "session": {
         "overview": {
           "header": "Deine Sitzungen",
@@ -459,7 +462,7 @@
         "edit": "bearbeiten",
         "delete": "löschen",
         "clonePrompt": "Wollen die diese Aufgabe wirklich duplizieren?",
-        "statistic": "Statistik",
+        "statistic": "Statistik für",
         "settings": "Einstellungen"
       }
     }

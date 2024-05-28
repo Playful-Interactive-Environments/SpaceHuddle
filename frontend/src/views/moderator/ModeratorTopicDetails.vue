@@ -331,7 +331,7 @@
   >
     <template #header>
       {{ $t('moderator.view.topicDetails.statistic') }}
-      {{ dialogTask.name }}
+      "{{ dialogTask.name }}"
     </template>
     <TaskStatistic :task-id="dialogTask.id" />
     <ModuleStatisticComponent :task-id="dialogTask.id" />

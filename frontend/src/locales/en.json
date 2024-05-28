@@ -346,6 +346,9 @@
           "hidden": " hidden"
         }
       },
+      "statistics": {
+        "participantActivity": "participant activity"
+      },
       "processTimeline": {
         "activatePublicScreen": "display this content on the public screen",
         "changePublicScreen": "display this item on the public screen",
@@ -459,7 +462,7 @@
         "edit": "edit",
         "delete": "delete",
         "clonePrompt": "Do you really want to clone this task?",
-        "statistic": "statistics",
+        "statistic": "Statistics for",
         "settings": "task settings"
       }
     }
