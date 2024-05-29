@@ -50,7 +50,7 @@
             :order="4"
           >-->
 
-          <span v-on:click="showRoles = true">
+          <span v-on:click="showRoles = true" v-if="isModerator">
             <ToolTip
               :effect="'light'"
               :text="
@@ -70,7 +70,7 @@
             step="participants"
             :order="10"
           >-->
-          <span v-on:click="showParticipants = true">
+          <span v-on:click="showParticipants = true" v-if="isModerator">
             <ToolTip
               :effect="'light'"
               :text="

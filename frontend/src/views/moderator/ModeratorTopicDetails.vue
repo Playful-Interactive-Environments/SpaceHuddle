@@ -32,7 +32,7 @@
               ></font-awesome-icon>
             </ToolTip>
           </span>
-          <span v-on:click="showDependencies = true">
+          <span v-if="isModerator" v-on:click="showDependencies = true">
             <ToolTip
               :effect="'light'"
               :text="
@@ -51,7 +51,7 @@
             step="coModerator"
             :order="4"
           >-->
-          <span v-on:click="showRoles = true">
+          <span v-if="isModerator" v-on:click="showRoles = true">
             <ToolTip
               :effect="'light'"
               :text="
@@ -71,7 +71,7 @@
             step="participants"
             :order="10"
           >-->
-          <span v-on:click="showParticipants = true">
+          <span v-if="isModerator" v-on:click="showParticipants = true">
             <ToolTip
               :effect="'light'"
               :text="
