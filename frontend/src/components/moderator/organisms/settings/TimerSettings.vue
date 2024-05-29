@@ -26,7 +26,7 @@
         </el-radio-group>
       </template>
       <el-form-item
-        v-if="!customTime && isActive"
+        v-if="isActive"
         prop="remindingTime"
         :label="$t('moderator.organism.settings.timerSettings.time')"
         :rules="[
@@ -47,20 +47,48 @@
         >
           <font-awesome-icon icon="infinity" />
         </el-button>
-        <el-button type="info" @click="setTimeLimit(true, 60)">
+        <el-button
+          :type="
+            isActive && !customTime && remainingSeconds === 60
+              ? 'primary'
+              : 'info'
+          "
+          @click="setTimeLimit(true, 60)"
+        >
           1:00
         </el-button>
-        <el-button type="info" @click="setTimeLimit(true, 5 * 60)">
+        <el-button
+          :type="
+            isActive && !customTime && remainingSeconds === 5 * 60
+              ? 'primary'
+              : 'info'
+          "
+          @click="setTimeLimit(true, 5 * 60)"
+        >
           5:00
         </el-button>
-        <el-button type="info" @click="setTimeLimit(true, 10 * 60)">
+        <el-button
+          :type="
+            isActive && !customTime && remainingSeconds === 10 * 60
+              ? 'primary'
+              : 'info'
+          "
+          @click="setTimeLimit(true, 10 * 60)"
+        >
           10:00
         </el-button>
-        <el-button type="info" @click="setTimeLimit(true, 15 * 60)">
+        <el-button
+          :type="
+            isActive && !customTime && remainingSeconds === 15 * 60
+              ? 'primary'
+              : 'info'
+          "
+          @click="setTimeLimit(true, 15 * 60)"
+        >
           15:00
         </el-button>
         <el-button
-          :type="isActive && formData.hasTimeLimit ? 'primary' : 'info'"
+          :type="isActive && customTime ? 'primary' : 'info'"
           @click="setTimeLimit(true)"
         >
           {{ $t('moderator.organism.settings.timerSettings.custom') }}
@@ -84,7 +112,7 @@
         </div>-->
       </el-form-item>
       <el-form-item
-        v-else-if="customTime && isActive"
+        v-if="customTime && isActive"
         prop="remindingTime"
         :label="$t('moderator.organism.settings.timerSettings.time')"
         :rules="[
@@ -101,11 +129,18 @@
       </el-form-item>
       <template #footer>
         <FromSubmitItem
+          :form-state-message="formData.stateMessage"
+          submit-label-key="moderator.organism.settings.timerSettings.submit"
+        />
+        <!--<FromSubmitItem
           v-if="customTime"
           :form-state-message="formData.stateMessage"
           submit-label-key="moderator.organism.settings.timerSettings.submit"
         />
-        <!--<el-button
+        <el-button v-on:click="handleClose" class="deactivate">
+          {{ $t('moderator.organism.settings.timerSettings.close') }}
+        </el-button>
+        <el-button
           class="deactivate"
           v-on:click="deactivateTimer"
           v-if="isActive"
@@ -161,8 +196,9 @@ export default class TimerSettings extends Vue {
   }
 
   formData: ValidationData = {
+    isActive: true,
     hasTimeLimit: true,
-    remindingTime: new Date(0),
+    remindingTime: null as Date | null,
   };
 
   showSettings = false;
@@ -172,27 +208,31 @@ export default class TimerSettings extends Vue {
   }
 
   set activeState(value: string) {
-    if (
+    this.formData.isActive =
+      value === 'on' ||
+      value === this.$t('moderator.organism.settings.timerSettings.on');
+    /*if (
       value === 'on' ||
       value === this.$t('moderator.organism.settings.timerSettings.on')
     )
       this.entityState = TaskStates.ACTIVE;
-    else this.entityState = TaskStates.WAIT;
+    else this.entityState = TaskStates.WAIT;*/
     this.formData.hasTimeLimit = false;
-    this.entityRemainingTime = null;
-    timerService.update(this.entityName, this.entity);
+    this.formData.remindingTime = null;
+    //this.entityRemainingTime = null;
+    //timerService.update(this.entityName, this.entity);
   }
 
   get activeState(): string {
     if (this.$t('moderator.organism.settings.timerSettings.on') === 'on')
-      return this.entityState === TaskStates.ACTIVE ? 'on' : 'off';
-    return this.entityState === TaskStates.ACTIVE
+      return this.isActive ? 'on' : 'off';
+    return this.isActive
       ? this.$t('moderator.organism.settings.timerSettings.on')
       : this.$t('moderator.organism.settings.timerSettings.off');
   }
 
   get isActive(): boolean {
-    return this.entityState === TaskStates.ACTIVE;
+    return this.formData.isActive; // this.entityState === TaskStates.ACTIVE;
   }
 
   handleClose(done: { (): void }): void {
@@ -237,6 +277,7 @@ export default class TimerSettings extends Vue {
   }
 
   reset(): void {
+    this.formData.isActive = this.entityState === TaskStates.ACTIVE;
     this.formData.hasTimeLimit = !!(
       !this.entity ||
       this.entityRemainingTime ||
@@ -251,6 +292,7 @@ export default class TimerSettings extends Vue {
       )
         time = this.entityRemainingTime;
       this.setRemindingTime(time);
+      this.customTime = true;
     } else {
       this.formData.remindingTime = null;
     }
@@ -280,6 +322,11 @@ export default class TimerSettings extends Vue {
     this.reset();
   }
 
+  @Watch('isActive', { immediate: true })
+  onIsActiveChanged(): void {
+    this.customTime = false;
+  }
+
   @Watch('formData.hasTimeLimit', { immediate: true })
   onHasTimeLimitChanged(val: boolean): void {
     if (val && this.formData.remindingTime === null) {
@@ -288,16 +335,19 @@ export default class TimerSettings extends Vue {
   }
 
   setTimeLimit(hasTimeLimit: boolean, time: number | null = null): void {
-    this.entityState = TaskStates.ACTIVE;
+    //this.entityState = TaskStates.ACTIVE;
+    this.formData.isActive = true;
     this.formData.hasTimeLimit = hasTimeLimit;
-    if (hasTimeLimit && time === null) this.customTime = true;
-    else this.remainingSeconds = time;
-    if (!this.customTime) this.save();
+    this.customTime = hasTimeLimit && time === null;
+    if (!this.customTime) {
+      this.remainingSeconds = time;
+    }
+    //if (!this.customTime) this.save();
   }
 
   save(): void {
-    this.entityState = TaskStates.ACTIVE;
-    this.entityRemainingTime = this.remainingSeconds;
+    this.entityState = this.isActive ? TaskStates.ACTIVE : TaskStates.WAIT;
+    this.entityRemainingTime = this.isActive ? this.remainingSeconds : null;
     timerService.update(this.entityName, this.entity);
     this.reset();
     this.showSettings = false;
