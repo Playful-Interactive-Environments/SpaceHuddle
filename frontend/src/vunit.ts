@@ -35,16 +35,13 @@ async function appViewport(): Promise<void> {
     }
     await delay(500);
   }*/
+  const outerWidth = document.documentElement.scrollWidth; // window.outerWidth / window.devicePixelRatio;
+  const outerHeight = document.documentElement.scrollHeight; // window.outerHeight / window.devicePixelRatio;
   //const width = screen.availWidth; // window.outerWidth; // window.innerWidth;
   //const height = screen.availHeight; // window.outerHeight; // window.innerHeight;
-  const width =
-    window.innerWidth < window.outerWidth
-      ? window.innerWidth
-      : window.outerWidth;
+  const width = window.innerWidth < outerWidth ? window.innerWidth : outerWidth;
   const height =
-    window.innerHeight < window.outerHeight
-      ? window.innerHeight
-      : window.outerHeight;
+    window.innerHeight < outerHeight ? window.innerHeight : outerHeight;
 
   doc.style.setProperty('--app-height', `${height}px`);
   doc.style.setProperty('--app-width', `${width}px`);
