@@ -291,8 +291,11 @@
           "displayAllModules": "display all modules",
           "clone": "Clone Module",
           "delete": "delete",
+          "move": "move",
           "statistic": "statistics",
-          "settings": "Module settings"
+          "settings": "Module settings",
+          "topic": "topic",
+          "session": "session"
         },
         "sessionSettings": {
           "header": "Create Session",

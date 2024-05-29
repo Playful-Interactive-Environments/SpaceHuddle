@@ -291,8 +291,11 @@
           "displayAllModules": "Alle Module anzeigen",
           "clone": "Modul duplizieren",
           "delete": "löschen",
+          "move": "verschieben",
           "statistic": "Statistik",
-          "settings": "Modul-Einstellungen"
+          "settings": "Modul-Einstellungen",
+          "topic": "Thema",
+          "session": "Session"
         },
         "sessionSettings": {
           "header": "Sitzung erstellen",

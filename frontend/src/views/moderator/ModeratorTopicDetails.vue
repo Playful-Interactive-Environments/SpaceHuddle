@@ -248,6 +248,18 @@
                                   <font-awesome-icon icon="trash" />
                                 </ToolTip>
                               </el-dropdown-item>
+                              <el-dropdown-item command="move">
+                                <ToolTip
+                                  :placement="'right'"
+                                  :text="
+                                    $t(
+                                      'moderator.organism.settings.taskSettings.move'
+                                    )
+                                  "
+                                >
+                                  <font-awesome-icon icon="icons" />
+                                </ToolTip>
+                              </el-dropdown-item>
                               <el-dropdown-item command="clone">
                                 <ToolTip
                                   :placement="'right'"
@@ -308,6 +320,11 @@
     :task-id="taskSettingsId"
     @taskUpdated="reloadTasks"
     @showTimerSettings="displayTimerSettings"
+  />
+  <TaskMoveSettings
+    v-model:show-modal="showTaskMoveSettings"
+    :task-id="taskSettingsId"
+    @taskUpdated="reloadTasks"
   />
   <TopicSettings
     v-model:show-modal="showTopicSettings"
@@ -399,9 +416,11 @@ import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStati
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
 import TopicDependencySettings from '@/components/moderator/organisms/settings/TopicDependencySettings.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import TaskMoveSettings from '@/components/moderator/organisms/settings/TaskMoveSettings.vue';
 
 @Options({
   components: {
+    TaskMoveSettings,
     ToolTip,
     ParticipantSettings,
     TaskStatistic,
@@ -432,6 +451,7 @@ export default class ModeratorTopicDetails extends Vue {
   session: Session | null = null;
   sessionRole = '';
   showTaskSettings = false;
+  showTaskMoveSettings = false;
   showTopicSettings = false;
   tasks: Task[] = [];
   activeTab = TaskCategoryOption.BRAINSTORMING;
@@ -817,6 +837,10 @@ export default class ModeratorTopicDetails extends Vue {
         this.taskSettingsCategory = getCategoryOfType(TaskType[task.taskType]);
         this.taskSettingsId = task.id;
         this.showTaskSettings = true;
+        break;
+      case 'move':
+        this.taskSettingsId = task.id;
+        this.showTaskMoveSettings = true;
         break;
       case 'delete':
         this.pauseReload = true;

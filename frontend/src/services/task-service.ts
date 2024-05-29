@@ -121,6 +121,20 @@ export const putTask = async (
   );
 };
 
+export const moveTask = async (
+  taskId: string,
+  topicId: string
+): Promise<Task> => {
+  return await apiExecutePut<Task>(
+    `/${EndpointType.TASK}/`,
+    {
+      id: taskId,
+      topicId: topicId,
+    },
+    EndpointAuthorisationType.MODERATOR
+  );
+};
+
 export const clone = async (
   taskId: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
