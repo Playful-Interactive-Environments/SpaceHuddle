@@ -13,7 +13,12 @@
         )
       }}
     </div>
-    <div v-if="editQuestion">
+    <div
+      v-if="
+        editQuestion &&
+        surveyConfig.questions[editQuestion.question.order].playerType
+      "
+    >
       {{
         $t(
           `module.information.brainhex.enum.playerType.${
