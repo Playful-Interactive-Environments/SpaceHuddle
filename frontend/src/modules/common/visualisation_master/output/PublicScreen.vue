@@ -316,7 +316,6 @@ export default class PublicScreen extends Vue {
   }
 
   updateCategories(categories: Category[]): void {
-    console.log(categories);
     this.categories = categories;
   }
 

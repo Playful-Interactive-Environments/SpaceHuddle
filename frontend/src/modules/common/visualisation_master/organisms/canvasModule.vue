@@ -133,7 +133,6 @@ export default class PublicScreen extends Vue {
   @Watch('ideas', { immediate: true })
   ideasChanged(): void {
     this.getCategorizedIdeas();
-    console.log(this.ideas);
   }
 
   updateCanvasDimensions(): void {
@@ -245,13 +244,13 @@ export default class PublicScreen extends Vue {
     this.eraser = !this.eraser;
   }
 
-  beginDrawing(e) {
+  beginDrawing(e: MouseEvent) {
     this.x = e.offsetX;
     this.y = e.offsetY;
     this.isDrawing = true;
   }
 
-  keepDrawing(e) {
+  keepDrawing(e: MouseEvent) {
     if (this.isDrawing) {
       this.drawLine(this.x, this.y, e.offsetX, e.offsetY);
       this.x = e.offsetX;
@@ -259,7 +258,7 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  stopDrawing(e) {
+  stopDrawing(e: MouseEvent) {
     if (this.isDrawing) {
       this.drawLine(this.x, this.y, e.offsetX, e.offsetY);
       this.x = 0;
