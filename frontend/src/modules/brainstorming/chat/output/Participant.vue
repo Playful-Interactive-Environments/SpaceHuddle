@@ -1,6 +1,13 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <template #footer>
+      <ImagePicker
+          v-model:link="imageWebLink"
+          v-model:image="imgDataUrl"
+          :useEditOverlay="true"
+          id="imagePicker"
+          :style="{ display: displayImagePicker ? 'block' : 'none' }"
+      />
       <ValidationForm
         ref="inputForm"
         :form-data="formData"
@@ -33,11 +40,12 @@
               class="media-right"
               type="primary"
               circle
-              v-on:click="addImage"
+
+              v-on:click="displayImagePicker = !displayImagePicker"
             >
               <font-awesome-icon icon="paperclip"></font-awesome-icon>
             </el-button>
-            <el-button
+            <!--            <el-button
               v-if="!newIdea.link && !inputHasFocus"
               class="media-right"
               type="primary"
@@ -45,7 +53,7 @@
               v-on:click="addDrawing"
             >
               <font-awesome-icon icon="pencil"></font-awesome-icon>
-            </el-button>
+            </el-button>-->
             <el-button
               class="media-right"
               type="primary"
@@ -154,14 +162,14 @@
       <span class="media-content"></span>
     </div>
 
-    <ImageUploader
+<!--    <ImageUploader
       v-model:show-modal="showUploadDialog"
       v-model="base64ImageUrl"
     />
     <DrawingUpload
       v-model:show-modal="showDrawingDialog"
       v-model="base64ImageUrl"
-    />
+    />-->
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -193,9 +201,11 @@ import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 
 @Options({
   components: {
+    ImagePicker,
     DrawingUpload,
     ValidationForm,
     IdeaCard,
@@ -219,6 +229,10 @@ export default class Participant extends Vue {
   base64ImageUrl: string | null = null;
   EndpointAuthorisationType = EndpointAuthorisationType;
   trackingManager!: TrackingManager;
+
+  imageWebLink: string | null = null;
+  imgDataUrl: string | null = null;
+  displayImagePicker = false;
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
@@ -348,6 +362,20 @@ export default class Participant extends Vue {
     this.newIdea.image = imgDataUrl;
     this.scrollToBottom(0);
     (this.$refs.upload as any).setStep(1);
+  }
+
+  @Watch('imageWebLink', { immediate: true })
+  onImageWebLinkChanged(): void {
+    this.newIdea.link = this.imageWebLink;
+    this.scrollToBottom(0);
+    this.displayImagePicker = false;
+  }
+
+  @Watch('imgDataUrl', { immediate: true })
+  onImgDataUrlChanged(): void {
+    this.newIdea.image = this.imgDataUrl;
+    this.scrollToBottom(0);
+    this.displayImagePicker = false;
   }
 
   @Watch('base64ImageUrl', { immediate: true })
@@ -511,5 +539,14 @@ export default class Participant extends Vue {
 .el-form-item.hide {
   margin-bottom: 0;
   display: none;
+}
+
+#imagePicker {
+  position: absolute;
+  right: 0;
+  bottom: 8rem;
+  height: 10rem;
+  width: 10rem;
+  z-index: 10;
 }
 </style>
