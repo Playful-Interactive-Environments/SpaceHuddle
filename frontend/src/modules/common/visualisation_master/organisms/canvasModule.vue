@@ -28,6 +28,7 @@
       <el-button type="primary" @click="changeLineWidth(-2)"
         ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
       >
+      <el-color-picker v-model="color" class="colorPicker" />
       <el-button
         type="primary"
         @click="categoryToggle = !categoryToggle"
@@ -91,7 +92,9 @@ export default class PublicScreen extends Vue {
   minLineWidth = 1;
   maxLineWidth = 60;
   eraser = false;
+
   color = themeColors.getContrastColor();
+
   canvas: CanvasRenderingContext2D | null = null;
   canvasHeight = 0;
   canvasWidth = 0;
@@ -161,10 +164,10 @@ export default class PublicScreen extends Vue {
   makeDraggable(el: HTMLElement): void {
     el.style.position = 'absolute';
     el.style.cursor = 'move';
-    el.style.userSelect = 'none'; // Prevent text selection
+    el.style.userSelect = 'none';
 
     el.onmousedown = (e) => {
-      e.preventDefault(); // Prevent text selection
+      e.preventDefault();
 
       const startX = e.clientX - el.offsetLeft;
       const startY = e.clientY - el.offsetTop;
@@ -303,7 +306,7 @@ export default class PublicScreen extends Vue {
   position: relative;
   width: 100%;
   height: 100%;
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
   -ms-overflow-style: none;
   overflow: hidden;
   border: 2px solid var(--color-background-darker);
@@ -316,13 +319,15 @@ export default class PublicScreen extends Vue {
 .draggable-container {
   cursor: move;
   width: 15rem;
-  user-select: none; /* Prevent text selection */
+  user-select: none;
 }
 
 .controlButtons {
   position: relative;
   z-index: 10000;
   width: fit-content;
+  display: flex;
+  align-items: center;
   * {
     margin: 0.2rem;
   }
@@ -340,7 +345,8 @@ export default class PublicScreen extends Vue {
 .eraser,
 .lineWidthPlus,
 .categoryToggle,
-.clear {
+.clear,
+.colorPicker {
   margin-left: 1.5rem;
 }
 </style>
