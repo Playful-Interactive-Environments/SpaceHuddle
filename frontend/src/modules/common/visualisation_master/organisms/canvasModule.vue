@@ -35,6 +35,9 @@
         class="categoryToggle"
         ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
+      <el-button type="primary" @click="sortIdeas"
+        ><font-awesome-icon :icon="['fas', 'shuffle']" />
+      </el-button>
       <el-button type="primary" @click="clearCanvas" class="clear"
         ><font-awesome-icon :icon="['far', 'trash-can']"
       /></el-button>
@@ -42,9 +45,11 @@
     <IdeaCard
       v-for="idea in ideas"
       :key="idea.id"
+      :id="idea.id"
       :idea="idea"
       :is-editable="false"
       class="draggable-container"
+      :class="idea.orderGroup"
       :style="{
         minWidth: minIdeaWidth + 'rem',
         maxWidth: maxIdeaWidth + 'rem',
@@ -116,6 +121,7 @@ export default class PublicScreen extends Vue {
     await nextTick();
     this.updateCanvasDimensions();
     this.makeAllDraggable();
+    this.initializePositions();
     const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
     if (c) {
       this.canvas = c.getContext('2d');
@@ -185,6 +191,57 @@ export default class PublicScreen extends Vue {
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     };
+  }
+
+  initializePositions(): void {
+    const canvasArea = this.$refs.canvasArea as HTMLElement;
+    const canvasRect = canvasArea.getBoundingClientRect();
+    const elements = document.getElementsByClassName('draggable-container');
+
+    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
+      const elRect = el.getBoundingClientRect();
+      const randomX = Math.random() * (canvasRect.width - elRect.width);
+      const randomY = Math.random() * (canvasRect.height - elRect.height);
+      el.style.left = `${randomX}px`;
+      el.style.top = `${randomY}px`;
+    });
+  }
+
+  sortIdeas(): void {
+    const categoryIdeas: Idea[] = [];
+    for (const cat of this.categories) {
+      const ideas = this.ideas.filter(
+        (idea) => idea.orderGroup === cat.keywords
+      );
+      let finalIdea = ideas[0];
+      for (const idea of ideas) {
+        if (
+          idea.parameter.zIndex > finalIdea.parameter.zIndex ||
+          !finalIdea.parameter.zIndex
+        ) {
+          finalIdea = idea;
+        }
+      }
+      categoryIdeas.push(finalIdea);
+    }
+    for (const idea of categoryIdeas) {
+      const ideaElement = document.getElementById(idea.id);
+      if (ideaElement) {
+        const elements = document.getElementsByClassName(idea.orderGroup);
+        Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
+          const randomX = Math.random() * 20 - 10;
+          const randomY = Math.random() * 20 - 10;
+          el.style.left =
+            Math.floor(Number(ideaElement.style.left.split('px')[0])) +
+            randomX +
+            'px';
+          el.style.top =
+            Math.floor(Number(ideaElement.style.top.split('px')[0])) +
+            randomY +
+            'px';
+        });
+      }
+    }
   }
 
   moveElement(el: HTMLElement, left: number, top: number): void {
