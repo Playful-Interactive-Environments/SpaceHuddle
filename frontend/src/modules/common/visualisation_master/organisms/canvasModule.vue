@@ -198,13 +198,17 @@ export default class PublicScreen extends Vue {
     const canvasRect = canvasArea.getBoundingClientRect();
     const elements = document.getElementsByClassName('draggable-container');
 
-    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
-      const elRect = el.getBoundingClientRect();
-      const randomX = Math.random() * (canvasRect.width - elRect.width);
-      const randomY = Math.random() * (canvasRect.height - elRect.height);
-      el.style.left = `${randomX}px`;
-      el.style.top = `${randomY}px`;
-    });
+    this.highestZ = this.ideas.length;
+    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
+      (el, index) => {
+        const elRect = el.getBoundingClientRect();
+        const randomX = Math.random() * (canvasRect.width - elRect.width);
+        const randomY = Math.random() * (canvasRect.height - elRect.height);
+        el.style.left = `${randomX}px`;
+        el.style.top = `${randomY}px`;
+        this.ideas[index].parameter.zIndex = index;
+      }
+    );
   }
 
   sortIdeas(): void {
