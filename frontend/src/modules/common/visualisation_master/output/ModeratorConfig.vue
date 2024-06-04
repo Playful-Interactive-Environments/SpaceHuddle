@@ -96,7 +96,13 @@ export default class ModeratorConfig extends Vue {
   }
 
   getVisModulesForTaskType() {
-    const taskType = this.taskType !== 'VOTING' ? 'IDEA' : 'VOTING';
+    console.log(this.taskType);
+    const taskType =
+      this.taskType !== 'VOTING'
+        ? this.taskType === 'CATEGORISATION'
+          ? 'CATEGORISATION'
+          : 'IDEA'
+        : 'VOTING';
     return Object.values(this.moduleConfig.visModules).filter(
       (module) => module.type === taskType
     );

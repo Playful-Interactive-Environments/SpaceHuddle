@@ -1,5 +1,9 @@
 <template>
-  <div class="timeControls" v-if="displayTimeMod" :style="{ opacity: timeModifierVisible ? 1 : 0 }">
+  <div
+    class="timeControls"
+    v-if="displayTimeMod"
+    :style="{ opacity: timeModifierVisible ? 1 : 0 }"
+  >
     <el-button class="playPause">
       <font-awesome-icon
         v-if="paused"
@@ -78,7 +82,14 @@
       :timerEnded="this.timerEnd"
       :votes="votes"
     />
-
+    <canvas-module
+        v-if="currentVisModule === 'canvasModule'"
+        :task-id="this.taskId"
+        :timeModifier="timeModifier"
+        :timerEnded="this.timerEnd"
+        :ideas="this.ideas"
+        :paused="paused"
+    />
   </div>
 </template>
 
@@ -106,11 +117,11 @@ import * as votingService from '@/services/voting-service';
 import Podium from '@/modules/common/visualisation_master/organisms/podium.vue';
 import Elimination from '@/modules/common/visualisation_master/organisms/elimination.vue';
 import * as viewService from '@/services/view-service';
-
+import CanvasModule from "@/modules/common/visualisation_master/organisms/canvasModule.vue";
 
 @Options({
   components: {
-
+    CanvasModule,
     Elimination,
     Podium,
     Strata,
@@ -285,8 +296,6 @@ export default class PublicScreen extends Vue {
 
   updateCategorisedIdeas(ideas: Idea[]): void {
     this.ideas = ideas;
-    console.log('categorised Ideas:');
-    console.log(this.ideas);
   }
 
   deregisterAll(): void {

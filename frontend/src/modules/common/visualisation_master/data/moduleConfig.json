@@ -48,6 +48,13 @@
       "icon": "layer-group",
       "type": "VOTING",
       "allowTimeMod": false
+    },
+    "canvasModule": {
+      "id": "canvasModule",
+      "image": "canvasModule/path",
+      "icon": "layer-group",
+      "type": "CATEGORISATION",
+      "allowTimeMod": true
     }
   }
 }

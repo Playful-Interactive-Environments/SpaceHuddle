@@ -48,6 +48,12 @@
         "title": "Elimination",
         "description": "The best ideas remain."
       }
+    },
+    "canvasModule": {
+      "description": {
+        "title": "Canvas",
+        "description": "Move ideas around and draw."
+      }
     }
   }
 }
