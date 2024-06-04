@@ -83,12 +83,13 @@
       :votes="votes"
     />
     <canvas-module
-        v-if="currentVisModule === 'canvasModule'"
-        :task-id="this.taskId"
-        :timeModifier="timeModifier"
-        :timerEnded="this.timerEnd"
-        :ideas="this.ideas"
-        :paused="paused"
+      v-if="currentVisModule === 'canvasModule'"
+      :task-id="this.taskId"
+      :timeModifier="timeModifier"
+      :timerEnded="this.timerEnd"
+      :ideas="this.ideas"
+      :categories="this.categories"
+      :paused="paused"
     />
   </div>
 </template>
@@ -117,7 +118,9 @@ import * as votingService from '@/services/voting-service';
 import Podium from '@/modules/common/visualisation_master/organisms/podium.vue';
 import Elimination from '@/modules/common/visualisation_master/organisms/elimination.vue';
 import * as viewService from '@/services/view-service';
-import CanvasModule from "@/modules/common/visualisation_master/organisms/canvasModule.vue";
+import CanvasModule from '@/modules/common/visualisation_master/organisms/canvasModule.vue';
+import { Category } from '@/types/api/Category';
+import * as categorisationService from '@/services/categorisation-service';
 
 @Options({
   components: {
@@ -143,6 +146,7 @@ export default class PublicScreen extends Vue {
   allIdeas: Idea[] = [];
   ideas: Idea[] = [];
   votes: VoteResult[] = [];
+  categories: Category[] = [];
 
   voteUseAverage = false;
 
@@ -159,6 +163,7 @@ export default class PublicScreen extends Vue {
 
   voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
   outputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  categoryCash!: cashService.SimplifiedCashEntry<Category[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -196,6 +201,12 @@ export default class PublicScreen extends Vue {
         EndpointAuthorisationType.MODERATOR,
         10,
         'categorised::'
+      );
+      this.categoryCash = categorisationService.registerGetCategoriesForTask(
+        this.taskId,
+        this.updateCategories,
+        EndpointAuthorisationType.MODERATOR,
+        20
       );
     }
     taskService.registerGetTaskById(
@@ -242,6 +253,12 @@ export default class PublicScreen extends Vue {
         EndpointAuthorisationType.MODERATOR,
         10,
         'categorised::'
+      );
+      this.categoryCash = categorisationService.registerGetCategoriesForTask(
+        this.taskId,
+        this.updateCategories,
+        EndpointAuthorisationType.MODERATOR,
+        20
       );
     }
   }
@@ -296,6 +313,11 @@ export default class PublicScreen extends Vue {
 
   updateCategorisedIdeas(ideas: Idea[]): void {
     this.ideas = ideas;
+  }
+
+  updateCategories(categories: Category[]): void {
+    console.log(categories);
+    this.categories = categories;
   }
 
   deregisterAll(): void {

@@ -71,6 +71,12 @@ export function getBackgroundColor(): string {
   return getComputedStyle(document.body).getPropertyValue('--color-background');
 }
 
+export function getIdeaCardBorderColor(): string {
+  return getComputedStyle(document.body).getPropertyValue(
+    '--el-card-border-color'
+  );
+}
+
 export function convertToRGBA(hexColor: string, alpha = 1): string {
   const color = new Color(hexColor) as any;
   return `rgba(${Math.round(color.r * 256)}, ${Math.round(

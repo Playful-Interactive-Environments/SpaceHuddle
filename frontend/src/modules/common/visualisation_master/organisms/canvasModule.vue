@@ -16,8 +16,27 @@
         type="primary"
         @click="toggleEraser"
         :class="{ eraserToggle: eraser }"
-        >{{ eraser ? 'Eraser On' : 'Eraser Off' }}</el-button
+        class="eraser"
+        ><font-awesome-icon :icon="['fas', 'eraser']"
+      /></el-button>
+      <el-button
+        type="primary"
+        @click="changeLineWidth(2)"
+        class="lineWidthPlus"
+        ><font-awesome-icon :icon="['fas', 'pen']" /> +</el-button
       >
+      <el-button type="primary" @click="changeLineWidth(-2)"
+        ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
+      >
+      <el-button
+        type="primary"
+        @click="categoryToggle = !categoryToggle"
+        class="categoryToggle"
+        ><font-awesome-icon :icon="['far', 'object-group']"
+      /></el-button>
+      <el-button type="primary" @click="clearCanvas" class="clear"
+        ><font-awesome-icon :icon="['far', 'trash-can']"
+      /></el-button>
     </div>
     <IdeaCard
       v-for="idea in ideas"
@@ -30,6 +49,7 @@
         maxWidth: maxIdeaWidth + 'rem',
         width: ideaWidth + 'rem',
         zIndex: idea.parameter.zIndex ? idea.parameter.zIndex : 0,
+        borderColor: getCategoryColor(idea),
       }"
       @mousedown="bringToFront(idea)"
     />
@@ -43,6 +63,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { Idea } from '@/types/api/Idea';
 import * as themeColors from '@/utils/themeColors';
 import { nextTick } from 'vue';
+import { Category } from '@/types/api/Category';
 
 @Options({
   components: {
@@ -54,6 +75,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: false }) readonly timerEnded!: boolean;
   @Prop({ default: [] }) readonly ideas!: Idea[];
+  @Prop({ default: [] }) readonly categories!: Category[];
   @Prop({ default: false }) readonly paused!: boolean;
 
   minIdeaWidth = 7;
@@ -63,9 +85,12 @@ export default class PublicScreen extends Vue {
   highestZ = 0;
 
   categorizedIdeas: Idea[][] = [];
+  categoryToggle = true;
 
-  eraser = false;
   lineWidth = 4;
+  minLineWidth = 1;
+  maxLineWidth = 60;
+  eraser = false;
   color = themeColors.getContrastColor();
   canvas: CanvasRenderingContext2D | null = null;
   canvasHeight = 0;
@@ -108,6 +133,7 @@ export default class PublicScreen extends Vue {
   @Watch('ideas', { immediate: true })
   ideasChanged(): void {
     this.getCategorizedIdeas();
+    console.log(this.ideas);
   }
 
   updateCanvasDimensions(): void {
@@ -160,6 +186,17 @@ export default class PublicScreen extends Vue {
   }
 
   moveElement(el: HTMLElement, left: number, top: number): void {
+    const canvasArea = this.$refs.canvasArea as HTMLElement;
+    const canvasRect = canvasArea.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+
+    if (left < 0) left = 0;
+    if (top < 0) top = 0;
+    if (left + elRect.width > canvasRect.width)
+      left = canvasRect.width - elRect.width;
+    if (top + elRect.height > canvasRect.height)
+      top = canvasRect.height - elRect.height;
+
     requestAnimationFrame(() => {
       el.style.left = `${left}px`;
       el.style.top = `${top}px`;
@@ -172,6 +209,15 @@ export default class PublicScreen extends Vue {
       this.ideaWidth + num >= this.minIdeaWidth
     ) {
       this.ideaWidth = this.ideaWidth + num;
+    }
+  }
+
+  changeLineWidth(num: number): void {
+    if (
+      this.lineWidth + num <= this.maxLineWidth &&
+      this.lineWidth + num >= this.minLineWidth
+    ) {
+      this.lineWidth = this.lineWidth + num;
     }
   }
 
@@ -222,9 +268,33 @@ export default class PublicScreen extends Vue {
     }
   }
 
+  clearCanvas() {
+    if (this.canvas) {
+      const canvasElement = document.getElementById(
+        'drawing-canvas'
+      ) as HTMLCanvasElement;
+      this.canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    }
+  }
+
   bringToFront(idea: Idea): void {
     this.highestZ++;
     idea.parameter.zIndex = this.highestZ;
+  }
+
+  getCategoryColor(idea: Idea): string {
+    if (this.categoryToggle) {
+      const category = this.categories.filter(
+        (cat) => idea.orderGroup === cat.keywords
+      );
+      if (category.length > 0) {
+        return category[0].parameter.color;
+      } else {
+        return themeColors.getIdeaCardBorderColor();
+      }
+    } else {
+      return themeColors.getIdeaCardBorderColor();
+    }
   }
 }
 </script>
@@ -266,5 +336,12 @@ export default class PublicScreen extends Vue {
 
 .eraserToggle {
   background-color: var(--color-evaluating-dark);
+}
+
+.eraser,
+.lineWidthPlus,
+.categoryToggle,
+.clear {
+  margin-left: 1.5rem;
 }
 </style>
