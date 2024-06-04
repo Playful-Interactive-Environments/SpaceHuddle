@@ -141,7 +141,14 @@ export default class PublicScreen extends Vue {
 
   @Watch('ideas', { immediate: true })
   ideasChanged(): void {
+    this.initializeZIndex();
     this.getCategorizedIdeas();
+  }
+
+  initializeZIndex(): void {
+    for (let i = 0; i < this.ideas.length; i++) {
+      this.ideas[i].parameter.zIndex = i;
+    }
   }
 
   updateCanvasDimensions(): void {
@@ -199,16 +206,13 @@ export default class PublicScreen extends Vue {
     const elements = document.getElementsByClassName('draggable-container');
 
     this.highestZ = this.ideas.length;
-    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
-      (el, index) => {
-        const elRect = el.getBoundingClientRect();
-        const randomX = Math.random() * (canvasRect.width - elRect.width);
-        const randomY = Math.random() * (canvasRect.height - elRect.height);
-        el.style.left = `${randomX}px`;
-        el.style.top = `${randomY}px`;
-        this.ideas[index].parameter.zIndex = index;
-      }
-    );
+    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
+      const elRect = el.getBoundingClientRect();
+      const randomX = Math.random() * (canvasRect.width - elRect.width);
+      const randomY = Math.random() * (canvasRect.height - elRect.height);
+      el.style.left = `${randomX}px`;
+      el.style.top = `${randomY}px`;
+    });
   }
 
   sortIdeas(): void {
