@@ -4,21 +4,21 @@
       "id": "gallery",
       "image": "gallery/path",
       "icon": "image",
-      "type": ["INFORMATION", "BRAINSTORMING"],
+      "type": ["INFORMATION", "BRAINSTORMING", "SELECTION"],
       "allowTimeMod": true
     },
     "cardShuffle": {
       "id": "cardShuffle",
       "image": "cardShuffle/path",
       "icon": "layer-group",
-      "type": ["INFORMATION", "BRAINSTORMING"],
+      "type": ["INFORMATION", "BRAINSTORMING", "SELECTION"],
       "allowTimeMod": true
     },
     "infiniteScroll": {
       "id": "infiniteScroll",
       "image": "infiniteScroll/path",
       "icon": "image",
-      "type": ["INFORMATION", "BRAINSTORMING"],
+      "type": ["INFORMATION", "BRAINSTORMING", "SELECTION"],
       "allowTimeMod": true
     },
     "barChart": {
