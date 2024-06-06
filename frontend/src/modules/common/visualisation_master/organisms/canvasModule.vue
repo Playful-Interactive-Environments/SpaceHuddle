@@ -107,7 +107,7 @@ export default class PublicScreen extends Vue {
   maxLineWidth = 60;
   eraser = false;
 
-  color = themeColors.getContrastColor();
+  color = themeColors.getEvaluatingColor();
 
   canvas: CanvasRenderingContext2D | null = null;
   canvasHeight = 0;
@@ -412,10 +412,13 @@ export default class PublicScreen extends Vue {
   width: fit-content;
   display: flex;
   align-items: center;
+  background-color: var(--color-background-dark);
+  border-radius: 0 0 var(--border-radius-small) 0;
+  padding: 0.2rem;
   * {
     margin: 0.2rem;
-    padding-left: 0.35rem;
-    padding-right: 0.35rem;
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
   }
 }
 
@@ -451,6 +454,6 @@ export default class PublicScreen extends Vue {
 .clear,
 .colorPicker,
 .shuffle {
-  margin-left: 1.5rem;
+  margin-left: 1rem;
 }
 </style>
