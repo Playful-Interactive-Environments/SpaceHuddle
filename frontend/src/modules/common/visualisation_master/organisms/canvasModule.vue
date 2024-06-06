@@ -33,12 +33,13 @@
         type="primary"
         @click="categoryToggle = !categoryToggle"
         class="categoryToggle"
+        v-if="taskType === 'CATEGORISATION'"
         ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
-      <el-button type="primary" @click="sortIdeas"
+      <el-button type="primary" @click="sortIdeas" v-if="taskType === 'CATEGORISATION'"
         ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
-      <el-button type="primary" @click="initializePositions"
+      <el-button type="primary" @click="initializePositions" class="shuffle"
         ><font-awesome-icon :icon="['fas', 'shuffle']" />
       </el-button>
       <el-button type="primary" @click="clearCanvas" class="clear"
@@ -88,6 +89,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: [] }) readonly categories!: Category[];
   @Prop({ default: false }) readonly paused!: boolean;
+  @Prop({ default: null }) readonly taskType!: string | null;
 
   minIdeaWidth = 7;
   maxIdeaWidth = 21;
@@ -447,7 +449,8 @@ export default class PublicScreen extends Vue {
 .lineWidthPlus,
 .categoryToggle,
 .clear,
-.colorPicker {
+.colorPicker,
+.shuffle {
   margin-left: 1.5rem;
 }
 </style>

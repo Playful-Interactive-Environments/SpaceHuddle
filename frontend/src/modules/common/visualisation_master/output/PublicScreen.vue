@@ -85,6 +85,7 @@
     <canvas-module
       v-if="currentVisModule === 'canvasModule'"
       :task-id="this.taskId"
+      :taskType="this.task.taskType"
       :timeModifier="timeModifier"
       :timerEnded="this.timerEnd"
       :ideas="this.ideas"
@@ -193,7 +194,11 @@ export default class PublicScreen extends Vue {
         EndpointAuthorisationType.MODERATOR,
         5
       );
-    } else if (this.task && this.task.taskType === 'CATEGORISATION') {
+    } else if (
+      this.task &&
+      (this.task.taskType === 'CATEGORISATION' ||
+        this.task.taskType === 'SELECTION')
+    ) {
       this.outputCash = viewService.registerGetInputIdeas(
         this.taskId,
         IdeaSortOrderHierarchy,
@@ -203,12 +208,14 @@ export default class PublicScreen extends Vue {
         10,
         'categorised::'
       );
-      this.categoryCash = categorisationService.registerGetCategoriesForTask(
-        this.taskId,
-        this.updateCategories,
-        EndpointAuthorisationType.MODERATOR,
-        20
-      );
+      if (this.task.taskType === 'CATEGORISATION') {
+        this.categoryCash = categorisationService.registerGetCategoriesForTask(
+          this.taskId,
+          this.updateCategories,
+          EndpointAuthorisationType.MODERATOR,
+          20
+        );
+      }
     }
   }
 
@@ -234,7 +241,11 @@ export default class PublicScreen extends Vue {
         EndpointAuthorisationType.MODERATOR,
         5
       );
-    } else if (this.task && this.task.taskType === 'CATEGORISATION') {
+    } else if (
+      this.task &&
+      (this.task.taskType === 'CATEGORISATION' ||
+        this.task.taskType === 'SELECTION')
+    ) {
       this.outputCash = viewService.registerGetInputIdeas(
         this.taskId,
         IdeaSortOrderHierarchy,
@@ -244,12 +255,14 @@ export default class PublicScreen extends Vue {
         10,
         'categorised::'
       );
-      this.categoryCash = categorisationService.registerGetCategoriesForTask(
-        this.taskId,
-        this.updateCategories,
-        EndpointAuthorisationType.MODERATOR,
-        20
-      );
+      if (this.task.taskType === 'CATEGORISATION') {
+        this.categoryCash = categorisationService.registerGetCategoriesForTask(
+          this.taskId,
+          this.updateCategories,
+          EndpointAuthorisationType.MODERATOR,
+          20
+        );
+      }
     }
   }
 

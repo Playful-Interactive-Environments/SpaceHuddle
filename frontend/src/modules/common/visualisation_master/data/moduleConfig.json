@@ -54,7 +54,7 @@
       "image": "canvasModule/path",
       "icon": "layer-group",
       "type": ["INFORMATION", "BRAINSTORMING", "CATEGORISATION", "SELECTION"],
-      "allowTimeMod": true
+      "allowTimeMod": false
     }
   }
 }
