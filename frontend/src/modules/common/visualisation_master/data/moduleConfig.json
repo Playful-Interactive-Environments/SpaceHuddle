@@ -4,56 +4,56 @@
       "id": "gallery",
       "image": "gallery/path",
       "icon": "image",
-      "type": "IDEA",
+      "type": ["INFORMATION", "BRAINSTORMING"],
       "allowTimeMod": true
     },
     "cardShuffle": {
       "id": "cardShuffle",
       "image": "cardShuffle/path",
       "icon": "layer-group",
-      "type": "IDEA",
+      "type": ["INFORMATION", "BRAINSTORMING"],
       "allowTimeMod": true
     },
     "infiniteScroll": {
       "id": "infiniteScroll",
       "image": "infiniteScroll/path",
       "icon": "image",
-      "type": "IDEA",
+      "type": ["INFORMATION", "BRAINSTORMING"],
       "allowTimeMod": true
     },
     "barChart": {
       "id": "barChart",
       "image": "barChart/path",
       "icon": "layer-group",
-      "type": "VOTING",
+      "type": ["VOTING"],
       "allowTimeMod": false
     },
     "strata": {
       "id": "strata",
       "image": "strata/path",
       "icon": "layer-group",
-      "type": "VOTING",
+      "type": ["VOTING"],
       "allowTimeMod": false
     },
     "podium": {
       "id": "podium",
       "image": "podium/path",
       "icon": "layer-group",
-      "type": "VOTING",
+      "type": ["VOTING"],
       "allowTimeMod": false
     },
     "elimination": {
       "id": "elimination",
       "image": "elimination/path",
       "icon": "layer-group",
-      "type": "VOTING",
+      "type": ["VOTING"],
       "allowTimeMod": false
     },
     "canvasModule": {
       "id": "canvasModule",
       "image": "canvasModule/path",
       "icon": "layer-group",
-      "type": "CATEGORISATION",
+      "type": ["INFORMATION", "BRAINSTORMING", "CATEGORISATION", "SELECTION"],
       "allowTimeMod": true
     }
   }

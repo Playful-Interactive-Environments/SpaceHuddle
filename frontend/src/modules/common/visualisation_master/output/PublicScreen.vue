@@ -167,9 +167,16 @@ export default class PublicScreen extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      2 * 60
+    );
     if (
-      this.currentVisModule &&
-      moduleConfig.visModules[this.currentVisModule].type === 'IDEA'
+      this.task &&
+      (this.task.taskType === 'BRAINSTORMING' ||
+        this.task.taskType === 'INFORMATION')
     ) {
       ideaService.registerGetIdeasForTask(
         this.taskId,
@@ -179,20 +186,14 @@ export default class PublicScreen extends Vue {
         this.authHeaderTyp,
         10
       );
-    } else if (
-      this.currentVisModule &&
-      moduleConfig.visModules[this.currentVisModule].type === 'VOTING'
-    ) {
+    } else if (this.task && this.task.taskType === 'VOTING') {
       this.voteCashEntry = votingService.registerGetResult(
         this.taskId,
         this.updateVotes,
         EndpointAuthorisationType.MODERATOR,
         5
       );
-    } else if (
-      this.currentVisModule &&
-      moduleConfig.visModules[this.currentVisModule].type === 'CATEGORISATION'
-    ) {
+    } else if (this.task && this.task.taskType === 'CATEGORISATION') {
       this.outputCash = viewService.registerGetInputIdeas(
         this.taskId,
         IdeaSortOrderHierarchy,
@@ -209,19 +210,14 @@ export default class PublicScreen extends Vue {
         20
       );
     }
-    taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      EndpointAuthorisationType.PARTICIPANT,
-      2 * 60
-    );
   }
 
   @Watch('currentVisModule', { immediate: true })
   onCurrentVisModuleChanged(): void {
     if (
-      this.currentVisModule &&
-      moduleConfig.visModules[this.currentVisModule].type === 'IDEA'
+      this.task &&
+      (this.task.taskType === 'BRAINSTORMING' ||
+        this.task.taskType === 'INFORMATION')
     ) {
       ideaService.registerGetIdeasForTask(
         this.taskId,
@@ -231,20 +227,14 @@ export default class PublicScreen extends Vue {
         this.authHeaderTyp,
         10
       );
-    } else if (
-      this.currentVisModule &&
-      moduleConfig.visModules[this.currentVisModule].type === 'VOTING'
-    ) {
+    } else if (this.task && this.task.taskType === 'VOTING') {
       this.voteCashEntry = votingService.registerGetResult(
         this.taskId,
         this.updateVotes,
         EndpointAuthorisationType.MODERATOR,
         5
       );
-    } else if (
-      this.currentVisModule &&
-      moduleConfig.visModules[this.currentVisModule].type === 'CATEGORISATION'
-    ) {
+    } else if (this.task && this.task.taskType === 'CATEGORISATION') {
       this.outputCash = viewService.registerGetInputIdeas(
         this.taskId,
         IdeaSortOrderHierarchy,

@@ -51,6 +51,8 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
+import TaskType from '@/types/enum/TaskType';
+
 
 @Options({
   components: { ModuleCard, IdeaCard },
@@ -96,15 +98,8 @@ export default class ModeratorConfig extends Vue {
   }
 
   getVisModulesForTaskType() {
-    console.log(this.taskType);
-    const taskType =
-      this.taskType !== 'VOTING'
-        ? this.taskType === 'CATEGORISATION'
-          ? 'CATEGORISATION'
-          : 'IDEA'
-        : 'VOTING';
-    return Object.values(this.moduleConfig.visModules).filter(
-      (module) => module.type === taskType
+    return Object.values(this.moduleConfig.visModules).filter((module) =>
+      module.type.includes(this.taskType)
     );
   }
 }
