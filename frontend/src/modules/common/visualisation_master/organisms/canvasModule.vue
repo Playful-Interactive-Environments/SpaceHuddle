@@ -53,12 +53,14 @@
       :is-editable="false"
       class="draggable-container"
       :class="idea.orderGroup"
+      :allow-image-preview="!isDragging"
       :style="{
         minWidth: minIdeaWidth + 'rem',
         maxWidth: maxIdeaWidth + 'rem',
         width: ideaWidth + 'rem',
         zIndex: idea.parameter.zIndex ? idea.parameter.zIndex : 0,
         borderColor: getCategoryColor(idea),
+        borderBottom: getBottomBorder(idea),
       }"
       @mousedown="bringToFront(idea)"
     />
@@ -90,6 +92,8 @@ export default class PublicScreen extends Vue {
   minIdeaWidth = 7;
   maxIdeaWidth = 21;
   ideaWidth = 15;
+
+  isDragging = false;
 
   highestZ = 0;
 
@@ -183,12 +187,14 @@ export default class PublicScreen extends Vue {
     el.style.userSelect = 'none';
 
     el.onmousedown = (e) => {
+      this.isDragging = false;
       e.preventDefault();
 
       const startX = e.clientX - el.offsetLeft;
       const startY = e.clientY - el.offsetTop;
 
       const onMouseMove = (e: MouseEvent) => {
+        this.isDragging = true;
         e.preventDefault(); // Prevent text selection
         this.moveElement(el, e.clientX - startX, e.clientY - startY);
       };
@@ -354,17 +360,24 @@ export default class PublicScreen extends Vue {
 
   getCategoryColor(idea: Idea): string {
     if (this.categoryToggle) {
-      const category = this.categories.filter(
+      const category = this.categories.find(
         (cat) => idea.orderGroup === cat.keywords
       );
-      if (category.length > 0) {
-        return category[0].parameter.color;
-      } else {
-        return themeColors.getIdeaCardBorderColor();
-      }
-    } else {
-      return themeColors.getIdeaCardBorderColor();
+      return category
+        ? category.parameter.color
+        : themeColors.getIdeaCardBorderColor();
     }
+    return themeColors.getIdeaCardBorderColor();
+  }
+
+  getBottomBorder(idea: Idea): string {
+    if (this.categoryToggle) {
+      const category = this.categories.find(
+        (cat) => idea.orderGroup === cat.keywords
+      );
+      return category ? `5px solid ${category.parameter.color}` : '';
+    }
+    return '';
   }
 }
 </script>
@@ -377,7 +390,8 @@ export default class PublicScreen extends Vue {
   scrollbar-width: none;
   -ms-overflow-style: none;
   overflow: hidden;
-  border: 2px solid var(--color-background-darker);
+  border: 4px solid var(--color-background-dark);
+  border-radius: var(--border-radius-small);
 }
 
 #canvasArea::-webkit-scrollbar {
