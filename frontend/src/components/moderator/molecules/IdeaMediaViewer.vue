@@ -6,6 +6,7 @@
     :class="cssClass"
     alt=""
     :preview-src-list="[idea?.image]"
+    :preview-teleported="imagePreviewTeleported"
     :hide-on-click-modal="true"
     :fit="fit"
   />
@@ -24,6 +25,7 @@
     :class="cssClass"
     alt=""
     :preview-src-list="allowImagePreview ? [idea?.link] : []"
+    :preview-teleported="imagePreviewTeleported"
     :hide-on-click-modal="true"
     :fit="fit"
   />
@@ -39,6 +41,7 @@ import * as imageUtil from '@/utils/image';
 export default class IdeaMediaViewer extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) allowImagePreview!: boolean;
+  @Prop({ default: true }) imagePreviewTeleported!: boolean;
   @Prop() cssClass!: string;
   @Prop({ default: '' }) fit!:
     | ''

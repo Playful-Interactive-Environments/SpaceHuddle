@@ -35,6 +35,7 @@
         v-if="idea.image || idea.link"
         :idea="idea"
         :allow-image-preview="allowImagePreview"
+        :image-preview-teleported="imagePreviewTeleported"
         fit="cover"
       />
       <div v-else class="card__image__icon">
@@ -275,6 +276,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false }) shareState!: boolean;
   @Prop({ default: true }) imageOverlayIsClickable!: boolean;
   @Prop({ default: true }) allowImagePreview!: boolean;
+  @Prop({ default: true }) imagePreviewTeleported!: boolean;
   @Prop({ default: false }) showDragArea!: boolean;
   @Prop({ default: null }) fixHeight!: string | null;
   @Prop({ default: null }) imageHeight!: string | null;

@@ -64,6 +64,7 @@
           <IdeaCard
             :idea="vote.idea"
             :is-editable="false"
+            :allow-image-preview="true"
             :portrait="!(vote.idea.image || vote.idea.link)"
             class="ideaItem"
           />
@@ -133,7 +134,6 @@ export default class PublicScreen extends Vue {
 
 <style scoped lang="scss">
 #strataModuleContainer {
-  position: relative;
   width: 100%;
   height: 100%;
 }
@@ -163,7 +163,6 @@ export default class PublicScreen extends Vue {
 }
 
 #strataContainer {
-  position: relative;
   width: calc(100% + (var(--side-padding) * 2));
   margin-left: calc(var(--side-padding) * -1);
   height: 500%;
@@ -184,7 +183,6 @@ export default class PublicScreen extends Vue {
   transform: translateY(-86%);
 
   #ideaContainer {
-    position: relative;
     width: calc(100% - (var(--side-padding) * 2));
     margin-left: var(--side-padding);
     height: 100%;
@@ -217,7 +215,7 @@ export default class PublicScreen extends Vue {
     position: absolute;
     width: 17%;
     min-width: 10rem;
-    top: 100%;
+
     .ideaItem {
       box-shadow: var(--color-dark-contrast) 0.2rem 0.2rem 0.4rem;
     }
@@ -240,6 +238,12 @@ export default class PublicScreen extends Vue {
 
   .ideaItem:hover {
     z-index: 10000 !important;
+  }
+
+  .ideaItem::v-deep(.el-image-viewer__wrapper) {
+    height: 100vh;
+    width: 100vw;
+    z-index: 100000;
   }
 
   .startingLine {
