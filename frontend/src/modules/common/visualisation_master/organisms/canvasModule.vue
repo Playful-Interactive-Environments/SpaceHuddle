@@ -36,10 +36,13 @@
         v-if="taskType === 'CATEGORISATION'"
         ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
-      <el-button type="primary" @click="sortIdeas" v-if="taskType === 'CATEGORISATION'"
+      <el-button
+        type="primary"
+        @click="sortIdeas"
+        v-if="taskType === 'CATEGORISATION'"
         ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
-      <el-button type="primary" @click="initializePositions" class="shuffle"
+      <el-button type="primary" @click="randomizePositions" class="shuffle"
         ><font-awesome-icon :icon="['fas', 'shuffle']" />
       </el-button>
       <el-button type="primary" @click="clearCanvas" class="clear"
@@ -76,6 +79,8 @@ import { Idea } from '@/types/api/Idea';
 import * as themeColors from '@/utils/themeColors';
 import { nextTick } from 'vue';
 import { Category } from '@/types/api/Category';
+import * as ideaService from '@/services/idea-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -130,8 +135,6 @@ export default class PublicScreen extends Vue {
     await nextTick();
     this.updateCanvasDimensions();
     this.makeAllDraggable();
-    this.initializeZIndex();
-    this.initializePositions();
     const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
     if (c) {
       this.canvas = c.getContext('2d');
@@ -140,6 +143,10 @@ export default class PublicScreen extends Vue {
 
   updated(): void {
     this.makeAllDraggable();
+    if (!this.loaded) {
+      this.initializeZIndex();
+      this.onIdeasLoaded();
+    }
   }
 
   unmounted(): void {
@@ -152,6 +159,14 @@ export default class PublicScreen extends Vue {
   @Watch('ideas', { immediate: true })
   ideasChanged(): void {
     this.getCategorizedIdeas();
+  }
+
+  loaded = false;
+  onIdeasLoaded(): void {
+    if (!this.loaded && this.ideas.length > 0) {
+      this.initializePositions();
+      this.loaded = true;
+    }
   }
 
   initializeZIndex(): void {
@@ -204,6 +219,13 @@ export default class PublicScreen extends Vue {
       const onMouseUp = () => {
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
+
+        const idea = this.ideas.find((idea) => idea.id === el.id);
+        if (idea) {
+          idea.parameter.x = el.style.left;
+          idea.parameter.y = el.style.top;
+          ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR);
+        }
       };
 
       document.addEventListener('mousemove', onMouseMove);
@@ -217,13 +239,43 @@ export default class PublicScreen extends Vue {
     const elements = document.getElementsByClassName('draggable-container');
 
     this.highestZ = this.ideas.length;
-    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
-      const elRect = el.getBoundingClientRect();
-      const randomX = Math.random() * (canvasRect.width - elRect.width);
-      const randomY = Math.random() * (canvasRect.height - elRect.height);
-      el.style.left = `${randomX}px`;
-      el.style.top = `${randomY}px`;
-    });
+    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
+      (el, index) => {
+        const elRect = el.getBoundingClientRect();
+        if (this.ideas[index].parameter.x && this.ideas[index].parameter.y) {
+          el.style.left = this.ideas[index].parameter.x + '';
+          el.style.top = this.ideas[index].parameter.y + '';
+        } else {
+          const randomX = Math.random() * (canvasRect.width - elRect.width);
+          const randomY = Math.random() * (canvasRect.height - elRect.height);
+          el.style.left = `${randomX}px`;
+          el.style.top = `${randomY}px`;
+        }
+      }
+    );
+  }
+
+  randomizePositions(): void {
+    const canvasArea = this.$refs.canvasArea as HTMLElement;
+    const canvasRect = canvasArea.getBoundingClientRect();
+    const elements = document.getElementsByClassName('draggable-container');
+
+    this.highestZ = this.ideas.length;
+    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
+      (el, index) => {
+        const elRect = el.getBoundingClientRect();
+        const randomX = Math.random() * (canvasRect.width - elRect.width);
+        const randomY = Math.random() * (canvasRect.height - elRect.height);
+        el.style.left = `${randomX}px`;
+        el.style.top = `${randomY}px`;
+        this.ideas[index].parameter.x = el.style.left;
+        this.ideas[index].parameter.y = el.style.top;
+        ideaService.putIdea(
+          this.ideas[index],
+          EndpointAuthorisationType.MODERATOR
+        );
+      }
+    );
   }
 
   sortIdeas(): void {
@@ -451,7 +503,6 @@ export default class PublicScreen extends Vue {
 .eraser,
 .lineWidthPlus,
 .categoryToggle,
-.clear,
 .colorPicker,
 .shuffle {
   margin-left: 1rem;
