@@ -71,6 +71,12 @@ export default class IdeaMediaViewer extends Vue {
   object-fit: contain;
 }
 
+.image::v-deep(.el-image-viewer__wrapper) {
+  height: 100vh;
+  width: 100vw;
+  z-index: 100000;
+}
+
 .image::v-deep(.el-image-viewer__img) {
   max-height: 70% !important;
   max-width: 70% !important;
