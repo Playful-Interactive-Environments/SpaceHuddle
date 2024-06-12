@@ -299,18 +299,27 @@ export default class PublicScreen extends Vue {
       const ideaElement = document.getElementById(idea.id);
       if (ideaElement) {
         const elements = document.getElementsByClassName(idea.orderGroup);
-        Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
-          const randomX = Math.random() * 20 - 10;
-          const randomY = Math.random() * 20 - 10;
-          el.style.left =
-            Math.floor(Number(ideaElement.style.left.split('px')[0])) +
-            randomX +
-            'px';
-          el.style.top =
-            Math.floor(Number(ideaElement.style.top.split('px')[0])) +
-            randomY +
-            'px';
-        });
+        Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
+          (el, index) => {
+            const randomX = Math.random() * 20 - 10;
+            const randomY = Math.random() * 20 - 10;
+            el.style.left =
+              Math.floor(Number(ideaElement.style.left.split('px')[0])) +
+              randomX +
+              'px';
+            el.style.top =
+              Math.floor(Number(ideaElement.style.top.split('px')[0])) +
+              randomY +
+              'px';
+
+            const idea = this.ideas.find((idea) => idea.id === el.id);
+            if (idea) {
+              idea.parameter.x = el.style.left;
+              idea.parameter.y = el.style.top;
+              ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR);
+            }
+          }
+        );
       }
     }
   }
