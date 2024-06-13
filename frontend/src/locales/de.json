@@ -605,8 +605,8 @@
       "new": "keine",
       "handled": "behandelt",
       "duplicate": "Duplikat",
-      "thumbs_down": "Daumen hoch",
-      "thumbs_up": "Daumen runter"
+      "thumbs_down": "Daumen runter",
+      "thumbs_up": "Daumen hoch"
     },
     "sessionSortOrder": {
       "null": "",
