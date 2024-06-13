@@ -72,13 +72,13 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import {Options, Vue} from 'vue-class-component';
+import {Prop, Watch} from 'vue-property-decorator';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import { Idea } from '@/types/api/Idea';
+import {Idea} from '@/types/api/Idea';
 import * as themeColors from '@/utils/themeColors';
-import { nextTick } from 'vue';
-import { Category } from '@/types/api/Category';
+import {nextTick} from 'vue';
+import {Category} from '@/types/api/Category';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
@@ -135,10 +135,6 @@ export default class PublicScreen extends Vue {
     await nextTick();
     this.updateCanvasDimensions();
     this.makeAllDraggable();
-    const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
-    if (c) {
-      this.canvas = c.getContext('2d');
-    }
   }
 
   updated(): void {
@@ -149,7 +145,7 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  unmounted(): void {
+  beforeUnmount(): void {
     const elements = document.getElementsByClassName('draggable-container');
     Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
       el.onmousedown = null;
@@ -159,13 +155,33 @@ export default class PublicScreen extends Vue {
   @Watch('ideas', { immediate: true })
   ideasChanged(): void {
     this.getCategorizedIdeas();
+    console.log(this.ideas);
   }
 
   loaded = false;
   onIdeasLoaded(): void {
     if (!this.loaded && this.ideas.length > 0) {
       this.initializePositions();
+      this.initializeCanvas();
       this.loaded = true;
+    }
+  }
+
+  initializeCanvas(): void {
+    const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
+    if (c) {
+      this.canvas = c.getContext('2d');
+      const idea = this.ideas.find((idea) => !!idea.parameter.canvas.canvasImage);
+      if (idea) {
+        const img = new Image();
+        img.src = idea.parameter.canvas.canvasImage;
+        img.onload = () => {
+          if (this.canvas) {
+            this.canvas.drawImage(img, 0, 0);
+          }
+        };
+        this.ideaWidth = idea.parameter.canvas.ideaSize;
+      }
     }
   }
 
@@ -404,6 +420,7 @@ export default class PublicScreen extends Vue {
       this.x = 0;
       this.y = 0;
       this.isDrawing = false;
+      this.saveCanvas();
     }
   }
 
@@ -413,6 +430,7 @@ export default class PublicScreen extends Vue {
         'drawing-canvas'
       ) as HTMLCanvasElement;
       this.canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      this.saveCanvas();
     }
   }
 
@@ -441,6 +459,20 @@ export default class PublicScreen extends Vue {
       return category ? `5px solid ${category.parameter.color}` : '';
     }
     return '';
+  }
+
+  saveCanvas(): void {
+    const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
+    if (c) {
+      const dataUrl = c.toDataURL();
+      this.ideas.forEach((idea) => {
+        idea.parameter.canvas = {
+          canvasImage: dataUrl,
+          ideaSize: this.ideaWidth,
+        };
+        ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR);
+      });
+    }
   }
 }
 </script>

@@ -44,7 +44,8 @@
           pointerEvents: ended ? 'all' : 'none',
         }"
         @transitionend="
-          moderatedIndex = !ended && !moderatedFlow ? moderatedIndex - 0.5 : moderatedIndex
+          moderatedIndex =
+            !ended && !moderatedFlow ? moderatedIndex - 0.5 : moderatedIndex
         "
       >
         <div
