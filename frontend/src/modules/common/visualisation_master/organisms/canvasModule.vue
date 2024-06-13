@@ -83,10 +83,7 @@ import { Idea } from '@/types/api/Idea';
 import * as themeColors from '@/utils/themeColors';
 import { nextTick } from 'vue';
 import { Category } from '@/types/api/Category';
-import * as ideaService from '@/services/idea-service';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task } from '@/types/api/Task';
-import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 
@@ -178,10 +175,11 @@ export default class PublicScreen extends Vue {
   onIdeasLoaded(): void {
     if (!this.loaded && this.ideas.length > 0) {
       this.module = this.task.modules.find(
-          (module) => module.name === 'visualisation_master'
+        (module) => module.name === 'visualisation_master'
       );
       this.initializePositions();
       this.initializeCanvas();
+      console.log(this.module);
       this.loaded = true;
     }
   }
@@ -256,9 +254,7 @@ export default class PublicScreen extends Vue {
 
         const idea = this.ideas.find((idea) => idea.id === el.id);
         if (idea) {
-          idea.parameter.x = el.style.left;
-          idea.parameter.y = el.style.top;
-          ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR);
+          this.saveIdeaPosition(idea.id, el.style.left, el.style.top);
         }
       };
 
@@ -268,26 +264,23 @@ export default class PublicScreen extends Vue {
   }
 
   initializePositions(): void {
-    const canvasArea = this.$refs.canvasArea as HTMLElement;
-    const canvasRect = canvasArea.getBoundingClientRect();
     const elements = document.getElementsByClassName('draggable-container');
 
     this.highestZ = this.ideas.length;
     Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
       (el, index) => {
-        const elRect = el.getBoundingClientRect();
-        if (this.ideas[index].parameter.x && this.ideas[index].parameter.y) {
-          el.style.left = this.ideas[index].parameter.x + '';
-          el.style.top = this.ideas[index].parameter.y + '';
-        } else {
-          const randomX =
-            Math.random() *
-            (canvasRect.width - elRect.width - this.paddingAdjustment);
-          const randomY =
-            Math.random() *
-            (canvasRect.height - elRect.height - this.paddingAdjustment);
-          el.style.left = `${randomX}px`;
-          el.style.top = `${randomY}px`;
+        if (
+          this.module &&
+          this.module.parameter.canvasPositions &&
+          this.module.parameter.canvasPositions.length > 0
+        ) {
+          const ideaPositionObject = this.module.parameter.canvasPositions.find(
+            (pos) => pos.ideaId === this.ideas[index].id
+          );
+          if (ideaPositionObject) {
+            el.style.left = ideaPositionObject.x;
+            el.style.top = ideaPositionObject.y;
+          }
         }
       }
     );
@@ -306,11 +299,10 @@ export default class PublicScreen extends Vue {
         const randomY = Math.random() * (canvasRect.height - elRect.height);
         el.style.left = `${randomX}px`;
         el.style.top = `${randomY}px`;
-        this.ideas[index].parameter.x = el.style.left;
-        this.ideas[index].parameter.y = el.style.top;
-        ideaService.putIdea(
-          this.ideas[index],
-          EndpointAuthorisationType.MODERATOR
+        this.saveIdeaPosition(
+          this.ideas[index].id,
+          el.style.left,
+          el.style.top
         );
       }
     );
@@ -337,27 +329,23 @@ export default class PublicScreen extends Vue {
       const ideaElement = document.getElementById(idea.id);
       if (ideaElement) {
         const elements = document.getElementsByClassName(idea.orderGroup);
-        Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
-          (el, index) => {
-            const randomX = Math.random() * 20 - 10;
-            const randomY = Math.random() * 20 - 10;
-            el.style.left =
-              Math.floor(Number(ideaElement.style.left.split('px')[0])) +
-              randomX +
-              'px';
-            el.style.top =
-              Math.floor(Number(ideaElement.style.top.split('px')[0])) +
-              randomY +
-              'px';
+        Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
+          const randomX = Math.random() * 20 - 10;
+          const randomY = Math.random() * 20 - 10;
+          el.style.left =
+            Math.floor(Number(ideaElement.style.left.split('px')[0])) +
+            randomX +
+            'px';
+          el.style.top =
+            Math.floor(Number(ideaElement.style.top.split('px')[0])) +
+            randomY +
+            'px';
 
-            const idea = this.ideas.find((idea) => idea.id === el.id);
-            if (idea) {
-              idea.parameter.x = el.style.left;
-              idea.parameter.y = el.style.top;
-              ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR);
-            }
+          const idea = this.ideas.find((idea) => idea.id === el.id);
+          if (idea) {
+            this.saveIdeaPosition(idea.id, el.style.left, el.style.top);
           }
-        );
+        });
       }
     }
   }
@@ -481,6 +469,41 @@ export default class PublicScreen extends Vue {
       return category ? `5px solid ${category.parameter.color}` : '';
     }
     return '';
+  }
+
+  saveIdeaPosition(id: string, x: string, y: string) {
+    if (
+      this.module &&
+      this.module.parameter.canvasPositions &&
+      this.module.parameter.canvasPositions.length > 0
+    ) {
+      const index = this.module.parameter.canvasPositions.findIndex(
+        (item) => item.ideaId === id
+      );
+      if (index > -1) {
+        this.module.parameter.canvasPositions[index] = {
+          ideaId: id,
+          x: x,
+          y: y,
+        };
+      } else {
+        this.module.parameter.canvasPositions.push({
+          ideaId: id,
+          x: x,
+          y: y,
+        });
+      }
+      moduleService.putModule(this.module);
+    } else if (this.module) {
+      this.module.parameter.canvasPositions = [
+        {
+          ideaId: id,
+          x: x,
+          y: y,
+        },
+      ];
+      moduleService.putModule(this.module);
+    }
   }
 
   saveCanvas(): void {
