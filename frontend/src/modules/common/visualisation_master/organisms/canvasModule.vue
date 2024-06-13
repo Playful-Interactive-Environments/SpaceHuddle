@@ -179,7 +179,6 @@ export default class PublicScreen extends Vue {
       );
       this.initializePositions();
       this.initializeCanvas();
-      console.log(this.module);
       this.loaded = true;
     }
   }
