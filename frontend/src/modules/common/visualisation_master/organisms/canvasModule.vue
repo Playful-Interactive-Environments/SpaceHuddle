@@ -28,6 +28,7 @@
       <el-button type="primary" @click="changeLineWidth(-2)"
         ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
       >
+      <p id="lineWidthIndicator">{{ lineWidth }}</p>
       <el-color-picker
         v-model="color"
         class="colorPicker"
@@ -117,7 +118,7 @@ export default class PublicScreen extends Vue {
 
   lineWidth = 4;
   minLineWidth = 1;
-  maxLineWidth = 60;
+  maxLineWidth = 80;
   eraser = false;
 
   color = themeColors.getEvaluatingColor();
@@ -591,6 +592,13 @@ export default class PublicScreen extends Vue {
     rgba(251, 7, 217, 1) 90%,
     rgba(255, 0, 0, 1) 100%
   );
+}
+
+#lineWidthIndicator {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-large);
+  width: 2rem;
 }
 
 .eraser,
