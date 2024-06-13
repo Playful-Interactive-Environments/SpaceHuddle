@@ -85,6 +85,7 @@
     <canvas-module
       v-if="currentVisModule === 'canvasModule'"
       :task-id="this.taskId"
+      :task="this.task"
       :taskType="this.task.taskType"
       :timeModifier="timeModifier"
       :timerEnded="this.timerEnd"

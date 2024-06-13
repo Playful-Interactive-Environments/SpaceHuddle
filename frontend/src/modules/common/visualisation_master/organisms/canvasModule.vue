@@ -85,6 +85,10 @@ import { nextTick } from 'vue';
 import { Category } from '@/types/api/Category';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Task } from '@/types/api/Task';
+import * as taskService from '@/services/task-service';
+import * as moduleService from '@/services/module-service';
+import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
@@ -93,12 +97,15 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 })
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly task!: Task;
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: false }) readonly timerEnded!: boolean;
   @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: [] }) readonly categories!: Category[];
   @Prop({ default: false }) readonly paused!: boolean;
   @Prop({ default: null }) readonly taskType!: string | null;
+
+  module: Module | undefined = undefined;
 
   minIdeaWidth = 7;
   maxIdeaWidth = 21;
@@ -170,6 +177,9 @@ export default class PublicScreen extends Vue {
   loaded = false;
   onIdeasLoaded(): void {
     if (!this.loaded && this.ideas.length > 0) {
+      this.module = this.task.modules.find(
+          (module) => module.name === 'visualisation_master'
+      );
       this.initializePositions();
       this.initializeCanvas();
       this.loaded = true;
@@ -180,18 +190,15 @@ export default class PublicScreen extends Vue {
     const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
     if (c) {
       this.canvas = c.getContext('2d');
-      const idea = this.ideas.find(
-        (idea) => !!idea.parameter.canvas.canvasImage
-      );
-      if (idea) {
+      if (this.module) {
         const img = new Image();
-        img.src = idea.parameter.canvas.canvasImage;
+        img.src = this.module.parameter.canvas.canvasImage;
         img.onload = () => {
           if (this.canvas) {
             this.canvas.drawImage(img, 0, 0);
           }
         };
-        this.ideaWidth = idea.parameter.canvas.ideaSize;
+        this.ideaWidth = this.module.parameter.canvas.ideaSize;
       }
     }
   }
@@ -480,13 +487,13 @@ export default class PublicScreen extends Vue {
     const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
     if (c) {
       const dataUrl = c.toDataURL();
-      this.ideas.forEach((idea) => {
-        idea.parameter.canvas = {
+      if (this.module) {
+        this.module.parameter.canvas = {
           canvasImage: dataUrl,
           ideaSize: this.ideaWidth,
         };
-        ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR);
-      });
+        moduleService.putModule(this.module);
+      }
     }
   }
 }
