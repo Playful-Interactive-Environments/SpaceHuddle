@@ -41,14 +41,11 @@
             topVotes.length - this.order[index] - 1
           ),
           marginTop: getTopMargin(index),
-          pointerEvents: moderatedFlow
-            ? moderatedIndex <= index
-              ? 'all'
-              : 'none'
-            : ended
-            ? 'all'
-            : 'none',
+          pointerEvents: ended ? 'all' : 'none',
         }"
+        @transitionend="
+          moderatedIndex = !ended && !moderatedFlow ? moderatedIndex - 0.5 : moderatedIndex
+        "
       >
         <div
           class="columnLayout"
@@ -73,7 +70,11 @@
         ).length > 0
       "
       id="revealOtherVotes"
-      :style="{ opacity: ended ? 1 : 0, pointerEvents: ended ? 'all' : 'none', display: ended ? 'flex' : 'none' }"
+      :style="{
+        opacity: ended ? 1 : 0,
+        pointerEvents: ended ? 'all' : 'none',
+        display: ended ? 'flex' : 'none',
+      }"
     >
       <a href="#otherVotesContainer" class="revealButton">
         Other ideas
@@ -133,7 +134,7 @@ export default class PublicScreen extends Vue {
 
   started = false;
   ended = false;
-  animationLength = 2;
+  animationLength = 1.5;
 
   topAmount = 5;
   topVotes: VoteResult[][] = [];
@@ -141,7 +142,6 @@ export default class PublicScreen extends Vue {
   voteSets: number[] = [];
   order: number[] = [];
   revealedVoteIndexes: number[] = [];
-
   moderatedFlow = false;
   moderatedIndex = this.topAmount;
 
@@ -149,19 +149,13 @@ export default class PublicScreen extends Vue {
     if (this.ended) {
       return 'all ' + this.animationLength / 2 + 's ease';
     } else {
-      if (!this.moderatedFlow) {
-        return 'all ' + this.animationLength + 's ease ' + index + 's';
-      } else {
-        return 'all ' + this.animationLength + 's ease';
-      }
+      return 'all ' + this.animationLength + 's ease';
     }
   }
 
   startAnimation(): void {
     this.started = true;
-    setTimeout(() => {
-      this.ended = true;
-    }, (this.voteSets.length + this.animationLength) * 1000);
+    this.moderatedIndex -= 1;
   }
 
   startModeratedAnimation(): void {
@@ -170,23 +164,17 @@ export default class PublicScreen extends Vue {
   }
 
   getTopMargin(index: number): string {
-    if (!this.moderatedFlow) {
-      return this.started
-        ? (this.order[index] / this.voteSets.length) * 40 + '%'
-        : '100%';
-    } else {
-      if (this.order[index] > this.moderatedIndex) {
-        if (this.moderatedIndex <= 0) {
-          setTimeout(() => {
-            this.ended = true;
-          }, 500);
-        }
-        return (this.order[index] / this.voteSets.length) * 40 + '%';
-      } else if (this.order[index] === this.moderatedIndex) {
-        return '0%';
-      } else {
-        return '100%';
+    if (this.order[index] > this.moderatedIndex) {
+      if (this.moderatedIndex <= 0) {
+        setTimeout(() => {
+          this.ended = true;
+        }, 500);
       }
+      return (this.order[index] / this.voteSets.length) * 40 + '%';
+    } else if (this.order[index] === this.moderatedIndex) {
+      return '0%';
+    } else {
+      return '100%';
     }
   }
 
@@ -258,7 +246,7 @@ export default class PublicScreen extends Vue {
   left: 2rem;
   p {
     font-size: var(--font-size-xlarge);
-    margin-left: .5rem;
+    margin-left: 0.5rem;
   }
   .startIcon {
     font-size: var(--font-size-xxlarge);
