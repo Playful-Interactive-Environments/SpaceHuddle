@@ -183,6 +183,7 @@ export default class PublicScreen extends Vue {
   transform: translateY(-86%);
 
   #ideaContainer {
+    position: relative;
     width: calc(100% - (var(--side-padding) * 2));
     margin-left: var(--side-padding);
     height: 100%;
