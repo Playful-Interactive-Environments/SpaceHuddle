@@ -6,13 +6,7 @@
            "locales": "de,en,",  
              "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "common/visualisation_master"  
-       },  
-       "card_shuffle_animation": {  
-           "publicScreen": "output/PublicScreen",  
-           "locales": "de,en,",  
-             "icon": "layer-group",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
-           "path": "brainstorming/card_shuffle_animation"  
-       },  
+       },
        "chat": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
@@ -27,13 +21,7 @@
            "locales": "de,en,",  
              "icon": "rocket",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "brainstorming/default"  
-       },  
-       "gallery": {  
-           "publicScreen": "output/PublicScreen",  
-           "locales": "de,en,",  
-             "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
-           "path": "brainstorming/gallery"  
-       },  
+       },
        "game": {  
            "participant": "output/Participant",  
            "locales": "de,en,",  
