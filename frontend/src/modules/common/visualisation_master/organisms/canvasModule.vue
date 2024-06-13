@@ -28,7 +28,7 @@
       <el-button type="primary" @click="changeLineWidth(-2)"
         ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
       >
-      <el-color-picker v-model="color" class="colorPicker" />
+      <el-color-picker v-model="color" class="colorPicker" @activeChange="colorChanged" />
       <el-button
         type="primary"
         @click="categoryToggle = !categoryToggle"
@@ -143,6 +143,10 @@ export default class PublicScreen extends Vue {
       this.initializeZIndex();
       this.onIdeasLoaded();
     }
+  }
+
+  colorChanged(color: string) {
+    this.color = color;
   }
 
   beforeUnmount(): void {
