@@ -72,13 +72,13 @@
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import {Idea} from '@/types/api/Idea';
+import { Idea } from '@/types/api/Idea';
 import * as themeColors from '@/utils/themeColors';
-import {nextTick} from 'vue';
-import {Category} from '@/types/api/Category';
+import { nextTick } from 'vue';
+import { Category } from '@/types/api/Category';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
@@ -155,7 +155,6 @@ export default class PublicScreen extends Vue {
   @Watch('ideas', { immediate: true })
   ideasChanged(): void {
     this.getCategorizedIdeas();
-    console.log(this.ideas);
   }
 
   loaded = false;
@@ -171,7 +170,9 @@ export default class PublicScreen extends Vue {
     const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
     if (c) {
       this.canvas = c.getContext('2d');
-      const idea = this.ideas.find((idea) => !!idea.parameter.canvas.canvasImage);
+      const idea = this.ideas.find(
+        (idea) => !!idea.parameter.canvas.canvasImage
+      );
       if (idea) {
         const img = new Image();
         img.src = idea.parameter.canvas.canvasImage;
