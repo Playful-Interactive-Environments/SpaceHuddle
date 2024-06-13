@@ -28,7 +28,11 @@
       <el-button type="primary" @click="changeLineWidth(-2)"
         ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
       >
-      <el-color-picker v-model="color" class="colorPicker" @activeChange="colorChanged" />
+      <el-color-picker
+        v-model="color"
+        class="colorPicker"
+        @activeChange="colorChanged"
+      />
       <el-button
         type="primary"
         @click="categoryToggle = !categoryToggle"
@@ -117,6 +121,8 @@ export default class PublicScreen extends Vue {
   canvas: CanvasRenderingContext2D | null = null;
   canvasHeight = 0;
   canvasWidth = 0;
+  paddingAdjustment = 10;
+
   x = 0;
   y = 0;
   isDrawing = false;
@@ -267,8 +273,12 @@ export default class PublicScreen extends Vue {
           el.style.left = this.ideas[index].parameter.x + '';
           el.style.top = this.ideas[index].parameter.y + '';
         } else {
-          const randomX = Math.random() * (canvasRect.width - elRect.width);
-          const randomY = Math.random() * (canvasRect.height - elRect.height);
+          const randomX =
+            Math.random() *
+            (canvasRect.width - elRect.width - this.paddingAdjustment);
+          const randomY =
+            Math.random() *
+            (canvasRect.height - elRect.height - this.paddingAdjustment);
           el.style.left = `${randomX}px`;
           el.style.top = `${randomY}px`;
         }
@@ -353,9 +363,9 @@ export default class PublicScreen extends Vue {
     if (left < 0) left = 0;
     if (top < 0) top = 0;
     if (left + elRect.width > canvasRect.width)
-      left = canvasRect.width - elRect.width;
+      left = canvasRect.width - elRect.width - this.paddingAdjustment;
     if (top + elRect.height > canvasRect.height)
-      top = canvasRect.height - elRect.height;
+      top = canvasRect.height - elRect.height - this.paddingAdjustment;
 
     requestAnimationFrame(() => {
       el.style.left = `${left}px`;
@@ -489,7 +499,6 @@ export default class PublicScreen extends Vue {
   height: 100%;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  overflow: hidden;
   border: 4px solid var(--color-background-dark);
   border-radius: var(--border-radius-small);
 }
@@ -505,14 +514,16 @@ export default class PublicScreen extends Vue {
 }
 
 .controlButtons {
-  position: relative;
-  z-index: 10000;
+  position: absolute;
   width: fit-content;
   display: flex;
   align-items: center;
   background-color: var(--color-background-dark);
-  border-radius: 0 0 var(--border-radius-small) 0;
+  border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
   padding: 0.2rem;
+  height: 3.5rem;
+  top: -3.5rem;
+  right: 1rem;
   * {
     margin: 0.2rem;
     padding-left: 0.3rem;
