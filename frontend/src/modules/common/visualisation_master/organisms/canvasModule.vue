@@ -255,6 +255,9 @@ export default class PublicScreen extends Vue {
         const idea = this.ideas.find((idea) => idea.id === el.id);
         if (idea) {
           this.saveIdeaPosition(idea.id, el.style.left, el.style.top);
+          if (this.module) {
+            moduleService.putModule(this.module);
+          }
         }
       };
 
@@ -306,6 +309,9 @@ export default class PublicScreen extends Vue {
         );
       }
     );
+    if (this.module) {
+      moduleService.putModule(this.module);
+    }
   }
 
   sortIdeas(): void {
@@ -347,6 +353,9 @@ export default class PublicScreen extends Vue {
           }
         });
       }
+    }
+    if (this.module) {
+      moduleService.putModule(this.module);
     }
   }
 
@@ -493,7 +502,6 @@ export default class PublicScreen extends Vue {
           y: y,
         });
       }
-      moduleService.putModule(this.module);
     } else if (this.module) {
       this.module.parameter.canvasPositions = [
         {
@@ -502,7 +510,6 @@ export default class PublicScreen extends Vue {
           y: y,
         },
       ];
-      moduleService.putModule(this.module);
     }
   }
 
