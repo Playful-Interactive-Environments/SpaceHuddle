@@ -6,7 +6,7 @@
            "locales": "de,en,",  
              "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "common/visualisation_master"  
-       },
+       },  
        "chat": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
@@ -21,7 +21,7 @@
            "locales": "de,en,",  
              "icon": "rocket",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "brainstorming/default"  
-       },
+       },  
        "game": {  
            "participant": "output/Participant",  
            "locales": "de,en,",  
