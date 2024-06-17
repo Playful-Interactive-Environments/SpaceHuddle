@@ -583,6 +583,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   setFormData(question: Question): void {
+    if (!question.question.description) question.question.description = '';
+    if (!question.question.parameter.explanation)
+      question.question.parameter.explanation = '';
     this.formData = {
       questionType: getQuestionTypeFromHierarchy(question.question),
       question: Object.assign({}, question.question),
