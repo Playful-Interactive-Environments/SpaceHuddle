@@ -1,45 +1,46 @@
 <template>
   <el-container ref="container">
-    <el-header height="150px" class="statistic">
-      <el-tabs v-model="activeProgressTab">
-        <el-tab-pane
-          :name="MissionProgressParameter.influenceAreas"
-          :label="
-            $t(
-              'module.brainstorming.missionmap.participant.tabs.influenceAreas'
-            )
-          "
-        >
-        </el-tab-pane>
-        <el-tab-pane
-          v-if="showProgress && module.parameter.effectElectricity"
-          :name="MissionProgressParameter.electricity"
-          :label="
-            $t('module.brainstorming.missionmap.participant.tabs.electricity')
-          "
-        >
-        </el-tab-pane>
-      </el-tabs>
-      <MissionProgressChart
-        v-if="showProgress"
-        :task-id="taskId"
-        :mission-progress-parameter="activeProgressTab"
-      />
-    </el-header>
-    <el-container ref="mapSpace">
-      <el-aside width="70vw" class="mapSpace">
-        <IdeaMap
-          v-if="sizeLoaded"
-          :ideas="ideas"
-          :parameter="module?.parameter"
-          :canChangePosition="() => false"
-          :calculate-size="false"
-          v-model:selected-idea="selectedIdea"
-          v-on:visibleIdeasChanged="visibleIdeasChanged"
-          v-on:selectionColorChanged="selectionColor = $event"
-        >
-        </IdeaMap>
-      </el-aside>
+    <el-aside width="60vw" class="mapSpace">
+      <el-header height="150px" class="statistic">
+        <el-tabs v-model="activeProgressTab">
+          <el-tab-pane
+            :name="MissionProgressParameter.influenceAreas"
+            :label="
+              $t(
+                'module.brainstorming.missionmap.participant.tabs.influenceAreas'
+              )
+            "
+          >
+          </el-tab-pane>
+          <el-tab-pane
+            v-if="showProgress && module.parameter.effectElectricity"
+            :name="MissionProgressParameter.electricity"
+            :label="
+              $t('module.brainstorming.missionmap.participant.tabs.electricity')
+            "
+          >
+          </el-tab-pane>
+        </el-tabs>
+        <MissionProgressChart
+          v-if="showProgress"
+          :task-id="taskId"
+          :mission-progress-parameter="activeProgressTab"
+        />
+      </el-header>
+      <IdeaMap
+        v-if="sizeLoaded"
+        :ideas="ideas"
+        class="map"
+        :parameter="module?.parameter"
+        :canChangePosition="() => false"
+        :calculate-size="false"
+        v-model:selected-idea="selectedIdea"
+        v-on:visibleIdeasChanged="visibleIdeasChanged"
+        v-on:selectionColorChanged="selectionColor = $event"
+      >
+      </IdeaMap>
+    </el-aside>
+    <el-container ref="mapSpace" class="ideaSpace">
       <el-main>
         <section
           v-if="ideas.length === 0"
@@ -284,6 +285,14 @@ export default class PublicScreen extends Vue {
   height: 100%;
   margin-right: 1rem;
   overflow: hidden;
+  .map {
+    height: 50%;
+  }
+}
+
+.ideaSpace {
+  border-left: 2px solid var(--color-background-dark);
+  padding-left: 1rem;
 }
 
 .statistic {
