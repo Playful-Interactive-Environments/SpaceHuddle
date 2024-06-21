@@ -10,19 +10,27 @@
       @mouseleave="stopDrawing"
     />
     <div class="controlButtons">
-      <el-button type="primary" @click="changeIdeaWidth(2)">+</el-button>
+      <el-button type="primary" @click="templateSelectionVisible = !templateSelectionVisible"
+        ><font-awesome-icon :icon="['fas', 'image']"
+      /></el-button>
+      <el-button
+        type="primary"
+        class="buttonSpacing"
+        @click="changeIdeaWidth(2)"
+        >+</el-button
+      >
       <el-button type="primary" @click="changeIdeaWidth(-2)">-</el-button>
       <el-button
         type="primary"
         @click="toggleEraser"
         :class="{ eraserToggle: eraser }"
-        class="eraser"
+        class="eraser buttonSpacing"
         ><font-awesome-icon :icon="['fas', 'eraser']"
       /></el-button>
       <el-button
         type="primary"
         @click="changeLineWidth(2)"
-        class="lineWidthPlus"
+        class="lineWidthPlus buttonSpacing"
         ><font-awesome-icon :icon="['fas', 'pen']" /> +</el-button
       >
       <el-button type="primary" @click="changeLineWidth(-2)"
@@ -31,13 +39,13 @@
       <p id="lineWidthIndicator">{{ lineWidth }}</p>
       <el-color-picker
         v-model="color"
-        class="colorPicker"
+        class="colorPicker buttonSpacing"
         @activeChange="colorChanged"
       />
       <el-button
         type="primary"
         @click="categoryToggle = !categoryToggle"
-        class="categoryToggle"
+        class="categoryToggle buttonSpacing"
         v-if="taskType === 'CATEGORISATION'"
         ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
@@ -47,12 +55,28 @@
         v-if="taskType === 'CATEGORISATION'"
         ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
-      <el-button type="primary" @click="randomizePositions" class="shuffle"
+      <el-button
+        type="primary"
+        @click="randomizePositions"
+        class="shuffle buttonSpacing"
         ><font-awesome-icon :icon="['fas', 'shuffle']" />
       </el-button>
       <el-button type="primary" @click="clearCanvas" class="clear"
         ><font-awesome-icon :icon="['far', 'trash-can']"
       /></el-button>
+      <div class="imageSelection" v-if="templateSelectionVisible" @mouseleave="templateSelectionVisible = false">
+        <el-button
+          v-for="image in backgroundTemplates"
+          class="templateImageButton"
+          :key="image"
+          @click="drawImageOnCanvas(image)"
+          :style="{
+            backgroundImage: 'url(' + image + ')',
+            backgroundSize: 'cover',
+            backgroundPosition: '50% 50%',
+          }"
+        ></el-button>
+      </div>
     </div>
     <IdeaCard
       v-for="idea in ideas"
@@ -131,6 +155,14 @@ export default class PublicScreen extends Vue {
   x = 0;
   y = 0;
   isDrawing = false;
+
+  backgroundTemplates: string[] = [
+    '/assets/animations/canvas/quadrants.png',
+    '/assets/animations/canvas/timeline.png',
+    '/assets/animations/canvas/columns.png',
+    '/assets/animations/canvas/rows.png',
+  ];
+  templateSelectionVisible = false;
 
   CalcCanvasWidth(): number {
     const canvasArea = this.$refs.canvasArea as HTMLElement;
@@ -453,6 +485,40 @@ export default class PublicScreen extends Vue {
     }
   }
 
+  drawImageOnCanvas(imageSrc: string) {
+    const img = new Image();
+    img.src = imageSrc;
+    img.onload = () => {
+      if (!this.canvas) return;
+
+      const canvas = this.canvas.canvas;
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+
+      // Calculate aspect ratios
+      const imgAspectRatio = img.width / img.height;
+      const canvasAspectRatio = canvasWidth / canvasHeight;
+
+      let renderWidth, renderHeight, offsetX, offsetY;
+
+      // Determine scaling factor and dimensions
+      if (imgAspectRatio > canvasAspectRatio) {
+        renderWidth = canvasHeight * imgAspectRatio;
+        renderHeight = canvasHeight;
+        offsetX = (canvasWidth - renderWidth) / 2;
+        offsetY = 0;
+      } else {
+        renderWidth = canvasWidth;
+        renderHeight = canvasWidth / imgAspectRatio;
+        offsetX = 0;
+        offsetY = (canvasHeight - renderHeight) / 2;
+      }
+
+      this.canvas.clearRect(0, 0, canvasWidth, canvasHeight);
+      this.canvas.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+    };
+  }
+
   bringToFront(idea: Idea): void {
     this.highestZ++;
     idea.parameter.zIndex = this.highestZ;
@@ -601,11 +667,32 @@ export default class PublicScreen extends Vue {
   width: 2rem;
 }
 
-.eraser,
-.lineWidthPlus,
-.categoryToggle,
-.colorPicker,
-.shuffle {
+.buttonSpacing {
   margin-left: 1rem;
+}
+
+.imageSelection {
+  position: absolute;
+  top: 70%;
+  right: 70%;
+  background-color: var(--color-background-dark);
+  border-radius: var(--border-radius);
+  border: 4px solid var(--color-background);
+  width: 100%;
+  height: 6rem;
+  z-index: 100000;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  .templateImageButton {
+    height: 85%;
+    width: 24%;
+    overflow: hidden;
+    background-color: var(--color-background);
+  }
+  .templateImageButton:hover {
+    background-color: var(--color-background-darker);
+  }
 }
 </style>
