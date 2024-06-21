@@ -2,104 +2,107 @@
   <div class="canvasModule">
     <div class="controlButtons">
       <el-button
-          type="primary"
-          @click="templateSelectionVisible = !templateSelectionVisible"
-      ><font-awesome-icon :icon="['fas', 'image']"
+        type="primary"
+        @click="templateSelectionVisible = !templateSelectionVisible"
+        ><font-awesome-icon :icon="['fas', 'image']"
       /></el-button>
-      <el-button type="primary" class="buttonSpacing" @click="changeIdeaWidth(2)"
-      >+</el-button
+      <el-button
+        type="primary"
+        class="buttonSpacing"
+        @click="changeIdeaWidth(2)"
+        >+</el-button
       >
       <el-button type="primary" @click="changeIdeaWidth(-2)">-</el-button>
       <el-button
-          type="primary"
-          @click="toggleEraser"
-          :class="{ eraserToggle: eraser }"
-          class="eraser buttonSpacing"
-      ><font-awesome-icon :icon="['fas', 'eraser']"
+        type="primary"
+        @click="toggleEraser"
+        :class="{ eraserToggle: eraser }"
+        class="eraser buttonSpacing"
+        ><font-awesome-icon :icon="['fas', 'eraser']"
       /></el-button>
       <el-button
-          type="primary"
-          @click="changeLineWidth(2)"
-          class="lineWidthPlus buttonSpacing"
-      ><font-awesome-icon :icon="['fas', 'pen']" /> +</el-button
+        type="primary"
+        @click="changeLineWidth(2)"
+        class="lineWidthPlus buttonSpacing"
+        ><font-awesome-icon :icon="['fas', 'pen']" /> +</el-button
       >
       <el-button type="primary" @click="changeLineWidth(-2)"
-      ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
+        ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
       >
       <p id="lineWidthIndicator">{{ lineWidth }}</p>
       <el-color-picker
-          v-model="color"
-          class="colorPicker buttonSpacing"
-          @activeChange="colorChanged"
+        v-model="color"
+        class="colorPicker buttonSpacing"
+        @activeChange="colorChanged"
       />
       <el-button
-          type="primary"
-          @click="categoryToggle = !categoryToggle"
-          class="categoryToggle buttonSpacing"
-          v-if="taskType === 'CATEGORISATION'"
-      ><font-awesome-icon :icon="['far', 'object-group']"
+        type="primary"
+        @click="categoryToggle = !categoryToggle"
+        class="categoryToggle buttonSpacing"
+        v-if="taskType === 'CATEGORISATION'"
+        ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
       <el-button
-          type="primary"
-          @click="sortIdeas"
-          v-if="taskType === 'CATEGORISATION'"
-      ><font-awesome-icon :icon="['far', 'object-group']"
+        type="primary"
+        @click="sortIdeas"
+        v-if="taskType === 'CATEGORISATION'"
+        ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
       <el-button
-          type="primary"
-          @click="randomizePositions"
-          class="shuffle buttonSpacing"
-      ><font-awesome-icon :icon="['fas', 'shuffle']" />
+        type="primary"
+        @click="randomizePositions"
+        class="shuffle buttonSpacing"
+        ><font-awesome-icon :icon="['fas', 'shuffle']" />
       </el-button>
       <el-button type="primary" @click="clearCanvas" class="clear"
-      ><font-awesome-icon :icon="['far', 'trash-can']"
+        ><font-awesome-icon :icon="['far', 'trash-can']"
       /></el-button>
       <div
-          class="imageSelection"
-          v-if="templateSelectionVisible"
-          @mouseleave="templateSelectionVisible = false"
+        class="imageSelection"
+        v-if="templateSelectionVisible"
+        @mouseleave="templateSelectionVisible = false"
       >
         <el-button
-            v-for="image in backgroundTemplates"
-            class="templateImageButton"
-            :key="image"
-            @click="drawImageOnCanvas(image)"
-            :style="{
-          backgroundImage: 'url(' + image + ')',
-          backgroundSize: 'cover',
-          backgroundPosition: '50% 50%',
-        }"
+          v-for="image in backgroundTemplates"
+          class="templateImageButton"
+          :key="image"
+          @click="drawImageOnCanvas(image)"
+          :style="{
+            backgroundImage: 'url(' + image + ')',
+            backgroundSize: 'cover',
+            backgroundPosition: '50% 50%',
+          }"
         ></el-button>
       </div>
     </div>
     <div id="canvasArea" ref="canvasArea">
       <canvas
-          id="drawing-canvas"
-          :width="canvasWidth"
-          :height="canvasHeight"
-          @mousedown="beginDrawing"
-          @mousemove="keepDrawing"
-          @mouseup="stopDrawing"
-          @mouseleave="stopDrawing"
+        id="drawing-canvas"
+        :width="canvasWidth"
+        :height="canvasHeight"
+        @mousedown="beginDrawing"
+        @mousemove="keepDrawing"
+        @mouseup="stopDrawing"
+        @mouseleave="stopDrawing"
       />
       <IdeaCard
-          v-for="idea in ideas"
-          :key="idea.id"
-          :id="idea.id"
-          :idea="idea"
-          :is-editable="false"
-          class="draggable-container"
-          :class="idea.orderGroup"
-          :allow-image-preview="!isDragging"
-          :style="{
-        minWidth: minIdeaWidth + 'rem',
-        maxWidth: maxIdeaWidth + 'rem',
-        width: ideaWidth + 'rem',
-        zIndex: idea.parameter.zIndex ? idea.parameter.zIndex : 0,
-        borderColor: getCategoryColor(idea),
-        borderBottom: getBottomBorder(idea),
-      }"
-          @mousedown="bringToFront(idea)"
+        v-for="idea in ideas"
+        :key="idea.id"
+        :id="idea.id"
+        :idea="idea"
+        :is-editable="false"
+        class="draggable-container"
+        :class="idea.orderGroup"
+        :allow-image-preview="!isDragging"
+        :style="{
+          minWidth: minIdeaWidth + 'rem',
+          maxWidth: maxIdeaWidth + 'rem',
+          width: ideaWidth + 'rem',
+          zIndex: idea.parameter.zIndex ? idea.parameter.zIndex : 0,
+          borderColor: getCategoryColor(idea),
+          borderBottom: getBottomBorder(idea),
+        }"
+        @mousedown="bringToFront(idea)"
       />
     </div>
   </div>
@@ -234,6 +237,10 @@ export default class PublicScreen extends Vue {
         };
         this.ideaWidth = this.module.parameter.canvas.ideaSize;
       }
+    } else {
+      setTimeout(() => {
+        this.initializeCanvas();
+      }, 1000);
     }
   }
 
@@ -372,15 +379,31 @@ export default class PublicScreen extends Vue {
       if (ideaElement) {
         const elements = document.getElementsByClassName(idea.orderGroup);
         Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
+          const canvasArea = this.$refs.canvasArea as HTMLElement;
+          const canvasRect = canvasArea.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+
           const randomX = Math.random() * 20 - 10;
           const randomY = Math.random() * 20 - 10;
+
+          let left =
+            Math.floor(Number(ideaElement.style.left.split('px')[0])) + randomX;
+
+          let top =
+            Math.floor(Number(ideaElement.style.top.split('px')[0])) + randomY;
+
+          if (left < 0) left = 0;
+          if (top < 0) top = 0;
+          if (left + elRect.width > canvasRect.width)
+            left = canvasRect.width - elRect.width - this.paddingAdjustment;
+          if (top + elRect.height > canvasRect.height)
+            top = canvasRect.height - elRect.height - this.paddingAdjustment;
+
           el.style.left =
-            Math.floor(Number(ideaElement.style.left.split('px')[0])) +
-            randomX +
+            left +
             'px';
           el.style.top =
-            Math.floor(Number(ideaElement.style.top.split('px')[0])) +
-            randomY +
+            top +
             'px';
 
           const idea = this.ideas.find((idea) => idea.id === el.id);
@@ -601,7 +624,6 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style scoped lang="scss">
-
 .canvasModule {
   position: relative;
   width: 100%;
