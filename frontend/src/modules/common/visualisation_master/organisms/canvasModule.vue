@@ -514,8 +514,9 @@ export default class PublicScreen extends Vue {
         offsetY = (canvasHeight - renderHeight) / 2;
       }
 
-      this.canvas.clearRect(0, 0, canvasWidth, canvasHeight);
+      this.clearCanvas();
       this.canvas.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+      this.saveCanvas();
     };
   }
 
