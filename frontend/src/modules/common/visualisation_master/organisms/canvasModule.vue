@@ -1,93 +1,97 @@
 <template>
-  <div id="canvasArea" ref="canvasArea">
-    <canvas
-      id="drawing-canvas"
-      :width="canvasWidth"
-      :height="canvasHeight"
-      @mousedown="beginDrawing"
-      @mousemove="keepDrawing"
-      @mouseup="stopDrawing"
-      @mouseleave="stopDrawing"
-    />
+  <div class="canvasModule">
     <div class="controlButtons">
-      <el-button type="primary" @click="templateSelectionVisible = !templateSelectionVisible"
-        ><font-awesome-icon :icon="['fas', 'image']"
-      /></el-button>
       <el-button
-        type="primary"
-        class="buttonSpacing"
-        @click="changeIdeaWidth(2)"
-        >+</el-button
+          type="primary"
+          @click="templateSelectionVisible = !templateSelectionVisible"
+      ><font-awesome-icon :icon="['fas', 'image']"
+      /></el-button>
+      <el-button type="primary" class="buttonSpacing" @click="changeIdeaWidth(2)"
+      >+</el-button
       >
       <el-button type="primary" @click="changeIdeaWidth(-2)">-</el-button>
       <el-button
-        type="primary"
-        @click="toggleEraser"
-        :class="{ eraserToggle: eraser }"
-        class="eraser buttonSpacing"
-        ><font-awesome-icon :icon="['fas', 'eraser']"
+          type="primary"
+          @click="toggleEraser"
+          :class="{ eraserToggle: eraser }"
+          class="eraser buttonSpacing"
+      ><font-awesome-icon :icon="['fas', 'eraser']"
       /></el-button>
       <el-button
-        type="primary"
-        @click="changeLineWidth(2)"
-        class="lineWidthPlus buttonSpacing"
-        ><font-awesome-icon :icon="['fas', 'pen']" /> +</el-button
+          type="primary"
+          @click="changeLineWidth(2)"
+          class="lineWidthPlus buttonSpacing"
+      ><font-awesome-icon :icon="['fas', 'pen']" /> +</el-button
       >
       <el-button type="primary" @click="changeLineWidth(-2)"
-        ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
+      ><font-awesome-icon :icon="['fas', 'pen']" /> -</el-button
       >
       <p id="lineWidthIndicator">{{ lineWidth }}</p>
       <el-color-picker
-        v-model="color"
-        class="colorPicker buttonSpacing"
-        @activeChange="colorChanged"
+          v-model="color"
+          class="colorPicker buttonSpacing"
+          @activeChange="colorChanged"
       />
       <el-button
-        type="primary"
-        @click="categoryToggle = !categoryToggle"
-        class="categoryToggle buttonSpacing"
-        v-if="taskType === 'CATEGORISATION'"
-        ><font-awesome-icon :icon="['far', 'object-group']"
+          type="primary"
+          @click="categoryToggle = !categoryToggle"
+          class="categoryToggle buttonSpacing"
+          v-if="taskType === 'CATEGORISATION'"
+      ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
       <el-button
-        type="primary"
-        @click="sortIdeas"
-        v-if="taskType === 'CATEGORISATION'"
-        ><font-awesome-icon :icon="['far', 'object-group']"
+          type="primary"
+          @click="sortIdeas"
+          v-if="taskType === 'CATEGORISATION'"
+      ><font-awesome-icon :icon="['far', 'object-group']"
       /></el-button>
       <el-button
-        type="primary"
-        @click="randomizePositions"
-        class="shuffle buttonSpacing"
-        ><font-awesome-icon :icon="['fas', 'shuffle']" />
+          type="primary"
+          @click="randomizePositions"
+          class="shuffle buttonSpacing"
+      ><font-awesome-icon :icon="['fas', 'shuffle']" />
       </el-button>
       <el-button type="primary" @click="clearCanvas" class="clear"
-        ><font-awesome-icon :icon="['far', 'trash-can']"
+      ><font-awesome-icon :icon="['far', 'trash-can']"
       /></el-button>
-      <div class="imageSelection" v-if="templateSelectionVisible" @mouseleave="templateSelectionVisible = false">
+      <div
+          class="imageSelection"
+          v-if="templateSelectionVisible"
+          @mouseleave="templateSelectionVisible = false"
+      >
         <el-button
-          v-for="image in backgroundTemplates"
-          class="templateImageButton"
-          :key="image"
-          @click="drawImageOnCanvas(image)"
-          :style="{
-            backgroundImage: 'url(' + image + ')',
-            backgroundSize: 'cover',
-            backgroundPosition: '50% 50%',
-          }"
+            v-for="image in backgroundTemplates"
+            class="templateImageButton"
+            :key="image"
+            @click="drawImageOnCanvas(image)"
+            :style="{
+          backgroundImage: 'url(' + image + ')',
+          backgroundSize: 'cover',
+          backgroundPosition: '50% 50%',
+        }"
         ></el-button>
       </div>
     </div>
-    <IdeaCard
-      v-for="idea in ideas"
-      :key="idea.id"
-      :id="idea.id"
-      :idea="idea"
-      :is-editable="false"
-      class="draggable-container"
-      :class="idea.orderGroup"
-      :allow-image-preview="!isDragging"
-      :style="{
+    <div id="canvasArea" ref="canvasArea">
+      <canvas
+          id="drawing-canvas"
+          :width="canvasWidth"
+          :height="canvasHeight"
+          @mousedown="beginDrawing"
+          @mousemove="keepDrawing"
+          @mouseup="stopDrawing"
+          @mouseleave="stopDrawing"
+      />
+      <IdeaCard
+          v-for="idea in ideas"
+          :key="idea.id"
+          :id="idea.id"
+          :idea="idea"
+          :is-editable="false"
+          class="draggable-container"
+          :class="idea.orderGroup"
+          :allow-image-preview="!isDragging"
+          :style="{
         minWidth: minIdeaWidth + 'rem',
         maxWidth: maxIdeaWidth + 'rem',
         width: ideaWidth + 'rem',
@@ -95,8 +99,9 @@
         borderColor: getCategoryColor(idea),
         borderBottom: getBottomBorder(idea),
       }"
-      @mousedown="bringToFront(idea)"
-    />
+          @mousedown="bringToFront(idea)"
+      />
+    </div>
   </div>
 </template>
 
@@ -175,8 +180,6 @@ export default class PublicScreen extends Vue {
   }
 
   async mounted() {
-    await nextTick();
-    this.updateCanvasDimensions();
     this.makeAllDraggable();
   }
 
@@ -211,6 +214,7 @@ export default class PublicScreen extends Vue {
         (module) => module.name === 'visualisation_master'
       );
       this.initializePositions();
+      this.updateCanvasDimensions();
       this.initializeCanvas();
       this.loaded = true;
     }
@@ -597,6 +601,13 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style scoped lang="scss">
+
+.canvasModule {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 #canvasArea {
   position: relative;
   width: 100%;
@@ -605,6 +616,7 @@ export default class PublicScreen extends Vue {
   -ms-overflow-style: none;
   border: 4px solid var(--color-background-dark);
   border-radius: var(--border-radius-small);
+  overflow: hidden;
 }
 
 #canvasArea::-webkit-scrollbar {
