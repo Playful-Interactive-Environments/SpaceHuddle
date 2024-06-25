@@ -61,7 +61,7 @@
         ><font-awesome-icon :icon="['fas', 'rotate-left']"
       /></el-button>
       <el-button type="primary" @click="redo"
-      ><font-awesome-icon :icon="['fas', 'rotate-right']"
+        ><font-awesome-icon :icon="['fas', 'rotate-right']"
       /></el-button>
       <div
         class="imageSelection"
@@ -178,12 +178,10 @@ export default class PublicScreen extends Vue {
   templateSelectionVisible = false;
 
   currentIdeaPositions: any[] = [];
+  currentCanvasState = '';
 
-  undoStatesCanvas: any[] = [];
-  undoStatesIdeaPositions: any[] = [];
-
-  redoStatesCanvas: any[] = [];
-  redoStatesIdeaPositions: any[] = [];
+  undoStates: any[] = [];
+  redoStates: any[] = [];
 
   undoSteps = 10;
 
@@ -511,6 +509,8 @@ export default class PublicScreen extends Vue {
 
   stopDrawing(e: MouseEvent) {
     if (this.isDrawing) {
+      this.putCanvasUndoStep(this.currentCanvasState);
+
       this.drawLine(this.x, this.y, e.offsetX, e.offsetY);
       this.x = 0;
       this.y = 0;
@@ -521,6 +521,8 @@ export default class PublicScreen extends Vue {
 
   clearCanvas() {
     if (this.canvas) {
+      this.putCanvasUndoStep(this.currentCanvasState);
+
       const canvasElement = document.getElementById(
         'drawing-canvas'
       ) as HTMLCanvasElement;
@@ -530,6 +532,8 @@ export default class PublicScreen extends Vue {
   }
 
   drawImageOnCanvas(imageSrc: string) {
+    this.putCanvasUndoStep(this.currentCanvasState);
+
     const img = new Image();
     img.src = imageSrc;
     img.onload = () => {
@@ -635,52 +639,64 @@ export default class PublicScreen extends Vue {
           canvasImage: dataUrl,
           ideaSize: this.ideaWidth,
         };
-
-        this.putCanvasUndoStep(dataUrl, this.ideaWidth);
-
+        this.currentCanvasState = dataUrl;
         moduleService.putModule(this.module);
       }
     }
   }
 
-  putIdeaPositionUndoStep(canvasPositions: any): void {
-    if (this.undoStatesIdeaPositions.length >= this.undoSteps) {
-      this.undoStatesIdeaPositions.shift();
+  putIdeaPositionUndoStep(canvasPositions: object): void {
+    if (this.undoStates.length >= this.undoSteps) {
+      this.undoStates.shift();
     }
-    this.undoStatesIdeaPositions.push(canvasPositions);
+    this.undoStates.push(canvasPositions);
   }
 
-  putCanvasUndoStep(dataUrl: string, ideaWidth: number): void {
-    if (this.undoStatesCanvas.length >= this.undoSteps) {
-      this.undoStatesCanvas.shift();
+  putCanvasUndoStep(dataUrl: string): void {
+    if (this.undoStates.length >= this.undoSteps) {
+      this.undoStates.shift();
     }
-    this.undoStatesCanvas.push({
-      canvasImage: dataUrl,
-      ideaSize: ideaWidth,
-    });
+    this.undoStates.push(dataUrl);
   }
 
-  putIdeaPositionRedoStep(canvasPositions: any): void {
-    if (this.redoStatesIdeaPositions.length >= this.undoSteps) {
-      this.redoStatesIdeaPositions.shift();
+  putIdeaPositionRedoStep(canvasPositions: object): void {
+    if (this.redoStates.length >= this.undoSteps) {
+      this.redoStates.shift();
     }
-    this.redoStatesIdeaPositions.push(canvasPositions);
+    this.redoStates.push(canvasPositions);
+  }
+
+  putCanvasRedoStep(dataUrl: string): void {
+    if (this.redoStates.length >= this.undoSteps) {
+      this.redoStates.shift();
+    }
+    this.redoStates.push(dataUrl);
   }
 
   undo(): void {
-    const canvasPositions = this.undoStatesIdeaPositions.pop();
-    if (this.module && this.module.parameter.canvasPositions) {
-      this.putIdeaPositionRedoStep([...this.module.parameter.canvasPositions]);
+    if (this.undoStates.length > 0) {
+      const undoState = this.undoStates.pop();
+      if (typeof undoState === 'string') {
+        this.setCanvas(undoState);
+        this.putCanvasRedoStep(this.currentCanvasState);
+      } else {
+        this.putIdeaPositionRedoStep(this.currentIdeaPositions);
+        this.setIdeaPositions(undoState);
+      }
     }
-    this.setIdeaPositions(canvasPositions);
   }
 
   redo(): void {
-    const canvasPositions = this.redoStatesIdeaPositions.pop();
-    if (this.module && this.module.parameter.canvasPositions) {
-      this.putIdeaPositionUndoStep([...this.module.parameter.canvasPositions]);
+    if (this.redoStates.length > 0) {
+      const redoState = this.redoStates.pop();
+      if (typeof redoState === 'string') {
+        this.setCanvas(redoState);
+        this.putCanvasUndoStep(this.currentCanvasState);
+      } else {
+        this.putIdeaPositionUndoStep(this.currentIdeaPositions);
+        this.setIdeaPositions(redoState);
+      }
     }
-    this.setIdeaPositions(canvasPositions);
   }
 
   setIdeaPositions(canvasPositions: any): void {
@@ -709,6 +725,20 @@ export default class PublicScreen extends Vue {
         }
       }
     );
+  }
+
+  setCanvas(dataUrl: string) {
+    if (dataUrl) {
+      const img = new Image();
+      img.src = dataUrl;
+      img.onload = () => {
+        if (this.canvas) {
+          this.canvas.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+          this.canvas.drawImage(img, 0, 0);
+        }
+      };
+      this.saveCanvas();
+    }
   }
 }
 </script>
