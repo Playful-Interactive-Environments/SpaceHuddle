@@ -37,6 +37,14 @@
       />
       <el-button
         type="primary"
+        @click="toggleTextInputMode"
+        class="buttonSpacing"
+        :class="{ textInputToggle: textInputMode }"
+      >
+        <font-awesome-icon :icon="['fas', 'font']" />
+      </el-button>
+      <el-button
+        type="primary"
         @click="categoryToggle = !categoryToggle"
         class="categoryToggle buttonSpacing"
         v-if="taskType === 'CATEGORISATION'"
@@ -184,6 +192,9 @@ export default class PublicScreen extends Vue {
   redoStates: any[] = [];
 
   undoSteps = 10;
+
+  textInputMode = false;
+  textInputElement: HTMLInputElement | null = null;
 
   CalcCanvasWidth(): number {
     const canvasArea = this.$refs.canvasArea as HTMLElement;
@@ -568,6 +579,95 @@ export default class PublicScreen extends Vue {
     };
   }
 
+  toggleTextInputMode() {
+    this.textInputMode = !this.textInputMode;
+    const canvasArea = this.$refs.canvasArea as HTMLElement;
+    if (this.textInputMode) {
+      canvasArea.addEventListener('click', this.handleCanvasClick);
+    } else {
+      canvasArea.removeEventListener('click', this.handleCanvasClick);
+      this.removeTextInputElement();
+    }
+  }
+
+  handleCanvasClick(e: MouseEvent) {
+    if (this.textInputMode) {
+      const rect = (
+        this.$refs.canvasArea as HTMLElement
+      ).getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      this.createTextInputElement(x, y);
+    }
+  }
+
+  createTextInputElement(x: number, y: number) {
+    const canvasArea = this.$refs.canvasArea as HTMLElement;
+    const canvasRect = canvasArea.getBoundingClientRect();
+
+    this.removeTextInputElement();
+    this.textInputElement = document.createElement('input');
+    this.textInputElement.type = 'text';
+    this.textInputElement.className = 'textInput';
+    this.textInputElement.style.position = 'absolute';
+    this.textInputElement.style.zIndex = '1000';
+    this.textInputElement.style.fontSize = '24px';
+    this.textInputElement.style.backgroundColor = 'transparent';
+    this.textInputElement.style.border = 'none';
+    this.textInputElement.style.width = '5rem';
+
+    this.textInputElement.addEventListener(
+      'keydown',
+      this.handleTextInputKeyDown
+    );
+    (this.$refs.canvasArea as HTMLElement).appendChild(this.textInputElement);
+
+    const elRect = this.textInputElement.getBoundingClientRect();
+
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x + elRect.width > canvasRect.width)
+      x = canvasRect.width - elRect.width - this.paddingAdjustment;
+    if (y + elRect.height > canvasRect.height)
+      y = canvasRect.height - elRect.height - this.paddingAdjustment;
+
+    this.textInputElement.style.left = `${x}px`;
+    this.textInputElement.style.top = `${y}px`;
+
+    this.textInputElement.focus();
+  }
+
+  handleTextInputKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter' && this.textInputElement) {
+      const text = this.textInputElement.value;
+      const x = parseInt(this.textInputElement.style.left, 10);
+      const y = parseInt(this.textInputElement.style.top, 10);
+      this.renderTextOnCanvas(text, x, y);
+      this.removeTextInputElement();
+      this.textInputMode = false;
+    }
+  }
+
+  removeTextInputElement() {
+    if (this.textInputElement) {
+      this.textInputElement.removeEventListener(
+        'keydown',
+        this.handleTextInputKeyDown
+      );
+      (this.$refs.canvasArea as HTMLElement).removeChild(this.textInputElement);
+      this.textInputElement = null;
+    }
+  }
+
+  renderTextOnCanvas(text: string, x: number, y: number) {
+    if (this.canvas) {
+      this.canvas.font = '24px Arial';
+      this.canvas.fillStyle = this.color;
+      this.canvas.fillText(text, x, y);
+      this.saveCanvas();
+    }
+  }
+
   bringToFront(idea: Idea): void {
     this.highestZ++;
     idea.parameter.zIndex = this.highestZ;
@@ -794,7 +894,8 @@ export default class PublicScreen extends Vue {
   position: absolute;
 }
 
-.eraserToggle {
+.eraserToggle,
+.textInputToggle {
   background-color: var(--color-evaluating-dark);
 }
 
