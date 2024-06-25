@@ -527,6 +527,11 @@ export default class PublicScreen extends Vue {
       this.y = 0;
       this.isDrawing = false;
       this.saveCanvas();
+
+      const ctx = this.canvas;
+      if (ctx) {
+        ctx.globalCompositeOperation = 'source-over';
+      }
     }
   }
 
