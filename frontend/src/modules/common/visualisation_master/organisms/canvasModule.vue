@@ -57,6 +57,12 @@
       <el-button type="primary" @click="clearCanvas" class="clear"
         ><font-awesome-icon :icon="['far', 'trash-can']"
       /></el-button>
+      <el-button type="primary" @click="undo" class="buttonSpacing"
+        ><font-awesome-icon :icon="['fas', 'rotate-left']"
+      /></el-button>
+      <el-button type="primary" @click="redo"
+      ><font-awesome-icon :icon="['fas', 'rotate-right']"
+      /></el-button>
       <div
         class="imageSelection"
         v-if="templateSelectionVisible"
@@ -114,7 +120,6 @@ import { Prop, Watch } from 'vue-property-decorator';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { Idea } from '@/types/api/Idea';
 import * as themeColors from '@/utils/themeColors';
-import { nextTick } from 'vue';
 import { Category } from '@/types/api/Category';
 import { Task } from '@/types/api/Task';
 import * as moduleService from '@/services/module-service';
@@ -171,6 +176,16 @@ export default class PublicScreen extends Vue {
     '/assets/animations/canvas/rows.png',
   ];
   templateSelectionVisible = false;
+
+  currentIdeaPositions: any[] = [];
+
+  undoStatesCanvas: any[] = [];
+  undoStatesIdeaPositions: any[] = [];
+
+  redoStatesCanvas: any[] = [];
+  redoStatesIdeaPositions: any[] = [];
+
+  undoSteps = 10;
 
   CalcCanvasWidth(): number {
     const canvasArea = this.$refs.canvasArea as HTMLElement;
@@ -292,6 +307,8 @@ export default class PublicScreen extends Vue {
       };
 
       const onMouseUp = () => {
+        this.putIdeaPositionUndoStep(this.currentIdeaPositions);
+
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
 
@@ -333,6 +350,8 @@ export default class PublicScreen extends Vue {
   }
 
   randomizePositions(): void {
+    this.putIdeaPositionUndoStep(this.currentIdeaPositions);
+
     const canvasArea = this.$refs.canvasArea as HTMLElement;
     const canvasRect = canvasArea.getBoundingClientRect();
     const elements = document.getElementsByClassName('draggable-container');
@@ -358,6 +377,8 @@ export default class PublicScreen extends Vue {
   }
 
   sortIdeas(): void {
+    this.putIdeaPositionUndoStep(this.currentIdeaPositions);
+
     const categoryIdeas: Idea[] = [];
     for (const cat of this.categories) {
       const ideas = this.ideas.filter(
@@ -399,12 +420,8 @@ export default class PublicScreen extends Vue {
           if (top + elRect.height > canvasRect.height)
             top = canvasRect.height - elRect.height - this.paddingAdjustment;
 
-          el.style.left =
-            left +
-            'px';
-          el.style.top =
-            top +
-            'px';
+          el.style.left = left + 'px';
+          el.style.top = top + 'px';
 
           const idea = this.ideas.find((idea) => idea.id === el.id);
           if (idea) {
@@ -596,6 +613,7 @@ export default class PublicScreen extends Vue {
           y: y,
         });
       }
+      this.currentIdeaPositions = [...this.module.parameter.canvasPositions];
     } else if (this.module) {
       this.module.parameter.canvasPositions = [
         {
@@ -604,6 +622,7 @@ export default class PublicScreen extends Vue {
           y: y,
         },
       ];
+      this.currentIdeaPositions = [...this.module.parameter.canvasPositions];
     }
   }
 
@@ -616,9 +635,80 @@ export default class PublicScreen extends Vue {
           canvasImage: dataUrl,
           ideaSize: this.ideaWidth,
         };
+
+        this.putCanvasUndoStep(dataUrl, this.ideaWidth);
+
         moduleService.putModule(this.module);
       }
     }
+  }
+
+  putIdeaPositionUndoStep(canvasPositions: any): void {
+    if (this.undoStatesIdeaPositions.length >= this.undoSteps) {
+      this.undoStatesIdeaPositions.shift();
+    }
+    this.undoStatesIdeaPositions.push(canvasPositions);
+  }
+
+  putCanvasUndoStep(dataUrl: string, ideaWidth: number): void {
+    if (this.undoStatesCanvas.length >= this.undoSteps) {
+      this.undoStatesCanvas.shift();
+    }
+    this.undoStatesCanvas.push({
+      canvasImage: dataUrl,
+      ideaSize: ideaWidth,
+    });
+  }
+
+  putIdeaPositionRedoStep(canvasPositions: any): void {
+    if (this.redoStatesIdeaPositions.length >= this.undoSteps) {
+      this.redoStatesIdeaPositions.shift();
+    }
+    this.redoStatesIdeaPositions.push(canvasPositions);
+  }
+
+  undo(): void {
+    const canvasPositions = this.undoStatesIdeaPositions.pop();
+    if (this.module && this.module.parameter.canvasPositions) {
+      this.putIdeaPositionRedoStep([...this.module.parameter.canvasPositions]);
+    }
+    this.setIdeaPositions(canvasPositions);
+  }
+
+  redo(): void {
+    const canvasPositions = this.redoStatesIdeaPositions.pop();
+    if (this.module && this.module.parameter.canvasPositions) {
+      this.putIdeaPositionUndoStep([...this.module.parameter.canvasPositions]);
+    }
+    this.setIdeaPositions(canvasPositions);
+  }
+
+  setIdeaPositions(canvasPositions: any): void {
+    const elements = document.getElementsByClassName('draggable-container');
+
+    this.highestZ = this.ideas.length;
+
+    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach(
+      (el, index) => {
+        if (canvasPositions && canvasPositions.length > 0) {
+          const ideaPositionObject = canvasPositions.find(
+            (pos) => pos.ideaId === this.ideas[index].id
+          );
+          if (ideaPositionObject) {
+            el.style.left = ideaPositionObject.x;
+            el.style.top = ideaPositionObject.y;
+
+            const idea = this.ideas.find((idea) => idea.id === el.id);
+            if (idea) {
+              this.saveIdeaPosition(idea.id, el.style.left, el.style.top);
+              if (this.module) {
+                moduleService.putModule(this.module);
+              }
+            }
+          }
+        }
+      }
+    );
   }
 }
 </script>
