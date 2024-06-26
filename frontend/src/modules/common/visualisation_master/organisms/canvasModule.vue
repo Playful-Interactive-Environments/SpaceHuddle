@@ -99,25 +99,46 @@
         @mouseup="stopDrawing"
         @mouseleave="stopDrawing"
       />
-      <IdeaCard
+      <div
         v-for="idea in ideas"
         :key="idea.id"
         :id="idea.id"
-        :idea="idea"
-        :is-editable="false"
         class="draggable-container"
         :class="idea.orderGroup"
-        :allow-image-preview="!isDragging"
         :style="{
           minWidth: minIdeaWidth + 'rem',
           maxWidth: maxIdeaWidth + 'rem',
-          width: ideaWidth + 'rem',
+          width: getIdeaSize(idea.id),
           zIndex: idea.parameter.zIndex ? idea.parameter.zIndex : 0,
           borderColor: getCategoryColor(idea),
           borderBottom: getBottomBorder(idea),
         }"
-        @mousedown="bringToFront(idea)"
-      />
+        @mouseenter="ideaSizeButtonHover = idea.id"
+        @mouseleave="ideaSizeButtonHover = null"
+      >
+        <IdeaCard
+          :idea="idea"
+          :is-editable="false"
+          :allow-image-preview="!isDragging"
+          class="idea-container"
+          @mousedown="bringToFront(idea)"
+        />
+        <div
+          class="sizeButton-container"
+          :style="{
+            opacity: getSizeButtonsVisible(idea.id) ? 1 : 0,
+            pointerEvents: getSizeButtonsVisible(idea.id) ? 'all' : 'none',
+          }"
+          :id="'sizeButtons' + idea.id"
+        >
+          <el-button class="sizeButton" @click="changeIdeaSize(idea.id, 2)"
+            >+</el-button
+          >
+          <el-button class="sizeButton" @click="changeIdeaSize(idea.id, -2)"
+            >-</el-button
+          >
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -152,7 +173,7 @@ export default class PublicScreen extends Vue {
 
   minIdeaWidth = 7;
   maxIdeaWidth = 21;
-  ideaWidth = 15;
+  ideaWidth = 11;
 
   isDragging = false;
 
@@ -160,6 +181,9 @@ export default class PublicScreen extends Vue {
 
   categorizedIdeas: Idea[][] = [];
   categoryToggle = true;
+
+  showSizeButtons = false;
+  ideaSizeButtonHover: string | null = null;
 
   lineWidth = 4;
   minLineWidth = 1;
@@ -196,6 +220,8 @@ export default class PublicScreen extends Vue {
   textInputMode = false;
   textInputElement: HTMLInputElement | null = null;
 
+  ideaSizes: any[] = [];
+
   CalcCanvasWidth(): number {
     const canvasArea = this.$refs.canvasArea as HTMLElement;
     return canvasArea ? canvasArea.offsetWidth : 0;
@@ -204,6 +230,14 @@ export default class PublicScreen extends Vue {
   CalcCanvasHeight(): number {
     const canvasArea = this.$refs.canvasArea as HTMLElement;
     return canvasArea ? canvasArea.offsetHeight : 0;
+  }
+
+  getSizeButtonsVisible(buttonID: string): boolean {
+    if (this.ideaSizeButtonHover) {
+      return this.ideaSizeButtonHover === buttonID;
+    } else {
+      return false;
+    }
   }
 
   async mounted() {
@@ -259,7 +293,7 @@ export default class PublicScreen extends Vue {
             this.canvas.drawImage(img, 0, 0);
           }
         };
-        this.ideaWidth = this.module.parameter.canvas.ideaSize;
+        this.ideaSizes = this.module.parameter.ideaSizes;
       }
     } else {
       setTimeout(() => {
@@ -356,6 +390,9 @@ export default class PublicScreen extends Vue {
         }
       }
     );
+    if (this.module) {
+      this.currentIdeaPositions = [...this.module.parameter.canvasPositions];
+    }
   }
 
   randomizePositions(): void {
@@ -469,6 +506,30 @@ export default class PublicScreen extends Vue {
     ) {
       this.ideaWidth = this.ideaWidth + num;
     }
+  }
+
+  changeIdeaSize(id: string, num: number): void {
+    const sizeEntry = this.ideaSizes.find((size) => size.id === id);
+    if (sizeEntry) {
+      if (
+        sizeEntry.size + num <= this.maxIdeaWidth &&
+        sizeEntry.size + num >= this.minIdeaWidth
+      ) {
+        sizeEntry.size += num;
+      }
+    } else {
+      this.ideaSizes.push({ id: id, size: this.ideaWidth + num });
+    }
+    console.log(this.ideaSizes);
+    this.saveIdeaSize();
+  }
+
+  getIdeaSize(id: string): string {
+    const sizeEntry = this.ideaSizes.find((size) => size.id === id);
+    if (sizeEntry) {
+      return sizeEntry.size + 'rem';
+    }
+    return this.ideaWidth + 'rem';
   }
 
   changeLineWidth(num: number): void {
@@ -700,6 +761,12 @@ export default class PublicScreen extends Vue {
     return '';
   }
 
+  saveIdeaSize(): void {
+    if (this.module) {
+      this.module.parameter.ideaSizes = this.ideaSizes;
+    }
+  }
+
   saveIdeaPosition(id: string, x: string, y: string) {
     if (
       this.module &&
@@ -742,7 +809,6 @@ export default class PublicScreen extends Vue {
       if (this.module) {
         this.module.parameter.canvas = {
           canvasImage: dataUrl,
-          ideaSize: this.ideaWidth,
         };
         this.currentCanvasState = dataUrl;
         moduleService.putModule(this.module);
@@ -874,6 +940,29 @@ export default class PublicScreen extends Vue {
   cursor: move;
   width: 15rem;
   user-select: none;
+  padding: 0;
+  border: 1px solid var(--el-border-color-light);
+  border-radius: var(--border-radius-xs);
+  transition: all 0.15s ease;
+  .idea-container {
+    margin: 0;
+  }
+  .sizeButton-container {
+    position: absolute;
+    top: -1.5rem;
+    display: flex;
+    padding: 0;
+    transition: opacity 0.2s ease;
+    .sizeButton {
+      position: relative;
+      background-color: transparent;
+      padding: 0.3rem !important;
+      width: 1.2rem;
+      height: 1.2rem;
+      min-height: 1rem !important;
+      font-size: var(--font-size-xlarge);
+    }
+  }
 }
 
 .controlButtons {
