@@ -934,14 +934,18 @@ export default class PublicScreen extends Vue {
     position: absolute;
     top: -1.5rem;
     display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
     padding: 0;
     transition: opacity 0.2s ease;
+    width: 7rem;
     .sizeButton {
       position: relative;
       background-color: transparent;
       padding: 0.3rem !important;
-      width: 1.2rem;
-      height: 1.2rem;
+      margin: 0;
+      width: 1.5rem;
+      height: 1.5rem;
       min-height: 1rem !important;
       font-size: var(--font-size-xlarge);
     }
