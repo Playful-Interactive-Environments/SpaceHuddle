@@ -504,7 +504,6 @@ export default class PublicScreen extends Vue {
     } else {
       this.ideaSizes.push({ id: id, size: this.ideaWidth + num });
     }
-    console.log(this.ideaSizes);
     this.saveIdeaSize();
   }
 
@@ -566,8 +565,6 @@ export default class PublicScreen extends Vue {
   stopDrawing(e: MouseEvent) {
     if (this.isDrawing) {
       this.putCanvasUndoStep(this.currentCanvasState);
-      console.log(this.undoStates);
-
       this.drawLine(this.x, this.y, e.offsetX, e.offsetY);
       this.x = 0;
       this.y = 0;
