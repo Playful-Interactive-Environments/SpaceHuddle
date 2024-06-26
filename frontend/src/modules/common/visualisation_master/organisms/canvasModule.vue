@@ -279,7 +279,10 @@ export default class PublicScreen extends Vue {
       this.canvas = c.getContext('2d');
       if (this.module) {
         const img = new Image();
-        if (this.module.parameter.canvas && this.module.parameter.canvas.canvasImage) {
+        if (
+          this.module.parameter.canvas &&
+          this.module.parameter.canvas.canvasImage
+        ) {
           img.src = this.module.parameter.canvas.canvasImage;
         } else {
           img.src = '';
