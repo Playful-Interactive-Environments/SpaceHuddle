@@ -51,8 +51,6 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfig.json';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
-import TaskType from '@/types/enum/TaskType';
-
 
 @Options({
   components: { ModuleCard, IdeaCard },
@@ -93,7 +91,13 @@ export default class ModeratorConfig extends Vue {
     if (this.modelValue.visModule) {
       this.selectedVisModule = this.modelValue.visModule.id;
     } else {
-      this.selectedVisModule = null;
+      const modules = this.getVisModulesForTaskType();
+      if (modules.length > 0) {
+        this.modelValue.visModule = this.getVisModulesForTaskType()[0];
+        this.selectedVisModule = this.modelValue.visModule.id;
+      } else {
+        this.selectedVisModule = null;
+      }
     }
   }
 
