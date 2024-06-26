@@ -8,13 +8,6 @@
       /></el-button>
       <el-button
         type="primary"
-        class="buttonSpacing"
-        @click="changeIdeaWidth(2)"
-        >+</el-button
-      >
-      <el-button type="primary" @click="changeIdeaWidth(-2)">-</el-button>
-      <el-button
-        type="primary"
         @click="toggleEraser"
         :class="{ eraserToggle: eraser }"
         class="eraser buttonSpacing"
@@ -182,7 +175,6 @@ export default class PublicScreen extends Vue {
   categorizedIdeas: Idea[][] = [];
   categoryToggle = true;
 
-  showSizeButtons = false;
   ideaSizeButtonHover: string | null = null;
 
   lineWidth = 4;
@@ -497,15 +489,6 @@ export default class PublicScreen extends Vue {
       el.style.left = `${left}px`;
       el.style.top = `${top}px`;
     });
-  }
-
-  changeIdeaWidth(num: number): void {
-    if (
-      this.ideaWidth + num <= this.maxIdeaWidth &&
-      this.ideaWidth + num >= this.minIdeaWidth
-    ) {
-      this.ideaWidth = this.ideaWidth + num;
-    }
   }
 
   changeIdeaSize(id: string, num: number): void {
