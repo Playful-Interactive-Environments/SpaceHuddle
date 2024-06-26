@@ -22,6 +22,9 @@ for /d %%d in (*.*) do (
             if !task!==selection (
                 call :addVisualisationMaster task
             )
+            if !task!==categorisation (
+                call :addVisualisationMaster task
+            )
             if !task!==voting (
                 call :addVisualisationMaster task
             )

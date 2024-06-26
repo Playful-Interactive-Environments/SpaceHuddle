@@ -52,7 +52,14 @@
            "path": "brainstorming/settings"  
        }  
    },  
-   "categorisation": {  
+   "categorisation": {
+       "visualisation_master": {
+           "publicScreen": "output/PublicScreen",
+           "moderatorConfig": "output/ModeratorConfig",
+           "locales": "de,en,",
+           "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,
+           "path": "common/visualisation_master"
+       },
        "default": {  
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
