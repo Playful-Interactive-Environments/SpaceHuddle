@@ -286,6 +286,7 @@ export default class PublicScreen extends Vue {
           }
         };
         this.ideaSizes = this.module.parameter.ideaSizes;
+        this.currentCanvasState = img.src;
       }
     } else {
       setTimeout(() => {
@@ -565,6 +566,7 @@ export default class PublicScreen extends Vue {
   stopDrawing(e: MouseEvent) {
     if (this.isDrawing) {
       this.putCanvasUndoStep(this.currentCanvasState);
+      console.log(this.undoStates);
 
       this.drawLine(this.x, this.y, e.offsetX, e.offsetY);
       this.x = 0;
