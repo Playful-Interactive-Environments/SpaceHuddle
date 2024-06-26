@@ -207,7 +207,7 @@ export default class PublicScreen extends Vue {
   undoStates: any[] = [];
   redoStates: any[] = [];
 
-  undoSteps = 10;
+  undoSteps = 20;
 
   textInputMode = false;
   textInputElement: HTMLInputElement | null = null;
@@ -279,13 +279,21 @@ export default class PublicScreen extends Vue {
       this.canvas = c.getContext('2d');
       if (this.module) {
         const img = new Image();
-        img.src = this.module.parameter.canvas.canvasImage;
+        if (this.module.parameter.canvas && this.module.parameter.canvas.canvasImage) {
+          img.src = this.module.parameter.canvas.canvasImage;
+        } else {
+          img.src = '';
+        }
         img.onload = () => {
           if (this.canvas) {
             this.canvas.drawImage(img, 0, 0);
           }
         };
-        this.ideaSizes = this.module.parameter.ideaSizes;
+        if (this.module.parameter.ideaSizes) {
+          this.ideaSizes = this.module.parameter.ideaSizes;
+        } else {
+          this.ideaSizes = [];
+        }
         this.currentCanvasState = img.src;
       }
     } else {
@@ -384,7 +392,11 @@ export default class PublicScreen extends Vue {
       }
     );
     if (this.module) {
-      this.currentIdeaPositions = [...this.module.parameter.canvasPositions];
+      if (this.module.parameter.canvasPositions) {
+        this.currentIdeaPositions = [...this.module.parameter.canvasPositions];
+      } else {
+        this.currentIdeaPositions = [];
+      }
     }
   }
 
@@ -962,6 +974,7 @@ export default class PublicScreen extends Vue {
   height: 3.5rem;
   top: -3.5rem;
   right: 1rem;
+  z-index: 10000;
   * {
     margin: 0.2rem;
     padding-left: 0.3rem;
