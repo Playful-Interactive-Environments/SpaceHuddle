@@ -132,6 +132,7 @@
           >
         </div>
       </div>
+      <div ref="textContainer" class="text-container"></div>
     </div>
   </div>
 </template>
@@ -203,6 +204,7 @@ export default class PublicScreen extends Vue {
 
   currentIdeaPositions: any[] = [];
   currentCanvasState = '';
+  currentTextPositions: any[] = [];
 
   undoStates: any[] = [];
   redoStates: any[] = [];
@@ -267,6 +269,7 @@ export default class PublicScreen extends Vue {
         (module) => module.name === 'visualisation_master'
       );
       this.initializePositions();
+      this.initializeTextPositions();
       this.updateCanvasDimensions();
       this.initializeCanvas();
       this.loaded = true;
@@ -333,6 +336,11 @@ export default class PublicScreen extends Vue {
     Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
       this.makeDraggable(el);
     });
+
+    const textElements = document.getElementsByClassName('textElement');
+    Array.from(textElements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
+      this.makeTextDraggable(el);
+    });
   }
 
   makeDraggable(el: HTMLElement): void {
@@ -373,6 +381,41 @@ export default class PublicScreen extends Vue {
     };
   }
 
+  makeTextDraggable(el: HTMLElement): void {
+    el.style.position = 'absolute';
+    el.style.cursor = 'move';
+    el.style.userSelect = 'none';
+
+    el.onmousedown = (e) => {
+      this.isDragging = false;
+      e.preventDefault();
+
+      const startX = e.clientX - el.offsetLeft;
+      const startY = e.clientY - el.offsetTop;
+
+      const onMouseMove = (e: MouseEvent) => {
+        this.isDragging = true;
+        e.preventDefault(); // Prevent text selection
+        this.moveElement(el, e.clientX - startX, e.clientY - startY);
+      };
+
+      const onMouseUp = () => {
+        this.putTextUndoStep(this.currentTextPositions);
+
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+
+        this.saveTextPosition(el.cloneNode(true) as HTMLElement);
+        if (this.module) {
+          moduleService.putModule(this.module);
+        }
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    };
+  }
+
   initializePositions(): void {
     const elements = document.getElementsByClassName('draggable-container');
 
@@ -399,6 +442,39 @@ export default class PublicScreen extends Vue {
         this.currentIdeaPositions = [...this.module.parameter.canvasPositions];
       } else {
         this.currentIdeaPositions = [];
+      }
+    }
+  }
+
+  initializeTextPositions(): void {
+    if (
+      this.module &&
+      this.module.parameter.textPositions &&
+      this.module.parameter.textPositions.length > 0
+    ) {
+      const textContainer = this.$refs.textContainer as HTMLElement;
+
+      this.module.parameter.textPositions.forEach((data) => {
+        const pElement = document.createElement('p');
+        pElement.textContent = data.text;
+        pElement.style.position = data.style.position;
+        pElement.style.left = data.style.left;
+        pElement.style.top = data.style.top;
+        pElement.style.fontSize = data.style.fontSize;
+        pElement.style.color = data.style.color;
+        pElement.style.transition = data.style.transition;
+        pElement.className = 'textElement';
+        pElement.id = data.id;
+
+        textContainer.appendChild(pElement);
+      });
+    }
+
+    if (this.module) {
+      if (this.module.parameter.textPositions) {
+        this.currentTextPositions = [...this.module.parameter.textPositions];
+      } else {
+        this.currentTextPositions = [];
       }
     }
   }
@@ -723,11 +799,25 @@ export default class PublicScreen extends Vue {
   }
 
   renderTextOnCanvas(text: string, x: number, y: number) {
-    if (this.canvas) {
-      this.canvas.font = '24px Arial';
-      this.canvas.fillStyle = this.color;
-      this.canvas.fillText(text, x, y);
-      this.saveCanvas();
+    this.putTextUndoStep(this.currentTextPositions);
+
+    const pElement = document.createElement('p');
+    pElement.textContent = text;
+    pElement.style.position = 'absolute';
+    pElement.style.left = `${x}px`;
+    pElement.style.top = `${y}px`;
+    pElement.style.fontSize = '16pt';
+    pElement.style.transition = 'all 0.15s ease';
+    pElement.className = 'textElement';
+    pElement.style.color = this.color;
+    pElement.id = text + Math.floor(Math.random() * 9999);
+
+    const textContainer = this.$refs.textContainer as HTMLElement;
+    textContainer.appendChild(pElement);
+
+    this.saveTextPosition(pElement.cloneNode(true) as HTMLElement);
+    if (this.module) {
+      moduleService.putModule(this.module);
     }
   }
 
@@ -799,6 +889,57 @@ export default class PublicScreen extends Vue {
     }
   }
 
+  saveTextPosition(el: HTMLElement) {
+    if (
+      this.module &&
+      this.module.parameter.textPositions &&
+      this.module.parameter.textPositions.length > 0
+    ) {
+      const index = this.module.parameter.textPositions.findIndex(
+        (item) => item.id === el.id
+      );
+      if (index > -1) {
+        this.module.parameter.textPositions[index] = {
+          style: el.style,
+          id: el.id,
+          text: el.innerText,
+        };
+      } else {
+        this.module.parameter.textPositions.push({
+          style: el.style,
+          id: el.id,
+          text: el.innerText,
+        });
+      }
+      this.currentTextPositions = [...this.module.parameter.textPositions];
+    } else if (this.module) {
+      this.module.parameter.textPositions = [
+        {
+          style: el.style,
+          id: el.id,
+          text: el.innerText,
+        },
+      ];
+      this.currentTextPositions = [...this.module.parameter.textPositions];
+    }
+  }
+
+  saveTextDeletion(el: HTMLElement): void {
+    if (
+      this.module &&
+      this.module.parameter.textPositions &&
+      this.module.parameter.textPositions.length > 0
+    ) {
+      const index = this.module.parameter.textPositions.findIndex(
+        (item) => item.id === el.id
+      );
+      if (index > -1) {
+        this.module.parameter.textPositions.splice(index, 1);
+      }
+      this.currentTextPositions = [...this.module.parameter.textPositions];
+    }
+  }
+
   saveCanvas(): void {
     const c = document.getElementById('drawing-canvas') as HTMLCanvasElement;
     if (c) {
@@ -827,6 +968,13 @@ export default class PublicScreen extends Vue {
     this.undoStates.push(dataUrl);
   }
 
+  putTextUndoStep(textPositions: object): void {
+    if (this.undoStates.length >= this.undoSteps) {
+      this.undoStates.shift();
+    }
+    this.undoStates.push(textPositions);
+  }
+
   putIdeaPositionRedoStep(canvasPositions: object): void {
     if (this.redoStates.length >= this.undoSteps) {
       this.redoStates.shift();
@@ -841,12 +989,22 @@ export default class PublicScreen extends Vue {
     this.redoStates.push(dataUrl);
   }
 
+  putTextRedoStep(textPositions: object): void {
+    if (this.redoStates.length >= this.undoSteps) {
+      this.redoStates.shift();
+    }
+    this.redoStates.push(textPositions);
+  }
+
   undo(): void {
     if (this.undoStates.length > 0) {
       const undoState = this.undoStates.pop();
       if (typeof undoState === 'string') {
         this.setCanvas(undoState);
         this.putCanvasRedoStep(this.currentCanvasState);
+      } else if (undoState[0].style) {
+        this.putTextRedoStep(this.currentTextPositions);
+        this.setText(undoState);
       } else {
         this.putIdeaPositionRedoStep(this.currentIdeaPositions);
         this.setIdeaPositions(undoState);
@@ -860,6 +1018,9 @@ export default class PublicScreen extends Vue {
       if (typeof redoState === 'string') {
         this.setCanvas(redoState);
         this.putCanvasUndoStep(this.currentCanvasState);
+      } else if (redoState[0].style) {
+        this.putTextUndoStep(this.currentTextPositions);
+        this.setText(redoState);
       } else {
         this.putIdeaPositionUndoStep(this.currentIdeaPositions);
         this.setIdeaPositions(redoState);
@@ -895,7 +1056,7 @@ export default class PublicScreen extends Vue {
     );
   }
 
-  setCanvas(dataUrl: string) {
+  setCanvas(dataUrl: string): void {
     if (dataUrl) {
       const img = new Image();
       img.src = dataUrl;
@@ -907,6 +1068,35 @@ export default class PublicScreen extends Vue {
       };
       this.saveCanvas();
     }
+  }
+
+  setText(textPositions: any): void {
+    const elements = document.getElementsByClassName('textElement');
+
+    Array.from(elements as HTMLCollectionOf<HTMLElement>).forEach((el) => {
+      const data = textPositions.find((data) => data.id === el.id);
+
+      if (data) {
+        el.style.left = data.style.left;
+        el.style.top = data.style.top;
+        this.saveTextPosition(el.cloneNode(true) as HTMLElement);
+      } else {
+        this.saveTextDeletion(el);
+        el.remove();
+      }
+      if (this.module) {
+        moduleService.putModule(this.module);
+      }
+    });
+
+    /*textPositions.forEach((data) => {
+      const pElement = document.getElementById(data.id);
+      if (pElement) {
+        pElement.style.left = data.style.left;
+        pElement.style.top = data.style.top;
+        this.saveTextPosition(pElement.cloneNode(true) as HTMLElement);
+      }
+    });*/
   }
 }
 </script>
