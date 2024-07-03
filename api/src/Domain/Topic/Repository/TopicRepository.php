@@ -383,7 +383,7 @@ class TopicRepository implements RepositoryInterface
                                 category.parameter,
                                 '$.correctValue'
                             ))", "CHAR"),
-                            "has_answer" => $detailQuery->func()->cast("JSON_UNQUOTE(JSON_EXTRACT(
+                            "is_quiz_question" => $detailQuery->func()->cast("JSON_UNQUOTE(JSON_EXTRACT(
                                 category.parameter,
                                 '$.hasAnswer'
                             ))", "CHAR"),
@@ -428,7 +428,7 @@ class TopicRepository implements RepositoryInterface
                             "link",
                             "parameter",
                             "count",
-                            "has_answer",
+                            "is_quiz_question",
                             "is_correct",
                             "correct_value"
                         ];
