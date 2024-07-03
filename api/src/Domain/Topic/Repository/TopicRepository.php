@@ -348,6 +348,24 @@ class TopicRepository implements RepositoryInterface
                             "idea.link",
                             "idea.order",
                             "idea.parameter",
+                            "is_correct" => $detailQuery->func()->cast("
+                            IF(
+                                JSON_UNQUOTE(JSON_EXTRACT(
+                                category.parameter,
+                                '$.hasAnswer'
+                                )) = 'true',
+                                IFNULL(
+                                    JSON_UNQUOTE(JSON_EXTRACT(
+                                        idea.parameter,
+                                        '$.isCorrect'
+                                    )),
+                                    IF(JSON_UNQUOTE(JSON_EXTRACT(
+                                        category.parameter,
+                                        '$.correctValue'
+                                    )) = idea.keywords, 'true', 'false')
+                                ),
+                                ''
+                            )", "CHAR"),
                             "idea.participant_id",
                             "idea.state",
                             "idea.task_id",
@@ -356,8 +374,21 @@ class TopicRepository implements RepositoryInterface
                             "category.description as question_description",
                             "category.id as question_image_id",
                             "category.link as question_link",
+                            "category.parameter as question_parameter",
+                            "question_type" => $detailQuery->func()->cast("JSON_UNQUOTE(JSON_EXTRACT(
+                                category.parameter,
+                                '$.questionType'
+                            ))", "CHAR"),
+                            "correct_value" => $detailQuery->func()->cast("JSON_UNQUOTE(JSON_EXTRACT(
+                                category.parameter,
+                                '$.correctValue'
+                            ))", "CHAR"),
+                            "has_answer" => $detailQuery->func()->cast("JSON_UNQUOTE(JSON_EXTRACT(
+                                category.parameter,
+                                '$.hasAnswer'
+                            ))", "CHAR"),
                             "category.id as question_id",
-                            "vote_result.count_rating as count",
+                            "IFNULL(vote_result.count_rating, COUNT(idea.id)) as count",
                             "vote_result.sum_detail_rating as sum"
                         ])
                             ->join([
@@ -371,19 +402,35 @@ class TopicRepository implements RepositoryInterface
                                 ]
                             ])
                             ->leftJoin("vote_result", "vote_result.idea_id = idea.id")
-                            ->order(["category.order", "selection_view_idea.order"]);
+                            ->group([
+                                "category.order",
+                                "selection_view_idea.order",
+                                "idea.keywords",
+                                "idea.description"
+                            ])
+                            ->order([
+                                "category.order",
+                                "selection_view_idea.order",
+                                "idea.keywords",
+                                "idea.description"
+                            ]);
                         $detailRows = $detailQuery->execute()->fetchAll("assoc");
                         $exportColumns = [
                             "question_keywords",
                             "question_description",
                             "question_image",
                             "question_link",
+                            "question_type",
+                            "question_parameter",
                             "keywords",
                             "description",
                             "image",
                             "link",
+                            "parameter",
                             "count",
-                            "sum"
+                            "has_answer",
+                            "is_correct",
+                            "correct_value"
                         ];
                     } else {
                         $detailQuery->select([
