@@ -18,28 +18,20 @@
             </div>
             <div class="sidebar__icon" aria-label="settings" role="button">
               <slot name="settings" />
-              <span v-on:click="$emit('openSettings', $event)">
+              <span v-if="canModify" v-on:click="$emit('openSettings', $event)">
                 <ToolTip
                   :effect="'light'"
                   :text="$t('moderator.organism.settings.topicSettings.edit')"
                 >
-                  <font-awesome-icon
-                    class="awesome-icon"
-                    icon="cog"
-                    v-if="canModify"
-                  />
+                  <font-awesome-icon class="awesome-icon" icon="cog" />
                 </ToolTip>
               </span>
-              <span v-on:click="$emit('delete', $event)">
+              <span v-if="canModify" v-on:click="$emit('delete', $event)">
                 <ToolTip
                   :effect="'light'"
                   :text="$t('moderator.organism.settings.topicSettings.delete')"
                 >
-                  <font-awesome-icon
-                    class="awesome-icon"
-                    icon="trash"
-                    v-if="canModify"
-                  />
+                  <font-awesome-icon class="awesome-icon" icon="trash" />
                 </ToolTip>
               </span>
             </div>

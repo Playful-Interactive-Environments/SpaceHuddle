@@ -90,25 +90,25 @@
                 </span>
               </div>
             </TutorialStep>
-            <ToolTip
-              :placement="'bottom'"
-              :text="
-                !homeStateValue
-                  ? $t(
-                      `moderator.organism.settings.topicSettings.activateTopic`
-                    )
-                  : $t(
-                      `moderator.organism.settings.topicSettings.deactivateTopic`
-                    )
-              "
+            <div
+              v-if="hasHomeState"
+              class="homeState"
+              :class="{
+                'is-checked': homeStateValue,
+              }"
+              v-on:click="homeStateValue = !homeStateValue"
             >
-              <div
-                v-if="hasHomeState"
-                class="homeState"
-                :class="{
-                  'is-checked': homeStateValue,
-                }"
-                v-on:click="homeStateValue = !homeStateValue"
+              <ToolTip
+                :placement="'bottom'"
+                :text="
+                  !homeStateValue
+                    ? $t(
+                        `moderator.organism.settings.topicSettings.activateTopic`
+                      )
+                    : $t(
+                        `moderator.organism.settings.topicSettings.deactivateTopic`
+                      )
+                "
               >
                 <p class="onOff">
                   {{
@@ -121,8 +121,8 @@
                         )
                   }}
                 </p>
-              </div>
-            </ToolTip>
+              </ToolTip>
+            </div>
           </div>
           <i class="line"></i>
         </span>

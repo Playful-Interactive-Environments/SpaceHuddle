@@ -328,8 +328,8 @@ export default class TopicCard extends Vue {
 
 @media only screen and (min-width: 950px) {
   .level-left {
-    max-width: calc(100% - 2rem);
-    width: calc(100% - 2rem);
+    max-width: calc(100% - 3rem);
+    width: calc(100% - 3rem);
   }
 
   .level-right {
