@@ -54,6 +54,37 @@
       >
         <el-carousel-item class="infoGraphic">
           <h2>
+            {{ $t('module.playing.moveit.participant.info.distance.title') }}
+          </h2>
+          <div class="chartArea">
+            <Line
+              :data="chartDataDistance"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.distance.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.distance.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+          <h2>
             {{ $t('module.playing.moveit.participant.info.speed.title') }}
           </h2>
           <div class="chartArea">
@@ -410,6 +441,13 @@ export default class ShowResult extends Vue {
     labels: [],
     datasets: [],
   };
+  chartDataDistance: {
+    labels: string[];
+    datasets: any[];
+  } = {
+    labels: [],
+    datasets: [],
+  };
   chartDataPersons: {
     labels: string[];
     datasets: any[];
@@ -655,8 +693,9 @@ export default class ShowResult extends Vue {
     }
     let totalValue = 0;
     const normalizedData = normalizedTrackingData(this.trackingData);
-    const labels = normalizedData.map((data) =>
-      (Math.round(data.distanceTraveled * 100) / 100).toString()
+    const driveTime = this.trackingManager.iterationStep?.parameter.driveTime;
+    const labels = normalizedData.map((data, index) =>
+      Math.round((driveTime / 1000 / normalizedData.length) * index).toString()
     );
     const outsideLength = Object.values(this.particleState)[0].timelineOutside
       .length;
@@ -667,6 +706,7 @@ export default class ShowResult extends Vue {
       this.chartDataOutside.labels =
       this.chartDataCollected.labels =
       this.chartDataSpeed.labels =
+      this.chartDataDistance.labels =
       this.chartDataPersons.labels =
         labels;
 
@@ -674,6 +714,14 @@ export default class ShowResult extends Vue {
       name: 'speed',
       label: 'speed',
       data: normalizedData.map((data) => Math.round(data.speed)),
+    });
+
+    this.chartDataDistance.datasets.push({
+      name: 'distance',
+      label: 'distance',
+      data: normalizedData.map(
+        (data) => Math.round(data.distanceTraveled * 100) / 100
+      ),
     });
 
     this.chartDataPersons.datasets.push({

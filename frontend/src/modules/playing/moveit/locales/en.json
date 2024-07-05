@@ -80,17 +80,24 @@
           "y": "emissions per person in g/kWh"
         }
       },
-      "speed": {
-        "title": "speed per time",
+      "distance": {
+        "title": "distance time diagram",
         "scale": {
-          "x": "Distance traveled in km",
+          "x": "time in s",
+          "y": "km"
+        }
+      },
+      "speed": {
+        "title": "speed time diagram",
+        "scale": {
+          "x": "time in s",
           "y": "km/h"
         }
       },
       "persons": {
         "title": "person count per time",
         "scale": {
-          "x": "Distance traveled in km",
+          "x": "time in s",
           "y": "persons"
         }
       },
@@ -99,7 +106,7 @@
         "collected": "collected emissions per time",
         "outside": "emissions released per time",
         "scale": {
-          "x": "Distance traveled in km",
+          "x": "time in s",
           "y": "emissions per person in g/kWh"
         }
       }
@@ -217,6 +224,7 @@
       "ps": "ps",
       "km/h": "km/h",
       "km": "km",
+      "min": "min",
       "liters/100": "liters per 100 km",
       "liters": "liters",
       "seconds": "m/s per second",

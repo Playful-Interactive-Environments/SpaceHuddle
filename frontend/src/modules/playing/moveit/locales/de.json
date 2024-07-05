@@ -80,17 +80,24 @@
           "y": "Emissionen pro Person in g/kWh"
         }
       },
-      "speed": {
-        "title": "Geschwindigkeit pro Zeitpunkt",
+      "distance": {
+        "title": "Weg-Zeit-Diagramm",
         "scale": {
-          "x": "zurückgelegter Weg in km",
+          "x": "Zeit in s",
+          "y": "km"
+        }
+      },
+      "speed": {
+        "title": "Geschwindigkeit-Zeit-Digramm",
+        "scale": {
+          "x": "Zeit in s",
           "y": "km/h"
         }
       },
       "persons": {
         "title": "Personenanzahl pro Zeitpunkt",
         "scale": {
-          "x": "zurückgelegter Weg in km",
+          "x": "Zeit in s",
           "y": "Personen"
         }
       },
@@ -99,7 +106,7 @@
         "collected": "eingesammelte Emissionen pro Zeitpunkt",
         "outside": "frei gesetzte Emissionen pro Zeitpunkt",
         "scale": {
-          "x": "zurückgelegter Weg in km",
+          "x": "Zeit in s",
           "y": "Emissionen pro Person in g/kWh"
         }
       }
@@ -217,6 +224,7 @@
       "ps": "PS",
       "km/h": "km/h",
       "km": "km",
+      "min": "min",
       "liters/100": "Liter pro 100 km",
       "liters": "Liter",
       "seconds": "m/s pro Sekunde",

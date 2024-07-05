@@ -119,7 +119,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { PlayerType } from '@/modules/information/brainhex/types/PlayerType';
 import Color from 'colorjs.io';
-import { getRandomColorList } from '@/utils/colors';
 
 @Options({
   components: {

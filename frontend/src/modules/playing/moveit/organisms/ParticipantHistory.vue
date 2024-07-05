@@ -20,6 +20,11 @@
           {{ index + 1 }} / {{ activeStepsList.length }}
         </h1>
         <h2 class="heading heading--regular">
+          {{ $t('module.playing.moveit.participant.drivingStats.time') }} :
+          {{ Math.round((calculateSpeed('driveTime') / 60000) * 100) / 100 }}
+          {{ $t('module.playing.moveit.enums.units.min') }}
+        </h2>
+        <h2 class="heading heading--regular">
           {{ $t('module.playing.moveit.participant.drivingStats.avgSpeed') }} :
           {{ Math.round(calculateSpeed('average')) }}
           {{ $t('module.playing.moveit.enums.units.km/h') }}
@@ -51,6 +56,38 @@
         </h2>
       </el-carousel-item>
     </el-carousel>
+    <h2>
+      {{ $t('module.playing.moveit.participant.info.distance.title') }}
+    </h2>
+    <div class="chartArea">
+      <Line
+        ref="distanceSpeed"
+        :data="chartDataDistance"
+        :options="{
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.distance.scale.x'
+                ),
+                display: true,
+              },
+            },
+            y: {
+              stacked: true,
+              title: {
+                text: $t(
+                  'module.playing.moveit.participant.info.distance.scale.y'
+                ),
+                display: true,
+              },
+            },
+          },
+        }"
+      />
+    </div>
     <h2>
       {{ $t('module.playing.moveit.participant.info.speed.title') }}
     </h2>
@@ -229,14 +266,21 @@ export default class ParticipantHistory extends Vue {
     labels: [],
     datasets: [],
   };
-  chartDataSpeed: {
+  chartDataPersons: {
     labels: string[];
     datasets: any[];
   } = {
     labels: [],
     datasets: [],
   };
-  chartDataPersons: {
+  chartDataDistance: {
+    labels: string[];
+    datasets: any[];
+  } = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataSpeed: {
     labels: string[];
     datasets: any[];
   } = {
@@ -330,17 +374,22 @@ export default class ParticipantHistory extends Vue {
     const normalizedData = normalizedTrackingData(
       this.activeStepsList[index].parameter.drive.trackingData
     );
-    const labels = normalizedData.map((data) =>
-      (Math.round(data.distanceTraveled * 100) / 100).toString()
-    );
-    this.chartDataInput.labels =
-      this.chartDataSpeed.labels =
-      this.chartDataPersons.labels =
-        labels;
 
-    this.chartDataSpeed.datasets = [];
+    const driveTime = this.activeStepsList[index].parameter.driveTime;
+    this.chartDataInput.labels =
+      this.chartDataPersons.labels =
+      this.chartDataDistance.labels =
+      this.chartDataSpeed.labels =
+        normalizedData.map((data, index) =>
+          Math.round(
+            (driveTime / 1000 / normalizedData.length) * index
+          ).toString()
+        );
+
     this.chartDataPersons.datasets = [];
     this.chartDataInput.datasets = [];
+    this.chartDataDistance.datasets = [];
+    this.chartDataSpeed.datasets = [];
 
     this.chartDataSpeed.datasets.push({
       name: 'speed',
@@ -348,9 +397,23 @@ export default class ParticipantHistory extends Vue {
       data: normalizedData.map((data) => Math.round(data.speed)),
     });
 
+    this.chartDataDistance.datasets.push({
+      name: 'distance',
+      label: 'distance',
+      data: normalizedData.map(
+        (data) => Math.round(data.distanceTraveled * 100) / 100
+      ),
+    });
+
     let chartRef = this.$refs.chartSpeed as any;
     if (chartRef && chartRef.chart) {
       chartRef.chart.data = this.chartDataSpeed;
+      chartRef.chart.update();
+    }
+
+    chartRef = this.$refs.distanceSpeed as any;
+    if (chartRef && chartRef.chart) {
+      chartRef.chart.data = this.chartDataDistance;
       chartRef.chart.update();
     }
 
@@ -422,6 +485,9 @@ export default class ParticipantHistory extends Vue {
         return distance(trackingData);
       case 'persons':
         return persons(trackingData);
+      case 'driveTime':
+        return this.activeStepsList[this.activeHistoryIndex].parameter
+          .driveTime;
     }
     return 0;
   }
