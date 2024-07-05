@@ -7,8 +7,27 @@
       :name="level.ideaId"
     >
       <table class="highscore-table">
+        <tr>
+          <th />
+          <th />
+          <th @click="setSortColumn('moleculeHitCount')">
+            <font-awesome-icon icon="atom" />
+          </th>
+          <th @click="setSortColumn('normalisedTime')">
+            <font-awesome-icon icon="clock" />
+          </th>
+          <th @click="setSortColumn('normalisedTime')">
+            <font-awesome-icon icon="star" />
+          </th>
+        </tr>
         <tr
-          v-for="(entry, index) of level.details.slice(0, level.count)"
+          v-for="(entry, index) of level.details
+            .sort(
+              (a, b) =>
+                (b.value[sortColumn] ?? 0 - a.value[sortColumn] ?? 0) *
+                sortOrder
+            )
+            .slice(0, level.count)"
           :key="entry.avatar.symbol"
         >
           <td>{{ index + 1 }}.</td>
@@ -19,7 +38,11 @@
             ></font-awesome-icon>
           </td>
           <td>
-            {{ Math.round((entry.value.normalisedTime / 60000) * 100) }}
+            {{ entry.value.moleculeHitCount }}
+          </td>
+          <td>
+            {{ Math.round((entry.value.normalisedTime / 60000) * 100) / 100 }}
+            min
           </td>
           <td>
             <el-rate
@@ -67,6 +90,8 @@ export default class Highscore extends Vue {
   highScoreList: VoteParameterResult[] = [];
   openHighScoreLevels: string[] = [];
   ideas: Idea[] = [];
+  sortColumn = 'normalisedTime';
+  sortOrder = 1;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -92,6 +117,12 @@ export default class Highscore extends Vue {
   unmounted(): void {
     cashService.deregisterAllGet(this.updateHighScore);
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  setSortColumn(column: string): void {
+    if (this.sortColumn === column) this.sortOrder *= -1;
+    else this.sortOrder = 1;
+    this.sortColumn = column;
   }
 
   updateHighScore(list: VoteParameterResult[]): void {

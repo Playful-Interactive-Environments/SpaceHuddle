@@ -2897,13 +2897,18 @@ export default class PlayLevel extends Vue {
       if (
         !this.highScore.parameter.normalisedTime ||
         this.highScore.parameter.normalisedTime < this.normalisedTime
-      )
+      ) {
         this.highScore.parameter.normalisedTime = this.normalisedTime;
-      if (
-        !this.highScore.parameter.rate ||
-        this.highScore.parameter.rate < this.stars
-      )
         this.highScore.parameter.rate = this.stars;
+        this.highScore.parameter.moleculeHitCount =
+          this.playStateResult.moleculeHitCount;
+        this.highScore.parameter.moleculeDecreaseCount =
+          this.playStateResult.moleculeDecreaseCount;
+        this.highScore.parameter.moleculeMovedCount =
+          this.playStateResult.moleculeMovedCount;
+        this.highScore.parameter.moleculeEmitCount =
+          this.playStateResult.moleculeEmitCount;
+      }
       votingService.putVote(this.highScore).then(() => {
         cashService.refreshCash(
           `/${EndpointType.TASK}/${this.taskId}/${EndpointType.VOTES}`
@@ -2913,6 +2918,10 @@ export default class PlayLevel extends Vue {
       const parameter: any = {
         normalisedTime: this.normalisedTime,
         rate: this.stars,
+        moleculeHitCount: this.playStateResult.moleculeHitCount,
+        moleculeDecreaseCount: this.playStateResult.moleculeDecreaseCount,
+        moleculeMovedCount: this.playStateResult.moleculeMovedCount,
+        moleculeEmitCount: this.playStateResult.moleculeEmitCount,
       };
       for (
         let i = CoolItConst.MAX_TEMPERATURE_RISE;

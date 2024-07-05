@@ -3,22 +3,24 @@
     <tr>
       <th />
       <th />
-      <th>
+      <th @click="setSortColumn('pointsSpent')">
         {{ $t('module.playing.shopit.participant.highscore.pointsSpent') }}
       </th>
-      <th>
+      <th @click="setSortColumn('co2')">
         {{ $t('module.playing.shopit.participant.highscore.co2') }}
       </th>
-      <th>
+      <th @click="setSortColumn('water')">
         {{ $t('module.playing.shopit.participant.highscore.water') }}
       </th>
-      <th>
+      <th @click="setSortColumn('lifetime')">
         {{ $t('module.playing.shopit.participant.highscore.lifetime') }}
       </th>
-      <th></th>
+      <th @click="setSortColumn('rate')"></th>
     </tr>
     <tr
-      v-for="(entry, index) of highScoreList.slice(0, this.highScoreCount)"
+      v-for="(entry, index) of highScoreList
+        .sort((a, b) => (b.value[sortColumn] - a.value[sortColumn]) * sortOrder)
+        .slice(0, this.highScoreCount)"
       :key="entry.avatar.symbol"
     >
       <td>{{ index + 1 }}.</td>
@@ -81,6 +83,8 @@ export default class Highscore extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   highScoreList: { value: number | any; avatar: Avatar }[] = [];
+  sortColumn = 'rate';
+  sortOrder = 1;
 
   mounted(): void {
     votingService.registerGetParameterResult(
@@ -94,6 +98,12 @@ export default class Highscore extends Vue {
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateHighScore);
+  }
+
+  setSortColumn(column: string): void {
+    if (this.sortColumn === column) this.sortOrder *= -1;
+    else this.sortOrder = 1;
+    this.sortColumn = column;
   }
 
   highScoreCount = 0;

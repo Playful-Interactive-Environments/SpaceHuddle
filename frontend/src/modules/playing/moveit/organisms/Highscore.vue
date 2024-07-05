@@ -18,7 +18,7 @@
           <tr>
             <th />
             <th />
-            <th>
+            <th @click="setSortColumn('collectedCount')">
               <el-tooltip
                 :content="
                   $t('module.playing.moveit.participant.drivingStats.collected')
@@ -27,7 +27,7 @@
                 <font-awesome-icon icon="atom" />
               </el-tooltip>
             </th>
-            <th>
+            <th @click="setSortColumn('averageSpeed')">
               <el-tooltip
                 :content="
                   $t('module.playing.moveit.participant.drivingStats.avgSpeed')
@@ -36,7 +36,7 @@
                 <font-awesome-icon icon="gauge" />
               </el-tooltip>
             </th>
-            <th>
+            <th @click="setSortColumn('maxSpeed')">
               <el-tooltip
                 :content="
                   $t('module.playing.moveit.participant.drivingStats.maxSpeed')
@@ -45,7 +45,7 @@
                 <font-awesome-icon icon="gauge-high" />
               </el-tooltip>
             </th>
-            <th>
+            <th @click="setSortColumn('consumption')">
               <el-tooltip
                 :content="
                   $t(
@@ -56,7 +56,7 @@
                 <font-awesome-icon icon="gas-pump" />
               </el-tooltip>
             </th>
-            <th v-if="category === 'bus'">
+            <th @click="setSortColumn('persons')" v-if="category === 'bus'">
               <el-tooltip
                 :content="
                   $t('module.playing.moveit.participant.drivingStats.persons')
@@ -65,12 +65,17 @@
                 <font-awesome-icon icon="people-group" />
               </el-tooltip>
             </th>
+            <th @click="setSortColumn('percentage')">
+              <font-awesome-icon icon="star" />
+            </th>
           </tr>
           <tr
-            v-for="(entry, index) of vehicleData.slice(
-              0,
-              highScoreCount[category][vehicle]
-            )"
+            v-for="(entry, index) of vehicleData
+              .sort(
+                (a, b) =>
+                  (b.value[sortColumn] - a.value[sortColumn]) * sortOrder
+              )
+              .slice(0, highScoreCount[category][vehicle])"
             :key="entry.avatar.symbol"
           >
             <td>{{ index + 1 }}.</td>
@@ -162,6 +167,8 @@ export default class Highscore extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   highScoreList: HighscoreData = {};
   openHighScoreCategories: string[] = [];
+  sortColumn = 'percentage';
+  sortOrder = 1;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -178,6 +185,12 @@ export default class Highscore extends Vue {
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateHighScore);
+  }
+
+  setSortColumn(column: string): void {
+    if (this.sortColumn === column) this.sortOrder *= -1;
+    else this.sortOrder = 1;
+    this.sortColumn = column;
   }
 
   highScoreCount: {

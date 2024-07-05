@@ -10,19 +10,23 @@
         <tr>
           <th />
           <th />
-          <th>
+          <th @click="setSortColumn('collected')">
             {{ $t('module.playing.findit.participant.highscore.collected') }}
           </th>
-          <th>
+          <th @click="setSortColumn('correctClassified')">
             {{ $t('module.playing.findit.participant.highscore.classified') }}
           </th>
-          <th>
+          <th @click="setSortColumn('time')">
             {{ $t('module.playing.findit.participant.highscore.time') }}
           </th>
-          <th></th>
+          <th @click="setSortColumn('stars')"></th>
         </tr>
         <tr
-          v-for="entry of level.details.slice(0, level.count)"
+          v-for="entry of level.details
+            .sort(
+              (a, b) => (b.value[sortColumn] - a.value[sortColumn]) * sortOrder
+            )
+            .slice(0, level.count)"
           :key="entry.avatar.symbol"
         >
           <td>{{ index + 1 }}.</td>
@@ -85,6 +89,8 @@ export default class Highscore extends Vue {
   highScoreList: VoteParameterResult[] = [];
   openHighScoreLevels: string[] = [];
   ideas: Idea[] = [];
+  sortColumn = 'stars';
+  sortOrder = 1;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -110,6 +116,12 @@ export default class Highscore extends Vue {
   unmounted(): void {
     cashService.deregisterAllGet(this.updateHighScore);
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  setSortColumn(column: string): void {
+    if (this.sortColumn === column) this.sortOrder *= -1;
+    else this.sortOrder = 1;
+    this.sortColumn = column;
   }
 
   updateHighScore(list: VoteParameterResult[]): void {
