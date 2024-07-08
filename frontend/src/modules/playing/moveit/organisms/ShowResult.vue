@@ -336,6 +336,7 @@ import {
   TrackingData,
   normalizedTrackingData,
 } from '@/modules/playing/moveit/utils/trackingData';
+import { drivingStepTime } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -683,6 +684,10 @@ export default class ShowResult extends Vue {
     return this.$t(`module.playing.moveit.enums.particle.${particleName}`);
   }
 
+  get driveTime(): number {
+    return drivingStepTime * this.trackingData.length;
+  }
+
   maxChartValue = 0;
   @Watch('particleState', { immediate: true })
   onParticleStateChanged(): void {
@@ -693,9 +698,11 @@ export default class ShowResult extends Vue {
     }
     let totalValue = 0;
     const normalizedData = normalizedTrackingData(this.trackingData);
-    const driveTime = this.trackingManager.iterationStep?.parameter.driveTime;
+    const driveTime = this.driveTime;
     const labels = normalizedData.map((data, index) =>
-      Math.round((driveTime / 1000 / normalizedData.length) * index).toString()
+      (
+        Math.round((driveTime / (normalizedData.length - 1)) * index * 10) / 10
+      ).toString()
     );
     const outsideLength = Object.values(this.particleState)[0].timelineOutside
       .length;

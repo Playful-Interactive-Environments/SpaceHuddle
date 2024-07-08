@@ -21,7 +21,7 @@
         </h1>
         <h2 class="heading heading--regular">
           {{ $t('module.playing.moveit.participant.drivingStats.time') }} :
-          {{ Math.round((calculateSpeed('driveTime') / 60000) * 100) / 100 }}
+          {{ Math.round((calculateSpeed('driveTime') / 60) * 100) / 100 }}
           {{ $t('module.playing.moveit.enums.units.min') }}
         </h2>
         <h2 class="heading heading--regular">
@@ -232,6 +232,7 @@ import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import * as themeColors from '@/utils/themeColors';
+import { drivingStepTime } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 interface DatasetData {
@@ -361,6 +362,13 @@ export default class ParticipantHistory extends Vue {
     this.historyPageChanged(this.activeHistoryIndex);
   }
 
+  get driveTime(): number {
+    const trackingData =
+      this.activeStepsList[this.activeHistoryIndex].parameter.drive
+        .trackingData;
+    return drivingStepTime * trackingData.length;
+  }
+
   activeHistoryIndex = 0;
   historyPageChanged(index: number): void {
     if (this.activeStepsList.length <= index) return;
@@ -371,18 +379,19 @@ export default class ParticipantHistory extends Vue {
       distanceTraveled += data.distance;
       data.distanceTraveled = distanceTraveled;
     }
-    const normalizedData = normalizedTrackingData(
-      this.activeStepsList[index].parameter.drive.trackingData
-    );
+    const trackingData =
+      this.activeStepsList[index].parameter.drive.trackingData;
+    const normalizedData = normalizedTrackingData(trackingData);
 
-    const driveTime = this.activeStepsList[index].parameter.driveTime;
     this.chartDataInput.labels =
       this.chartDataPersons.labels =
       this.chartDataDistance.labels =
       this.chartDataSpeed.labels =
         normalizedData.map((data, index) =>
-          Math.round(
-            (driveTime / 1000 / normalizedData.length) * index
+          (
+            Math.round(
+              (this.driveTime / (normalizedData.length - 1)) * index * 10
+            ) / 10
           ).toString()
         );
 
@@ -486,8 +495,7 @@ export default class ParticipantHistory extends Vue {
       case 'persons':
         return persons(trackingData);
       case 'driveTime':
-        return this.activeStepsList[this.activeHistoryIndex].parameter
-          .driveTime;
+        return this.driveTime;
     }
     return 0;
   }

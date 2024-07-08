@@ -386,7 +386,7 @@
       </h2>
       <h2 class="heading heading--regular">
         {{ $t('module.playing.moveit.participant.drivingStats.time') }} :
-        {{ calculateTime() }}s
+        {{ this.driveTime }}s
       </h2>
       <el-button type="primary" native-type="submit" @click="endGame">
         {{ $t('module.playing.moveit.participant.confirm') }}
@@ -476,6 +476,10 @@ interface ColorProp {
 }
 
 const minToleratedAngleDeviation = 22.5;
+export const timeScaleFactor = 10;
+const intervalCalculationTime = 50;
+export const drivingStepTime =
+  (intervalCalculationTime / 1000) * timeScaleFactor;
 
 @Options({
   methods: { getRedColor, getGreenColor },
@@ -573,7 +577,7 @@ export default class DriveToLocation extends Vue {
 
   boardingPersons = 0;
 
-  readonly intervalCalculationTime = 50;
+  readonly intervalCalculationTime = intervalCalculationTime;
   intervalCalculation = -1;
   readonly intervalAnimationTime = 50;
   intervalAnimation = -1;
@@ -736,6 +740,10 @@ export default class DriveToLocation extends Vue {
     return this.moveAngle;
   }
 
+  get driveTime(): number {
+    return drivingStepTime * this.trackingData.length;
+  }
+
   getRoute(): turf.Feature<turf.LineString> | turf.LineString {
     return turfUtils.getRoute(this.routePath);
   }
@@ -746,8 +754,7 @@ export default class DriveToLocation extends Vue {
 
   getDrivingDistance(moveSpeed: number | null = null): number {
     if (moveSpeed === null) moveSpeed = this.moveSpeed;
-    const drivingTime = (this.intervalCalculationTime / (1000 * 3600)) * 10;
-    return moveSpeed * drivingTime;
+    return (moveSpeed * drivingStepTime) / 3600;
   }
 
   getNewDrivingPoint(distance: number): [number, number] {
