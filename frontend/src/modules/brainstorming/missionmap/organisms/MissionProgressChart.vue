@@ -535,7 +535,10 @@ export default class MissionProgressChart extends Vue {
           return this.module.parameter[parameter] + sum;
         else return displayParameter[parameter].value + sum;
       },
-      (parameter) => displayParameter[parameter].iconCode
+      (parameter) => {
+        return displayParameter[parameter].iconCode;
+      },
+      10
     );
     for (const dataset of datasets) {
       (dataset as any).pointStyle = 'circle';
