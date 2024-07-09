@@ -31,8 +31,8 @@
     },
     "tabs": {
       "measures": "measures",
-      "statistic": "statistic",
-      "influenceAreas": "statistic",
+      "statistic": "state",
+      "influenceAreas": "state",
       "electricity": "electricity",
       "map": "map"
     },

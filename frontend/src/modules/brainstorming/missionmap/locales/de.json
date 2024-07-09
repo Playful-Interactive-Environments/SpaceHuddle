@@ -31,8 +31,8 @@
     },
     "tabs": {
       "measures": "Maßnahmen",
-      "statistic": "Statistik",
-      "influenceAreas": "Statistik",
+      "statistic": "Status",
+      "influenceAreas": "Status",
       "electricity": "Elektrizität",
       "map": "Karte"
     },
