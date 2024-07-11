@@ -1,0 +1,150 @@
+{
+  "participant": {
+    "primary": "Primärklasse",
+    "secondary": "Sekundärklasse",
+    "exception": "Ausnahmenklasse",
+    "youLike": "Du magst",
+    "asWell": "sowie",
+    "dislike": "Jede BrainHex-Klasse hat auch eine Ausnahme, die beschreibt, was du am Spielen nicht magst. Deine Ausnahmen sind:",
+    "noDislike": "Deinen Ergebnissen zufolge gibt es nur wenige Spielerfahrungen, die du stark ablehnst.",
+    "score": "Du hast für jede der Klassen in diesem Test die folgende Punktzahl erreicht:"
+  },
+  "enum": {
+    "rating": {
+      "5": "Ich liebe es!",
+      "4": "Ich mag es!",
+      "3": "Es ist in Ordnung!",
+      "2": "Ich mag es nicht!",
+      "1": "Ich hasse es!"
+    }
+  },
+  "questions": {
+    "Exploring to see what you can find": {
+      "text": "Auf Entdeckungsreise gehen, um zu sehen, was es alles so gibt."
+    },
+    "Frantically escaping from a terrifying foe": {
+      "text": "Hektisch vor einem angsteinflößenden Gegner fliehen."
+    },
+    "Working out how to crack a challenging puzzle": {
+      "text": "Erarbeiten, wie man eine herausfordernde Rätselaufgabe knackt."
+    },
+    "The struggle to difficult boss": {
+      "text": "Der Kampf um einen schwierigen Bossgegner zu besiegen."
+    },
+    "Playing in a group, online or in the same room": {
+      "text": "In einer Gruppe spielen, sei es online oder im selben Raum."
+    },
+    "Responding quickly to an exciting situation": {
+      "text": "Schnell auf eine aufregende Situation reagieren."
+    },
+    "Picking up every single collectible in an area": {
+      "text": "Alle Sammelobjekte in einem Bereich aufsammeln."
+    },
+    "Looking around just to enjoy the scenery": {
+      "text": "Sich umzusehen, um einfach die Szenerie zu genießen."
+    },
+    "Being in control at high speed": {
+      "text": "Bei hoher Geschwindigkeit alles unter Kontrolle haben."
+    },
+    "Devising a promising strategy when deciding what to try next": {
+      "text": "Eine vielversprechende Strategie für die Entscheidung über die nächsten Schritte entwickeln."
+    },
+    "Feeling relief when you escape to a safe area": {
+      "text": "Erleichterung verspüren nach dem Erreichen einer sicheren Zone."
+    },
+    "Taking on a strong opponent when playing against a human player in a versus match": {
+      "text": "Im Wettkampf gegen einen starken menschlichen Gegner antreten."
+    },
+    "Talking with other players, online or in the same room": {
+      "text": "Sich mit anderen Spielern unterhalten, sei es online oder im selben Raum."
+    },
+    "Finding what you need to complete a collection": {
+      "text": "Herausfinden, was für das Komplettieren einer Sammlung benötigt wird."
+    },
+    "Hanging from a high ledge": {
+      "text": "Über einen tiefen Abgrund hängen."
+    },
+    "Wondering whats behind a locked door": {
+      "text": "Sich darüber Gedanken machen, was hinter einer verschlossenen Tür sich verbergen könnte."
+    },
+    "Feeling scared, terrified or disturbed": {
+      "text": "Angst,  Schrecken oder Beunruhigung verspüren."
+    },
+    "Working out what to do on your own": {
+      "text": "Alleine erarbeiten, was zu tun ist."
+    },
+    "Completing a punishing challenge after failing many times": {
+      "text": "Eine besonders schwierige Herausforderung nach etlichen Misserfolgen abschließen."
+    },
+    "Co-operating with strangers": {
+      "text": "Mit Unbekannten kooperieren."
+    },
+    "Getting 100% (completing everything in a game)": {
+      "text": "100% erreichen (also alles im Spiel erledigen)."
+    },
+    "Arrange the following experiences into a sequence from best to worst": {
+      "text": "Geben Sie für die folgende Erlebnisse eine Reihung von das Beste bis das schlechteste an.",
+      "keyword": "Reihung"
+    }
+  },
+  "answers": {
+    "A moment of jaw-dropping wonder or beauty": "Ein Moment von atemberaubender Schönheit oder des Staunens.",
+    "An experience of primeval terror that blows your mind": "Ein Erlebnis von überwältigendem Schrecken.",
+    "A moment of breathtaking speed or vertigo": "Ein Moment von atemberaubender Geschwindigkeit oder des Schwindelgefühls.",
+    "The moment when the solution to a difficult puzzle clicks in your mind": "Der Moment, in dem plötzlich die Lösung zu einem schwierigen Rätsel einfällt.",
+    "A moment of hard-fought victory": "Ein Moment des hart erkämpften Sieges.",
+    "A moment when you feel an intense sense of unity with another player": "Ein Moment der tiefen Verbundenheit mit einem anderen Spieler bzw. einer anderen Spielerin.",
+    "A moment of completeness that you have strived for": "Ein Moment des Erreichens von allem angestrebten."
+  },
+  "result": {
+    "Seeker": {
+      "name": "Entdecker*in",
+      "description": "seltsame und wunderbare Dinge finden oder bekannte Dinge finden",
+      "detailDescription": "Der archetypische Sucher wird durch den Mechanismus des Interesses motiviert, der mit dem Gehirnbereich zusammenhängt, der sensorische Informationen und Gedächtnisassoziationen verarbeitet. Die Begegnung mit reichhaltig interpretierbaren Mustern führt zur Ausschüttung von Endormorphin, das wiederum das Lustzentrum auslöst. Der Seeker-Typ ist neugierig auf die Spielwelt und genießt die Momente des Staunens.",
+      "exception": "Kein Wunder",
+      "exceptionDescription": "Du magst es nicht, wenn man dich bittet, nach Dingen zu suchen, sondern bevorzugst klar definierte Aufgaben."
+    },
+    "Survivor": {
+      "name": "Überlebenskünstler*in",
+      "description": "pulsierende Risiken und Flucht vor abscheulichen und furchterregenden Bedrohungen",
+      "detailDescription": "Während Terror eine starke negative Erfahrung ist, genießen manche Menschen die Intensität der damit verbundenen Erfahrung. Der mit diesem Typus verbundene Neurotransmitter ist Epinephrin, der chemische Grundstoff für Erregung, der die Wirkung von Dopamin (das durch Belohnungen ausgelöst wird) verstärkt. Der Erregungszustand, der mit Epinephrin verbunden ist, wird durch die Wirkung des Furchtzentrums, das hyperaktiv wird, wenn eine Situation als beängstigend eingeschätzt wird (aufgrund früherer Erfahrungen und bestimmter instinktiver Aversionen), zu einem Zustand der Angst. Es ist noch nicht klar, ob die Freude an der Angst anhand der Intensität der Schreckenserfahrung selbst oder anhand der danach empfundenen Erleichterung bewertet werden sollte.",
+      "exception": "Keine Furcht",
+      "exceptionDescription": "Sie haben nicht gerne Angst, sondern fühlen sich lieber sicher oder haben die Kontrolle."
+    },
+    "Daredevil": {
+      "name": "Draufgänger*in",
+      "description": "sich in großen Höhen oder mit hoher Geschwindigkeit zu bewegen, während man noch die Kontrolle hat",
+      "detailDescription": "Bei diesem Spielstil dreht sich alles um den Nervenkitzel der Verfolgung, die Aufregung der Risikobereitschaft und allgemein um das Spielen am Limit. Spielaktivitäten wie das Navigieren auf schwindelerregenden Plattformen oder das Herumhetzen mit hoher Geschwindigkeit, ohne die Kontrolle zu verlieren, sind typisch für diese Spielpräferenz. Das mit diesem Typus verbundene Verhalten konzentriert sich auf die Suche nach Nervenkitzel, Aufregung und Risikobereitschaft, und somit kann das bereits erwähnte Adrenalin als Belohnungsverstärker angesehen werden.",
+      "exception": "Kein Druck",
+      "exceptionDescription": "Sie mögen es nicht, wenn man Sie unter Druck setzt, sondern nehmen sich lieber Zeit, damit Sie die richtige Entscheidung treffen können."
+    },
+    "Mastermind": {
+      "name": "Strateg*in",
+      "description": "Lösen von Rätseln und Ausarbeiten von Strategien",
+      "detailDescription": "Ein teuflisches Rätsel, das sich nicht lösen lässt, oder ein Problem, das eine Strategie erfordert, um es zu lösen, ist für diesen Archetyp die Essenz des Spaßes. Spieler, die diesem Archetyp entsprechen, haben Spaß am Lösen von Rätseln und am Entwickeln von Strategien und konzentrieren sich darauf, die effizientesten Entscheidungen zu treffen. Wann immer Spieler vor Rätseln stehen oder Strategien entwickeln müssen, sorgen das Entscheidungszentrum des Gehirns und die enge Beziehung zwischen diesem und dem Vergnügungszentrum dafür, dass das Treffen guter Entscheidungen von Natur aus lohnend ist.",
+      "exception": "Keine Probleme",
+      "exceptionDescription": "Sie mögen es nicht, wenn man Sie bittet, Rätsel zu lösen oder Lösungen ohne klare Anweisungen zu erarbeiten."
+    },
+    "Conqueror": {
+      "name": "Eroberer*in",
+      "description": "Unmöglich schwierige Gegner besiegen, sich abmühen, bis man schließlich den Sieg erringt, und andere Spieler besiegen",
+      "detailDescription": "Some players are not satisfied with winning easily—they want to struggle against adversity. Players fitting the Conqueror archetype enjoy defeating impossibly difficult foes, struggling until they achieve victory, and beating other players. They behave forcefully, channeling their anger in order to achieve victory and thus experience fiero. When mammals face difficult situations, their body produces epinephrine (adrenalin) and norepinephrine, the former producing arousal and excitement and the latter are being associated with anger and combative tendencies. Anger serves to motivate opposition and to encourage persistence in the face of challenge. Testosterone may have an important role in this behavior.",
+      "exception": "Keine Bestrafung",
+      "exceptionDescription": "Du magst es nicht, dich durch scheinbar unmögliche Herausforderungen zu kämpfen und dieselbe Aufgabe immer wieder zu wiederholen."
+    },
+    "Socialiser": {
+      "name": "Netzwerker*in",
+      "description": "mit Leuten herumhängen, denen du vertraust, und anderen helfen",
+      "detailDescription": "Menschen sind eine Hauptquelle der Freude für Spieler, die dem Archetyp des Sozialisators entsprechen - sie reden gerne mit ihnen, sie helfen ihnen gerne, sie hängen gerne mit Leuten herum, denen sie vertrauen. Spieler, deren Vorliebe für das Spiel diesem Muster entspricht, neigen dazu, vertrauensvoll zu sein, und sie werden wütend auf diejenigen, die ihr Vertrauen missbrauchen. Dieses Verhalten steht in Verbindung mit dem sozialen Zentrum, der wichtigsten neuronalen Quelle von Oxytocin, einem Neurotransmitter, der nachweislich mit Vertrauen in Verbindung steht.",
+      "exception": "Keine Gnade",
+      "exceptionDescription": "Du kümmerst dich selten bis nie darum, die Gefühle anderer Spieler zu verletzen - Mitleid ist etwas für Schwache!"
+    },
+    "Achiever": {
+      "name": "Sammler*in",
+      "description": "alles sammeln, was man sammeln kann, oder alles tun, was man tun kann",
+      "detailDescription": "Während ein Eroberer als herausforderungsorientiert angesehen werden kann, ist der Archetyp des Erreichers expliziter zielorientiert und durch langfristige Erfolge motiviert. Diese Unterscheidung kann subtil sein, ist aber dennoch wichtig: Die Vorliebe für das Spiel im Achiever-Stil beruht auf dem \"Abhaken von Kästchen\", während die Vorliebe für das Spiel im Eroberer-Stil auf dem Besiegen von Herausforderungen beruht. Die Befriedigung, die beim Erreichen von Zielen empfunden wird, wird durch Dopamin (und damit durch das Lustzentrum) unterstützt, sollte aber so verstanden werden, dass sie letztlich zwanghaft ausgerichtet ist. Spieler, die etwas erreichen wollen, bevorzugen Spiele, die auf eine endgültige Vollendung abzielen. Während das Lustzentrum mit dieser Vorliebe zusammenhängt, spielt das Entscheidungszentrum wahrscheinlich auch eine Rolle: Subjektive Berichte von Spielern, die zum Achiever-Stil neigen, zeigen eine zwanghafte Fixierung auf das Erreichen von Zielen.",
+      "exception": "Keine Verpflichtung",
+      "exceptionDescription": "Du magst es nicht, wenn man dich bittet, alles zu erledigen. Du wählst lieber aus, welche Aufgaben du versuchst, oder spielst einfach nur ein Spiel."
+    }
+  }
+}

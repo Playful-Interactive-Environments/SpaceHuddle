@@ -1,0 +1,78 @@
+{
+  "participant": {
+    "tips": "Nachhaltigkeitstipps"
+  },
+  "enum": {
+    "rating": {
+      "5": "stimmt völlig",
+      "4": "stimmt fas",
+      "3": "unentschieden",
+      "2": "stimmt ein wenig",
+      "1": "stimmt gar nicht"
+    }
+  },
+  "questions": {
+    "When I buy clothes, I always pay attention to the brand After all, I want to belong": {
+      "text": "Wenn ich mir Klamotten kaufe, dann achte ich grundsätzlich auf die Marke. Schließlich will ich dazugehören.",
+      "keyword": "Marken"
+    },
+    "Shopping is not a necessary evil, its almost a hobby I buy something even if I dont actually need it": {
+      "text": "Einkaufen und Shoppen sind kein notweniges Übel, sondern fast ein Hobby. Ich kaufe auch dann etwas, wenn ich es eigentlich gar nicht benötige.",
+      "keyword": "Hobby"
+    },
+    "When I go shopping, I usually spend more money than I actually wanted to": {
+      "text": "Wenn ich shoppen gehe, gebe ich meist mehr Geld aus, als ich eigentlich wollte.",
+      "keyword": "Geld"
+    },
+    "When I go shopping, I dont care about the price I buy what I feel like buying": {
+      "text": "Beim Einkaufen und Shoppen ist mir der Preis egal. Ich kaufe, wozu ich gerade Lust habe.",
+      "keyword": "Preis"
+    },
+    "Do I wash or dry clean myself? - When shopping, I rarely or never pay attention to the care instructions on the garment": {
+      "text": "Selbst waschen oder reinigen? – Beim Einkaufen achte ich selten oder gar nicht auf die Pflegehinweise im Kleidungsstück.",
+      "keyword": "Pflegehinweise"
+    },
+    "I dont care about test, quality and environmental labels when making my purchasing decisions": {
+      "text": "Test-, Qualitäts- und Umweltsiegel sind mir bei meinen Kaufentscheidungen egal.",
+      "keyword": "Qualität"
+    },
+    "Comparing prices is for bores I buy straight away Not that someone else will snatch it away from me": {
+      "text": "Preise vergleichen ist etwas für Langweiler. Ich kaufe sofort. Nicht, dass es mir jemand anderes wegschnappt.",
+      "keyword": "Preis"
+    },
+    "If I see an item of clothing or accessory that I like on my favorite movie, TV or music star, then I have to have it": {
+      "text": "Sehe ich bei meinen Lieblingsstar aus Film, Fernsehen oder Musik ein Kleidungsstück oder Accessoire, das mir gut gefällt, dann muss ich es auch haben.",
+      "keyword": "Stars"
+    },
+    "Im not interested in the conditions under which clothes are made The main thing is that they are cheap - no matter how much money I have at my disposal": {
+      "text": "Unter welchen Bedingungen Klamotten hergestellt werden, interessiert mich nicht. Hauptsache sie sind billig – Egal wie viel Geld ich zur Verfügung habe.",
+      "keyword": "Herstellung"
+    },
+    "Im very interested in what other people think is cool Fashion and lifestyle magazines are therefore my favorite reading": {
+      "text": "Was andere Menschen als cool empfinden interessiert mich sehr. Mode- und Lifestyle-Magazine sind deshalb meine bevorzugte Lektüre.",
+      "keyword": "Lifestyle"
+    }
+  },
+  "result": {
+    "bargain": {
+      "name": "Schnäppchenjäger*in",
+      "description": "Als Schnäppchenjäger macht dir beim Sparen keiner etwas vor – du achtest auf jeden Cent und überlegst dir jeden deiner Käufe gut. Verkaufstricks ziehen bei dir nur dann, wenn der Preis stimmt!",
+      "tips": "# Secondhand-Shoppen, finde tolle und preiswerte Einzelstücke, die deine Geldbörse und gleichzeitig auch die Umwelt schonen.  # Reparieren statt wegwerfen, viele Dinge lassen sich mit etwas Geschick kostengünstig wieder instand setzen. So kannst du richtig sparen und gleichzeitig auch etwas Gutes für unsere Erde tun. # Schnäppchen sind zwar toll, aber häufig von schlechterer Qualität und unter dürftigen Bedingungen produziert worden. Hast du schon einmal überlegt, in Zukunft neben dem Preis auch auf andere Faktoren (z. B. Arbeitsbedingungen, Umweltsiegel etc.) zu achten? "
+    },
+    "deliberate": {
+      "name": "überlegte Käufer*in",
+      "description": "Bevor du etwas kaufst, überlegst du gut, ob du es dir leisten kannst und vergleichst die Preise. Deine Kaufentscheidungen sind daher gut durchdacht. Beim Einkaufen achtest du auf Qualität und Pflegeeigenschaften, nicht auf Marken. Gütesiegel sowie Test- und Qualitätssiegel sind dir wichtig, denn nicht nur Qualität, auch Mensch und Natur liegen dir am Herzen. Setze weiterhin deinen Verstand ein, lass dir Zeit mit deinen Entscheidungen und konsumiere qualitativ hochwertig sowie nachhaltig für Mensch, Natur, Umwelt und deinen Geldbeutel. Da du dein Einkaufverhalten ohnehin gut im Griff zu haben scheinst, verzichten wir bei dir auf Tipps und eine Belehrung. Weiter so!",
+      "tips": ""
+    },
+    "impulsive": {
+      "name": "impulsive Käufer*in",
+      "description": "Du kaufst, weil es dir Spaß macht und weil es dir ein gutes Gefühl gibt. Zeit für lange Überlegungen nimmst du dir dabei nicht, denn du bist dir in deiner Entscheidung schnell sicher. Der Preis, das Produktlabel und die Art und Weise, wie es produziert wurde, sind dabei meist nebensächlich. ",
+      "tips": "# Limits setzen und Liste schreiben. Überlege dir, bevor du einkaufen gehst, was du wirklich brauchst. Achte beim Shoppen dann gar nicht auf andere Artikel, sondern konzentriere dich auch deine Liste. Setze dir zudem ein Budgetlimit, an welches du dich strikt hältst.  # Kaufe nur in Ausnahmefällen sofort. Wenn dir etwas gefällt, gehe doch noch eine Runde spazieren oder ein Geschäft weiter, bevor du den Artikel tatsächlich kaufst. Das ist wichtig, denn übermäßiger Konsum schadet der Umwelt, indem unnötig Ressourcen verschwendet werden.  # Qualität statt Quantität. Entscheide dich bewusst für weniger, aber qualitativ hochwertige Produkte, die vielseitig einsetzbar sind. Es gibt noch andere Dinge im Leben, die Spaß machen, es muss nicht unbedingt nur shoppen sein! "
+    },
+    "brands": {
+      "name": "Marken-Shopper*in",
+      "description": "Shoppen ist dein Hobby. Was andere von dir halten, ist dir wichtig. Du bist ein Trendsetter und Film—und Fernsehstars sind deine Vorbilder. Auf den Preis achtest du so gut wie nie, Hauptsache das Produkt, dass du kaufst, gefällt dir und du bist angesagt. Ein großes Problem bei dir ist, dass du häufig mehr Geld ausgibst, als du überhaupt zur Verfügung hast. Aber auch als Trendsetter kann man nachhaltig, gleichzeitig stylisch und preisbewusst einkaufen. ",
+      "tips": "# Informiere dich über die Nachhaltigkeitsstandards deiner Lieblingsmarken. Viele Marken setzten mittlerweile zunehmend auf faire und umweltfreundliche Produktion. So bist du angesagt und tust auch noch etwas Gutes für unseren Planeten. # Konsumiere bewusster. Man muss nicht bei jedem Trend dabei sein und immer das Neuste vom Neuesten haben. Viele Menschen mögen dich bestimmt wegen deiner inneren Werte und nicht, weil deine Kleidung so schön und angesagt ist.  # Verkaufe Kleidung, die nicht mehr im Trend ist. So kannst du einen Teil vom Kaufpreis wieder einnehmen und anderen sowie unserer Erde eine Freude bereiten. "
+    }
+  }
+}

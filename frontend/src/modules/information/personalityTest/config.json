@@ -1,0 +1,8 @@
+{
+  "icon": "face-rolling-eyes",
+  "iconPrefix": "fas",
+  "type": "main",
+  "input": "no",
+  "syncPublicParticipant": false,
+  "finishManuel": false
+}

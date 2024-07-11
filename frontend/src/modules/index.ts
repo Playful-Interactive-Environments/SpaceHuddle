@@ -257,6 +257,20 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
               locales[taskKey][moduleKey] = value.default;
             }
           );
+          if (module.sub_locales) {
+            const list = module.sub_locales
+              .split(',')
+              .map((item) => item.trim());
+            for (const item of list) {
+              if (item.length > 0) {
+                await import(
+                  `@/modules/${module.path}/locales/${item}/${locale}.json`
+                ).then((value) => {
+                  locales[taskKey][moduleKey][item] = value.default;
+                });
+              }
+            }
+          }
         }
       }
     } else {

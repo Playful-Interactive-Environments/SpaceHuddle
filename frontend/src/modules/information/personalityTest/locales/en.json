@@ -1,0 +1,20 @@
+{
+  "description": {
+    "title": "Personality Test",
+    "description": "Find out who you are."
+  },
+  "moderatorConfig": {
+    "test": "test"
+  },
+  "moderatorContent": {
+  },
+  "publicScreen": {
+  },
+  "participant": {
+    "thanksIndividual": "Your answer has been saved.",
+    "previous": "previous",
+    "next": "next",
+    "submit": "Save",
+    "waiting": "Please wait. Questions and answers are being loaded."
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "participant": {
+    "tips": "Sustainability tips"
+  },
+  "enum": {
+    "rating": {
+      "5": "I love it!",
+      "4": "I like it!",
+      "3": "It's okay!",
+      "2": "I dislike it!",
+      "1": "I hate it!"
+    }
+  },
+  "questions": {
+    "When I buy clothes, I always pay attention to the brand After all, I want to belong": {
+      "text": "When I buy clothes, I always pay attention to the brand. After all, I want to belong.",
+      "keyword": "brands"
+    },
+    "Shopping is not a necessary evil, it's almost a hobby I buy something even if I don't actually need it": {
+      "text": "Shopping is not a necessary evil, it's almost a hobby. I buy something even if I don't actually need it.",
+      "keyword": "hobby"
+    },
+    "When I go shopping, I usually spend more money than I actually wanted to": {
+      "text": "When I go shopping, I usually spend more money than I actually wanted to.",
+      "keyword": "money"
+    },
+    "When I go shopping, I don't care about the price I buy what I feel like buying": {
+      "text": "When I go shopping, I don't care about the price. I buy what I feel like buying.",
+      "keyword": "price"
+    },
+    "Do I wash or dry clean myself? - When shopping, I rarely or never pay attention to the care instructions on the garment": {
+      "text": "Do I wash or dry clean myself? - When shopping, I rarely or never pay attention to the care instructions on the garment.",
+      "keyword": "care instructions"
+    },
+    "I don't care about test, quality and environmental labels when making my purchasing decisions": {
+      "text": "I don't care about test, quality and environmental labels when making my purchasing decisions.",
+      "keyword": "quality"
+    },
+    "Comparing prices is for bores I buy straight away Not that someone else will snatch it away from me": {
+      "text": "Comparing prices is for bores. I buy straight away. Not that someone else will snatch it away from me.",
+      "keyword": "price"
+    },
+    "If I see an item of clothing or accessory that I like on my favorite movie, TV or music star, then I have to have it": {
+      "text": "If I see an item of clothing or accessory that I like on my favorite movie, TV or music star, then I have to have it.",
+      "keyword": "stars"
+    },
+    "I'm not interested in the conditions under which clothes are made The main thing is that they are cheap - no matter how much money I have at my disposal": {
+      "text": "I'm not interested in the conditions under which clothes are made. The main thing is that they are cheap - no matter how much money I have at my disposal.",
+      "keyword": "manufacturing"
+    },
+    "I'm very interested in what other people think is cool Fashion and lifestyle magazines are therefore my favorite reading": {
+      "text": "I'm very interested in what other people think is cool. Fashion and lifestyle magazines are therefore my favorite reading.",
+      "keyword": "lifestyle"
+    }
+  },
+  "result": {
+    "bargain": {
+      "name": "Bargain hunter",
+      "description": "As a bargain hunter, no one can fool you when it comes to saving money - you watch every penny and think carefully about every purchase you make. Sales tricks only work for you if the price is right!",
+      "tips": "# Second-hand shopping, find great and inexpensive individual items that are easy on your wallet and the environment at the same time.  # Repair instead of throwing away, many things can be repaired inexpensively with a little skill. This way you can save money and do something good for our planet at the same time. # Bargain items may be great, but they are often of poor quality and produced under poor conditions. Have you ever considered paying attention to other factors besides price (e.g. working conditions, environmental labels, etc.) in future?"
+    },
+    "deliberate": {
+      "name": "deliberate buyer",
+      "description": "Before you buy something, you think carefully about whether you can afford it and compare prices. Your purchasing decisions are therefore well thought out. When shopping, you pay attention to quality and care properties, not brands. Quality seals as well as test and quality labels are important to you, because you care not only about quality, but also about people and nature. Continue to use your brain, take your time with your decisions and consume high-quality and sustainable products for people, nature, the environment and your wallet. As you seem to have your shopping behavior under control anyway, we won't give you any tips or instructions. Keep up the good work!",
+      "tips": ""
+    },
+    "impulsive": {
+      "name": "impulsive buyer",
+      "description": "You buy because you enjoy it and because it makes you feel good. You don't take time for long deliberations because you are quickly sure of your decision. The price, the product label and the way it was produced are usually irrelevant. ",
+      "tips": "# Set limits and write a list. Think about what you really need before you go shopping. Don't pay attention to other items when shopping, but concentrate on your list. Set yourself a budget limit and stick strictly to it.  # Buy immediately only in exceptional cases. If you like something, go for a walk or to the next store before you actually buy it. This is important because overconsumption harms the environment by wasting resources unnecessarily.  # Quality instead of quantity. Make a conscious decision to buy fewer, high-quality products that can be used in a variety of ways. There are other things in life that are fun, it doesn't necessarily have to be just shopping!"
+    },
+    "brands": {
+      "name": "Brand shopper",
+      "description": "Shopping is your hobby. What others think of you is important to you. You're a trendsetter and movie and TV stars are your role models. You hardly ever pay attention to the price, the main thing is that you like the product you buy and you are fashionable. A big problem with you is that you often spend more money than you have available. But even as a trendsetter, you can shop sustainably, stylishly and price-consciously. ",
+      "tips": "# Inform yourself about the sustainability standards of your favorite brands. Many brands are now increasingly focusing on fair and environmentally friendly production. This way, you'll be trendy and also do something good for our planet. # Consume more consciously. You don't have to be part of every trend and always have the latest thing. Many people will like you because of your inner values and not because your clothes are so beautiful and trendy.  # Sell clothes that are no longer trendy. This way you can recoup part of the purchase price and bring joy to others and our planet. "
+    }
+  }
+}

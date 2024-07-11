@@ -29,12 +29,19 @@ function createDetailConfig($path) {
         $locales = scandir($pathLocales);
         if (count($locales) > 0) {
             $locale_list = "";
+            $sub_locale_list = "";
             foreach($locales as $localeFile) {
                 if($localeFile == '.' || $localeFile == '..') continue;
-                $locale = explode('.', $localeFile)[0];
-                $locale_list = "$locale_list$locale, ";
+                if (str_contains($localeFile, '.')) {
+                    $locale = explode('.', $localeFile)[0];
+                    $locale_list = "$locale_list$locale, ";
+                } else {
+                    $sub_locale_list = "$sub_locale_list$localeFile, ";
+                }
             }
             $detailConfig['locales'] = $locale_list;
+            if (strlen($sub_locale_list) > 0)
+                $detailConfig['sub_locales'] = $sub_locale_list;
         }
     }
 

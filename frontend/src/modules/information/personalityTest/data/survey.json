@@ -1,0 +1,199 @@
+{
+  "brainhex": {
+    "questions": [
+      {
+        "question": "Exploring to see what you can find.",
+        "type": "rating",
+        "resultType": "Seeker"
+      },
+      {
+        "question": "Frantically escaping from a terrifying foe.",
+        "type": "rating",
+        "resultType": "Survivor"
+      },
+      {
+        "question": "Working out how to crack a challenging puzzle.",
+        "type": "rating",
+        "resultType": "Mastermind"
+      },
+      {
+        "question": "The struggle to difficult boss.",
+        "type": "rating",
+        "resultType": "Conqueror"
+      },
+      {
+        "question": "Playing in a group, online or in the same room.",
+        "type": "rating",
+        "resultType": "Socialiser"
+      },
+      {
+        "question": "Responding quickly to an exciting situation.",
+        "type": "rating",
+        "resultType": "Daredevil"
+      },
+      {
+        "question": "Picking up every single collectible in an area.",
+        "type": "rating",
+        "resultType": "Achiever"
+      },
+      {
+        "question": "Looking around just to enjoy the scenery.",
+        "type": "rating",
+        "resultType": "Seeker"
+      },
+      {
+        "question": "Being in control at high speed.",
+        "type": "rating",
+        "resultType": "Daredevil"
+      },
+      {
+        "question": "Devising a promising strategy when deciding what to try next.",
+        "type": "rating",
+        "resultType": "Mastermind"
+      },
+      {
+        "question": "Feeling relief when you escape to a safe area.",
+        "type": "rating",
+        "resultType": "Survivor"
+      },
+      {
+        "question": "Taking on a strong opponent when playing against a human player in a versus match.",
+        "type": "rating",
+        "resultType": "Conqueror"
+      },
+      {
+        "question": "Talking with other players, online or in the same room.",
+        "type": "rating",
+        "resultType": "Socialiser"
+      },
+      {
+        "question": "Finding what you need to complete a collection.",
+        "type": "rating",
+        "resultType": "Achiever"
+      },
+      {
+        "question": "Hanging from a high ledge.",
+        "type": "rating",
+        "resultType": "Daredevil"
+      },
+      {
+        "question": "Wondering what's behind a locked door.",
+        "type": "rating",
+        "resultType": "Seeker"
+      },
+      {
+        "question": "Feeling scared, terrified or disturbed.",
+        "type": "rating",
+        "resultType": "Survivor"
+      },
+      {
+        "question": "Working out what to do on your own.",
+        "type": "rating",
+        "resultType": "Mastermind"
+      },
+      {
+        "question": "Completing a punishing challenge after failing many times.",
+        "type": "rating",
+        "resultType": "Conqueror"
+      },
+      {
+        "question": "Co-operating with strangers.",
+        "type": "rating",
+        "resultType": "Socialiser"
+      },
+      {
+        "question": "Getting 100% (completing everything in a game).",
+        "type": "rating",
+        "resultType": "Achiever"
+      },
+      {
+        "question": "Arrange the following experiences into a sequence from best to worst.",
+        "type": "order",
+        "options": [
+          {
+            "answer": "A moment of jaw-dropping wonder or beauty.",
+            "resultType": "Seeker"
+          },
+          {
+            "answer": "An experience of primeval terror that blows your mind.",
+            "resultType": "Survivor"
+          },
+          {
+            "answer": "A moment of breathtaking speed or vertigo.",
+            "resultType": "Daredevil"
+          },
+          {
+            "answer": "The moment when the solution to a difficult puzzle clicks in your mind.",
+            "resultType": "Mastermind"
+          },
+          {
+            "answer": "A moment of hard-fought victory.",
+            "resultType": "Conqueror"
+          },
+          {
+            "answer": "A moment when you feel an intense sense of unity with another player.",
+            "resultType": "Socialiser"
+          },
+          {
+            "answer": "A moment of completeness that you have strived for.",
+            "resultType": "Achiever"
+          }
+        ]
+      }
+    ],
+    "result": ["Seeker","Survivor","Daredevil","Mastermind","Conqueror","Socialiser","Achiever"],
+    "calculation": {
+      "file": "BrainhexType",
+      "class": "BrainhexCalculation"
+    }
+  },
+  "shopping": {
+    "questions": [
+      {
+        "question": "When I buy clothes, I always pay attention to the brand. After all, I want to belong.",
+        "type": "rating"
+      },
+      {
+        "question": "Shopping is not a necessary evil, it's almost a hobby. I buy something even if I don't actually need it.",
+        "type": "rating"
+      },
+      {
+        "question": "When I go shopping, I usually spend more money than I actually wanted to.",
+        "type": "rating"
+      },
+      {
+        "question": "When I go shopping, I don't care about the price. I buy what I feel like buying.",
+        "type": "rating"
+      },
+      {
+        "question": "Do I wash or dry clean myself? - When shopping, I rarely or never pay attention to the care instructions on the garment.",
+        "type": "rating"
+      },
+      {
+        "question": "I don't care about test, quality and environmental labels when making my purchasing decisions.",
+        "type": "rating"
+      },
+      {
+        "question": "Comparing prices is for bores. I buy straight away. Not that someone else will snatch it away from me.",
+        "type": "rating"
+      },
+      {
+        "question": "If I see an item of clothing or accessory that I like on my favorite movie, TV or music star, then I have to have it.",
+        "type": "rating"
+      },
+      {
+        "question": "I'm not interested in the conditions under which clothes are made. The main thing is that they are cheap - no matter how much money I have at my disposal.",
+        "type": "rating"
+      },
+      {
+        "question": "I'm very interested in what other people think is cool. Fashion and lifestyle magazines are therefore my favorite reading.",
+        "type": "rating"
+      }
+    ],
+    "result": ["bargain","deliberate","impulsive","brands"],
+    "calculation": {
+      "file": "ShoppingType",
+      "class": "ShoppingCalculation"
+    }
+  }
+}

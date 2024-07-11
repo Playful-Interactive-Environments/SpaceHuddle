@@ -1,0 +1,150 @@
+{
+  "participant": {
+    "primary": "Primary Class",
+    "secondary": "Secondary Class",
+    "exception": "Exception Class",
+    "youLike": "You like",
+    "asWell": "as well as",
+    "dislike": "Each BrainHex Class also has an Exception, which describes what you dislike about playing games. Your Exceptions are:",
+    "noDislike": "According to your results, there are few play experiences that you strongly dislike.",
+    "score": "Your scores for each of the classes in this test were as follows:"
+  },
+  "enum": {
+    "rating": {
+      "5": "I love it!",
+      "4": "I like it!",
+      "3": "It's okay!",
+      "2": "I dislike it!",
+      "1": "I hate it!"
+    }
+  },
+  "questions": {
+    "Exploring to see what you can find": {
+      "text": "Exploring to see what you can find."
+    },
+    "Frantically escaping from a terrifying foe": {
+      "text": "Frantically escaping from a terrifying foe."
+    },
+    "Working out how to crack a challenging puzzle": {
+      "text": "Working out how to crack a challenging puzzle."
+    },
+    "The struggle to difficult boss": {
+      "text": "The struggle to difficult boss."
+    },
+    "Playing in a group, online or in the same room": {
+      "text": "Playing in a group, online or in the same room."
+    },
+    "Responding quickly to an exciting situation": {
+      "text": "Responding quickly to an exciting situation."
+    },
+    "Picking up every single collectible in an area": {
+      "text": "Picking up every single collectible in an area."
+    },
+    "Looking around just to enjoy the scenery": {
+      "text": "Looking around just to enjoy the scenery."
+    },
+    "Being in control at high speed": {
+      "text": "Being in control at high speed."
+    },
+    "Devising a promising strategy when deciding what to try next": {
+      "text": "Devising a promising strategy when deciding what to try next."
+    },
+    "Feeling relief when you escape to a safe area": {
+      "text": "Feeling relief when you escape to a safe area."
+    },
+    "Taking on a strong opponent when playing against a human player in a versus match": {
+      "text": "Taking on a strong opponent when playing against a human player in a versus match."
+    },
+    "Talking with other players, online or in the same room": {
+      "text": "Talking with other players, online or in the same room."
+    },
+    "Finding what you need to complete a collection": {
+      "text": "Finding what you need to complete a collection."
+    },
+    "Hanging from a high ledge": {
+      "text": "Hanging from a high ledge."
+    },
+    "Wondering whats behind a locked door": {
+      "text": "Wondering what's behind a locked door."
+    },
+    "Feeling scared, terrified or disturbed": {
+      "text": "Feeling scared, terrified or disturbed."
+    },
+    "Working out what to do on your own": {
+      "text": "Working out what to do on your own."
+    },
+    "Completing a punishing challenge after failing many times": {
+      "text": "Completing a punishing challenge after failing many times."
+    },
+    "Co-operating with strangers": {
+      "text": "Co-operating with strangers."
+    },
+    "Getting 100% (completing everything in a game)": {
+      "text": "Getting 100% (completing everything in a game)."
+    },
+    "Arrange the following experiences into a sequence from best to worst": {
+      "text": "Arrange the following experiences into a sequence from best to worst.",
+      "keyword": "order"
+    }
+  },
+  "answers": {
+    "A moment of jaw-dropping wonder or beauty": "A moment of jaw-dropping wonder or beauty.",
+    "An experience of primeval terror that blows your mind": "An experience of primeval terror that blows your mind.",
+    "A moment of breathtaking speed or vertigo": "A moment of breathtaking speed or vertigo.",
+    "The moment when the solution to a difficult puzzle clicks in your mind": "The moment when the solution to a difficult puzzle clicks in your mind.",
+    "A moment of hard-fought victory": "A moment of hard-fought victory.",
+    "A moment when you feel an intense sense of unity with another player": "A moment when you feel an intense sense of unity with another player.",
+    "A moment of completeness that you have strived for": "A moment of completeness that you have strived for."
+  },
+  "result": {
+    "Seeker": {
+      "name": "seeker",
+      "description": "finding strange and wonderful things or finding familiar things",
+      "detailDescription": "The archetypal Seeker is motivated by interest mechanism, which relates to the brain area processing sensory information and memory association. Encountering richly interpretable patterns produces endormorphin, which in turn triggers the pleasure center. The Seeker type is curious about the game world and enjoys moments of wonder.",
+      "exception": "No Wonder",
+      "exceptionDescription": "You dislike being asked to search for things, preferring clearly defined tasks."
+    },
+    "Survivor": {
+      "name": "survivor",
+      "description": "pulse-pounding risks and escaping from hideous and scary threats",
+      "detailDescription": "While terror is a strong negative experience, some people enjoy the intensity of the associated experience. The neurotransmitter related to this type is epinephrine, the chemical underpinning of excitement, which enhances the effects of dopamine (triggered when rewards are received). The state of arousal associated with epinephrine becomes that of terror as a result of the action of the fear center, which becomes hyperactive when a situation is assessed as frightening (based on prior experience, and certain instinctive aversions). It is not yet clear whether the enjoyment of fear should be assessed in terms of the intensity of the experience of terror itself, or in terms of the relief felt afterwards.",
+      "exception": "No Fear",
+      "exceptionDescription": "You do not enjoy feeling afraid, preferring to feel safe or in control."
+    },
+    "Daredevil": {
+      "name": "daredevil",
+      "description": "rushing around at heights or high speed while you are still in control",
+      "detailDescription": "This play style is all about the thrill of the chase, the excitement of risk taking and generally playing on the edge. Game activities such as navigating dizzying platforms or rushing around at high speeds while still in control typify the implied play preference. The behavior related to this type is focused around thrill seeking, excitement and risk taking, and thus epinephrine, which was already mentioned, can be seen as a reward enhancer.",
+      "exception": "No Pressure",
+      "exceptionDescription": "You dislike being asked to perform under pressure, preferring to take your time so you can make the right decision."
+    },
+    "Mastermind": {
+      "name": "mastermind",
+      "description": "solving puzzles and devising strategies",
+      "detailDescription": "A fiendish puzzle that defies solution or a problem that requires strategy to overcome is the essence of fun to this archetype. Players who fit this archetype enjoy solving puzzles and devising strategies, as well as focusing on making the most efficient decisions. Whenever players face puzzles or must devise strategies, the decision center of the brain and the close relationship between this and the pleasure center ensures that making good decisions is inherently rewarding.",
+      "exception": "No Problems",
+      "exceptionDescription": "You dislike being asked to solve puzzles or work out solutions without clear instructions."
+    },
+    "Conqueror": {
+      "name": "conqueror",
+      "description": "defeating impossibly difficult foes, struggling until you eventually achieve victory, and beating other players",
+      "detailDescription": "Some players are not satisfied with winning easily—they want to struggle against adversity. Players fitting the Conqueror archetype enjoy defeating impossibly difficult foes, struggling until they achieve victory, and beating other players. They behave forcefully, channeling their anger in order to achieve victory and thus experience fiero. When mammals face difficult situations, their body produces epinephrine (adrenalin) and norepinephrine, the former producing arousal and excitement and the latter are being associated with anger and combative tendencies. Anger serves to motivate opposition and to encourage persistence in the face of challenge. Testosterone may have an important role in this behavior.",
+      "exception": "No Punishment",
+      "exceptionDescription": "You dislike struggling to overcome seemingly impossible challenges, and repeating the same task over and over again."
+    },
+    "Socialiser": {
+      "name": "socialiser",
+      "description": "hanging around with people you trust and helping people",
+      "detailDescription": "People are a primary source of enjoyment for players fitting a Socialiser archetype—they like talking to them, they like helping them, they like hanging around with people they trust. Players whose preference for play fits this pattern tend to be trusting, and they get angry at those who abuse their trust. This behavior connects to the social center, and which is the principal neural source of oxytocin, a neurotransmitter demonstrated to have a connection with trust.",
+      "exception": "No Mercy",
+      "exceptionDescription": "You rarely if ever care about hurting other players' feelings - mercy is for the weak!"
+    },
+    "Achiever": {
+      "name": "achiever",
+      "description": "collecting anything you can collect or doing everything you possibly can",
+      "detailDescription": "While a Conqueror can be seen as challenge-oriented, the Achiever archetype is more explicitly goal-oriented, motivated by long-term achievements. This distinction can be subtle, but it is nonetheless important: preference for Achiever-style play is rooted in ‘ticking boxes’, while preference for Conqueror-style play is rooted in defeating challenges. The satisfaction felt on attaining goals is underpinned by dopamine (and hence the pleasure center) but should be understood as being ultimately obsessive in its focus. Achievers prefer games amenable to ultimate completion. While the pleasure center is related to this preference, the decision center likely plays a role: subjective reports from players tending toward Achiever-style play show a compulsive fixation on reaching goals.",
+      "exception": "No Commitment",
+      "exceptionDescription": "You dislike being asked to complete everything, preferring to pick and choose which tasks you will attempt, or simply messing around with a game."
+    }
+  }
+}

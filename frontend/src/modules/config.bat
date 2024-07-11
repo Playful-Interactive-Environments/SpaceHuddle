@@ -108,9 +108,18 @@ EXIT /B 0
                         set language=%%~G
                         set locales=!locales!!language:~0,2!,
                     )
+                    set sub_locales=
+                    for /f "delims=" %%G in ('dir /a:d /b') do (
+                        set sub=%%~G
+                        set sub_locales=!sub_locales!!sub!,
+                    )
                     if !task! neq none ( cd ..\..
                     ) else cd ..
                     echo            "locales": "!locales!",  >> .\..\config.json
+                    set empty=
+                    if !sub_locales! neq !empty! (
+                        echo            "sub_locales": "!sub_locales!",  >> .\..\config.json
+                    )
                 )
 
                 if exist !modulePath!config.json (

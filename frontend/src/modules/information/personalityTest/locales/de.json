@@ -1,0 +1,20 @@
+{
+  "description": {
+    "title": "Persönlichkeitstest",
+    "description": "Finde heraus wer du bist."
+  },
+  "moderatorConfig": {
+    "test": "Test"
+  },
+  "moderatorContent": {
+  },
+  "publicScreen": {
+  },
+  "participant": {
+    "thanksIndividual": "Deine Antwort wurde gespeichert.",
+    "previous": "zurück",
+    "next": "weiter",
+    "submit": "Speichern",
+    "waiting": "Bitte warten. Fragen und Antworten werden geladen."
+  }
+}
