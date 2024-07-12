@@ -1,0 +1,195 @@
+{
+  "participant": {
+    "primary": "Primärklasse",
+    "secondary": "Sekundärklasse",
+    "score": "Du hast für jede der Klassen in diesem Test die folgende Punktzahl erreicht:"
+  },
+  "enum": {
+    "rating": {
+      "1": "gar nicht",
+      "2": "wenig",
+      "3": "teils-teils",
+      "4": "ziemlich",
+      "5": "völlig"
+    }
+  },
+  "questions": {
+    "Being with other people generally gives me a lot of energy": {
+      "text": "Der Umgang mit anderen Leuten gibt mir im Allgemeinen viel Energie."
+    },
+    "I feel most comfortable when I am alone": {
+      "text": "lch fühle mich am wohlsten, wenn ich alleine bin."
+    },
+    "I like meeting lots of people and having fun with them": {
+      "text": "lch treffe gerne viele Leute und habe SpaB mit ihnen."
+    },
+    "When Im with a lot of people, I prefer to stay in the background": {
+      "text": "Wenn ich mit vielen Menschen zusammen bin, halte ich mich lieber im Hintergrund."
+    },
+    "Talking to other people motivates me and brings out the best in me": {
+      "text": "Mich mit anderen Personen zu unterhalten motiviert mich und bringt mein Bestes zum Vorschein."
+    },
+    "I usually prefer to do things on my own": {
+      "text": "lch ziehe es gewöhnlich vor, Dinge alleine zu tun."
+    },
+    "I always enjoy meeting new people": {
+      "text": "lch habe immer Spaß daran, neue Menschen kennen zu lernen."
+    },
+    "Being with other people is often exhausting for me": {
+      "text": "Das Zusammensein mit anderen Menschen ist häufig anstrengend für mich."
+    },
+    "I feel best when I have lots of people around me": {
+      "text": "Es geht mir am besten, wenn ich viele Menschen um mich herum habe."
+    },
+    "I dont get enthusiastic about other people easily": {
+      "text": "lch kann mich nicht so schnell für andere Menschen begeistern."
+    },
+    "When Im working on something, Im easily distracted": {
+      "text": "Wenn ich an etwas arbeite, bin ich leicht abzulenken."
+    },
+    "If I have a plan, I do everything I can to realize it": {
+      "text": "Wenn ich einen Plan habe, dann tue ich alles, um ihn zu verwirklichen."
+    },
+    "When I encounter difficulties in executing a plan, I tend to give up quickly": {
+      "text": "Wenn ich bei der Ausführung eines Plans auf Schwierigkeiten stoße, neige ich dazu, schnell aufzugeben."
+    },
+    "I had no problem working hard for something, that will only bear fruit after a relatively long time": {
+      "text": "lch hatte keine Probleme damit, hart für etwas zu arbeiten, was erst nach relativ langer Zeit Früchte tragen wird."
+    },
+    "I often dont follow through with my plans": {
+      "text": "lch setze meine Plane oft nicht zu Ende durch."
+    },
+    "When Im following a plan, Im not easily distracted by short-term needs": {
+      "text": "Wenn ich einen Plan verfolge, lasse ich mich nicht leicht durch kurzfristige Bedürfnisse ablenken."
+    },
+    "I often set myself a goal without really trying to achieve it": {
+      "text": "lch habe mir oft ein Ziel gesetzt, ohne wirklich versucht zu haben, es zu erreichen."
+    },
+    "When I set myself a goal, I pursue it very doggedly": {
+      "text": "Wenn ich mir ein Ziel gesetzt habe, verfolge ich es sehr hartnäckig."
+    },
+    "It is very difficult for me to follow a plan if it requires me to ignore momentary needs": {
+      "text": "Es ist sehr schwierig für mich, einen Plan zu verfolgen, wenn dies erfordert, dass ich momentane Bedürfnisse ignoriere."
+    },
+    "When I set my mind to something, I stick to it, no matter how long it takes": {
+      "text": "Wenn ich mir ein Vorhaben in den Kopf gesetzt habe, dann bleibe ich dran, egal wie lange es dauert."
+    },
+    "Im rarely afraid that other people wont like me": {
+      "text": "lch habe selten Angst, dass andere Menschen mich nicht mögen."
+    },
+    "When I meet up with friends, I sometimes have the feeling that they talk badly about me afterwards": {
+      "text": "Wenn ich mich mit Freunden treffe, habe ich manchmal das Gefühl, dass sie hinterher schlecht über mich reden."
+    },
+    "I never doubt that I deserve to be accepted by others": {
+      "text": "lch zweifle nie daran, dass ich es verdiene, von anderen akzeptiert zu werden."
+    },
+    "I often doubt the permanence of my relationships": {
+      "text": "lch zweifle oft an der Beständigkeit meiner Beziehungen."
+    },
+    "Even if friends or relatives dont contact me for a long time, I dont assume that its because of me": {
+      "text": "Auch wenn sich Freunde oder Verwandte lange Zeit nicht bei mir melden, gehe ich nicht davon aus, dass es an mir liegt."
+    },
+    "If a person doesnt get in touch with me for a long time, I quickly start to question my relationship with them": {
+      "text": "Wenn sich eine Person langer nicht bei mir meldet, fange ich schnell an, die Beziehung zu ihr in Frage zu stellen."
+    },
+    "If someone important to me is behaving strangely, I rarely suspect that it might have something to do with me": {
+      "text": "Wenn eine mir wichtige Person sich irgendwie komisch verhalt, habe ich selten die Vermutung, dass dies etwas mit mir zu tun haben könnte."
+    },
+    "If other people let it be known that they dont like something about me, my mood can quickly turn negative": {
+      "text": "Wenn andere Menschen durchblicken lassen, dass sie etwas an mir nicht mögen, kann meine Stimmung recht schnell ins negative umschlagen."
+    },
+    "If friends or acquaintances dont pay enough attention to me, I rarely have the feeling that they dont like me anymore": {
+      "text": "Wenn Freunde oder Bekannte mir nicht genug Aufmerksamkeit schenken, habe ich selten dass Gefühl, dass sie mich nicht mehr mögen."
+    },
+    "If I receive signals of rejection from other people, I am immediately worried and think about the possible reason": {
+      "text": "Wenn ich von anderen Personen Signale der Ablehnung empfange, bin ich sofort beunruhigt und mache mir Gedanken über den möglichen Grund."
+    },
+    "I enjoy thinking about new solutions to problems": {
+      "text": "lch genieße es, über neue Lösungen für Probleme nachzudenken."
+    },
+    "For me, thinking is not associated with fun": {
+      "text": "Denken ist für mich nicht mit Spaß verbunden."
+    },
+    "I like to think about what society could look like in the future": {
+      "text": "lch denke gerne darüber nach, wie die Gesellschaft in Zukunft aussehen könnte."
+    },
+    "I dont like to think about things when there is no clear need for it": {
+      "text": "lch mag es nicht, über Dinge nachzudenken, wenn es dafür keine klare Notwendigkeit gibt."
+    },
+    "I love thinking about complex topics like the meaning of life or world politics": {
+      "text": "lch liebe es, über komplexe Themen wie den Sinn des Lebens oder die Weltpolitik nachzudenken."
+    },
+    "I dont like to play mind games": {
+      "text": "lch mag es nicht, Gedankenspiele anzustellen."
+    },
+    "I really like to keep myself mentally occupied": {
+      "text": "lch mag es sehr, mich geistig zu betätigen."
+    },
+    "I prefer to deal with everyday things rather than think about theoretical topics": {
+      "text": "lch beschaftige mich lieber mit alltaglichen Dingen, als über theoretische Themen nachzudenken."
+    },
+    "I feel best when I am challenged mentally": {
+      "text": "Es geht mir am besten, wenn ich geistig gefordert werde."
+    },
+    "I dont like thinking about unconventional ideas": {
+      "text": "lch mag es nicht, über unkonventionelle ldeen nachzudenken."
+    },
+    "I would rather share than compete with others to get something all for myself": {
+      "text": "Ich würde lieber teilen als mit anderen darum zu wetteifern, etwas ganz für mich zu bekommen."
+    },
+    "My own well-being is more important to me than other peoples problems": {
+      "text": "Mein eigenes Wohlbefinden ist mir wichtiger als die Probleme anderer Personen."
+    },
+    "I prefer not to assert my interests if they conflict with other peoples feelings": {
+      "text": "lch verzichte lieber darauf, meine Interessen durchzusetzen, wenn sie mit den Gefühlen anderer Leute im Konflikt stehen."
+    },
+    "I dont like to help other people if it puts me at a disadvantage": {
+      "text": "lch helfe anderen Menschen ungern, wenn mir daraus Nachteile entstehen."
+    },
+    "I like to be generous without expecting anything in return": {
+      "text": "lch bin gerne großzügig, ohne dafür eine Gegenleistung zu erwarten."
+    },
+    "In conflicts of interest with others, I always try to get the maximum for myself": {
+      "text": "Bei Interessenkonflikten mit Anderen versuche ich immer, das Maximale für mich herauszuholen."
+    },
+    "When I share something with others, I dont mind if others get more than I do": {
+      "text": "Wenn ich etwas mit anderen teile, finde ich es nicht schlimm, wenn andere mehr bekommen als ich selbst."
+    },
+    "I dont like to do a person a favor if I know that I wont get anything back from them later": {
+      "text": "lch tue einer Person ungern einen Gefallen, wenn ich weiß, dass ich später nichts von ihr zurückbekomme."
+    },
+    "I would help other people even if I had a lot of problems myself": {
+      "text": "lch würde anderen Personen auch dann helfen, wenn ich gerade selbst viele Probleme habe."
+    },
+    "I had no problems asserting my interests at the expense of others": {
+      "text": "lch hätte keine Probleme damit, meine Interessen auf Kosten anderer Personen durchzusetzen."
+    }
+  },
+  "result": {
+    "extraversion": {
+      "name": "Extroversion",
+      "description": "Dieser Faktor beschreibt Aktivität und zwischenmenschliches Verhalten. Er wird teilweise auch Begeisterungsfähigkeit (englisch: surgency) genannt.",
+      "characteristics": "# Personen mit hohen Extraversionswerten sind gesellig, aktiv, gesprächig, personenorientiert, herzlich, optimistisch und heiter. Sie sind zudem empfänglich für Anregungen und Aufregungen. # Introvertierte Personen sind zurückhaltend bei sozialen Interaktionen, gerne allein und unabhängig. Sie können auch sehr aktiv sein, aber weniger in Gesellschaft."
+    },
+    "conscientiousness": {
+      "name": "Gewissenhaftigkeit",
+      "description": "Dieser Faktor beschreibt in erster Linie den Grad an Selbstkontrolle, Genauigkeit und Zielstrebigkeit.",
+      "characteristics": "# Personen mit hohen Gewissenhaftigkeitswerten handeln organisiert, sorgfältig, planend, effektiv, verantwortlich, zuverlässig und überlegt. # Personen mit niedrigen Gewissenhaftigkeitswerten handeln unsorgfältig, spontan und ungenau."
+    },
+    "neuroticism": {
+      "name": "Neurotizismus",
+      "description": "Dieser Faktor spiegelt individuelle Unterschiede im Erleben von negativen Emotionen wider und wird von einigen Autoren auch als emotionale Labilität bezeichnet. Der Gegenpol wird auch als emotionale Stabilität, Zufriedenheit oder Ich-Stärke benannt.",
+      "characteristics": "# Personen mit einer hohen Ausprägung in Neurotizismus erleben häufiger Angst, Nervosität, Anspannung, Trauer, Unsicherheit und Verlegenheit. Zudem bleiben diese Empfindungen bei ihnen länger bestehen und werden leichter ausgelöst. Sie tendieren zu mehr Sorgen um ihre Gesundheit, neigen zu unrealistischen Ideen und haben Schwierigkeiten, in Stresssituationen angemessen zu reagieren. # Personen mit niedrigen Neurotizismuswerten sind eher ruhig, zufrieden, stabil, entspannt und sicher. Sie erleben seltener negative Gefühle. Dabei sind niedrige Werte nicht zwangsläufig mit dem Erleben von positiven Emotionen verbunden."
+    },
+    "openness": {
+      "name": "Offenheit",
+      "description": "Mit diesem Faktor wird das Interesse und das Ausmaß der Beschäftigung mit neuen Erfahrungen, Erlebnissen und Eindrücken beschrieben.",
+      "characteristics": "# Personen mit hohen Offenheitswerten geben häufig an, dass sie eine rege Fantasie haben, ihre positiven und negativen Gefühle deutlich wahrnehmen sowie an vielen persönlichen und öffentlichen Vorgängen interessiert sind. Sie beschreiben sich als wissbegierig, intellektuell, fantasievoll, experimentierfreudig und künstlerisch interessiert. Sie sind eher bereit, bestehende Normen kritisch zu hinterfragen und auf neuartige soziale, ethische und politische Wertvorstellungen einzugehen. Sie sind unabhängig in ihrem Urteil, verhalten sich häufig unkonventionell, erproben neue Handlungsweisen und bevorzugen Abwechslung. # Personen mit niedrigen Offenheitswerten neigen demgegenüber eher zu konventionellem Verhalten und zu konservativen Einstellungen. Sie ziehen Bekanntes und Bewährtes dem Neuen vor und sie nehmen ihre emotionalen Reaktionen eher gedämpft wahr."
+    },
+    "agreeableness": {
+      "name": "Verträglichkeit",
+      "description": "Ebenso wie Extraversion ist Verträglichkeit in erster Linie ein Faktor, der interpersonelles Verhalten beschreibt.",
+      "characteristics": "# Ein zentrales Merkmal von Personen mit hohen Verträglichkeitswerten ist ihr Altruismus. Sie begegnen anderen mit Verständnis, Wohlwollen und Mitgefühl, sie sind bemüht, anderen zu helfen, und überzeugt, dass diese sich ebenso hilfsbereit verhalten werden. Sie neigen zu zwischenmenschlichem Vertrauen, zur Kooperativität und zur Nachgiebigkeit. # Personen mit niedrigen Verträglichkeitswerten beschreiben sich im Gegensatz dazu als streitbar, egozentrisch, misstrauisch und antagonistisch gegenüber den Absichten anderer Menschen. Sie verhalten sich eher wettbewerbsorientiert als kooperativ."
+    }
+  }
+}

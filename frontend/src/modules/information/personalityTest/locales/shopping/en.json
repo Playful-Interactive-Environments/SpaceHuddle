@@ -4,11 +4,11 @@
   },
   "enum": {
     "rating": {
-      "5": "I love it!",
-      "4": "I like it!",
-      "3": "It's okay!",
-      "2": "I dislike it!",
-      "1": "I hate it!"
+      "5": "completely true",
+      "4": "almost agree",
+      "3": "undecided",
+      "2": "somewhat true",
+      "1": "not true at all"
     }
   },
   "questions": {

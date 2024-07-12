@@ -1,8 +1,5 @@
 <template>
-  <DetailResult
-    :task-id="taskId"
-    :show-exception="chartType !== ResultChartType.PUBLIC"
-  />
+  <DetailResult :task-id="taskId" />
   <DetailResult
     v-if="chartType === ResultChartType.STATISTIC"
     :task-id="taskId"
@@ -73,7 +70,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import DetailResult from '@/modules/information/personalityTest/organisms/ResultChart/brainhex/DetailResult.vue';
+import DetailResult from '@/modules/information/personalityTest/organisms/ResultChart/big5/DetailResult.vue';
 import { ResultChartType } from '@/modules/information/personalityTest/types/ResultChartType';
 import { Bar } from 'vue-chartjs';
 import { ChartData } from 'chart.js';
@@ -95,10 +92,10 @@ export default class ResultChart extends Vue {
   readonly chartType!: ResultChartType;
 
   ResultChartType = ResultChartType;
-  test = 'brainhex';
+  test = 'big5';
 
-  redValue = 0;
-  greenValue = 5;
+  redValue = 25;
+  greenValue = 35;
 
   barChartDataList: {
     title: string;

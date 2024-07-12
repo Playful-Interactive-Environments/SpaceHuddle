@@ -75,6 +75,7 @@ export default class QuizResult extends Vue {
   readonly questionType!: QuestionType;
   @Prop({ default: 'detailRatingSum' }) readonly resultColumn!: string;
   @Prop({ default: '' }) readonly test!: string;
+  @Prop({ default: false }) readonly showQuestionList!: boolean;
   @Prop({ default: true }) readonly showLegend!: true;
 
   QuestionType = QuestionType;
@@ -264,13 +265,21 @@ export default class QuizResult extends Vue {
       labels: ideas.map((idea) => {
         if (idea.description && this.questionType !== QuestionType.RATING) {
           return this.breakString(
-            this.$t(
-              `module.information.personalityTest.${
-                this.test
-              }.answers.${idea.description
-                .replaceAll('.', '')
-                .replaceAll("'", '')}`
-            ),
+            this.showQuestionList
+              ? this.$t(
+                  `module.information.personalityTest.${
+                    this.test
+                  }.questions.${idea.description
+                    .replaceAll('.', '')
+                    .replaceAll("'", '')}.text`
+                )
+              : this.$t(
+                  `module.information.personalityTest.${
+                    this.test
+                  }.answers.${idea.description
+                    .replaceAll('.', '')
+                    .replaceAll("'", '')}`
+                ),
             34
           );
         }

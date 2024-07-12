@@ -32,6 +32,7 @@ import {
   ArcElement,
   PointElement,
   Filler,
+  RadialLinearScale,
 } from 'chart.js';
 
 ChartJS.register(
@@ -44,7 +45,8 @@ ChartJS.register(
   LineElement,
   ArcElement,
   PointElement,
-  Filler
+  Filler,
+  RadialLinearScale
 );
 
 ChartJS.defaults.font.family =

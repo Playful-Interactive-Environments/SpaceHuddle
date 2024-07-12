@@ -195,5 +195,289 @@
       "file": "ShoppingType",
       "class": "ShoppingCalculation"
     }
+  },
+  "big5":  {
+    "questions": [
+      {
+        "question": "Being with other people generally gives me a lot of energy.",
+        "type": "rating",
+        "resultType": "extraversion"
+      },
+      {
+        "question": "I feel most comfortable when I am alone.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "extraversion"
+      },
+      {
+        "question": "I like meeting lots of people and having fun with them.",
+        "type": "rating",
+        "resultType": "extraversion"
+      },
+      {
+        "question": "When I'm with a lot of people, I prefer to stay in the background.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "extraversion"
+      },
+      {
+        "question": "Talking to other people motivates me and brings out the best in me.",
+        "type": "rating",
+        "resultType": "extraversion"
+      },
+      {
+        "question": "I usually prefer to do things on my own.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "extraversion"
+      },
+      {
+        "question": "I always enjoy meeting new people.",
+        "type": "rating",
+        "resultType": "extraversion"
+      },
+      {
+        "question": "Being with other people is often exhausting for me.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "extraversion"
+      },
+      {
+        "question": "I feel best when I have lots of people around me.",
+        "type": "rating",
+        "resultType": "extraversion"
+      },
+      {
+        "question": "I don't get enthusiastic about other people easily.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "extraversion"
+      },
+      {
+        "question": "When I'm working on something, I'm easily distracted.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "If I have a plan, I do everything I can to realize it.",
+        "type": "rating",
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "When I encounter difficulties in executing a plan, I tend to give up quickly.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "I had no problem working hard for something, that will only bear fruit after a relatively long time.",
+        "type": "rating",
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "I often don't follow through with my plans.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "When I'm following a plan, I'm not easily distracted by short-term needs.",
+        "type": "rating",
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "I often set myself a goal without really trying to achieve it.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "When I set myself a goal, I pursue it very doggedly.",
+        "type": "rating",
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "It is very difficult for me to follow a plan if it requires me to ignore momentary needs.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "When I set my mind to something, I stick to it, no matter how long it takes.",
+        "type": "rating",
+        "resultType": "conscientiousness"
+      },
+      {
+        "question": "I'm rarely afraid that other people won't like me.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "When I meet up with friends, I sometimes have the feeling that they talk badly about me afterwards.",
+        "type": "rating",
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "I never doubt that I deserve to be accepted by others.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "I often doubt the permanence of my relationships.",
+        "type": "rating",
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "Even if friends or relatives don't contact me for a long time, I don't assume that it's because of me.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "If a person doesn't get in touch with me for a long time, I quickly start to question my relationship with them.",
+        "type": "rating",
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "If someone important to me is behaving strangely, I rarely suspect that it might have something to do with me.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "If other people let it be known that they don't like something about me, my mood can quickly turn negative.",
+        "type": "rating",
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "If friends or acquaintances don't pay enough attention to me, I rarely have the feeling that they don't like me anymore.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "If I receive signals of rejection from other people, I am immediately worried and think about the possible reason.",
+        "type": "rating",
+        "resultType": "neuroticism"
+      },
+      {
+        "question": "I enjoy thinking about new solutions to problems.",
+        "type": "rating",
+        "resultType": "openness"
+      },
+      {
+        "question": "For me, thinking is not associated with fun.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "openness"
+      },
+      {
+        "question": "I like to think about what society could look like in the future.",
+        "type": "rating",
+        "resultType": "openness"
+      },
+      {
+        "question": "I don't like to think about things when there is no clear need for it.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "openness"
+      },
+      {
+        "question": "I love thinking about complex topics like the meaning of life or world politics.",
+        "type": "rating",
+        "resultType": "openness"
+      },
+      {
+        "question": "I don't like to play mind games.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "openness"
+      },
+      {
+        "question": "I really like to keep myself mentally occupied.",
+        "type": "rating",
+        "resultType": "openness"
+      },
+      {
+        "question": "I prefer to deal with everyday things rather than think about theoretical topics.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "openness"
+      },
+      {
+        "question": "I feel best when I am challenged mentally.",
+        "type": "rating",
+        "resultType": "openness"
+      },
+      {
+        "question": "I don't like thinking about unconventional ideas.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "openness"
+      },
+      {
+        "question": "I would rather share than compete with others to get something all for myself.",
+        "type": "rating",
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "My own well-being is more important to me than other people's problems.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "I prefer not to assert my interests if they conflict with other people's feelings.",
+        "type": "rating",
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "I don't like to help other people if it puts me at a disadvantage.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "I like to be generous without expecting anything in return.",
+        "type": "rating",
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "In conflicts of interest with others, I always try to get the maximum for myself.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "When I share something with others, I don't mind if others get more than I do.",
+        "type": "rating",
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "I don't like to do a person a favor if I know that I won't get anything back from them later.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "I would help other people even if I had a lot of problems myself.",
+        "type": "rating",
+        "resultType": "agreeableness"
+      },
+      {
+        "question": "I had no problems asserting my interests at the expense of others.",
+        "type": "rating",
+        "reverse": true,
+        "resultType": "agreeableness"
+      }
+    ],
+    "result": ["openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"],
+    "calculation": {
+      "file": "Big5Type",
+      "class": "Big5Calculation"
+    }
   }
 }

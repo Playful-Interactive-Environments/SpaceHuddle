@@ -1,0 +1,195 @@
+{
+  "participant": {
+    "primary": "Primary Class",
+    "secondary": "Secondary Class",
+    "score": "Your scores for each of the classes in this test were as follows:"
+  },
+  "enum": {
+    "rating": {
+      "1": "not at all",
+      "2": "little",
+      "3": "partly-partly",
+      "4": "quite",
+      "5": "completely"
+    }
+  },
+  "questions": {
+    "Being with other people generally gives me a lot of energy": {
+      "text": "Being with other people generally gives me a lot of energy."
+    },
+    "I feel most comfortable when I am alone": {
+      "text": "I feel most comfortable when I am alone."
+    },
+    "I like meeting lots of people and having fun with them": {
+      "text": "I like meeting lots of people and having fun with them."
+    },
+    "When Im with a lot of people, I prefer to stay in the background": {
+      "text": "When I'm with a lot of people, I prefer to stay in the background."
+    },
+    "Talking to other people motivates me and brings out the best in me": {
+      "text": "Talking to other people motivates me and brings out the best in me."
+    },
+    "I usually prefer to do things on my own": {
+      "text": "I usually prefer to do things on my own."
+    },
+    "I always enjoy meeting new people": {
+      "text": "I always enjoy meeting new people."
+    },
+    "Being with other people is often exhausting for me": {
+      "text": "Being with other people is often exhausting for me."
+    },
+    "I feel best when I have lots of people around me": {
+      "text": "I feel best when I have lots of people around me."
+    },
+    "I dont get enthusiastic about other people easily": {
+      "text": "I don't get enthusiastic about other people easily."
+    },
+    "When Im working on something, Im easily distracted": {
+      "text": "When I'm working on something, I'm easily distracted."
+    },
+    "If I have a plan, I do everything I can to realize it": {
+      "text": "If I have a plan, I do everything I can to realize it."
+    },
+    "When I encounter difficulties in executing a plan, I tend to give up quickly": {
+      "text": "When I encounter difficulties in executing a plan, I tend to give up quickly."
+    },
+    "I had no problem working hard for something, that will only bear fruit after a relatively long time": {
+      "text": "I had no problem working hard for something, that will only bear fruit after a relatively long time."
+    },
+    "I often dont follow through with my plans": {
+      "text": "I often don't follow through with my plans."
+    },
+    "When Im following a plan, Im not easily distracted by short-term needs": {
+      "text": "When I'm following a plan, I'm not easily distracted by short-term needs."
+    },
+    "I often set myself a goal without really trying to achieve it": {
+      "text": "I often set myself a goal without really trying to achieve it."
+    },
+    "When I set myself a goal, I pursue it very doggedly": {
+      "text": "When I set myself a goal, I pursue it very doggedly."
+    },
+    "It is very difficult for me to follow a plan if it requires me to ignore momentary needs": {
+      "text": "It is very difficult for me to follow a plan if it requires me to ignore momentary needs."
+    },
+    "When I set my mind to something, I stick to it, no matter how long it takes": {
+      "text": "When I set my mind to something, I stick to it, no matter how long it takes."
+    },
+    "Im rarely afraid that other people wont like me": {
+      "text": "I'm rarely afraid that other people won't like me."
+    },
+    "When I meet up with friends, I sometimes have the feeling that they talk badly about me afterwards": {
+      "text": "When I meet up with friends, I sometimes have the feeling that they talk badly about me afterwards."
+    },
+    "I never doubt that I deserve to be accepted by others": {
+      "text": "I never doubt that I deserve to be accepted by others."
+    },
+    "I often doubt the permanence of my relationships": {
+      "text": "I often doubt the permanence of my relationships."
+    },
+    "Even if friends or relatives dont contact me for a long time, I dont assume that its because of me": {
+      "text": "Even if friends or relatives don't contact me for a long time, I don't assume that it's because of me."
+    },
+    "If a person doesnt get in touch with me for a long time, I quickly start to question my relationship with them": {
+      "text": "If a person doesn't get in touch with me for a long time, I quickly start to question my relationship with them."
+    },
+    "If someone important to me is behaving strangely, I rarely suspect that it might have something to do with me": {
+      "text": "If someone important to me is behaving strangely, I rarely suspect that it might have something to do with me."
+    },
+    "If other people let it be known that they dont like something about me, my mood can quickly turn negative": {
+      "text": "If other people let it be known that they don't like something about me, my mood can quickly turn negative."
+    },
+    "If friends or acquaintances dont pay enough attention to me, I rarely have the feeling that they dont like me anymore": {
+      "text": "If friends or acquaintances don't pay enough attention to me, I rarely have the feeling that they don't like me anymore."
+    },
+    "If I receive signals of rejection from other people, I am immediately worried and think about the possible reason": {
+      "text": "If I receive signals of rejection from other people, I am immediately worried and think about the possible reason."
+    },
+    "I enjoy thinking about new solutions to problems": {
+      "text": "I enjoy thinking about new solutions to problems."
+    },
+    "For me, thinking is not associated with fun": {
+      "text": "For me, thinking is not associated with fun."
+    },
+    "I like to think about what society could look like in the future": {
+      "text": "I like to think about what society could look like in the future."
+    },
+    "I dont like to think about things when there is no clear need for it": {
+      "text": "I don't like to think about things when there is no clear need for it."
+    },
+    "I love thinking about complex topics like the meaning of life or world politics": {
+      "text": "I love thinking about complex topics like the meaning of life or world politics."
+    },
+    "I dont like to play mind games": {
+      "text": "I don't like to play mind games."
+    },
+    "I really like to keep myself mentally occupied": {
+      "text": "I really like to keep myself mentally occupied."
+    },
+    "I prefer to deal with everyday things rather than think about theoretical topics": {
+      "text": "I prefer to deal with everyday things rather than think about theoretical topics."
+    },
+    "I feel best when I am challenged mentally": {
+      "text": "I feel best when I am challenged mentally."
+    },
+    "I dont like thinking about unconventional ideas": {
+      "text": "I don't like thinking about unconventional ideas."
+    },
+    "I would rather share than compete with others to get something all for myself": {
+      "text": "I would rather share than compete with others to get something all for myself."
+    },
+    "My own well-being is more important to me than other peoples problems": {
+      "text": "My own well-being is more important to me than other people's problems."
+    },
+    "I prefer not to assert my interests if they conflict with other peoples feelings": {
+      "text": "I prefer not to assert my interests if they conflict with other people's feelings."
+    },
+    "I dont like to help other people if it puts me at a disadvantage": {
+      "text": "I don't like to help other people if it puts me at a disadvantage."
+    },
+    "I like to be generous without expecting anything in return": {
+      "text": "I like to be generous without expecting anything in return."
+    },
+    "In conflicts of interest with others, I always try to get the maximum for myself": {
+      "text": "In conflicts of interest with others, I always try to get the maximum for myself."
+    },
+    "When I share something with others, I dont mind if others get more than I do": {
+      "text": "When I share something with others, I don't mind if others get more than I do."
+    },
+    "I dont like to do a person a favor if I know that I wont get anything back from them later": {
+      "text": "I don't like to do a person a favor if I know that I won't get anything back from them later."
+    },
+    "I would help other people even if I had a lot of problems myself": {
+      "text": "I would help other people even if I had a lot of problems myself."
+    },
+    "I had no problems asserting my interests at the expense of others": {
+      "text": "I had no problems asserting my interests at the expense of others."
+    }
+  },
+  "result": {
+    "extraversion": {
+      "name": "extraversion",
+      "description": "Extraversion is characterised by breadth of activities (as opposed to depth), surgency from external activities/situations, and energy creation from external means. The trait is marked by pronounced engagement with the external world. Extraverts enjoy interacting with people, and are often perceived as energetic. They tend to be enthusiastic and action-oriented. They possess high group visibility, like to talk, and assert themselves. Extraverts may appear more dominant in social settings, as opposed to introverts in that setting. Introverts have lower social engagement and energy levels than extraverts. They tend to seem quiet, low-key, deliberate, and less involved in the social world. Their lack of social involvement should not be interpreted as shyness or depression; but as greater independence of their social world than extraverts. Introverts need less stimulation, and more time alone than extraverts. This does not mean that they are unfriendly or antisocial; rather, they are aloof and reserved in social situations. Generally, people are a combination of extraversion and introversion, with personality psychologist Hans Eysenck suggesting a model by which differences in their brains produce these traits.",
+      "characteristics": ""
+    },
+    "conscientiousness": {
+      "name": "conscientiousness",
+      "description": "Conscientiousness is a tendency to be self-disciplined, act dutifully, and strive for achievement against measures or outside expectations. It is related to people's level of impulse control, regulation, and direction. High conscientiousness is often perceived as being stubborn and focused. Low conscientiousness is associated with flexibility and spontaneity, but can also appear as sloppiness and lack of reliability. High conscientiousness indicates a preference for planned rather than spontaneous behaviour. The average level of conscientiousness rises among young adults and then declines among older adults.",
+      "characteristics": ""
+    },
+    "neuroticism": {
+      "name": "neuroticism",
+      "description": "Neuroticism is the tendency to have strong negative emotions, such as anger, anxiety, or depression. It is sometimes called emotional instability, or is reversed and referred to as emotional stability. According to Hans Eysenck's (1967) theory of personality, neuroticism is associated with low tolerance for stress or strongly disliked changes. Neuroticism is a classic temperament trait that has been studied in temperament research for decades, even before it was adapted by the Five Factor Model. Neurotic people are emotionally reactive and vulnerable to stress. They are more likely to interpret ordinary situations as threatening. They can perceive minor frustrations as hopelessly difficult. Their negative emotional reactions tend to stay for unusually long periods of time, which means they are often in a bad mood. For instance, neuroticism is connected to pessimism toward work, to certainty that work hinders personal relationships, and to higher levels of anxiety from the pressures at work. Furthermore, neurotic people may display more skin-conductance reactivity than calm and composed people. These problems in emotional regulation can make a neurotic person think less clearly, make worse decisions, and cope less effectively with stress. Being disappointed with one's life achievements can make one more neurotic and increase one's chances of falling into clinical depression. Moreover, neurotic individuals tend to experience more negative life events, but neuroticism also changes in response to positive and negative life experiences. Also, neurotic people tend to have worse psychological well-being. At the other end of the scale, less neurotic individuals are less easily upset and are less emotionally reactive. They tend to be calm, emotionally stable, and free from persistent negative feelings. Freedom from negative feelings does not mean that low scorers experience a lot of positive feelings; that is related to extraversion instead. Neuroticism is similar but not identical to being neurotic in the Freudian sense (i.e., neurosis). Some psychologists[who?] prefer to call neuroticism by the term emotional instability to differentiate it from the term neurotic in a career test.",
+      "characteristics": ""
+    },
+    "openness": {
+      "name": "openness",
+      "description": "Openness to experience is a general appreciation for art, emotion, adventure, unusual ideas, imagination, curiosity, and variety of experience. People who are open to experience are intellectually curious, open to emotion, sensitive to beauty, and willing to try new things. They tend to be, when compared to closed people, more creative and more aware of their feelings. They are also more likely to hold unconventional beliefs. Open people can be perceived as unpredictable or lacking focus, and more likely to engage in risky behaviour or drug-taking. Moreover, individuals with high openness are said to pursue self-actualisation specifically by seeking out intense, euphoric experiences. Conversely, those with low openness want to be fulfilled by persevering and are characterised as pragmatic and data-driven – sometimes even perceived to be dogmatic and closed-minded. Some disagreement remains about how to interpret and contextualise the openness factor as there is a lack of biological support for this particular trait. Openness has not shown a significant association with any brain regions as opposed to the other four traits which did when using brain imaging to detect changes in volume associated with each trait.",
+      "characteristics": ""
+    },
+    "agreeableness": {
+      "name": "agreeableness",
+      "description": "Agreeableness is the general concern for social harmony. Agreeable individuals value getting along with others. They are generally considerate, kind, generous, trusting and trustworthy, helpful, and willing to compromise their interests with others. Agreeable people also have an optimistic view of human nature. Disagreeable individuals place self-interest above getting along with others. They are generally unconcerned with others' well-being and are less likely to extend themselves for other people. Sometimes their skepticism about others' motives causes them to be suspicious, unfriendly, and uncooperative. Disagreeable people are often competitive or challenging, which can be seen as argumentative or untrustworthy. Because agreeableness is a social trait, research has shown that one's agreeableness positively correlates with the quality of relationships with one's team members. Agreeableness also positively predicts transformational leadership skills. In a study conducted among 169 participants in leadership positions in a variety of professions, individuals were asked to take a personality test and be directly evaluated by supervised subordinates. Very agreeable leaders were more likely to be considered transformational rather than transactional. Although the relationship was not strong (r=0.32, β=0.28, p<0.01), it was the strongest of the Big Five traits. However, the same study could not predict leadership effectiveness as evaluated by the leader's direct supervisor. Conversely, agreeableness has been found to be negatively related to transactional leadership in the military. A study of Asian military units showed that agreeable people are more likely to be poor transactional leaders. Therefore, with further research, organisations may be able to determine an individual's potential for performance based on their personality traits. For instance, in their journal article \"Which Personality Attributes Are Most Important in the Workplace?\" Paul Sackett and Philip Walmsley claim that conscientiousness and agreeableness are \"important to success across many different jobs.\"",
+      "characteristics": ""
+    }
+  }
+}

@@ -43,6 +43,7 @@
         :change="false"
         :update="true"
         :test="test"
+        :show-question-list="true"
       />
       <ResultTypeResult
         v-else
