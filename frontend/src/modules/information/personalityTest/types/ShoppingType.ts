@@ -12,29 +12,35 @@ export enum ShoppingType {
 
 export interface ShoppingValue extends ResultValue {
   resultType: ShoppingType;
+  points: number;
 }
 
 export class ShoppingCalculation extends ResultCalculation {
   override calculateResult(answerList: {
     [key: string]: number | { [key: string]: number };
   }): ShoppingValue {
+    const points = this.calculateResultPoints(answerList);
     return {
-      resultType: this.calculateResultTypeValues(answerList),
+      points: points,
+      resultType: this.calculateResultTypeValues(points),
     };
   }
 
-  calculateResultTypeValues(answerList: {
+  calculateResultPoints(answerList: {
     [key: string]: number | { [key: string]: number };
-  }): ShoppingType {
-    const sum = Object.values(answerList).reduce(
+  }): number {
+    return Object.values(answerList).reduce(
       (sum, item) => (sum as number) + (item as number),
       0
-    );
-    if (sum <= 15) {
+    ) as number;
+  }
+
+  calculateResultTypeValues(points: number): ShoppingType {
+    if (points <= 15) {
       return ShoppingType.BARGAIN;
-    } else if (sum <= 20) {
+    } else if (points <= 20) {
       return ShoppingType.DELIBERATE;
-    } else if (sum <= 30) {
+    } else if (points <= 30) {
       return ShoppingType.IMPULSIVE;
     } else {
       return ShoppingType.BRANDS;

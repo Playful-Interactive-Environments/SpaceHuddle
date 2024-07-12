@@ -219,6 +219,19 @@ export default class QuizResult extends Vue {
       const hexColor = color.toString({ format: 'hex', collapse: false });
       rateColors.push(hexColor);
     }
+    if (this.questionType === QuestionType.RATING) {
+      for (let i = min; i <= max; i++) {
+        const value = (i + 1).toString();
+        if (!ideas.find((item) => item.keywords === value)) {
+          ideas.push({
+            id: '',
+            keywords: value,
+            description: value,
+          } as Idea);
+        }
+      }
+    }
+    ideas.sort((a, b) => parseInt(a.keywords) - parseInt(b.keywords));
     const datasets = legend.map((l) => {
       return {
         label: l.name,

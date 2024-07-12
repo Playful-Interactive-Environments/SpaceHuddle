@@ -1,4 +1,6 @@
-<template>&nbsp;</template>
+<template>
+  <div>&nbsp;</div>
+</template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';

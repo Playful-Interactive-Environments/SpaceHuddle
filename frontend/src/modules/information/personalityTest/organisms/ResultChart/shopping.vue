@@ -37,6 +37,52 @@
       }"
     />
   </div>
+  <div class="chartContainer" :style="{ height: `${pointChartHeight}rem` }">
+    <Bar
+      v-if="chartType === ResultChartType.STATISTIC"
+      id="pointChartRef"
+      ref="pointChartRef"
+      :data="pointChartData"
+      :options="{
+        maintainAspectRatio: false,
+        responsive: true,
+        indexAxis: 'y',
+        animation: {
+          duration: 2000,
+        },
+        scales: {
+          y: {
+            ticks: {
+              color: contrastColor,
+              precision: 0,
+            },
+            grid: {
+              display: false,
+            },
+            stacked: true,
+          },
+          x: {
+            ticks: {
+              precision: 0,
+            },
+            stacked: true,
+          },
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            align: 'end',
+            labels: {
+              boxWidth: 30,
+              boxHeight: 30,
+              color: contrastColor,
+            },
+          },
+        },
+      }"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -52,6 +98,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { getResultTypeList } from '@/modules/information/personalityTest/types/ResultType';
 import { ResultChartType } from '@/modules/information/personalityTest/types/ResultChartType';
+import { ShoppingType } from '@/modules/information/personalityTest/types/ShoppingType';
 
 @Options({
   components: {
@@ -67,8 +114,14 @@ export default class ResultChart extends Vue {
   readonly chartType!: ResultChartType;
 
   test = 'shopping';
+  ResultChartType = ResultChartType;
 
   chartData: any = {
+    labels: [],
+    datasets: [],
+  };
+
+  pointChartData: any = {
     labels: [],
     datasets: [],
   };
@@ -86,8 +139,31 @@ export default class ResultChart extends Vue {
     return calcHeight;
   }
 
+  get pointChartHeight(): number {
+    const headHeight = 5;
+    const itemHeight = 3;
+    const calcHeight =
+      this.pointChartData.labels.length * itemHeight + headHeight;
+    const minHeight = headHeight + itemHeight * 2;
+    if (calcHeight < minHeight) return minHeight;
+    return calcHeight;
+  }
+
   get ResultTypeList(): string[] {
     return getResultTypeList(this.test);
+  }
+
+  getTypeColor(resultType: ShoppingType): string {
+    switch (resultType) {
+      case ShoppingType.BARGAIN:
+        return themeColors.getPlayingColor();
+      case ShoppingType.DELIBERATE:
+        return themeColors.getGreenColor();
+      case ShoppingType.IMPULSIVE:
+        return themeColors.getYellowColor();
+      case ShoppingType.BRANDS:
+        return themeColors.getRedColor();
+    }
   }
 
   unmounted(): void {
@@ -105,21 +181,37 @@ export default class ResultChart extends Vue {
     );
   }
 
-  resultTypeCount: { [key: string]: number[] } = {};
+  resultTypeCount: { [key: string]: number } = {};
+  pointCount: { [key: string]: { [key: number]: number } } = {};
+  possiblePoints: number[] = [];
   updateState(result: TaskParticipantState[]): void {
     for (const resultType of this.ResultTypeList) {
-      this.resultTypeCount[resultType] = [0, 0, 0, 0, 0, 0, 0];
+      this.resultTypeCount[resultType] = 0;
+      this.pointCount[resultType] = {};
     }
     for (const state of result) {
-      if (state.parameter.resultType) {
-        for (let i = 0; i < this.ResultTypeList.length; i++) {
-          this.resultTypeCount[state.parameter.resultType][i] += 1;
+      const resultType = state.parameter.resultType;
+      if (resultType) {
+        this.resultTypeCount[resultType] += 1;
+        const points = parseInt(state.parameter.points);
+        if (points) {
+          if (!this.possiblePoints.includes(points))
+            this.possiblePoints.push(points);
+          if (this.pointCount[resultType][points])
+            this.pointCount[resultType][points] += 1;
+          else this.pointCount[resultType][points] = 1;
         }
       }
     }
+    this.possiblePoints.sort((a, b) => a - b);
     if (this.resultData) {
       this.chartData.labels = this.resultData.labels;
       this.chartData.datasets = this.resultData.datasets;
+      this.updateChart();
+    }
+    if (this.pointResultData) {
+      this.pointChartData.labels = this.pointResultData.labels;
+      this.pointChartData.datasets = this.pointResultData.datasets;
       this.updateChart();
     }
   }
@@ -128,9 +220,7 @@ export default class ResultChart extends Vue {
     const datasets: any[] = [];
     datasets.push({
       label: '',
-      data: Object.keys(this.resultTypeCount).map(
-        (item) => this.resultTypeCount[item][0]
-      ),
+      data: Object.values(this.resultTypeCount),
       borderRadius: 5,
       borderSkipped: false,
       backgroundColor: themeColors.getYellowColor(),
@@ -146,6 +236,28 @@ export default class ResultChart extends Vue {
     };
   }
 
+  get pointResultData(): any {
+    const datasets: any[] = [];
+    for (const resultType of this.ResultTypeList) {
+      datasets.push({
+        label: this.$t(
+          `module.information.personalityTest.${this.test}.result.${resultType}.name`
+        ),
+        data: this.possiblePoints.map(
+          (points) => this.pointCount[resultType][points] ?? 0
+        ),
+        borderRadius: 5,
+        borderSkipped: false,
+        backgroundColor: this.getTypeColor(resultType as ShoppingType),
+        color: themeColors.getContrastColor(),
+      });
+    }
+    return {
+      labels: this.possiblePoints,
+      datasets: datasets,
+    };
+  }
+
   lastUpdateCall = '';
   async updateChart(): Promise<void> {
     const uuid = uuidv4();
@@ -156,6 +268,13 @@ export default class ResultChart extends Vue {
         const chartRef = this.$refs.chartRef as any;
         if (chartRef.chart) {
           chartRef.chart.data = this.chartData;
+          chartRef.chart.update();
+        }
+      }
+      if (this.$refs.pointChartRef) {
+        const chartRef = this.$refs.pointChartRef as any;
+        if (chartRef.chart) {
+          chartRef.chart.data = this.pointChartData;
           chartRef.chart.update();
         }
       }

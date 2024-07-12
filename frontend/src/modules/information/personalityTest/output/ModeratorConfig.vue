@@ -1,6 +1,6 @@
 <template>
   <el-form-item
-    v-if="!taskId"
+    v-if="!moduleId"
     :label="$t('module.information.personalityTest.moderatorConfig.test')"
     :prop="`${rulePropPath}.test`"
   >
@@ -46,6 +46,9 @@ export default class ModeratorConfig extends Vue implements CustomInit {
   async onModelValueChanged(): Promise<void> {
     if (this.modelValue && !this.modelValue.questionType) {
       this.modelValue.questionType = QuestionnaireType.SURVEY;
+    }
+    if (this.modelValue && !this.modelValue.test) {
+      this.modelValue.test = Object.keys(surveyConfig)[0];
     }
   }
 
