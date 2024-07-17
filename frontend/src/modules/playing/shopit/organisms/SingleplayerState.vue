@@ -144,10 +144,7 @@
       </div>
     </TransitionGroup>
   </div>
-  <div
-    class="resultArea"
-    :style="{ height: height }"
-  >
+  <div class="resultArea" :style="{ height: height }">
     <div class="result" v-if="playStateType === PlayStateType.win">
       <h2 class="heading heading--medium">
         {{ $t('module.playing.shopit.participant.win') }}

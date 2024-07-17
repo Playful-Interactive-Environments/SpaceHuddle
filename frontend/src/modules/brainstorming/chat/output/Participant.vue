@@ -2,11 +2,11 @@
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <template #footer>
       <ImagePicker
-          v-model:link="imageWebLink"
-          v-model:image="imgDataUrl"
-          :useEditOverlay="true"
-          id="imagePicker"
-          :style="{ display: displayImagePicker ? 'block' : 'none' }"
+        v-model:link="imageWebLink"
+        v-model:image="imgDataUrl"
+        :useEditOverlay="true"
+        id="imagePicker"
+        :style="{ display: displayImagePicker ? 'block' : 'none' }"
       />
       <ValidationForm
         ref="inputForm"
@@ -40,7 +40,6 @@
               class="media-right"
               type="primary"
               circle
-
               v-on:click="displayImagePicker = !displayImagePicker"
             >
               <font-awesome-icon icon="paperclip"></font-awesome-icon>
@@ -162,7 +161,7 @@
       <span class="media-content"></span>
     </div>
 
-<!--    <ImageUploader
+    <!--<ImageUploader
       v-model:show-modal="showUploadDialog"
       v-model="base64ImageUrl"
     />

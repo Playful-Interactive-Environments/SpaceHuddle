@@ -153,6 +153,7 @@ import { Module } from '@/types/api/Module';
     IdeaCard,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly task!: Task;

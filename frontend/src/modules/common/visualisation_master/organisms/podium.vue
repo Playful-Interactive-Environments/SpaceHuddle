@@ -146,6 +146,7 @@ export default class PublicScreen extends Vue {
   moderatedFlow = false;
   moderatedIndex = this.topAmount;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getIdeaTransitionConfig(index: number): string {
     if (this.ended) {
       return 'all ' + this.animationLength / 2 + 's ease';

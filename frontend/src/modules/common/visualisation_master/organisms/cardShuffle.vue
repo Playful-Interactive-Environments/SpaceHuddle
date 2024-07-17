@@ -88,7 +88,7 @@ export default class PublicScreen extends Vue {
     }
     setTimeout(() => {
       this.spreadCards();
-    }, cardCount * this.shuffleDelay + (1000 / this.timeModifier));
+    }, cardCount * this.shuffleDelay + 1000 / this.timeModifier);
   }
 
   spreadCards(): void {
@@ -110,7 +110,7 @@ export default class PublicScreen extends Vue {
     }
     setTimeout(() => {
       this.stackCards();
-    }, cardCount * this.shuffleDelay + (10000 / this.timeModifier));
+    }, cardCount * this.shuffleDelay + 10000 / this.timeModifier);
   }
 
   columnCount = 5;

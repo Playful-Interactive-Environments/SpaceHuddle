@@ -16,7 +16,12 @@
           width: 100 / this.bestIdeaCount + '%',
         }"
       >
-        <p>{{ Math.round((this.votes[num - 1].ratingSum + Number.EPSILON) * 100) / 100 }}</p>
+        <p>
+          {{
+            Math.round((this.votes[num - 1].ratingSum + Number.EPSILON) * 100) /
+            100
+          }}
+        </p>
       </div>
     </div>
     <div class="tombolaIdeas" :style="{ opacity: loaded ? 100 : 0 }">

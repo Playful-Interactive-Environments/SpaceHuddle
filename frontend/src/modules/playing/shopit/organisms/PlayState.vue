@@ -163,10 +163,7 @@
       </div>
     </TransitionGroup>
   </div>
-  <div
-      class="resultArea"
-      :style="{ height: height }"
-  >
+  <div class="resultArea" :style="{ height: height }">
     <div class="result" v-if="playStateType === PlayStateType.win">
       <h2 class="heading heading--medium">
         {{ $t('module.playing.shopit.participant.win') }}
@@ -182,26 +179,26 @@
       </p>
       <div class="endCards">
         <div
-            v-for="card in endCardsOverview"
-            :key="card.infoKey"
-            :id="card.infoKey"
-            class="endCard"
-            :style="{
+          v-for="card in endCardsOverview"
+          :key="card.infoKey"
+          :id="card.infoKey"
+          class="endCard"
+          :style="{
             backgroundImage:
               'url(' + gameConfig.gameValues.cardBackground + ')',
           }"
-            @click="activeCardChanged(card, card.infoKey, true)"
+          @click="activeCardChanged(card, card.infoKey, true)"
         >
           <Card
-              :cost="card.cost"
-              :CO2="card.CO2"
-              :energy="card.energy"
-              :lifetime="card.lifetime"
-              :water="card.water"
-              :money="card.money"
-              :category="card.category"
-              :condition="card.condition"
-              :cardName="card.name"
+            :cost="card.cost"
+            :CO2="card.CO2"
+            :energy="card.energy"
+            :lifetime="card.lifetime"
+            :water="card.water"
+            :money="card.money"
+            :category="card.category"
+            :condition="card.condition"
+            :cardName="card.name"
           />
           <p class="CardDescription">{{ card.infoKey }}</p>
         </div>
@@ -218,7 +215,7 @@
         <p class="marginTop">
           {{
             $t(
-                'module.playing.shopit.participant.' +
+              'module.playing.shopit.participant.' +
                 this.activeCard.category +
                 'EndCardTexts.header'
             )
@@ -232,7 +229,7 @@
         <p class="marginTop">
           {{
             $t(
-                'module.playing.shopit.participant.' +
+              'module.playing.shopit.participant.' +
                 this.activeCard.category +
                 'EndCardTexts.description'
             )
@@ -241,7 +238,7 @@
         <p class="marginTop">
           {{
             $t(
-                'module.playing.shopit.participant.' +
+              'module.playing.shopit.participant.' +
                 this.activeCard.category +
                 'EndCardTexts.shop-it-tip'
             )
@@ -267,26 +264,26 @@
       </p>
       <div class="endCards">
         <div
-            v-for="card in endCardsOverview"
-            :key="card.infoKey"
-            :id="card.infoKey"
-            class="endCard"
-            :style="{
+          v-for="card in endCardsOverview"
+          :key="card.infoKey"
+          :id="card.infoKey"
+          class="endCard"
+          :style="{
             backgroundImage:
               'url(' + gameConfig.gameValues.cardBackground + ')',
           }"
-            @click="activeCardChanged(card, card.infoKey, true)"
+          @click="activeCardChanged(card, card.infoKey, true)"
         >
           <Card
-              :cost="card.cost"
-              :CO2="card.CO2"
-              :energy="card.energy"
-              :lifetime="card.lifetime"
-              :water="card.water"
-              :money="card.money"
-              :category="card.category"
-              :condition="card.condition"
-              :cardName="card.name"
+            :cost="card.cost"
+            :CO2="card.CO2"
+            :energy="card.energy"
+            :lifetime="card.lifetime"
+            :water="card.water"
+            :money="card.money"
+            :category="card.category"
+            :condition="card.condition"
+            :cardName="card.name"
           />
           <p class="CardDescription">{{ card.infoKey }}</p>
         </div>
@@ -303,7 +300,7 @@
         <p class="marginTop">
           {{
             $t(
-                'module.playing.shopit.participant.' +
+              'module.playing.shopit.participant.' +
                 this.activeCard.category +
                 'EndCardTexts.header'
             )
@@ -317,7 +314,7 @@
         <p class="marginTop">
           {{
             $t(
-                'module.playing.shopit.participant.' +
+              'module.playing.shopit.participant.' +
                 this.activeCard.category +
                 'EndCardTexts.description'
             )
@@ -326,7 +323,7 @@
         <p class="marginTop">
           {{
             $t(
-                'module.playing.shopit.participant.' +
+              'module.playing.shopit.participant.' +
                 this.activeCard.category +
                 'EndCardTexts.shop-it-tip'
             )
@@ -437,12 +434,12 @@ export default class PlayState extends Vue {
     const tipsArray: string[] = [];
     for (let i = 1; i <= 3; i++) {
       tipsArray.push(
-          this.$t(
-              'module.playing.shopit.participant.' +
-              category +
-              'EndCardTexts.tips.' +
-              i
-          )
+        this.$t(
+          'module.playing.shopit.participant.' +
+            category +
+            'EndCardTexts.tips.' +
+            i
+        )
       );
     }
     return tipsArray;
@@ -1550,5 +1547,3 @@ p.gameKey {
   font-size: var(--font-size-large);
 }
 </style>
-
-
