@@ -50,7 +50,7 @@ ChartJS.register(
 );
 
 ChartJS.defaults.font.family =
-  "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif, 'Font Awesome 6 Free Solid'";
+  "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif, 'Font Awesome'";
 
 import { IconPack, library } from '@fortawesome/fontawesome-svg-core';
 // internal icons

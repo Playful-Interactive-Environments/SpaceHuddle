@@ -479,5 +479,194 @@
       "file": "Big5Type",
       "class": "Big5Calculation"
     }
+  },
+  "thinkingHats": {
+    "questions": [
+      {
+        "question": "When you are faced with a problem to solve, what do you do first?",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "I collect all available information to investigate the cause of the problem.",
+            "resultType": "white"
+          },
+          {
+            "answer": "I focus on the consequences that the problem has for the person(s) concerned.",
+            "resultType": "red"
+          },
+          {
+            "answer": "I think about the possible negative consequences and ask myself questions like \"What happens if I can't solve the problem?\"",
+            "resultType": "black"
+          },
+          {
+            "answer": "I immediately think of various solutions to the problem.",
+            "resultType": "green"
+          },
+          {
+            "answer": "I keep in mind what the positive consequences will be once the problem has been solved.",
+            "resultType": "yellow"
+          },
+          {
+            "answer": "I come up with a plan to tackle the problem",
+            "resultType": "blue"
+          }
+        ]
+      },
+      {
+        "question": "When you tackle a group project, you focus on...",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "...on brainstorming and the search for good ideas.",
+            "resultType": "green"
+          },
+          {
+            "answer": "...on the positive outcome that the project can achieve.",
+            "resultType": "yellow"
+          },
+          {
+            "answer": "...the potential risks that the project entails.",
+            "resultType": "black"
+          },
+          {
+            "answer": "...to coordinate / manage communication within the group.",
+            "resultType": "blue"
+          },
+          {
+            "answer": "...to ensure that everyone in the group is satisfied with all decisions.",
+            "resultType": "red"
+          },
+          {
+            "answer": "...to objectively consider all facts and opinions of the group members.",
+            "resultType": "white"
+          }
+        ]
+      },
+      {
+        "question": "Which of these statements best describes you? The person in the group who...",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "...is the quickest to become frustrated when something goes wrong.",
+            "resultType": "red"
+          },
+          {
+            "answer": "...most critically scrutinizes what can go wrong / has not been considered.",
+            "resultType": "black"
+          },
+          {
+            "answer": "...enjoys being creative and coming up with solutions the most.",
+            "resultType": "green"
+          },
+          {
+            "answer": "...has the quickest overview of everything.",
+            "resultType": "white"
+          },
+          {
+            "answer": "...is communicated most clearly and is best understood by all group members.",
+            "resultType": "blue"
+          },
+          {
+            "answer": "...is almost always in a good mood and motivates the others in the group.",
+            "resultType": "yellow"
+          }
+        ]
+      },
+      {
+        "question": "When you are stressed, you tend to...",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "...to get yourself into negative thoughts.",
+            "resultType": "black"
+          },
+          {
+            "answer": "...to motivate you with positive thoughts.",
+            "resultType": "yellow"
+          },
+          {
+            "answer": "...to seek advice and help from other people.",
+            "resultType": "red"
+          },
+          {
+            "answer": "...analyze the cause and try to eliminate it.",
+            "resultType": "white"
+          },
+          {
+            "answer": "...to look for solutions to eliminate the stress.",
+            "resultType": "green"
+          },
+          {
+            "answer": "I am never stressed.",
+            "resultType": "blue"
+          }
+        ]
+      },
+      {
+        "question": "If you were in the situation of analyzing a product, would you...",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "...focus on the basic idea of the product and summarize what its possible advantages/disadvantages are.",
+            "resultType": "blue"
+          },
+          {
+            "answer": "...concentrate on the first impression the product makes on you.",
+            "resultType": "red"
+          },
+          {
+            "answer": "...focus on how the product could be improved / enhanced.",
+            "resultType": "green"
+          },
+          {
+            "answer": "...focus on the advantages, for example what the strengths of the product are or what the product can offer in comparison to others.",
+            "resultType": "yellow"
+          },
+          {
+            "answer": "...focus on the disadvantages, for example what the weaknesses of the product are or what the product lacks compared to others.",
+            "resultType": "black"
+          },
+          {
+            "answer": "...focus on the facts you know about the product.",
+            "resultType": "white"
+          }
+        ]
+      },
+      {
+        "question": "Which of the following strengths best applies to you?",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "Being able to take the lead in a situation when necessary.",
+            "resultType": "blue"
+          },
+          {
+            "answer": "To be impartial and not immediately judge people / situations etc. negatively or positively.",
+            "resultType": "white"
+          },
+          {
+            "answer": "Having a positive mood that makes other people feel good.",
+            "resultType": "yellow"
+          },
+          {
+            "answer": "To be able to develop new and original ideas.",
+            "resultType": "green"
+          },
+          {
+            "answer": "Being able to share your own thoughts and feelings with others.",
+            "resultType": "red"
+          },
+          {
+            "answer": "Being able to accept / deal with criticism.",
+            "resultType": "black"
+          }
+        ]
+      }
+    ],
+    "result": ["white", "blue", "red", "green", "yellow", "black"],
+    "calculation": {
+      "file": "ThinkingHatsType",
+      "class": "ThinkingHatsCalculation"
+    }
   }
 }

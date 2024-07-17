@@ -1,5 +1,9 @@
 import surveyConfig from '@/modules/information/personalityTest/data/survey.json';
 
+export function convertToI18nKey(text: string): string {
+  return text.replaceAll('.', '').replaceAll("'", '').replaceAll('"', '');
+}
+
 export function getResultTypeList(test: string): string[] {
   if (surveyConfig[test]) {
     /*return Object.keys(surveyConfig[test].result).map((item) =>

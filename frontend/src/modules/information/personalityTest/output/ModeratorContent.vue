@@ -7,9 +7,9 @@
       {{ editQuestion.question.order + 1 }}.
       {{
         $t(
-          `module.information.personalityTest.${test}.questions.${editQuestion.question.description
-            .replaceAll('.', '')
-            .replaceAll("'", '')}.text`
+          `module.information.personalityTest.${test}.questions.${convertToI18nKey(
+            editQuestion.question.description
+          )}.text`
         )
       }}
     </div>
@@ -77,11 +77,9 @@
             );
           }
           return $t(
-            `module.information.personalityTest.${test}.questions.${questionConfig[
-              item.order
-            ].question
-              .replaceAll('.', '')
-              .replaceAll('\'', '')}.keyword`
+            `module.information.personalityTest.${test}.questions.${convertToI18nKey(
+              questionConfig[item.order].question
+            )}.keyword`
           );
         }
       "
@@ -143,8 +141,10 @@ import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipant
 import ResultTypeResult from '@/modules/information/personalityTest/organisms/ResultTypeResult.vue';
 import surveyConfig from '@/modules/information/personalityTest/data/survey.json';
 import { ResultChartType } from '@/modules/information/personalityTest/types/ResultChartType';
+import { convertToI18nKey } from '@/modules/information/personalityTest/types/ResultType';
 
 @Options({
+  methods: { convertToI18nKey },
   components: {
     ResultTypeResult,
     MarkdownEditor,

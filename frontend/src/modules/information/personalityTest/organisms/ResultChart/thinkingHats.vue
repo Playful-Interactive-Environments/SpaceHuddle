@@ -94,10 +94,10 @@ export default class ResultChart extends Vue {
   readonly chartType!: ResultChartType;
 
   ResultChartType = ResultChartType;
-  test = 'big5';
+  test = 'thinkingHats';
 
-  redValue = 25;
-  greenValue = 35;
+  redValue = 0;
+  greenValue = 3;
 
   barChartDataList: {
     title: string;

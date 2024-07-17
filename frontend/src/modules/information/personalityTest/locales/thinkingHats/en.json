@@ -1,0 +1,97 @@
+{
+  "participant": {
+    "primary": "Primary Class",
+    "secondary": "Secondary Class",
+    "score": "Your scores for each of the classes in this test were as follows:"
+  },
+  "questions": {
+    "When you are faced with a problem to solve, what do you do first?": {
+      "text": "When you are faced with a problem to solve, what do you do first?",
+      "keyword": "problem"
+    },
+    "When you tackle a group project, you focus on": {
+      "text": "When you tackle a group project, you focus on...",
+      "keyword": "group problem"
+    },
+    "Which of these statements best describes you? The person in the group who": {
+      "text": "Which of these statements best describes you? The person in the group who...",
+      "keyword": "group"
+    },
+    "When you are stressed, you tend to": {
+      "text": "When you are stressed, you tend to...",
+      "keyword": "stress"
+    },
+    "If you were in the situation of analyzing a product, would you": {
+      "text": "If you were in the situation of analyzing a product, would you...",
+      "keyword": "product"
+    },
+    "Which of the following strengths best applies to you?": {
+      "text": "Which of the following strengths best applies to you?",
+      "keyword": "strengths"
+    }
+  },
+  "answers": {
+    "I collect all available information to investigate the cause of the problem": "I collect all available information to investigate the cause of the problem.",
+    "I focus on the consequences that the problem has for the person(s) concerned": "I focus on the consequences that the problem has for the person(s) concerned.",
+    "I think about the possible negative consequences and ask myself questions like What happens if I can't solve the problem?": "I think about the possible negative consequences and ask myself questions like \"What happens if I can't solve the problem?\"",
+    "I immediately think of various solutions to the problem": "I immediately think of various solutions to the problem.",
+    "I keep in mind what the positive consequences will be once the problem has been solved": "I keep in mind what the positive consequences will be once the problem has been solved.",
+    "I come up with a plan to tackle the problem": "I come up with a plan to tackle the problem.",
+    "on brainstorming and the search for good ideas": "...on brainstorming and the search for good ideas.",
+    "on the positive outcome that the project can achieve": "...on the positive outcome that the project can achieve.",
+    "the potential risks that the project entails": "...the potential risks that the project entails.",
+    "to coordinate / manage communication within the group": "...to coordinate / manage communication within the group.",
+    "to ensure that everyone in the group is satisfied with all decisions": "...to ensure that everyone in the group is satisfied with all decisions.",
+    "to objectively consider all facts and opinions of the group members": "...to objectively consider all facts and opinions of the group members.",
+    "is the quickest to become frustrated when something goes wrong": "...is the quickest to become frustrated when something goes wrong.",
+    "most critically scrutinizes what can go wrong / has not been considered": "...most critically scrutinizes what can go wrong / has not been considered.",
+    "enjoys being creative and coming up with solutions the most": "...enjoys being creative and coming up with solutions the most.",
+    "has the quickest overview of everything": "...has the quickest overview of everything.",
+    "is communicated most clearly and is best understood by all group members": "...is communicated most clearly and is best understood by all group members.",
+    "is almost always in a good mood and motivates the others in the group": "...is almost always in a good mood and motivates the others in the group.",
+    "to get yourself into negative thoughts": "...to get yourself into negative thoughts.",
+    "to motivate you with positive thoughts": "...to motivate you with positive thoughts.",
+    "to seek advice and help from other people": "...to seek advice and help from other people.",
+    "analyze the cause and try to eliminate it": "...analyze the cause and try to eliminate it.",
+    "to look for solutions to eliminate the stress": "...to look for solutions to eliminate the stress.",
+    "I am never stressed": "I am never stressed.",
+    "focus on the basic idea of the product and summarize what its possible advantages/disadvantages are": "...focus on the basic idea of the product and summarize what its possible advantages/disadvantages are.",
+    "concentrate on the first impression the product makes on you": "...concentrate on the first impression the product makes on you.",
+    "focus on how the product could be improved / enhanced": "...focus on how the product could be improved / enhanced.",
+    "focus on the advantages, for example what the strengths of the product are or what the product can offer in comparison to others": "...focus on the advantages, for example what the strengths of the product are or what the product can offer in comparison to others.",
+    "focus on the disadvantages, for example what the weaknesses of the product are or what the product lacks compared to others": "...focus on the disadvantages, for example what the weaknesses of the product are or what the product lacks compared to others.",
+    "focus on the facts you know about the product": "...focus on the facts you know about the product.",
+    "Being able to take the lead in a situation when necessary": "Being able to take the lead in a situation when necessary.",
+    "To be impartial and not immediately judge people / situations etc negatively or positively": "To be impartial and not immediately judge people / situations etc. negatively or positively.",
+    "Having a positive mood that makes other people feel good": "Having a positive mood that makes other people feel good.",
+    "To be able to develop new and original ideas": "To be able to develop new and original ideas.",
+    "Being able to share your own thoughts and feelings with others": "Being able to share your own thoughts and feelings with others.",
+    "Being able to accept / deal with criticism": "Being able to accept / deal with criticism."
+  },
+  "result": {
+    "white": {
+      "name": "White hat (analytical)",
+      "description": "The WHITE hat stands for objectivity and neutrality. Information is collected under this hat without evaluating it. The white hat provides an objective overview of all available data and information - completely independent of personal opinion. This hat is often put on at the beginning of a discussion or process to get an initial overview."
+    },
+    "blue": {
+      "name": "Blue hat (organizing)",
+      "description": "The BLUE hat stands for control and for the organization of the entire thought process. The moderator is typically the wearer of the blue hat. He looks at the entire process from a superior position and thus gains an overview. The tasks of the blue hat wearer consist of summarizing the results or making decisions about which hats are to be put on again in the further process."
+    },
+    "red": {
+      "name": "Red hat (emotional)",
+      "description": "In contrast to the white hat, the RED hat stands for emotions. Under this hat you can give free rein to your feelings, and under the red hat you can express everything you feel inside. Everything diffuse, everything emotional can be expressed without you having to justify yourself."
+    },
+    "green": {
+      "name": "Green hat (creative)",
+      "description": "The GREEN hat stands for creativity, growth and new ideas. When this hat is worn, you go in search of alternatives. Anything that leads to new ideas and approaches can be formulated under the green hat, regardless of how crazy or unrealistic the ideas are."
+    },
+    "yellow": {
+      "name": "Yellow hat (optimistic)",
+      "description": "The YELLOW hat stands for the opposite of the black hat. It is about discovering the positive. When the yellow hat is worn, the group tries to find all opportunities or plus points, but also to formulate realistic hopes and desirable goals."
+    },
+    "black": {
+      "name": "Black hat (critical)",
+      "description": "The BLACK hat explores the negative aspects and risks of the question. This includes all factual arguments that speak against a project or a decision. When the black hat is worn, the group strives to objectively identify all negative aspects of an issue."
+    }
+  }
+}

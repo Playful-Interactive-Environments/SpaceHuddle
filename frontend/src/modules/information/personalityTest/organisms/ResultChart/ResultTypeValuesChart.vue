@@ -52,8 +52,8 @@
       :options="{
         scales: {
           x: {
-            min: -0.5,
-            max: 4.5,
+            min: minCount - 0.5,
+            max: maxCount + 0.5,
             title: {
               display: true,
               text: $t(
@@ -67,8 +67,8 @@
             },
           },
           y: {
-            min: -0.5,
-            max: 4.5,
+            min: minCount - 0.5,
+            max: maxCount + 0.5,
             title: {
               display: true,
               text: $t(
@@ -123,7 +123,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import Color from 'colorjs.io';
 import { getResultTypeList } from '@/modules/information/personalityTest/types/ResultType';
-import { Big5Value } from '@/modules/information/personalityTest/types/Big5Type';
 
 @Options({
   components: {
@@ -133,12 +132,11 @@ import { Big5Value } from '@/modules/information/personalityTest/types/Big5Type'
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class DetailResult extends Vue {
+export default class ResultTypeValuesChart extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: false }) readonly showAll!: boolean;
   @Prop({ default: false }) readonly showDetails!: boolean;
-
-  test = 'big5';
+  @Prop({ default: 'big5' }) readonly test!: string;
 
   readonly zoomFactor = 5;
   chartData: any = {
@@ -161,6 +159,14 @@ export default class DetailResult extends Vue {
 
   get ResultTypeList(): string[] {
     return getResultTypeList(this.test);
+  }
+
+  get minCount(): number {
+    return 0;
+  }
+
+  get maxCount(): number {
+    return this.ResultTypeList.length - 1;
   }
 
   getResultTypeName(index: number): string {
@@ -191,14 +197,14 @@ export default class DetailResult extends Vue {
   resultTypeCombinedCount: { [key: string]: { [key: string]: number } } = {};
   updateState(result: TaskParticipantState[]): void {
     for (const resultType of this.ResultTypeList) {
-      this.resultTypeCount[resultType] = [0, 0, 0, 0, 0];
+      this.resultTypeCount[resultType] = this.ResultTypeList.map(() => 0);
       this.resultTypeCombinedCount[resultType] = {};
       for (const resultType2 of this.ResultTypeList) {
         this.resultTypeCombinedCount[resultType][resultType2] = 0;
       }
     }
     for (const state of result) {
-      const values = state.parameter as Big5Value;
+      const values = state.parameter;
       if (values.resultTypeValues) {
         const rankingList = Object.keys(values.resultTypeValues).sort(
           (a, b) => values.resultTypeValues[b] - values.resultTypeValues[a]
@@ -249,10 +255,8 @@ export default class DetailResult extends Vue {
       const rateColors: string[] = [];
       const color1 = new Color(themeColors.getGreenColor());
       const color2 = new Color(themeColors.getRedColor());
-      const min = 0;
-      const max = 4;
-      for (let i = min; i <= max; i++) {
-        const color = color1.mix(color2, (1 / max) * i, {
+      for (let i = this.minCount; i <= this.maxCount; i++) {
+        const color = color1.mix(color2, (1 / this.maxCount) * i, {
           space: 'lch',
           outputSpace: 'srgb',
         }) as any;

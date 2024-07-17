@@ -56,9 +56,9 @@
       {{ activeQuestion.question.order + 1 }}.
       {{
         $t(
-          `module.information.personalityTest.${test}.questions.${activeQuestion.question.description
-            .replaceAll('.', '')
-            .replaceAll("'", '')}.text`
+          `module.information.personalityTest.${test}.questions.${convertToI18nKey(
+            activeQuestion.question.description
+          )}.text`
         )
       }}
     </div>
@@ -88,15 +88,42 @@
             <p class="media-content">
               {{
                 $t(
-                  `module.information.personalityTest.${test}.answers.${element.description
-                    .replaceAll('.', '')
-                    .replaceAll("'", '')}`
+                  `module.information.personalityTest.${test}.answers.${convertToI18nKey(
+                    element.description
+                  )}`
                 )
               }}
             </p>
           </div>
         </template>
       </draggable>
+    </el-space>
+    <el-space
+      direction="vertical"
+      class="fill"
+      v-else-if="
+        activeQuestion && activeQuestionType === QuestionType.SINGLECHOICE
+      "
+    >
+      <el-radio-group
+        v-model="activeAnswer.textValue"
+        v-on:change="choiceChanged"
+      >
+        <el-radio
+          v-for="answer in activeQuestion.answers"
+          :key="answer.id"
+          :label="answer.id"
+          border
+        >
+          {{
+            $t(
+              `module.information.personalityTest.${test}.answers.${convertToI18nKey(
+                answer.description
+              )}`
+            )
+          }}
+        </el-radio>
+      </el-radio-group>
     </el-space>
     <div
       v-else-if="activeQuestion && activeQuestionType === QuestionType.RATING"
@@ -160,6 +187,7 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { delay, until } from '@/utils/wait';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import {
+  convertToI18nKey,
   ResultCalculation,
   ResultValue,
 } from '@/modules/information/personalityTest/types/ResultType';
@@ -168,11 +196,13 @@ import * as importService from '@/modules/information/personalityTest/utils/impo
 
 interface AnswerValue {
   numValue: number | null;
+  textValue: string | null;
   selectionList: string[];
   isSaved: boolean;
 }
 
 @Options({
+  methods: { convertToI18nKey },
   components: {
     FontAwesomeIcon,
     ParticipantModuleDefaultContainer,
@@ -201,12 +231,14 @@ export default class Participant extends Vue {
 
   activeAnswer: AnswerValue = {
     numValue: null,
+    textValue: null,
     selectionList: [],
     isSaved: false,
   };
   ownAnswerList: { [key: string]: string } = {};
   resultValue: ResultValue | null = null;
   calculation: ResultCalculation = new ResultCalculation();
+  storedActiveAnswer: Hierarchy | undefined = undefined;
 
   QuestionType = QuestionType;
   orderAnswers: Hierarchy[] = [];
@@ -264,6 +296,7 @@ export default class Participant extends Vue {
   hierarchyList: Hierarchy[] = [];
   updateHierarchy(hierarchyList: Hierarchy[]): void {
     this.hierarchyList = hierarchyList;
+    this.assignAnswers();
     const inputList = hierarchyList.filter((item) => item.isOwn);
     for (const input of inputList) {
       const parentId = input.parentId;
@@ -272,6 +305,15 @@ export default class Participant extends Vue {
           this.ownAnswerList[parentId] += `, ${input.keywords}`;
         else this.ownAnswerList[parentId] = input.keywords;
       }
+    }
+    this.loadStoredAnswersForActiveQuestion();
+  }
+
+  assignAnswers(): void {
+    for (const question of this.questions) {
+      question.answers = this.hierarchyList.filter(
+        (item) => item.parentId === question.question.id
+      );
     }
   }
 
@@ -330,6 +372,8 @@ export default class Participant extends Vue {
         for (let i = 0; i < this.orderAnswers.length; i++) {
           answers.push(this.orderAnswers[i].id);
         }
+      } else if (this.activeQuestion) {
+        answers.push(this.activeAnswer.textValue);
       }
     } else {
       answers = this.activeAnswer.numValue;
@@ -422,7 +466,7 @@ export default class Participant extends Vue {
             answer,
             EndpointAuthorisationType.PARTICIPANT
           );
-          hierarchyService.refreshCash(this.taskId, this.activeQuestionId);
+          hierarchyService.refreshCash(this.taskId, 'all');
           hasChanges = true;
         }
       } else {
@@ -430,6 +474,7 @@ export default class Participant extends Vue {
         answer.id = null;
         this.activeAnswer.isSaved = false;
         this.activeAnswer.numValue = null;
+        this.activeAnswer.textValue = null;
         hasChanges = true;
       }
     } else if (hasAnswer) {
@@ -443,7 +488,7 @@ export default class Participant extends Vue {
         },
         EndpointAuthorisationType.PARTICIPANT
       );
-      hierarchyService.refreshCash(this.taskId, this.activeQuestionId);
+      hierarchyService.refreshCash(this.taskId, 'all');
       hasChanges = true;
     }
     this.ownAnswerList[this.activeQuestionId] = answerValue
@@ -453,6 +498,14 @@ export default class Participant extends Vue {
   }
 
   async saveVoting(): Promise<boolean> {
+    if (
+      this.activeAnswer.selectionList.length === 0 ||
+      !this.activeQuestion?.answers.find(
+        (item) => item.id === this.activeAnswer.selectionList[0]
+      )
+    ) {
+      return false;
+    }
     let hasChanges = false;
     for (const vote of this.votes) {
       if (!this.activeAnswer.selectionList.includes(vote.ideaId)) {
@@ -498,6 +551,14 @@ export default class Participant extends Vue {
   }
 
   async inputChanged(): Promise<void> {
+    await delay(100);
+    this.questionAnswered = this.getQuestionAnswered();
+  }
+
+  async choiceChanged(): Promise<void> {
+    if (this.activeAnswer.textValue) {
+      this.activeAnswer.selectionList = [this.activeAnswer.textValue];
+    }
     await delay(100);
     this.questionAnswered = this.getQuestionAnswered();
   }
@@ -686,16 +747,8 @@ export default class Participant extends Vue {
       newQuestionResultStorage !== oldQuestionResultStorage ||
       newValue.question.id !== oldValue?.question.id
     ) {
-      cashService.deregisterAllGet(this.updateAnswers);
       cashService.deregisterAllGet(this.updateVotes);
       if (newValue.question.id) {
-        hierarchyService.registerGetList(
-          this.taskId,
-          newValue.question.id,
-          this.updateAnswers,
-          EndpointAuthorisationType.PARTICIPANT,
-          60 * 60
-        );
         if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
           votingService.registerGetHierarchyVotes(
             newValue.question.id,
@@ -703,6 +756,8 @@ export default class Participant extends Vue {
             EndpointAuthorisationType.PARTICIPANT,
             60 * 60
           );
+        } else {
+          this.loadStoredAnswersForActiveQuestion();
         }
       }
     }
@@ -745,6 +800,13 @@ export default class Participant extends Vue {
       await until(
         () => this.activeQuestion && this.activeQuestion.answers.length > 0
       );
+
+      if (
+        this.activeQuestionType === QuestionType.SINGLECHOICE &&
+        votes.length > 0
+      ) {
+        this.activeAnswer.textValue = votes[0].ideaId;
+      } else this.activeAnswer.textValue = null;
     }
     if (this.activeQuestion && this.activeQuestion.answers.length === 0)
       await delay(500);
@@ -822,6 +884,7 @@ export default class Participant extends Vue {
     this.storedActiveAnswer = undefined;
     this.activeAnswer.isSaved = false;
     this.activeAnswer.numValue = null;
+    this.activeAnswer.textValue = null;
     this.activeAnswer.selectionList = [];
     this.activeQuestionLoaded = false;
     this.questionAnswered = false;
@@ -833,35 +896,18 @@ export default class Participant extends Vue {
       const answer = this.storedAnswerList[this.activeQuestionIndex];
       this.activeAnswer.isSaved = false;
       this.activeAnswer.numValue = answer.numValue;
+      this.activeAnswer.textValue = answer.textValue;
       this.activeAnswer.selectionList = [];
     }
   }
 
-  storedActiveAnswer: Hierarchy | undefined = undefined;
-  async updateAnswers(answers: Hierarchy[]): Promise<void> {
-    if (answers.length > 0 && answers[0].parentId !== this.activeQuestionId) {
-      return;
-    }
-    const questionResultStorage: QuestionResultStorage =
-      getQuestionResultStorageFromQuestionType(this.activeQuestionType);
-    if (questionResultStorage === QuestionResultStorage.VOTING) {
-      if (answers.length > 0 && this.activeQuestion) {
-        const hasChanged =
-          this.activeQuestion.answers.length !== answers.length;
-        this.activeQuestion.answers = answers;
-        if (hasChanged) {
-          if (
-            this.orderAnswers.length !== answers.length ||
-            (answers.length > 0 &&
-              !this.orderAnswers.find((answer) => answers[0].id === answer.id))
-          ) {
-            if (!this.savedQuestions.includes(this.activeQuestionId))
-              this.loadSavedOrder();
-          }
-        }
-      }
-    } else if (this.activeQuestionType === QuestionType.RATING) {
-      const answer = answers.find((item) => item.isOwn);
+  async loadStoredAnswersForActiveQuestion(): Promise<void> {
+    if (!this.activeQuestion) return;
+    const questionId = this.activeQuestion.question.id;
+    if (this.activeQuestionType === QuestionType.RATING) {
+      const answer = this.hierarchyList.find(
+        (item) => item.isOwn && item.parentId === questionId
+      );
       if (
         answer &&
         this.storedActiveAnswer &&
@@ -891,6 +937,7 @@ export default class Participant extends Vue {
   questions: Question[] = [];
   updateQuestions(questions: Hierarchy[]): void {
     this.questions = hierarchyService.convertToQuestions(questions);
+    this.assignAnswers();
     this.loadProgress();
     this.questionCount = questions.length;
   }
@@ -946,17 +993,14 @@ export default class Participant extends Vue {
 
   questionAnswered = false;
   getQuestionAnswered(): boolean {
-    if (
-      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
-      QuestionResultStorage.VOTING
-    ) {
+    if (this.activeQuestionType === QuestionType.ORDER) {
       if (this.hasVotesForActiveQuestion) {
         return this.votesQuestionId === this.activeQuestionId;
       }
-    } else {
-      if (this.activeQuestionType === QuestionType.RATING) {
-        return this.activeAnswer.numValue !== null;
-      }
+    } else if (this.activeQuestionType === QuestionType.SINGLECHOICE) {
+      return this.activeAnswer.textValue !== null;
+    } else if (this.activeQuestionType === QuestionType.RATING) {
+      return this.activeAnswer.numValue !== null;
     }
     return false;
   }
@@ -971,7 +1015,6 @@ export default class Participant extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
-    cashService.deregisterAllGet(this.updateAnswers);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateQuestions);
@@ -1234,5 +1277,37 @@ label {
 h1 {
   font-size: var(--font-size-large);
   font-weight: var(--font-weight-bold);
+}
+
+.el-radio {
+  --color: var(--color-informing-dark);
+  white-space: unset;
+  height: unset;
+  width: 100%;
+  margin-top: 0.5rem;
+  background-color: var(--color);
+  --el-color-primary: white;
+  --el-radio-text-color: white;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+
+  &.is-checked {
+    --color: var(--color-informing);
+  }
+}
+
+.el-radio::v-deep(.el-radio__inner) {
+  font-family: 'Font Awesome';
+  --el-radio-input-width: 1.2rem;
+  --el-radio-input-height: var(--el-radio-input-width);
+
+  &:after {
+    width: var(--el-radio-input-width);
+    height: var(--el-radio-input-height);
+    background-color: unset;
+    content: '\f00c';
+    color: var(--color-informing);
+    text-align: center;
+  }
 }
 </style>

@@ -1,0 +1,97 @@
+{
+  "participant": {
+    "primary": "Primärklasse",
+    "secondary": "Sekundärklasse",
+    "score": "Du hast für jede der Klassen in diesem Test die folgende Punktzahl erreicht:"
+  },
+  "questions": {
+    "When you are faced with a problem to solve, what do you do first?": {
+      "text": "Wenn du vor einem zu lösenden Problem stehst, was machst du als erstes?",
+      "keyword": "Problem"
+    },
+    "When you tackle a group project, you focus on": {
+      "text": "Wenn du ein Gruppenprojekt in Angriff nimmst, konzentrierst du dich...",
+      "keyword": "Gruppenprojekt"
+    },
+    "Which of these statements best describes you? The person in the group who": {
+      "text": "Welche dieser Aussagen beschreibt dich am besten? Der/Diejenige in der Gruppe, der/die...",
+      "keyword": "Gruppe"
+    },
+    "When you are stressed, you tend to": {
+      "text": "Wenn du gestresst bist, tendierst du dazu...",
+      "keyword": "Stress"
+    },
+    "If you were in the situation of analyzing a product, would you": {
+      "text": "Wenn du in der Situation wärst, ein Produkt zu analysieren, würdest du...",
+      "keyword": "Produkt"
+    },
+    "Which of the following strengths best applies to you?": {
+      "text": "Welche der folgenden Stärken trifft am ehesten auf dich zu?",
+      "keyword": "Stärken"
+    }
+  },
+  "answers": {
+    "I collect all available information to investigate the cause of the problem": "Ich sammle alle vorhandenen Informationen, um die Ursache des Problems zu erforschen.",
+    "I focus on the consequences that the problem has for the person(s) concerned": "Ich konzentriere mich auf die Konsequenzen, die das Problem für die betroffene(n) Person(en) hat.",
+    "I think about the possible negative consequences and ask myself questions like What happens if I cant solve the problem?": "Ich denke an die möglichen negativen Folgen stelle mir Fragen wie \"Was passiert, wenn ich das Problem nicht lösen kann?\"",
+    "I immediately think of various solutions to the problem": "Ich überlege mir sofort verschiedene Lösungsvorschläge für das Problem.",
+    "I keep in mind what the positive consequences will be once the problem has been solved": "Ich halte mir vor Augen, was die positiven Konsequenzen sind, sobald das Problem gelöst ist.",
+    "I come up with a plan to tackle the problem": "Ich lege mir einen Plan zurecht, wie ich das Problem in Angriff nehme.",
+    "on brainstorming and the search for good ideas": "...auf Brainstorming und die Suche nach guten Ideen.",
+    "on the positive outcome that the project can achieve": "...auf den positiven Outcome, den das Projekt erzielen kann.",
+    "the potential risks that the project entails": "...auf die potenziellen Risiken, die das Projekt mit sich bringt.",
+    "to coordinate / manage communication within the group": "...darauf die Kommunikation in der Gruppe zu koordinieren / zu leiten.",
+    "to ensure that everyone in the group is satisfied with all decisions": "...darauf sicherzugehen, dass jeder in der Gruppe mit allen Entscheidungen zufrieden ist.",
+    "to objectively consider all facts and opinions of the group members": "...darauf alle Fakten und Meinungen der Gruppenmitglieder objektiv zu berücksichtigen.",
+    "is the quickest to become frustrated when something goes wrong": "...am schnellsten frustriert ist, wenn etwas schiefgeht.",
+    "most critically scrutinizes what can go wrong / has not been considered": "...am kritischsten hinterfragt, was alles schiefgehen kann / nicht bedacht worden ist.",
+    "enjoys being creative and coming up with solutions the most": "...es am meisten genießt, kreativ zu sein und sich Lösungen zu überlegen.",
+    "has the quickest overview of everything": "...am schnellsten einen Überblick über alles hat.",
+    "is communicated most clearly and is best understood by all group members": "...am klarsten kommuniziert und am besten verständlich für alle Gruppenmitglieder ist.",
+    "is almost always in a good mood and motivates the others in the group": "...fast immer gut gelaunt ist und die anderen in der Gruppe motiviert.",
+    "to get yourself into negative thoughts": "...dich in negative Gedanken reinzusteigern.",
+    "to motivate you with positive thoughts": "...dich mit positiven Gedanken zu motivieren.",
+    "to seek advice and help from other people": "...mir Rat und Hilfe bei anderen Personen zu suchen.",
+    "analyze the cause and try to eliminate it": "...die Ursache zu analysieren und versuchen zu beseitigen.",
+    "to look for solutions to eliminate the stress": "...nach Lösungen zu suchen, um den Stress zu beseitigen.",
+    "I am never stressed": "Ich bin nie gestresst.",
+    "focus on the basic idea of the product and summarize what its possible advantages/disadvantages are": "...dich auf die Grundidee des Produktes konzentrieren, und zusammenfassen was seine möglichen Vor-/Nachteile sind.",
+    "concentrate on the first impression the product makes on you": "...dich auf den ersten Eindruck konzentrieren, den das Produkt auf dich macht.",
+    "focus on how the product could be improved / enhanced": "...dich darauf konzentrieren, wie das Produkt verbessert / erweitert werden könnte.",
+    "focus on the advantages, for example what the strengths of the product are or what the product can offer in comparison to others": "...dich auf die Vorteile konzentrieren, zum Beispiel was die Stärken des Produktes sind bzw. was das Produkt im Vergleich zu anderen bieten kann.",
+    "focus on the disadvantages, for example what the weaknesses of the product are or what the product lacks compared to others": "...dich auf die Nachteile konzentrieren, zum Beispiel was die Schwächen des Produktes sind bzw. was dem Produkt im Vergleich zu anderen fehlt.",
+    "focus on the facts you know about the product": "...dich auf die Fakten konzentrieren, die du über das Produkt kennst.",
+    "Being able to take the lead in a situation when necessary": "In der Lage zu sein, bei Bedarf die Führung in einer Situation zu übernehmen.",
+    "To be impartial and not immediately judge people / situations etc negatively or positively": "Unvoreingenommen zu sein und Menschen / Situationen etc. nicht sofort negativ oder positiv zu beurteilen.",
+    "Having a positive mood that makes other people feel good": "Eine positive Grundstimmung zu haben, die anderen Menschen ein angenehmes Gefühl vermittelt.",
+    "To be able to develop new and original ideas": "In der Lage zu sein, neue und originelle Gedanken zu entwickeln.",
+    "Being able to share your own thoughts and feelings with others": "In der Lage zu sein, eigene Gedanken und Gefühle mit anderen zu teilen.",
+    "Being able to accept / deal with criticism": "In der Lage zu sein Kritik anzunehmen / damit umzugehen."
+  },
+  "result": {
+    "white": {
+      "name": "Weißer Hut (analytisch)",
+      "description": "Der WEISSE Hut steht für Objektivität und Neutralität. Unter diesem Hut werden Informationen gesammelt, ohne sie zu werten. Unter dem weissen Hut verschafft man sich einen objektiven Überblick über alle verfügbaren Daten und Informationen – vollkommen unabhängig von der persönlichen Meinung. Dieser Hut wird häufig zu Beginn einer Diskussion oder eines Prozesses aufgesetzt, um einen ersten Überblick zu erhalten."
+    },
+    "blue": {
+      "name": "Blauer Hut (ordnend)",
+      "description": "Der BLAUE Hut steht für Kontrolle und für die Organisation des gesamten Denkprozesses. Der Moderator ist typischerweise der Träger des blauen Hutes. Er blickt von einer übergeordneten Stelle auf den gesamten Prozess und erlangt so einen Überblick. Die Aufgaben des Trägers des blauen Hut bestehen daraus, die Ergebnisse zusammenzufassen oder Entscheidungen darüber treffen, welche Hüte im weiteren Prozess noch einmal aufgesetzt werden."
+    },
+    "red": {
+      "name": "Roter Hut (emotional)",
+      "description": "Der ROTE Hut steht im Gegensatz zum weissen Hut für Emotionen. Unter diesem Hut kann den Gefühlen freien Lauf gelassen werden.Unter dem roten Hut kann alles geäussert werden, was Sie in sich fühlen. Alles Diffuse, alles Gefühlsmäßige kann ausgesprochen werden, ohne dass Sie sich rechtfertigen müssen."
+    },
+    "green": {
+      "name": "Grüner Hut (kreativ)",
+      "description": "Der GRÜNE Hut steht für die Kreativität, für Wachstum und für neue Ideen. Wenn dieser Hut getragen wird, begibt man sich auf die Suche nach Alternativen. Unter dem grünen Hut darf alles formuliert werden, was zu neuen Ideen und Ansätzen führt, unabhängig davon, wie verrückt oder unrealistisch die Ideen sind."
+    },
+    "yellow": {
+      "name": "Gelber Hut (optimistisch)",
+      "description": "Der GELBE Hut steht für das Gegenteil des schwarzen Huts. Hier geht es darum, das Positive zu entdecken. Wenn der gelbe Hut getragen wird bemüht sich die Gruppe alle Chancen oder Pluspunkte zu finden, aber auch realistische  Hoffnungen und erstrebenswerte Ziele zu formulieren."
+    },
+    "black": {
+      "name": "Schwarzer Hut (kritisch)",
+      "description": "Der SCHWARZE Hut lotet die negativen Aspekte und Risiken der Fragestellung aus. Dazu gehören alle sachlichen Argumente, die gegen ein Projekt bzw. eine Entscheidung sprechen. Wenn der schwarze Hut getragen wird, ist die Gruppe bestrebt objektiv alle negativen Aspekte eines Themas herauszufinden."
+    }
+  }
+}

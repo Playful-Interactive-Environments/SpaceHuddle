@@ -72,7 +72,11 @@ export default class ModeratorConfig extends Vue implements CustomInit {
           order: i,
         })
         .then((question) => {
-          if (question.parameter.questionType === QuestionType.ORDER) {
+          if (
+            question.parameter.questionType === QuestionType.ORDER ||
+            question.parameter.questionType === QuestionType.SINGLECHOICE ||
+            question.parameter.questionType === QuestionType.MULTIPLECHOICE
+          ) {
             const index = parseInt(question.keywords);
             const options =
               surveyConfig[this.modelValue.test].questions[index].options;

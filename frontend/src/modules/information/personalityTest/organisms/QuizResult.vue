@@ -53,6 +53,7 @@ import * as themeColors from '@/utils/themeColors';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import { convertToI18nKey } from '@/modules/information/personalityTest/types/ResultType';
 
 interface ChartLegend {
   color: string;
@@ -269,16 +270,12 @@ export default class QuizResult extends Vue {
               ? this.$t(
                   `module.information.personalityTest.${
                     this.test
-                  }.questions.${idea.description
-                    .replaceAll('.', '')
-                    .replaceAll("'", '')}.text`
+                  }.questions.${convertToI18nKey(idea.description)}.text`
                 )
               : this.$t(
                   `module.information.personalityTest.${
                     this.test
-                  }.answers.${idea.description
-                    .replaceAll('.', '')
-                    .replaceAll("'", '')}`
+                  }.answers.${convertToI18nKey(idea.description)}`
                 ),
             34
           );
@@ -286,9 +283,7 @@ export default class QuizResult extends Vue {
         return this.$t(
           `module.information.personalityTest.${
             this.test
-          }.enum.rating.${idea.keywords
-            .replaceAll('.', '')
-            .replaceAll("'", '')}`
+          }.enum.rating.${convertToI18nKey(idea.keywords)}`
         );
       }),
       datasets: datasets,
