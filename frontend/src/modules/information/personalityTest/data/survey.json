@@ -668,5 +668,278 @@
       "file": "ThinkingHatsType",
       "class": "ThinkingHatsCalculation"
     }
+  },
+  "communication": {
+    "questions": [
+      {
+        "question": "You are standing in line at the bakery.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "I agree with her that there is a lot going on today.",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "I am annoyed that the sales clerk treats me so rudely instead of hurrying up.",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "I tell the sales clerk that I am not in such a hurry.",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "I imagine it must be really stressful to be in her place.",
+            "resultType": "self_revelation"
+          }
+        ]
+      },
+      {
+        "question": "You meet a colleague in the corridor.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "I suspect that his mind is probably elsewhere.",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "I find it understandable that he can no longer remember after all this time.",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "I find it unfriendly that the colleague ignores me.",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "I suspect that he wants to be left alone.",
+            "resultType": "appeal"
+          }
+        ]
+      },
+      {
+        "question": "Your friend has invited you to a party.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "I assume that he/she is an outgoing person and likes to approach others.",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "I have the impression that he/she is interested in me and wants to get to know me.",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "I assume that he/she doesn't know many people here and I deliberately take time for him/her.",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "I think about how long I've known M., answer the question and think nothing more of it.",
+            "resultType": "factual_information"
+          }
+        ]
+      },
+      {
+        "question": "A colleague comes into your office for a meeting.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "I say: \"That could well be the case. We haven't had the window open yet today.\"",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "The colleague obviously wants to ask me to ventilate.",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "I have the impression that my colleague attaches great importance to fresh air.",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "I think to myself that he can leave again if he doesn't like it here.",
+            "resultType": "relationship"
+          }
+        ]
+      },
+      {
+        "question": "I come home.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "That I smell bad.",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "That he/she cares about my well-being and hopes that the shower will do me good",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "That a shower is refreshing after a hard day.",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "That I should take a shower.",
+            "resultType": "appeal"
+          }
+        ]
+      },
+      {
+        "question": "You receive a customer call.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "inwardly irritated: \"What's it all about?\"",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "with honest sympathy: \"That's annoying that it was so often occupied.\"",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "in an attempt to make up for the annoyance \"I'm sorry about that. How can I help you?\"",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "neutral: \"What's it all about?\"",
+            "resultType": "factual_information"
+          }
+        ]
+      },
+      {
+        "question": "You have made an appointment with your new supervisor.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "You try to be brief so that your boss is not interrupted for too long.",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "You have the impression that your boss is under stress and is therefore trying to do two things at once.",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "You find it tactless that your boss continues to work while you are talking to him.",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "You ask your questions and barely notice that your boss is looking at the screen.",
+            "resultType": "factual_information"
+          }
+        ]
+      },
+      {
+        "question": "During a lively discussion among friends.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "You can understand that your friend is annoyed because he was interrupted.",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "You think about whether it's true that you've already interrupted him three times.",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "You try not to interrupt him now.",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "You feel attacked and exposed.",
+            "resultType": "relationship"
+          }
+        ]
+      },
+      {
+        "question": "You have been working in a project group developing new software for a year.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "You answer: \"Yes, development is actually taking longer than expected.\"",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "You sense the head of department's impatience and say: \"I also hope that things will progress more quickly now. We'll do everything we can to finish on time.\"",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "You get the impression that the boss is under a lot of pressure and say: \"I know time is pressing. I can understand that you would have liked the results sooner.\"",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "You find this remark derogatory, but try not to let your anger at this stupid question show.",
+            "resultType": "relationship"
+          }
+        ]
+      },
+      {
+        "question": "When your colleague takes a look at the on-call list",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "You reply: \"Yes, I've swapped shifts with Andi. But if you want, I can swap one or two Friday shifts with you.\"",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "You are annoyed by the impression that your colleague is accusing you of uncollegial behavior.",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "You reply: \"That's right. Andi does the service for me on Fridays and I do it for him on Mondays.\"",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "You can understand that your colleague finds it unfair that you don't work on Fridays and explain why.",
+            "resultType": "self_revelation"
+          }
+        ]
+      },
+      {
+        "question": "You are engrossed in the business section of the newspaper.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "\"You don't mind me reading, do you?\"",
+            "resultType": "self_revelation"
+          },
+          {
+            "answer": "\"Here is a report on our current annual report.\"",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "\"I'll be allowed to read the newspaper for a moment!\"",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "\"Okay, I'm almost done!\"",
+            "resultType": "appeal"
+          }
+        ]
+      },
+      {
+        "question": "At a meeting, you plead for a more flexible division.",
+        "type": "singlechoice",
+        "options": [
+          {
+            "answer": "You are annoyed that your colleague is dismissing your suggestion.",
+            "resultType": "relationship"
+          },
+          {
+            "answer": "You try to change the proposal so that Mr. Meier is satisfied with the solution.",
+            "resultType": "appeal"
+          },
+          {
+            "answer": "You explain the advantages of the solution to Mr. Meier once again.",
+            "resultType": "factual_information"
+          },
+          {
+            "answer": "You notice that Mr. Meier attaches great importance to precise regulations and try to understand exactly what his concerns are.",
+            "resultType": "self_revelation"
+          }
+        ]
+      }
+    ],
+    "result": ["appeal", "relationship", "self_revelation", "factual_information"],
+    "calculation": {
+      "file": "CommunicationType",
+      "class": "CommunicationCalculation"
+    }
   }
 }

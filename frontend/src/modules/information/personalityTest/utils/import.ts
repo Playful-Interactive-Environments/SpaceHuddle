@@ -11,7 +11,10 @@ export async function importCalculation(test: string): Promise<any> {
   return new input[config.class]();
 }
 
-export async function importComponent(folder: string, test: string): Promise<any> {
+export async function importComponent(
+  folder: string,
+  test: string
+): Promise<any> {
   return await defineAsyncComponent(
     () =>
       import(

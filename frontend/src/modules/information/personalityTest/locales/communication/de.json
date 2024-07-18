@@ -1,0 +1,125 @@
+{
+  "participant": {
+    "primary": "Primärklasse",
+    "secondary": "Sekundärklasse",
+    "score": "Du hast für jede der Klassen in diesem Test die folgende Punktzahl erreicht:"
+  },
+  "questions": {
+    "You are standing in line at the bakery": {
+      "text": "Du stehst in einer Schlange beim Bäcker. Du wartest schon eine ganze Weile. Endlich bist du an der Reihe und sagst rasch, was du haben möchtest. Die Verkäuferin runzelt die Stirn und sagt: \"Mal ganz langsam. Das ist ja eine Hektik heute.\"",
+      "keyword": "Bäcker"
+    },
+    "You meet a colleague in the corridor": {
+      "text": "Auf dem Gang triffst du einen Kollegen aus einer anderen Abteilung, den du vor einem Jahr auf einem Seminar kennen gelernt hast. Der Kollege grüßt dich nicht.",
+      "keyword": "Gang"
+    },
+    "Your friend has invited you to a party": {
+      "text": "Dein Freund M. hat dich zu einer Party eingeladen. Eine dir unbekannte, etwa gleichaltrige Person fragt dich auf der Party: \"Und, woher kennst du den M.?\"",
+      "keyword": "Party"
+    },
+    "A colleague comes into your office for a meeting": {
+      "text": "Ein Kollege, zu dem du ein eher distanziertes Verhältnis hast, kommt zu einer Besprechung in dein Büro und sagt: \"Ui, das ist ja ganz schön stickig hier.\"",
+      "keyword": "Büro"
+    },
+    "I come home": {
+      "text": "Ich komme an einem warmen Sommerabend müde und abgeschlafft von einem langen Bürotag nach Hause. Dein Partner fragt dich: \"Na, willst du erst mal duschen?\" Er/sie will damit sagen:",
+      "keyword": "nach Hause kommen"
+    },
+    "You receive a customer call": {
+      "text": "Du erhältst einen Kundenanruf. Der Kunde sagt mit unüberhörbarer Ironie: \"Das ist ja unglaublich, dass ich Sie heute noch zu sprechen bekomme. Den ganzen Vormittag hab ich versucht, Sie zu erreichen und immer war besetzt.\" Du antwortest:",
+      "keyword": "Anruf"
+    },
+    "You have made an appointment with your new supervisor": {
+      "text": "Du hast einen Termin mit deinem neuen Vorgesetzten vereinbart, weil du einige fachliche Fragen hast. Als du sein Büro betrittst, blickt er nicht vom Bildschirm auf und arbeitet weiter am PC während er sagt: \"Schießen Sie schon mal los. Ich höre Ihnen zu.\"",
+      "keyword": "Vorgesetzten"
+    },
+    "During a lively discussion among friends": {
+      "text": "Bei einer engagierten Diskussion im Freundeskreis sagt ein Freund mit scharfem Tonfall zu dir: \"Jetzt hast du mich schon zum dritten Mal unterbrochen.\"",
+      "keyword": "Diskussion"
+    },
+    "You have been working in a project group developing new software for a year": {
+      "text": "Du arbeitest seit einem Jahr in einer Projektgruppe zur Entwicklung einer neuen Software mit. Heute präsentierst du vor den Führungskräften deiner Abteilung die Zwischenergebnisse der Projektarbeit. Als du die Präsentation beendet hast, sagt der Abteilungsleiter: \"Und dafür hat die Projektgruppe ein Jahr gebraucht?\"",
+      "keyword": "Projektgruppe"
+    },
+    "When your colleague takes a look at the on-call list": {
+      "text": "Als dein Kollege, zu dem du ein neutrales Verhältnis hast, einen Blick auf die Liste für die Telefonbereitschaft wirft, sagt er: \"Na sowas, an den Freitagen kann ich deinen Namen ja gar nicht entdecken!\" Tatsächlich machst du kaum einen Freitags-Dienst, weil dein Kollege Andi dich gebeten hatte, deine Freitags-Dienste zu übernehmen wenn du dafür seinen Service an Montagen übernimmst. Dieses Angebot hattest du gerne angenommen.",
+      "keyword": "Bereitschaft"
+    },
+    "You are engrossed in the business section of the newspaper": {
+      "text": "Du sitzt zu Hause am Frühstückstisch und bist in den Wirtschaftsteil der Zeitung vertieft. Dein Gegenüber stellt nach einiger Zeit die Frage: \"Sag mal, was gibt’s eigentlich so Interessantes zu lesen?\" Du erwiderst:",
+      "keyword": "Zeitung"
+    },
+    "At a meeting, you plead for a more flexible division": {
+      "text": "Bei einer Besprechung, in der es um die Verbesserung der Arbeitsabläufe geht, plädierst du für eine flexiblere Aufteilung bei einigen Aufgaben. Herr Meier, ein älterer Kollege, lehnt das vehement ab: \"Das geht doch nicht. Das gibt ja das totale Chaos.\"",
+      "keyword": "Besprechung"
+    }
+  },
+  "answers": {
+    "I agree with her that there is a lot going on today": "Ich stimme ihr zu, dass heute viel los ist.",
+    "I am annoyed that the sales clerk treats me so rudely instead of hurrying up": "Ich ärgere mich, dass die Verkäuferin mich so unfreundlich behandelt, statt sich zu beeilen.",
+    "I tell the sales clerk that I am not in such a hurry": "Ich sage der Verkäuferin, dass ich es nicht so eilig habe.",
+    "I imagine it must be really stressful to be in her place": "Ich stelle mir vor, dass es wirklich stressig sein muss, an ihrer Stelle zu sein.",
+    "I suspect that his mind is probably elsewhere": "Ich vermute, dass er wohl mit seinen Gedanken woanders ist.",
+    "I find it understandable that he can no longer remember after all this time": "Ich finde es verständlich, dass er sich nach der langen Zeit nicht mehr erinnern kann.",
+    "I find it unfriendly that the colleague ignores me": "Ich finde es unfreundlich, dass der Kollege mich ignoriert.",
+    "I suspect that he wants to be left alone": "Ich vermute, dass er in Ruhe gelassen werden will.",
+    "I assume that he/she is an outgoing person and likes to approach others": "Ich vermute, dass er/sie ein kontaktfreudiger Mensch ist und gerne auf andere zugeht.",
+    "I have the impression that he/she is interested in me and wants to get to know me": "Ich habe den Eindruck, dass er/sie sich für mich interessiert und mich kennenlernen möchte.",
+    "I assume that he/she doesnt know many people here and I deliberately take time for him/her": "Ich vermute, dass er/sie hier wenig Leute kennt und nehme mir bewusst Zeit für sie/ihn.",
+    "I think about how long Ive known M, answer the question and think nothing more of it": "Ich überlege, wie lange ich M. kenne, beantworte die Frage und denke mir nichts weiter dabei.",
+    "I say: That could well be the case We havent had the window open yet today": "Ich stelle fest: \"Das kann gut sein. Wir hatten das Fenster heute noch nicht offen.\"",
+    "The colleague obviously wants to ask me to ventilate": "Der Kollege will mich offenbar auffordern, zu lüften.",
+    "I have the impression that my colleague attaches great importance to fresh air": "Ich habe den Eindruck, dass der Kollege viel Wert auf frische Luft legt.",
+    "I think to myself that he can leave again if he doesnt like it here": "Ich denke mir, dass er ja wieder gehen kann, wenn es ihm hier nicht passt.",
+    "That I smell bad": "Dass ich schlecht rieche.",
+    "That he/she cares about my well-being and hopes that the shower will do me good": "Dass er/sie sich um mein Wohlbefinden sorgt und hofft, dass mir die Dusche gut tun wird.",
+    "That a shower is refreshing after a hard day": "Dass eine Dusche nach einem anstrengenden Tag erfrischend ist.",
+    "That I should take a shower": "Dass ich duschen gehen sollte.",
+    "inwardly irritated: Whats it all about?": "innerlich gereizt: \"Um was geht es denn?\"",
+    "with honest sympathy: Thats annoying that it was so often occupied": "mit ehrlicher Anteilnahme: \"Das ist ja ärgerlich, dass so oft besetzt war.\"",
+    "in an attempt to make up for the annoyance Im sorry about that How can I help you?": "mit dem Versuch das Ärgernis wieder gut zu machen \"Das tut mir Leid. Wie kann ich Ihnen weiterhelfen?\"",
+    "neutral: Whats it all about?": "neutral: \"Um was geht es denn?\"",
+    "You try to be brief so that your boss is not interrupted for too long": "Du versuchst dich kurz zu fassen, damit dein Chef nicht zu lange unterbrochen wird.",
+    "You have the impression that your boss is under stress and is therefore trying to do two things at once": "Du hast den Eindruck, dass dein Chef im Stress ist und deshalb versucht, zwei Sachen auf einmal zu erledigen.",
+    "You find it tactless that your boss continues to work while you are talking to him": "Du findest es taktlos, dass dein Chef weiterarbeitet, während du mit ihm sprichst.",
+    "You ask your questions and barely notice that your boss is looking at the screen": "Du stellst deine Fragen und bemerkst dabei kaum, dass dein Chef auf den Bildschirm blickt.",
+    "You can understand that your friend is annoyed because he was interrupted": "Du kannst verstehen, dass dein Freund sich ärgert, weil er unterbrochen wurde.",
+    "You think about whether its true that youve already interrupted him three times": "Du überlegst, ob es stimmt, dass du ihn schon dreimal unterbrochen hast.",
+    "You try not to interrupt him now": "Du versuchst, ihn jetzt nicht mehr zu unterbrechen.",
+    "You feel attacked and exposed": "Du fühlst dich angegriffen und bloßgestellt.",
+    "You answer: Yes, development is actually taking longer than expected": "Du antwortest: \"Ja, die Entwicklung braucht tatsächlich länger als erwartet.\"",
+    "You sense the head of departments impatience and say: I also hope that things will progress more quickly now Well do everything we can to finish on time": "Du spürst die Ungeduld des Abteilungsleiters und sagst: \"Ich hoffe auch, dass es jetzt schneller vorangehen wird. Wir werden alles tun, damit wir rechtzeitig fertig werden.\"",
+    "You get the impression that the boss is under a lot of pressure and say: I know time is pressing I can understand that you would have liked the results sooner": "Du hast den Eindruck, dass der Chef unter großem Druck steht und sagst: \"Ich weiß, die Zeit drängt. Ich kann nachvollziehen, dass Sie sich die Ergebnisse schneller gewünscht hätten.\"",
+    "You find this remark derogatory, but try not to let your anger at this stupid question show": "Du findest diese Bemerkung abwertend, versuchst jedoch, dir deinen Ärger über diese dumme Frage nicht anmerken zu lassen.",
+    "You reply: Yes, Ive swapped shifts with Andi But if you want, I can swap one or two Friday shifts with you": "Du antwortest: \"Ja, die Dienste habe ich mit Andi getauscht. Aber wenn du willst, kann ich auch den ein oder anderen Freitags-Dienst mit dir tauschen.\"",
+    "You are annoyed by the impression that your colleague is accusing you of uncollegial behavior": "Du ärgerst dich über den Eindruck, dass der Kollege dir unkollegiales Verhalten unterstellt.",
+    "You reply: Thats right Andi does the service for me on Fridays and I do it for him on Mondays": "Du antwortest: \"Das stimmt. Andi übernimmt für mich freitags den Service und ich montags für ihn.\"",
+    "You can understand that your colleague finds it unfair that you dont work on Fridays and explain why": "Du kannst verstehen, dass dein Kollege es ungerecht findet, dass du freitags keine Dienste übernimmst und erklärst ihm, wie es dazu kommt.",
+    "You dont mind me reading, do you?": "\"Dich stört es, dass ich lese, nicht wahr?\"",
+    "Here is a report on our current annual report": "\"Hier steht ein Bericht über unseren aktuellen Geschäftsbericht.\"",
+    "Ill be allowed to read the newspaper for a moment!": "\"Ich werde ja wohl noch kurz die Zeitung lesen dürfen!\"",
+    "Okay, Im almost done!": "\"Okay, bin gleich fertig!\"",
+    "You are annoyed that your colleague is dismissing your suggestion": "Du bist verärgert, dass der Kollege deinen Vorschlag so abkanzelt.",
+    "You try to change the proposal so that Mr Meier is satisfied with the solution": "Du versuchst, den Vorschlag so zu ändern, dass Herr Meier mit der Lösung zufrieden ist.",
+    "You explain the advantages of the solution to Mr Meier once again": "Du erklärst Herrn Meier noch einmal die Vorteile der Lösung.",
+    "You notice that Mr Meier attaches great importance to precise regulations and try to understand exactly what his concerns are": "Du merkst, dass Her Meier auf genaue Regelungen Wert legt und versuchst, zu verstehen, welche Bedenken er genau hat."
+  },
+  "result": {
+    "appeal": {
+      "name": "die Berufung oder das Plädoyer",
+      "description": "Der Appell oder Wunsch enthält das, was der Absender möchte, dass der Empfänger tut oder denkt. Nach von Thun wird derjenige, der etwas sagt, auch etwas bewirken. Diese Appell-Botschaft soll den Empfänger dazu bringen, etwas zu tun oder etwas zu lassen. Der Versuch, jemanden zu beeinflussen, kann weniger oder mehr offen (Ratschläge) oder versteckt (Manipulation) sein. Mit dem \"Appell-Ohr\" fragt sich der Empfänger: \"Was soll ich jetzt tun, denken oder fühlen?\" Zum Beispiel: \"Mütter werden von Kindern sehr appellativ beeinflusst. Mutti! Die Schuhe .... Ja! Ich bin gleich da, um sie dir anzuziehen.\""
+    },
+    "relationship": {
+      "name": "die Beziehungsebene",
+      "description": "Die Beziehungsebene drückt aus, wie der Sender mit dem Empfänger zurechtkommt und was der Sender über den Empfänger denkt und fühlt. Je nachdem, wie der Sender mit dem Empfänger spricht (Ausdrucksweise, Körpersprache, Intonation ...) drückt der Sender Wertschätzung, Respekt, Freundlichkeit, Desinteresse, Verachtung oder etwas anderes aus. Der Sender kann ausdrücken, was er über den Empfänger denkt (Du-Aussage) und wie sie miteinander auskommen (Wir-Aussage).[citation needed]Je nachdem, welche Botschaft der Empfänger mit dem Beziehungsohr hört, fühlt er sich entweder bedrückt, akzeptiert oder bevormundet. Gute Kommunikation zeichnet sich durch gegenseitige Wertschätzung aus."
+    },
+    "self_revelation": {
+      "name":"die selbstoffenbarende Ebene",
+      "description":"Die Selbstoffenbarungsebene enthält das, was der Absender über sich selbst preisgeben möchte; sie enthält Informationen über den Absender.Sie kann sowohl aus bewusst beabsichtigter Selbstdarstellung als auch aus unbeabsichtigter Selbstenthüllung bestehen, die dem Absender nicht bewusst ist (siehe auch Johari-Fenster).So wird jede Nachricht zur Information über die Persönlichkeit des Absenders.Das selbstoffenbarende Ohr des Empfängers nimmt wahr, welche Informationen über den Absender in der Nachricht verborgen sind."
+    },
+    "factual_information": {
+      "name":"die faktische Ebene",
+      "description":"Die Sachebene enthält das, worüber der Absender informieren will:Auf der Sachebene gibt der Absender der Nachricht Daten, Fakten und Informationsaussagen wieder. Es ist die Aufgabe des Senders, diese Informationen klar und verständlich zu übermitteln. Der Empfänger prüft mit dem \"Faktenohr\", ob die Sachnachricht die Kriterien der Wahrheit (wahr/unwahr) oder der Relevanz (relevant/irrelevant) und der Vollständigkeit (befriedigend/etwas muss noch hinzugefügt werden) erfüllt.In einem Langzeitteam kann die Sachebene klar sein und nur wenige Worte benötigen."
+    }
+  }
+}

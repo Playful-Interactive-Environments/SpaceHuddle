@@ -126,7 +126,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-           "sub_locales": "big5,brainhex,shopping,thinkingHats,",  
+           "sub_locales": "big5,brainhex,communication,shopping,thinkingHats,",  
              "icon": "face-rolling-eyes",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": false,  
            "path": "information/personalityTest"  
        },  

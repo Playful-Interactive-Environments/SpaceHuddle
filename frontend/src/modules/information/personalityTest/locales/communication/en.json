@@ -1,0 +1,125 @@
+{
+  "participant": {
+    "primary": "Primary Class",
+    "secondary": "Secondary Class",
+    "score": "Your scores for each of the classes in this test were as follows:"
+  },
+  "questions": {
+    "You are standing in line at the bakery": {
+      "text": "You're standing in line at the bakery. You've been waiting for quite a while. Finally it's your turn and you quickly say what you want. The sales clerk frowns and says: “Slow down a bit. It's hectic today.”",
+      "keyword": "bakery"
+    },
+    "You meet a colleague in the corridor": {
+      "text": "In the corridor, you meet a colleague from another department who you met at a seminar a year ago. The colleague doesn't greet you.",
+      "keyword": "corridor"
+    },
+    "Your friend has invited you to a party": {
+      "text": "Your friend M. has invited you to a party. At the party, a person you don't know who is around the same age asks you: \"So, how do you know M.?\"",
+      "keyword": ""
+    },
+    "A colleague comes into your office for a meeting": {
+      "text": "A colleague with whom you have a rather distant relationship comes into your office for a meeting and says: \"Wow, it's really stuffy in here.\"",
+      "keyword": "office"
+    },
+    "I come home": {
+      "text": "I come home on a warm summer evening, tired and exhausted from a long day at the office. Your partner asks you: \"Well, do you want to take a shower first?\" What he/she means to say is:",
+      "keyword": "come home"
+    },
+    "You receive a customer call": {
+      "text": "You receive a customer call. The customer says with unmistakable irony: “It's incredible that I can still speak to you today. I've been trying to reach you all morning and it's always been busy.” You reply:",
+      "keyword": "call"
+    },
+    "You have made an appointment with your new supervisor": {
+      "text": "You have made an appointment with your new supervisor because you have some technical questions. When you enter his office, he doesn't look up from his screen and continues to work on his PC while saying: \"Go ahead. I'm listening to you.\"",
+      "keyword": "supervisor"
+    },
+    "During a lively discussion among friends": {
+      "text": "During a lively discussion among friends, a friend says to you in a sharp tone of voice: \"That's the third time you've interrupted me.\"",
+      "keyword": "discussion"
+    },
+    "You have been working in a project group developing new software for a year": {
+      "text": "You have been working in a project group developing new software for a year. Today you are presenting the interim results of the project work to the managers in your department. When you have finished the presentation, the head of department says: \"And it took the project group a year to do this?\"",
+      "keyword": "project group"
+    },
+    "When your colleague takes a look at the on-call list": {
+      "text": "When your colleague, with whom you have a neutral relationship, takes a look at the list of people on call, he says: \"Well, I can't even see your name on Fridays!\" In fact, you hardly ever work on Fridays because your colleague Andi had asked you to take over your Friday duties in exchange for taking over his service on Mondays. You gladly accepted this offer.",
+      "keyword": "standby"
+    },
+    "You are engrossed in the business section of the newspaper": {
+      "text": "You're sitting at the breakfast table at home, engrossed in the business section of the newspaper. After a while, your counterpart asks: \"Tell me, what's so interesting to read?\" You reply:",
+      "keyword": "newspaper"
+    },
+    "At a meeting, you plead for a more flexible division": {
+      "text": "At a meeting about improving work processes, you argue for a more flexible division of some tasks. Mr. Meier, an older colleague, vehemently rejects this: \"That won't work. That would cause total chaos.\"",
+      "keyword": "meeting"
+    }
+  },
+  "answers": {
+    "I agree with her that there is a lot going on today": "I agree with her that there is a lot going on today.",
+    "I am annoyed that the sales clerk treats me so rudely instead of hurrying up": "I am annoyed that the sales clerk treats me so rudely instead of hurrying up.",
+    "I tell the sales clerk that I am not in such a hurry": "I tell the sales clerk that I am not in such a hurry.",
+    "I imagine it must be really stressful to be in her place": "I imagine it must be really stressful to be in her place.",
+    "I suspect that his mind is probably elsewhere": "I suspect that his mind is probably elsewhere.",
+    "I find it understandable that he can no longer remember after all this time": "I find it understandable that he can no longer remember after all this time.",
+    "I find it unfriendly that the colleague ignores me": "I find it unfriendly that the colleague ignores me.",
+    "I suspect that he wants to be left alone": "I suspect that he wants to be left alone.",
+    "I assume that he/she is an outgoing person and likes to approach others": "I assume that he/she is an outgoing person and likes to approach others.",
+    "I have the impression that he/she is interested in me and wants to get to know me": "I have the impression that he/she is interested in me and wants to get to know me.",
+    "I assume that he/she doesnt know many people here and I deliberately take time for him/her": "I assume that he/she doesn't know many people here and I deliberately take time for him/her.",
+    "I think about how long Ive known M, answer the question and think nothing more of it": "I think about how long I've known M., answer the question and think nothing more of it.",
+    "I say: That could well be the case We havent had the window open yet today": "I say: \"That could well be the case. We haven't had the window open yet today.\"",
+    "The colleague obviously wants to ask me to ventilate": "The colleague obviously wants to ask me to ventilate.",
+    "I have the impression that my colleague attaches great importance to fresh air": "I have the impression that my colleague attaches great importance to fresh air.",
+    "I think to myself that he can leave again if he doesnt like it here": "I think to myself that he can leave again if he doesn't like it here.",
+    "That I smell bad": "That I smell bad.",
+    "That he/she cares about my well-being and hopes that the shower will do me good": "That he/she cares about my well-being and hopes that the shower will do me good.",
+    "That a shower is refreshing after a hard day": "That a shower is refreshing after a hard day.",
+    "That I should take a shower": "That I should take a shower.",
+    "inwardly irritated: Whats it all about?": "inwardly irritated: \"What's it all about?\"",
+    "with honest sympathy: Thats annoying that it was so often occupied": "with honest sympathy: \"That's annoying that it was so often occupied.\"",
+    "in an attempt to make up for the annoyance Im sorry about that How can I help you?": "in an attempt to make up for the annoyance \"I'm sorry about that. How can I help you?\"",
+    "neutral: Whats it all about?": "neutral: \"What's it all about?\"",
+    "You try to be brief so that your boss is not interrupted for too long": "You try to be brief so that your boss is not interrupted for too long.",
+    "You have the impression that your boss is under stress and is therefore trying to do two things at once": "You have the impression that your boss is under stress and is therefore trying to do two things at once.",
+    "You find it tactless that your boss continues to work while you are talking to him": "You find it tactless that your boss continues to work while you are talking to him.",
+    "You ask your questions and barely notice that your boss is looking at the screen": "You ask your questions and barely notice that your boss is looking at the screen.",
+    "You can understand that your friend is annoyed because he was interrupted": "You can understand that your friend is annoyed because he was interrupted.",
+    "You think about whether its true that youve already interrupted him three times": "You think about whether it's true that you've already interrupted him three times.",
+    "You try not to interrupt him now": "You try not to interrupt him now.",
+    "You feel attacked and exposed": "You feel attacked and exposed.",
+    "You answer: Yes, development is actually taking longer than expected": "You answer: \"Yes, development is actually taking longer than expected.\"",
+    "You sense the head of departments impatience and say: I also hope that things will progress more quickly now Well do everything we can to finish on time": "You sense the head of department's impatience and say: \"I also hope that things will progress more quickly now. We'll do everything we can to finish on time.\"",
+    "You get the impression that the boss is under a lot of pressure and say: I know time is pressing I can understand that you would have liked the results sooner": "You get the impression that the boss is under a lot of pressure and say: \"I know time is pressing. I can understand that you would have liked the results sooner.\"",
+    "You find this remark derogatory, but try not to let your anger at this stupid question show": "You find this remark derogatory, but try not to let your anger at this stupid question show.",
+    "You reply: Yes, Ive swapped shifts with Andi But if you want, I can swap one or two Friday shifts with you": "You reply: \"Yes, I've swapped shifts with Andi. But if you want, I can swap one or two Friday shifts with you.\"",
+    "You are annoyed by the impression that your colleague is accusing you of uncollegial behavior": "You are annoyed by the impression that your colleague is accusing you of uncollegial behavior.",
+    "You reply: Thats right Andi does the service for me on Fridays and I do it for him on Mondays": "You reply: \"That's right. Andi does the service for me on Fridays and I do it for him on Mondays.\"",
+    "You can understand that your colleague finds it unfair that you dont work on Fridays and explain why": "You can understand that your colleague finds it unfair that you don't work on Fridays and explain why.",
+    "You dont mind me reading, do you?": "\"You don't mind me reading, do you?\"",
+    "Here is a report on our current annual report": "\"Here is a report on our current annual report.\"",
+    "Ill be allowed to read the newspaper for a moment!": "\"I'll be allowed to read the newspaper for a moment!\"",
+    "Okay, Im almost done!": "\"Okay, I'm almost done!\"",
+    "You are annoyed that your colleague is dismissing your suggestion": "You are annoyed that your colleague is dismissing your suggestion.",
+    "You try to change the proposal so that Mr Meier is satisfied with the solution": "You try to change the proposal so that Mr. Meier is satisfied with the solution.",
+    "You explain the advantages of the solution to Mr Meier once again": "You explain the advantages of the solution to Mr. Meier once again.",
+    "You notice that Mr Meier attaches great importance to precise regulations and try to understand exactly what his concerns are": "You notice that Mr. Meier attaches great importance to precise regulations and try to understand exactly what his concerns are."
+  },
+  "result": {
+    "appeal": {
+      "name": "the appeal or plea level",
+      "description": "The appeal or want contains what the sender wants the receiver to do or think . According to von Thun whoever states something, will also affect something. This appeal-message should make the receiver do something or leave something undone. The attempt to influence someone can be less or more open (advice) or hidden (manipulation). With the \"appeal ear\" the receiver asks himself: \"What should I do, think or feel now?\" For Example: \"Mothers are very appeal-influenced by children. Mum! The shoes .... Yes! I'll be right there to put them on for you.\""
+    },
+    "relationship": {
+      "name": "the relationship level",
+      "description": "The relationship layer expresses how the sender gets along with the receiver and what the sender thinks and feels about the receiver. Depending on how the sender talks to the receiver (way of expression, body language, intonation ...) the sender expresses esteem, respect, friendliness, disinterest, contempt or something else. the sender may express what he thinks about the receiver (you-statement) and how they get along (we-statement).[citation needed]Depending on which message the receiver hears with relationship ear, he feels either depressed, accepted or patronized. Good communication is distinguished by mutual appreciation."
+    },
+    "self_revelation": {
+      "name": "the self-revealing level",
+      "description": "The self revealing level contains what the sender would like to reveal about themselves; It contains information about the sender . It may consist of consciously intended self-expression as well as unintended self-disclosure, which is not conscious to the sender (see also Johari window). Thus, every message becomes information about the personality of the sender. The self-revealing ear of the receiver perceives which information about the sender is hidden in the message."
+    },
+    "factual_information": {
+      "name": "the factual level",
+      "description": "The factual level contains what the sender wants to inform about: On the factual level the sender of the news gives data, facts and information statements. It is the sender's task to send this information clearly and understandably. The receiver proves with the \"Factual ear\", whether the matter message fulfills the criteria of truth (true/untrue) or relevance (relevant/irrelevant) and the completeness (satisfying/something has to be added). In a long-term team, the matter layer may be clear and in need of only a few words."
+    }
+  }
+}
