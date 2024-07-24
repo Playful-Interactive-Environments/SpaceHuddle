@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "Konsumtypen",
+    "description": "Welcher Einkaufstyp bist du?"
+  },
   "participant": {
     "tips": "Nachhaltigkeitstipps"
   },

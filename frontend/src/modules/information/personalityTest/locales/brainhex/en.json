@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "BrainHex",
+    "description": "BrainHex is a neurobiology-based typology of gamer personality."
+  },
   "participant": {
     "primary": "Primary Class",
     "secondary": "Secondary Class",

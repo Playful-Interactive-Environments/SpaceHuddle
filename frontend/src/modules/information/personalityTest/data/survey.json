@@ -1,5 +1,7 @@
 {
   "brainhex": {
+    "icon": "brainhex",
+    "iconPrefix": "fac",
     "questions": [
       {
         "question": "Exploring to see what you can find.",
@@ -148,6 +150,8 @@
     }
   },
   "shopping": {
+    "icon": "cart-shopping",
+    "iconPrefix": "fas",
     "questions": [
       {
         "question": "When I buy clothes, I always pay attention to the brand. After all, I want to belong.",
@@ -197,6 +201,8 @@
     }
   },
   "big5":  {
+    "icon": "pentagon",
+    "iconPrefix": "fac",
     "questions": [
       {
         "question": "Being with other people generally gives me a lot of energy.",
@@ -481,6 +487,8 @@
     }
   },
   "thinkingHats": {
+    "icon": "graduation-cap",
+    "iconPrefix": "fas",
     "questions": [
       {
         "question": "When you are faced with a problem to solve, what do you do first?",
@@ -670,6 +678,8 @@
     }
   },
   "communication": {
+    "icon": "ear-listen",
+    "iconPrefix": "fas",
     "questions": [
       {
         "question": "You are standing in line at the bakery.",

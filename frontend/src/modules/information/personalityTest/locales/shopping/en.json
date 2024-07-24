@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "shopping type",
+    "description": "What type of shopper are you?"
+  },
   "participant": {
     "tips": "Sustainability tips"
   },

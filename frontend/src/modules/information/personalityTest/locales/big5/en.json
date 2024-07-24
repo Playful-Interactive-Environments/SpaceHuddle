@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "Big 5",
+    "description": "The Big Five describe the human personality in five personality factors."
+  },
   "participant": {
     "primary": "Primary Class",
     "secondary": "Secondary Class",

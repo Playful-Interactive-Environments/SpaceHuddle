@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "Vier-Ohren-Modell",
+    "description": "Das Vier-Ohren-Modell geht davon aus, dass jede Äußerung vier Botschaften enthält und auch auf vier Weisen, beziehungsweise Ebenen verstanden werden kann."
+  },
   "participant": {
     "primary": "Primärklasse",
     "secondary": "Sekundärklasse",

@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "6 Thinking Hats",
+    "description": "Beleuchtung komplexerer Aufgabenstellungen und Ideen aus unterschiedlichen Perspektiven."
+  },
   "participant": {
     "primary": "Primärklasse",
     "secondary": "Sekundärklasse",

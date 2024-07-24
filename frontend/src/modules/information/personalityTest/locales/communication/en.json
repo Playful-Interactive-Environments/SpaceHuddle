@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "four-ear model",
+    "description": "The four-ear model assumes that every utterance contains four messages and can also be understood in four ways, or levels."
+  },
   "participant": {
     "primary": "Primary Class",
     "secondary": "Secondary Class",

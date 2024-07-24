@@ -1,19 +1,64 @@
 <template>
-  <el-form-item
-    v-if="!moduleId"
-    :label="$t('module.information.personalityTest.moderatorConfig.test')"
-    :prop="`${rulePropPath}.test`"
-  >
-    <el-select v-model="modelValue.test">
-      <el-option
-        v-for="test of Object.keys(surveyConfig)"
-        :key="test"
-        :value="test"
-        :label="`${test}`"
+  <div v-if="!moduleId" class="card-section">
+    <el-card
+      v-for="test in Object.keys(surveyConfig)"
+      :key="test"
+      @click="modelValue.test = test"
+      :class="{
+        selectedModule: modelValue.test === test,
+      }"
+    >
+      <h2
+        class="heading heading--regular line-break"
+        style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis"
       >
-      </el-option>
-    </el-select>
-  </el-form-item>
+        {{
+          $t(`module.information.personalityTest.${test}.moderatorConfig.name`)
+        }}
+      </h2>
+      <div class="card-icon">
+        <font-awesome-icon
+          :icon="[surveyConfig[test].iconPrefix, surveyConfig[test].icon]"
+        />
+      </div>
+      <p>
+        {{
+          $t(
+            `module.information.personalityTest.${test}.moderatorConfig.description`
+          )
+        }}
+      </p>
+    </el-card>
+  </div>
+  <div v-else class="card-section">
+    <el-card>
+      <h2
+        class="heading heading--regular line-break"
+        style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis"
+      >
+        {{
+          $t(
+            `module.information.personalityTest.${modelValue.test}.moderatorConfig.name`
+          )
+        }}
+      </h2>
+      <div class="card-icon">
+        <font-awesome-icon
+          :icon="[
+            surveyConfig[modelValue.test].iconPrefix,
+            surveyConfig[modelValue.test].icon,
+          ]"
+        />
+      </div>
+      <p>
+        {{
+          $t(
+            `module.information.personalityTest.${modelValue.test}.moderatorConfig.description`
+          )
+        }}
+      </p>
+    </el-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -101,3 +146,52 @@ export default class ModeratorConfig extends Vue implements CustomInit {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.card-section {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.el-card {
+  width: 23.75%;
+  min-width: 15em;
+  margin: 0.625%;
+
+  border-width: 2px;
+  border-color: var(--color-primary);
+  --el-card-padding: 0.7rem 1rem;
+  word-break: break-word;
+  background-color: white;
+  border-style: dashed;
+  text-align: center;
+  font-size: var(--font-size-default);
+}
+
+.card-icon {
+  text-align: center;
+  width: 100%;
+  font-size: 40pt;
+}
+
+h2 {
+  margin: 0;
+}
+p {
+  margin: 0;
+}
+
+.selectedModule {
+  background-color: var(--color-dark-contrast-light);
+  h2 {
+    color: white;
+  }
+  p {
+    color: white;
+  }
+  .card-icon {
+    color: white;
+  }
+}
+</style>

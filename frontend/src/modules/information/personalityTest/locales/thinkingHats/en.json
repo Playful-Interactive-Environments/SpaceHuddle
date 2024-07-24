@@ -1,4 +1,8 @@
 {
+  "moderatorConfig": {
+    "name": "6 Thinking Hats",
+    "description": "Consideration of complex tasks and ideas from different perspectives."
+  },
   "participant": {
     "primary": "Primary Class",
     "secondary": "Secondary Class",
