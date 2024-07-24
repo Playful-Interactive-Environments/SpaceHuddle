@@ -100,7 +100,7 @@ export default class Participant extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     if (this.taskId) {
-      this.trackingManager = new TrackingManager(this.taskId, {}, true, 100);
+      this.trackingManager = new TrackingManager(this.taskId, {}, 100);
     }
     this.deregisterAll();
     taskService.registerGetTaskById(

@@ -30,11 +30,9 @@ export class TrackingManager {
   taskId: string;
   task!: Task;
   iteration: TaskParticipantIteration | null = null;
-  iterationStep: TaskParticipantIterationStep | null = null;
   iterationList: TaskParticipantIteration[] = [];
   iterationStepList: TaskParticipantIterationStep[] = [];
   stepList: TaskParticipantIterationStep[] = [];
-  finalStepList: TaskParticipantIterationStep[] = [];
   state: TaskParticipantState | null = null;
   readonly pointsPerStar = 100;
   maxPoints = 1000;
@@ -44,16 +42,38 @@ export class TrackingManager {
   callbackUpdateFinalStepList: (() => void) | null = null;
 
   iterationsCash!: cashService.SimplifiedCashEntry<TaskParticipantIteration[]>;
-  stepsCash!: cashService.SimplifiedCashEntry<TaskParticipantIterationStep[]>;
-  finalStepsCash!: cashService.SimplifiedCashEntry<
-    TaskParticipantIterationStep[]
-  >;
-  constructor(
-    taskId: string,
-    initInstanceContent: any,
-    pullFinalSteps = false,
-    maxPoints = 1000
-  ) {
+
+  dbSync: {
+    steps: { [key: string]: boolean };
+    iteration: { [key: string]: boolean };
+    state: boolean;
+  } = {
+    steps: {},
+    iteration: {},
+    state: false,
+  };
+
+  get finalStepList(): TaskParticipantIterationStep[] {
+    const orderList = this.stepList.sort((a, b) => {
+      if (b.iteration === a.iteration) return b.step - a.step;
+      return b.iteration - a.iteration;
+    });
+    const result: TaskParticipantIterationStep[] = [];
+    for (const item of orderList) {
+      if (!result.find((resultItem) => resultItem.ideaId === item.ideaId)) {
+        result.push(item);
+      }
+    }
+    return result;
+  }
+
+  get iterationStep(): TaskParticipantIterationStep | null {
+    if (this.iterationStepList.length > 0)
+      return this.iterationStepList[this.iterationStepList.length - 1];
+    return null;
+  }
+
+  constructor(taskId: string, initInstanceContent: any, maxPoints = 1000) {
     this.maxPoints = maxPoints;
     this.taskId = taskId;
     this.deregisterAll();
@@ -76,21 +96,12 @@ export class TrackingManager {
           EndpointAuthorisationType.PARTICIPANT,
           2 * 60
         );
-        this.stepsCash = taskParticipantService.registerGetIterationStepList(
+        taskParticipantService.registerGetIterationStepList(
           this.taskId,
           this.callUpdateSteps,
           EndpointAuthorisationType.PARTICIPANT,
           2 * 60
         );
-        if (pullFinalSteps) {
-          this.finalStepsCash =
-            taskParticipantService.registerGetIterationStepFinalList(
-              this.taskId,
-              this.callUpdateFinalSteps,
-              EndpointAuthorisationType.PARTICIPANT,
-              60 * 60
-            );
-        }
       });
     taskService.registerGetTaskById(
       this.taskId,
@@ -104,15 +115,12 @@ export class TrackingManager {
   private readonly callUpdateIterations = (result: any) =>
     this._updateIterations(result);
   private readonly callUpdateSteps = (result: any) => this._updateSteps(result);
-  private readonly callUpdateFinalSteps = (result: any) =>
-    this._updateFinalSteps(result);
   private readonly callUpdateTask = (result: any) => this._updateTask(result);
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.callUpdateState);
     cashService.deregisterAllGet(this.callUpdateIterations);
     cashService.deregisterAllGet(this.callUpdateSteps);
-    cashService.deregisterAllGet(this.callUpdateFinalSteps);
     cashService.deregisterAllGet(this.callUpdateTask);
   }
 
@@ -130,29 +138,33 @@ export class TrackingManager {
   }
 
   private _updateIterations(iterationList: TaskParticipantIteration[]): void {
+    if (this.iteration) {
+      const index = iterationList.findIndex(
+        (item) => item.id === this.iteration?.id
+      );
+      if (index > -1) {
+        iterationList[index] = this.iteration;
+      }
+    }
     this.iterationList = iterationList;
     if (this.callbackUpdateIterationList) this.callbackUpdateIterationList();
   }
 
-  private _updateSteps(stepList: TaskParticipantIterationStep[]): void {
-    this.stepList = stepList.sort((a, b) => {
-      if (a.iteration !== b.iteration) return b.iteration - a.iteration;
-      return b.step - a.step;
-    });
+  private _updateSteps(
+    stepList: TaskParticipantIterationStep[] | null = null
+  ): void {
+    if (stepList) {
+      this.stepList = stepList.sort((a, b) => {
+        if (a.iteration !== b.iteration) return b.iteration - a.iteration;
+        return b.step - a.step;
+      });
+    }
     if (this.iteration) {
-      this.iterationStepList = stepList
+      this.iterationStepList = this.stepList
         .filter((item) => item.iteration === this.iteration?.iteration)
         .sort((a, b) => b.step - a.step);
-      if (this.iterationStepList.length > 0 && !this.iterationStep) {
-        this.iterationStep =
-          this.iterationStepList[this.iterationStepList.length - 1];
-      }
     }
     if (this.callbackUpdateStepList) this.callbackUpdateStepList();
-  }
-
-  private _updateFinalSteps(stepList: TaskParticipantIterationStep[]): void {
-    this.finalStepList = stepList;
     if (this.callbackUpdateFinalStepList) this.callbackUpdateFinalStepList();
   }
 
@@ -249,7 +261,8 @@ export class TrackingManager {
           this.state.parameter[key] = contentChanges[key];
         }
       }
-      await taskParticipantService.putParticipantState(this.taskId, this.state);
+      this.dbSync.state = true;
+      await this.syncData(false);
     }
   }
 
@@ -259,10 +272,7 @@ export class TrackingManager {
         this.iterationList,
         true
       );
-      await taskParticipantService.putParticipantState(this.taskId, this.state);
-      if (this.task) {
-        taskParticipantService.refreshPoints(this.task.sessionId);
-      }
+      this.dbSync.state = true;
     }
   }
 
@@ -281,25 +291,19 @@ export class TrackingManager {
           this.iteration.parameter[key] = contentChanges[key];
         }
       }
-      await taskParticipantService.putParticipantIteration(
-        this.taskId,
-        this.iteration
-      );
-      await this.iterationsCash.refreshData();
+      this.dbSync.iteration[this.iteration.id] = true;
       if (updateStateSum) {
         await this.saveStatePointsFromIterations();
       }
+      await this.syncData();
     }
   }
 
   async saveIterationPoints(stars: number): Promise<void> {
     if (this.iteration) {
       this.iteration.parameter.gameplayResult = this.getGameplayResult(stars);
-      await taskParticipantService.putParticipantIteration(
-        this.taskId,
-        this.iteration
-      );
-      await this.iterationsCash.refreshData();
+      this.dbSync.iteration[this.iteration.id] = true;
+      await this.syncData();
     }
   }
 
@@ -315,24 +319,17 @@ export class TrackingManager {
           null,
           points
         );
-      await taskParticipantService.putParticipantIteration(
-        this.taskId,
-        this.iteration
-      );
-      await this.iterationsCash.refreshData();
+      this.dbSync.iteration[this.iteration.id] = true;
+      await this.syncData();
     }
   }
 
-  async saveIterationPointsFromSteps(): Promise<void> {
+  saveIterationPointsFromSteps(): void {
     if (this.iteration) {
       this.iteration.parameter.gameplayResult = this.getGameplayResultFromChild(
         this.iterationStepList
       );
-      await taskParticipantService.putParticipantIteration(
-        this.taskId,
-        this.iteration
-      );
-      await this.iterationsCash.refreshData();
+      this.dbSync.iteration[this.iteration.id] = true;
     }
   }
 
@@ -364,11 +361,6 @@ export class TrackingManager {
     return 0;
   }
 
-  private async _refreshSteps(): Promise<void> {
-    await this.stepsCash.refreshData();
-    if (this.finalStepsCash) await this.finalStepsCash.refreshData();
-  }
-
   async createInstanceStep(
     ideaId: string | null,
     state: TaskParticipantIterationStepStatesType,
@@ -391,27 +383,22 @@ export class TrackingManager {
           pointsSpent
         );
       }
-      this.iterationStep =
-        await taskParticipantService.postParticipantIterationStep(this.taskId, {
-          iteration: this.iteration?.iteration,
-          ideaId: ideaId,
-          state: state,
-          parameter: initContent,
-        });
-      await this._refreshSteps();
-      if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
-        await this.saveIterationPointsFromSteps();
-        if (shareUpdateInstanceSum) await this.saveStatePointsFromIterations();
-      }
+      this._saveIterationStep(
+        ideaId,
+        state,
+        initContent,
+        updateInstanceSum,
+        shareUpdateInstanceSum
+      );
     }
   }
 
-  private async _deletePreviousPointsForIdea(
+  private _deletePreviousPointsForIdea(
     ideaId: string | null,
     excludeId: string | null = null,
     rule: ((step: TaskParticipantIterationStep) => boolean) | null = null,
     updateInstanceSum = false
-  ): Promise<void> {
+  ): void {
     const previousIdeaPoints = this.stepList.filter(
       (item) =>
         item.ideaId === ideaId &&
@@ -419,23 +406,17 @@ export class TrackingManager {
         (excludeId === null || item.id !== excludeId) &&
         (rule === null || rule(item))
     );
-    for (let item of previousIdeaPoints) {
+    for (const item of previousIdeaPoints) {
       const previousPoints = item.parameter.gameplayResult.points;
       item.parameter.gameplayResult.points = 0;
-      item = await taskParticipantService.putParticipantIterationStep(
-        this.taskId,
-        item
-      );
+      this.dbSync.steps[item.id] = true;
 
       const instance = this.iterationList.find(
         (instance) => instance.iteration === item.iteration
       );
       if (instance && updateInstanceSum) {
         instance.parameter.gameplayResult.points -= previousPoints;
-        await taskParticipantService.putParticipantIteration(
-          this.taskId,
-          instance
-        );
+        this.dbSync.iteration[instance.id] = true;
       }
     }
   }
@@ -454,12 +435,13 @@ export class TrackingManager {
   ): Promise<void> {
     if (this.iteration) {
       if (deletePreviousPointRule) {
-        await this._deletePreviousPointsForIdea(
+        this._deletePreviousPointsForIdea(
           ideaId,
           null,
           deletePreviousPointRule,
           updateInstanceSum
         );
+        await this.syncData();
       }
       if (points !== null || pointsSpent !== null)
         initContent.gameplayResult = this.getGameplayResult(
@@ -469,19 +451,36 @@ export class TrackingManager {
           null,
           pointsSpent
         );
-      this.iterationStep =
-        await taskParticipantService.postParticipantIterationStep(this.taskId, {
-          iteration: this.iteration?.iteration,
-          ideaId: ideaId,
-          state: state,
-          parameter: initContent,
-        });
-      await this._refreshSteps();
-      if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
-        await this.saveIterationPointsFromSteps();
-        if (shareUpdateInstanceSum) await this.saveStatePointsFromIterations();
-      }
+      this._saveIterationStep(
+        ideaId,
+        state,
+        initContent,
+        updateInstanceSum,
+        shareUpdateInstanceSum
+      );
     }
+  }
+
+  async _saveIterationStep(
+    ideaId: string | null,
+    state: TaskParticipantIterationStepStatesType,
+    initContent: any,
+    updateInstanceSum = false,
+    shareUpdateInstanceSum = true
+  ): Promise<void> {
+    const iterationStep =
+      await taskParticipantService.postParticipantIterationStep(this.taskId, {
+        iteration: this.iteration?.iteration,
+        ideaId: ideaId,
+        state: state,
+        parameter: initContent,
+      });
+    this._updateSteps([...this.stepList, iterationStep]);
+    if (updateInstanceSum && iterationStep.parameter.gameplayResult) {
+      await this.saveIterationPointsFromSteps();
+      if (shareUpdateInstanceSum) await this.saveStatePointsFromIterations();
+    }
+    await this.syncData();
   }
 
   async saveIterationStep(
@@ -500,7 +499,7 @@ export class TrackingManager {
   ): Promise<void> {
     if (this.iterationStep) {
       if (deletePreviousPointRule) {
-        await this._deletePreviousPointsForIdea(
+        this._deletePreviousPointsForIdea(
           this.iterationStep.ideaId,
           this.iterationStep.id,
           deletePreviousPointRule,
@@ -527,15 +526,13 @@ export class TrackingManager {
           this.iterationStep.parameter[key] = contentChanges[key];
         }
       }
-      await taskParticipantService.putParticipantIterationStep(
-        this.taskId,
-        this.iterationStep
-      );
-      await this._refreshSteps();
+      this.dbSync.steps[this.iterationStep.id] = true;
+      this._updateSteps();
       if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
         if (shareUpdateInstanceSum) await this.saveStatePointsFromIterations();
       }
+      await this.syncData();
     }
   }
 
@@ -554,11 +551,9 @@ export class TrackingManager {
           starLimitRule
         )
       );
-      await taskParticipantService.putParticipantIterationStep(
-        this.taskId,
-        this.iterationStep
-      );
-      await this._refreshSteps();
+      this.dbSync.steps[this.iterationStep.id] = true;
+      await this.syncData();
+      this._updateSteps();
     }
   }
 
@@ -574,11 +569,54 @@ export class TrackingManager {
           null,
           points
         );
-      await taskParticipantService.putParticipantIterationStep(
-        this.taskId,
-        this.iterationStep
-      );
-      await this._refreshSteps();
+      this.dbSync.steps[this.iterationStep.id] = true;
+      await this.syncData();
+      this._updateSteps();
     }
+  }
+
+  async syncData(updatePoints = true): Promise<void> {
+    const callList: Promise<any>[] = [];
+    for (const key of Object.keys(this.dbSync.steps)) {
+      const step =
+        key === this.iterationStep?.id
+          ? this.iterationStep
+          : this.iterationStepList.find((item) => item.id === key);
+      if (this.dbSync.steps[key] && step) {
+        this.dbSync.steps[key] = false;
+        callList.push(
+          taskParticipantService.putParticipantIterationStep(this.taskId, step)
+        );
+      }
+    }
+    for (const key of Object.keys(this.dbSync.iteration)) {
+      const iteration =
+        key === this.iteration?.id
+          ? this.iteration
+          : this.iterationList.find((item) => item.id === key);
+      if (this.dbSync.iteration[key] && iteration) {
+        this.dbSync.iteration[key] = false;
+        callList.push(
+          taskParticipantService.putParticipantIteration(this.taskId, iteration)
+        );
+      }
+    }
+    if (this.dbSync.state && this.state) {
+      this.dbSync.state = false;
+      const callState = taskParticipantService.putParticipantState(
+        this.taskId,
+        this.state
+      );
+      callList.push(callState);
+      if (updatePoints) {
+        callState.then(() => {
+          if (this.task) {
+            taskParticipantService.refreshPoints(this.task.sessionId);
+          }
+        });
+      }
+    }
+    await Promise.all(callList);
+    //await this.iterationsCash.refreshData();
   }
 }

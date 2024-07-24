@@ -137,7 +137,6 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import Highscore from '@/modules/information/quiz/organisms/Highscore.vue';
 import { until } from '@/utils/wait';
 import MarkdownEditor from '@/components/shared/molecules/MarkdownEditor.vue';
-import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import ResultTypeResult from '@/modules/information/personalityTest/organisms/ResultTypeResult.vue';
 import surveyConfig from '@/modules/information/personalityTest/data/survey.json';
 import { ResultChartType } from '@/modules/information/personalityTest/types/ResultChartType';
@@ -341,31 +340,19 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   get detailVotingResult(): VoteResult[] {
     if (this.trackingResult.length > 0 && this.questions.length > 0) {
       const result: VoteResult[] = [];
-      for (const step of this.trackingResult) {
-        const question = this.questions.find(
-          (q) => q.question.id === step.ideaId
+      for (const question of this.questions) {
+        const idea = { ...question.question };
+        idea.parameter = { ...idea.parameter };
+        const tracking = this.trackingResult.filter(
+          (item) => item.ideaId === question.question.id
         );
-        if (question) {
-          const idea = { ...question.question };
-          idea.parameter = { ...idea.parameter };
-          idea.parameter.isCorrect =
-            step.state === TaskParticipantIterationStepStatesType.CORRECT;
-          const exists = result.find(
-            (exist) =>
-              exist.idea.id === idea.id &&
-              exist.idea.parameter.isCorrect === idea.parameter.isCorrect
-          );
-          if (exists) exists.countParticipant++;
-          else {
-            result.push({
-              idea: idea,
-              ratingSum: 1,
-              detailRatingSum: 1,
-              countParticipant: 1,
-              avatarList: [],
-            });
-          }
-        }
+        result.push({
+          idea: idea,
+          ratingSum: tracking.length,
+          detailRatingSum: tracking.length,
+          countParticipant: tracking.length,
+          avatarList: [],
+        });
       }
       return result;
     }

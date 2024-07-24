@@ -435,7 +435,7 @@ export default class Participant extends Vue {
   onTaskIdChanged(): void {
     this.deregisterAll();
     if (this.taskId) {
-      this.trackingManager = new TrackingManager(this.taskId, {}, true);
+      this.trackingManager = new TrackingManager(this.taskId, {});
       this.trackingManager.callbackUpdateState = this.updateState;
       this.trackingManager.callbackUpdateFinalStepList =
         this.updateStoredAnswers;

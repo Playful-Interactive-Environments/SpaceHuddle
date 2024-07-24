@@ -167,7 +167,7 @@ export default class Participant extends Vue {
   onTaskIdChanged(): void {
     this.deregisterAll();
     if (this.taskId) {
-      this.trackingManager = new TrackingManager(this.taskId, {}, true, 100);
+      this.trackingManager = new TrackingManager(this.taskId, {}, 100);
     }
     taskService.registerGetTaskById(
       this.taskId,

@@ -261,7 +261,7 @@ export default class Participant extends Vue {
   onTaskIdChanged(): void {
     this.deregisterAll();
     if (this.taskId) {
-      this.trackingManager = new TrackingManager(this.taskId, {}, true);
+      this.trackingManager = new TrackingManager(this.taskId, {});
       this.trackingManager.callbackUpdateState = this.updateState;
       this.trackingManager.callbackUpdateFinalStepList =
         this.updateStoredAnswers;
@@ -749,6 +749,10 @@ export default class Participant extends Vue {
     ) {
       cashService.deregisterAllGet(this.updateVotes);
       if (newValue.question.id) {
+        if (this.activeQuestionType === QuestionType.ORDER) {
+          this.loadSavedOrder();
+        }
+
         if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
           votingService.registerGetHierarchyVotes(
             newValue.question.id,
