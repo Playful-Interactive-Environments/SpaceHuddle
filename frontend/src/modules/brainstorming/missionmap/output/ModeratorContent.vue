@@ -23,19 +23,6 @@
       :mission-progress-parameter="activeProgressTab"
     />
   </div>
-  <IdeaMap
-    v-if="module"
-    class="mapSpace"
-    :ideas="ideas"
-    :canChangePosition="(idea) => this.inputManager.isCurrentIdea(idea.id)"
-    :highlightCondition="(idea) => !idea.parameter.shareData"
-    v-model:selected-idea="selectedIdea"
-    :parameter="module?.parameter"
-    :calculate-size="false"
-    v-on:ideaPositionChanged="saveIdea"
-    v-on:selectionColorChanged="selectionColor = $event"
-  >
-  </IdeaMap>
   <el-collapse v-model="openTabs">
     <el-collapse-item
       v-for="(item, key) in orderGroupContent"

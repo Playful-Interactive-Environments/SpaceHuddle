@@ -1,25 +1,14 @@
 {
   "description": {
-    "title": "Mission Map",
-    "description": "verankere deine Ideen auf der Karte"
+    "title": "Maßnahmen",
+    "description": "unterstütze mit deinen erspielten Wählerstimmen Maßnahmen"
   },
   "participant": {
-    "points": "Wählerstimmen",
     "rate": "Rate",
     "description": "Beschreibung",
     "explanation": "Stellungnahme",
     "freeExplanation": "Freier Text für eigene Erklärung oder Antwortvorschlag",
     "save": "speichern",
-    "spentHeader": "weitere Wählerstimmen für die Maßnahme ausgeben",
-    "nothingToSpent": "du hast derzeit zu wenig Punkte um für dieses Maßnahme weiteren Wählerstimmen zu vergeben",
-    "maxSpent": "du hast bereits die maximalle mögliche Unterstützung für diese Maßnahme vergeben",
-    "new": "davon neu",
-    "target": "insgesamt benötigt",
-    "actual": "bereits erhalten",
-    "own": "dein Anteil",
-    "minParticipants": "Mindestanzahl der Teilnehmer",
-    "countParticipants": "Anzahl der Teilnehmer",
-    "spent": "ausgeben",
     "cancel": "abbrechen",
     "yourPart": "dein Anteil",
     "sort": "Massnahmen sortieren",
@@ -32,7 +21,7 @@
     "tabs": {
       "measures": "Maßnahmen",
       "statistic": "Status",
-      "influenceAreas": "Status",
+      "influenceAreas": "Entwicklung",
       "electricity": "Elektrizität",
       "map": "Karte"
     },
@@ -42,6 +31,28 @@
       "y-influenceAreas": "Entwicklung der Gesellschaft",
       "y-electricity": "Stromanteil in %",
       "y-electricityAmount": "Stromverbrauch für ganz Österreich in TWh"
+    },
+    "loi": {
+      "title": "Unterstützungserklärung",
+      "name": "Kurzbezeichnung",
+      "no": "Registrierungsnummer",
+      "description": "Text des Volksbegehrens",
+      "points": "Wählerstimmen einsetzen",
+      "participation": "Bisherige Beteiligung",
+      "count": "Anzahl der Wählerstimmen",
+      "minCount": "Mindestens benötigte Wählerstimmen",
+      "explanation": "Stellungnahme",
+      "spent": "unterstützen mit $count Wählerstimmen",
+      "spentHeader": "weitere Wählerstimmen für die Maßnahme ausgeben",
+      "nothingToSpent": "du hast derzeit zu wenig Punkte um für dieses Maßnahme weiteren Wählerstimmen zu vergeben",
+      "maxSpent": "du hast bereits die maximalle mögliche Unterstützung für diese Maßnahme vergeben",
+      "maxSpentAll": "es wurde bereits die maximalle mögliche Unterstützung für diese Maßnahme vergeben",
+      "new": "davon neu",
+      "target": "insgesamt benötigt",
+      "actual": "bereits erhalten",
+      "own": "dein Anteil",
+      "minParticipants": "Mindestanzahl der Teilnehmer",
+      "countParticipants": "Anzahl der Teilnehmer"
     }
   },
   "moderatorConfig": {
@@ -79,10 +90,11 @@
     "reasonsForRejection": "Begründe deine Ablehnung",
     "electricityValidationErrors": "Stromsumme muss 0 sein, bitte die Werte so anpassen, dass die Summe wieder 0 ist anstelle von ",
     "addExplanation": "hinzufügen",
+    "impact": "Auswirkungen auf",
     "electricity": {
       "none": "0",
-      "min-demand": "ige Reduktion",
-      "max-demand": "ige Erhöhung",
+      "min-demand": "Reduktion",
+      "max-demand": "Erhöhung",
       "min-supply": " geringere Deckung des Gesamtbedarfs",
       "max-supply": " zusätzliche Deckung des Gesamtbedarfs"
     },
@@ -133,6 +145,11 @@
       "services": "Dienstleistungen",
       "household": "Private Haushalt",
       "agriculture": "Landwirtschaft"
+    },
+    "influenceScale": {
+      "-5": "Verschlechterung",
+      "0": "unverändert",
+      "5": "Verbesserung"
     }
   }
 }

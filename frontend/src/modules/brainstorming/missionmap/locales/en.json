@@ -1,25 +1,14 @@
 {
   "description": {
-    "title": "Mission Map",
-    "description": "anchor your ideas on the map"
+    "title": "Measures",
+    "description": "support measures with the votes you have earned"
   },
   "participant": {
-    "points": "votes",
     "rate": "rate",
     "description": "description",
     "explanation": "comment",
     "freeExplanation": "free text for own explanation or suggested answer",
     "save": "save",
-    "spentHeader": "spend additional votes on measure",
-    "nothingToSpent": "you currently have too few points to award any more votes for this measure",
-    "maxSpent": "you have already allocated the maximum possible support for this measure",
-    "new": "thereof new",
-    "target": "required in total",
-    "actual": "already received",
-    "own": "your part",
-    "minParticipants": "Minimum number of participants",
-    "countParticipants": "Number of participants",
-    "spent": "spent",
     "cancel": "cancel",
     "yourPart": "your part",
     "sort": "Sort measures",
@@ -32,7 +21,7 @@
     "tabs": {
       "measures": "measures",
       "statistic": "state",
-      "influenceAreas": "state",
+      "influenceAreas": "development",
       "electricity": "electricity",
       "map": "map"
     },
@@ -42,6 +31,28 @@
       "y-influenceAreas": "development of society",
       "y-electricity": "electricity ratio in %",
       "y-electricityAmount": "Electricity consumption for the whole of Austria in TWh"
+    },
+    "loi": {
+      "title": "declaration of support",
+      "name": "Short name",
+      "no": "Registration number",
+      "description": "Text of the referendum",
+      "points": "Invest votes",
+      "participation": "previous participation",
+      "count": "Number of votes",
+      "minCount": "Minimum number of votes required",
+      "explanation": "comment",
+      "spent": "support with $count votes",
+      "spentHeader": "spend additional votes on measure",
+      "nothingToSpent": "you currently have too few points to award any more votes for this measure",
+      "maxSpent": "you have already allocated the maximum possible support for this measure",
+      "maxSpentAll": "the maximum possible support has already been allocated for this measure",
+      "new": "thereof new",
+      "target": "required in total",
+      "actual": "already received",
+      "own": "your part",
+      "minParticipants": "Minimum number of participants",
+      "countParticipants": "Number of participants"
     }
   },
   "moderatorConfig": {
@@ -79,10 +90,11 @@
     "reasonsForRejection": "Give reasons for your rejection",
     "electricityValidationErrors": "electricity sum must be 0 please adjust the values so that the sum is again 0 instead of ",
     "addExplanation": "add",
+    "impact": "impact on",
     "electricity": {
       "none": "0",
-      "min-demand": " reduction",
-      "max-demand": " increase",
+      "min-demand": "reduction",
+      "max-demand": "increase",
       "min-supply": " lower coverage of the total demand",
       "max-supply": " additional coverage of the total demand"
     },
@@ -133,6 +145,11 @@
       "services": "services",
       "household": "household",
       "agriculture": "agriculture"
+    },
+    "influenceScale": {
+      "-5": "deterioration",
+      "0": "unchanged",
+      "5": "improvement"
     }
   }
 }

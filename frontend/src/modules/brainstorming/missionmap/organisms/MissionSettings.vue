@@ -9,34 +9,6 @@
     ref="ideaSettings"
   >
     <el-form-item
-      v-if="authHeaderTyp === EndpointAuthorisationType.PARTICIPANT"
-      :label="
-        $t('module.brainstorming.missionmap.moderatorContent.mapLocation')
-      "
-      :prop="`parameter.mapLocation`"
-    >
-      <div style="height: var(--map-settings-height)">
-        <mgl-map
-          :center="mapCenter"
-          :zoom="mapZoom"
-          :double-click-zoom="false"
-          @map:load="onLoad"
-        >
-          <CustomMapMarker
-            :coordinates="convertCoordinates(idea.parameter.position)"
-            :draggable="true"
-            v-on:dragend="positionChanged"
-          >
-            <template v-slot:icon>
-              <font-awesome-icon icon="location-crosshairs" class="pin" />
-            </template>
-          </CustomMapMarker>
-
-          <mgl-navigation-control position="bottom-left" />
-        </mgl-map>
-      </div>
-    </el-form-item>
-    <el-form-item
       v-for="parameter of Object.keys(gameConfig.parameter)"
       :key="parameter"
       :label="$t(`module.brainstorming.missionmap.gameConfig.${parameter}`)"
@@ -44,9 +16,18 @@
       :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
     >
       <template #label>
+        {{ $t(`module.brainstorming.missionmap.moderatorContent.impact`) }}
         {{ $t(`module.brainstorming.missionmap.gameConfig.${parameter}`) }}
         <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
       </template>
+      <div class="level is-mobile">
+        <div class="level-left">
+          {{ $t('module.brainstorming.missionmap.enum.influenceScale.-5') }}
+        </div>
+        <div class="level-right">
+          {{ $t('module.brainstorming.missionmap.enum.influenceScale.5') }}
+        </div>
+      </div>
       <el-slider
         v-if="idea.parameter.influenceAreas"
         v-model="idea.parameter.influenceAreas[parameter]"
@@ -56,29 +37,6 @@
         :marks="calculateMarks(-5, 5, 1)"
       />
     </el-form-item>
-    <!--
-      :rules="[{ validator: validateElectricity }]"
-    --->
-    <!--<el-form-item
-      v-for="parameter of Object.keys(additionalParameter)"
-      :key="parameter"
-      :label="$t(`module.playing.moveit.enums.electricity.${parameter}`)"
-      :prop="`parameter.electricity.${parameter}`"
-      :style="{
-        '--parameter-color': additionalParameter[parameter].color,
-      }"
-    >
-      <template #label>
-        {{ $t(`module.playing.moveit.enums.electricity.${parameter}`) }}
-        <font-awesome-icon :icon="additionalParameter[parameter].icon" />
-      </template>
-      <el-input-number
-        v-if="idea.parameter.electricity"
-        v-model="idea.parameter.electricity[parameter]"
-        :min="-100"
-        :max="100"
-      />
-    </el-form-item>-->
     <el-form-item
       v-if="effectElectricity && idea.parameter.electricity"
       :label="
@@ -132,72 +90,96 @@
           :style="{ color: ElectricityConsumption[item].color }"
         />
       </el-select>
-      <el-slider
+      <div
         v-if="
           idea.parameter.electricity.influence ===
           ElectricityInfluence.CHANGE_ELECTRICITY_SUPPLY
         "
-        v-model="idea.parameter.electricity.value"
-        :min="0"
-        :max="50"
-        :marks="{
-          0: $t(
-            'module.brainstorming.missionmap.moderatorContent.electricity.none'
-          ),
-          50: {
-            style: {
-              color: getGreenColor(),
-              '--translate': '-100%',
+      >
+        <div class="level is-mobile">
+          <div class="level-left"></div>
+          <div class="level-right">
+            {{
+              $t(
+                'module.brainstorming.missionmap.moderatorContent.electricity.max-supply'
+              )
+            }}
+          </div>
+        </div>
+        <el-slider
+          v-model="idea.parameter.electricity.value"
+          :min="0"
+          :max="50"
+          :marks="{
+            0: $t(
+              'module.brainstorming.missionmap.moderatorContent.electricity.none'
+            ),
+            50: {
+              style: {
+                color: getGreenColor(),
+                '--translate': '-100%',
+              },
+              label: `50%`,
             },
-            label: `50%${$t(
-              'module.brainstorming.missionmap.moderatorContent.electricity.max-supply'
-            )}`,
-          },
-        }"
-        @change="calculateElectricityMix"
-      />
-      <el-slider
-        v-else
-        v-model="idea.parameter.electricity.value"
-        :min="-100"
-        :max="100"
-        :marks="{
-          '-100': {
-            style: {
-              color: getRedColor(),
-              '--translate': 0,
+          }"
+          @change="calculateElectricityMix"
+        />
+      </div>
+      <div v-else>
+        <div class="level is-mobile">
+          <div class="level-left">
+            {{
+              $t(
+                'module.brainstorming.missionmap.moderatorContent.electricity.min-demand'
+              )
+            }}
+          </div>
+          <div class="level-right">
+            {{
+              $t(
+                'module.brainstorming.missionmap.moderatorContent.electricity.max-demand'
+              )
+            }}
+          </div>
+        </div>
+        <el-slider
+          v-model="idea.parameter.electricity.value"
+          :min="-100"
+          :max="100"
+          :marks="{
+            '-100': {
+              style: {
+                color: getRedColor(),
+                '--translate': 0,
+              },
+              label: `-100%`,
             },
-            label: `-100%${$t(
-              'module.brainstorming.missionmap.moderatorContent.electricity.min-demand'
-            )}`,
-          },
-          '-50': {
-            style: {
-              color: getRedColor(),
+            '-50': {
+              style: {
+                color: getRedColor(),
+              },
+              label: `-50%`,
             },
-            label: `-50%`,
-          },
-          0: $t(
-            'module.brainstorming.missionmap.moderatorContent.electricity.none'
-          ),
-          50: {
-            style: {
-              color: getGreenColor(),
+            0: $t(
+              'module.brainstorming.missionmap.moderatorContent.electricity.none'
+            ),
+            50: {
+              style: {
+                color: getGreenColor(),
+              },
+              label: `50%`,
             },
-            label: `50%`,
-          },
-          100: {
-            style: {
-              color: getGreenColor(),
-              '--translate': '-100%',
+            100: {
+              style: {
+                color: getGreenColor(),
+                '--translate': '-100%',
+              },
+              label: `100%`,
             },
-            label: `100%${$t(
-              'module.brainstorming.missionmap.moderatorContent.electricity.max-demand'
-            )}`,
-          },
-        }"
-        @change="calculateElectricityMix"
-      />
+          }"
+          @change="calculateElectricityMix"
+        />
+      </div>
       <div class="columns">
         <div class="chart column">
           <Doughnut
@@ -272,94 +254,38 @@
       "
       :prop="`parameter.minParticipants`"
     >
-      <el-slider
+      <template #label>
+        2 - 30
+        {{
+          $t('module.brainstorming.missionmap.moderatorContent.minParticipants')
+        }}
+      </template>
+      <el-input-number
         v-model="idea.parameter.minParticipants"
         :min="2"
         :max="30"
         :step="1"
-        :show-stops="true"
-        :marks="calculateMarks(5, 30, 5)"
+        step-strictly
+        :value-on-clear="2"
       />
     </el-form-item>
     <el-form-item
       :label="$t('module.brainstorming.missionmap.moderatorContent.points')"
       :prop="`parameter.points`"
     >
-      <el-slider
+      <template #label>
+        500 - 10000
+        {{ $t('module.brainstorming.missionmap.moderatorContent.points') }}
+      </template>
+      <el-input-number
         v-model="idea.parameter.points"
         :min="500"
         :max="10000"
         :step="500"
-        :show-stops="true"
-        :marks="calculateMarks(1000, 10000, 1000)"
+        step-strictly
+        :value-on-clear="500"
       />
     </el-form-item>
-    <!--<el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.minPoints')"
-      :prop="`parameter.minPoints`"
-    >
-      <el-slider
-        v-model="idea.parameter.minPoints"
-        :min="100"
-        :max="idea.parameter.maxPoints"
-        :step="100"
-        :show-stops="true"
-        :marks="calculateMarks(100, idea.parameter.maxPoints, 100, 10)"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.maxPoints')"
-      :prop="`parameter.maxPoints`"
-    >
-      <el-slider
-        v-model="idea.parameter.maxPoints"
-        :min="idea.parameter.minPoints"
-        :max="idea.parameter.points"
-        :step="100"
-        :show-stops="true"
-        :marks="
-          calculateMarks(
-            idea.parameter.minPoints,
-            idea.parameter.points,
-            100,
-            10
-          )
-        "
-      />
-    </el-form-item>-->
-    <el-form-item
-      v-if="authHeaderTyp === EndpointAuthorisationType.MODERATOR"
-      :label="
-        $t('module.brainstorming.missionmap.moderatorContent.explanation')
-      "
-      :prop="`parameter.explanationList`"
-    >
-      <div
-        v-for="(explanation, index) of idea.parameter.explanationList"
-        :key="index"
-      >
-        <el-input v-model="idea.parameter.explanationList[index]">
-          <template #prepend>
-            <span style="width: 1.5rem">{{ index + 1 }}.</span>
-            <div @click="() => idea.parameter.explanationList.splice(index, 1)">
-              <font-awesome-icon icon="trash" />
-            </div>
-          </template>
-        </el-input>
-      </div>
-      <AddItem
-        :text="
-          $t('module.brainstorming.missionmap.moderatorContent.addExplanation')
-        "
-        @addNew="() => idea.parameter.explanationList.push('')"
-      />
-    </el-form-item>
-    <!--<el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.share')"
-      :prop="`parameter.shareData`"
-    >
-      <el-switch v-model="idea.parameter.shareData" />
-    </el-form-item>-->
     <el-form-item
       v-if="
         authHeaderTyp === EndpointAuthorisationType.MODERATOR &&
@@ -824,5 +750,13 @@ export default class MissionSettings extends Vue {
 
 .chart {
   padding-top: 1rem;
+}
+
+.level-right {
+  color: var(--color-green);
+}
+
+.level-left {
+  color: var(--color-red);
 }
 </style>

@@ -1,5 +1,5 @@
 {
-  "icon": "map-location",
+  "icon": "scale-unbalanced",
   "type": "main",
   "input": "optional",
   "inputFilterTypes": "[\"task\"]",
