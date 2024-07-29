@@ -1,5 +1,109 @@
 <template>
   <div class="chart_container">
+    <div
+      v-if="
+        missionProgressParameter === MissionProgressParameter.influenceAreas
+      "
+    >
+      <div class="columns influenceAreas is-mobile">
+        <div class="column">
+          <img
+            src="@/modules/brainstorming/missionmap/assets/eco.png"
+            alt="eco"
+          />
+          <div class="influenceName">
+            <font-awesome-icon icon="leaf" />
+            {{ $t(`module.brainstorming.missionmap.gameConfig.eco`) }}
+          </div>
+          {{ convertInfluenceDataSet(0) }}
+        </div>
+        <div class="column">
+          <img
+            src="@/modules/brainstorming/missionmap/assets/social.png"
+            alt="social"
+          />
+          <div class="influenceName">
+            <font-awesome-icon icon="heart" />
+            {{ $t(`module.brainstorming.missionmap.gameConfig.social`) }}
+          </div>
+          {{ convertInfluenceDataSet(1) }}
+        </div>
+        <div class="column">
+          <img
+            src="@/modules/brainstorming/missionmap/assets/business.png"
+            alt="business"
+          />
+          <div class="influenceName">
+            <font-awesome-icon icon="sack-dollar" />
+            {{ $t(`module.brainstorming.missionmap.gameConfig.business`) }}
+          </div>
+          {{ convertInfluenceDataSet(2) }}
+        </div>
+      </div>
+    </div>
+    <div v-else-if="lineChartDataList.length > 0" class="columns">
+      <div class="column electricityMix">
+        <Doughnut
+          :data="chartDataElectricityMixInitial"
+          :options="{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+                position: 'right',
+                labels: {
+                  color: '#000000',
+                },
+              },
+              title: {
+                display: true,
+                text: $t(
+                  'module.brainstorming.missionmap.participant.chart.y-electricity1'
+                ),
+              },
+              tooltip: {
+                callbacks: {
+                  afterTitle: pieToolTip,
+                },
+              },
+            },
+          }"
+        />
+      </div>
+      <div
+        class="column electricityMix"
+        v-if="lineChartDataList[0].data.datasets[0].data.length > 1"
+      >
+        <Doughnut
+          :data="chartDataElectricityMixResult"
+          :options="{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+                position: 'right',
+                labels: {
+                  color: '#000000',
+                },
+              },
+              title: {
+                display: true,
+                text: $t(
+                  'module.brainstorming.missionmap.participant.chart.y-electricity2'
+                ),
+              },
+              tooltip: {
+                callbacks: {
+                  afterTitle: pieToolTip,
+                },
+              },
+            },
+          }"
+        />
+      </div>
+    </div>
     <div v-for="(chartData, index) in lineChartDataList" :key="index">
       <el-collapse>
         <el-collapse-item
@@ -139,6 +243,14 @@
               annotation: {
                 annotations: chartAnnotations(chartData),
               },
+              tooltip: {
+                callbacks: {
+                  label: lineToolTip,
+                  afterLabel: lineToolTipAfter,
+                  afterTitle: (item) =>
+                    lineToolTipDescription(item, chartData.items),
+                },
+              },
             },
           }"
         />
@@ -154,8 +266,8 @@ import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json'
 import gameConfigMoveIt from '@/modules/playing/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as themeColors from '@/utils/themeColors';
-import { Bar, Line } from 'vue-chartjs';
-import { ChartData } from 'chart.js/dist/types';
+import { Bar, Doughnut, Line } from 'vue-chartjs';
+import { ChartData, TooltipItem } from 'chart.js/dist/types';
 import { Idea } from '@/types/api/Idea';
 import { Vote, VoteParameterResult } from '@/types/api/Vote';
 import {
@@ -200,6 +312,7 @@ interface LineChartData {
     FontAwesomeIcon,
     Bar,
     Line,
+    Doughnut,
     IdeaCard,
   },
 })
@@ -213,6 +326,14 @@ export default class MissionProgressChart extends Vue {
   readonly authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: '' }) readonly yLabel!: string;
   lineChartDataList: LineChartData[] = [];
+  chartDataElectricityMixInitial: ChartData = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataElectricityMixResult: ChartData = {
+    labels: [],
+    datasets: [],
+  };
   module!: Module;
   ideas: Idea[] = [];
   inputManager!: CombinedInputManager;
@@ -562,6 +683,153 @@ export default class MissionProgressChart extends Vue {
       labelColors: themeColors.getContrastColor(),
       items: ideaList,
     });
+
+    this.chartDataElectricityMixInitial = {
+      labels: [],
+      datasets: [],
+    };
+    this.chartDataElectricityMixInitial.datasets.push({
+      label: this.$t('module.playing.moveit.participant.electricity'),
+      backgroundColor: [],
+      data: [],
+    });
+    this.chartDataElectricityMixResult = {
+      labels: [],
+      datasets: [],
+    };
+    this.chartDataElectricityMixResult.datasets.push({
+      label: this.$t('module.playing.moveit.participant.electricity'),
+      backgroundColor: [],
+      data: [],
+    });
+    const j = 0;
+    for (let i = 0; i < this.lineChartDataList[0].data.datasets.length; i++) {
+      const energySource = this.lineChartDataList[0].data.datasets[i];
+      if (energySource.label && this.chartDataElectricityMixResult.labels) {
+        this.chartDataElectricityMixResult.labels.push(energySource.label);
+      }
+      this.chartDataElectricityMixResult.datasets[j].data.push(
+        energySource.data[energySource.data.length - 1 - j] as any
+      );
+      (
+        this.chartDataElectricityMixResult.datasets[j]
+          .backgroundColor as string[]
+      ).push(energySource.backgroundColor as string);
+
+      if (energySource.label && this.chartDataElectricityMixInitial.labels) {
+        this.chartDataElectricityMixInitial.labels.push(energySource.label);
+      }
+      this.chartDataElectricityMixInitial.datasets[j].data.push(
+        energySource.data[j] as any
+      );
+      (
+        this.chartDataElectricityMixInitial.datasets[j]
+          .backgroundColor as string[]
+      ).push(energySource.backgroundColor as string);
+    }
+    /*if (this.lineChartDataList[0].data.labels) {
+      for (let j = 0; j < this.lineChartDataList[0].data.labels.length; j++) {
+        this.chartDataElectricityMix.datasets.push({
+          label: this.$t('module.playing.moveit.participant.electricity'),
+          backgroundColor: [],
+          data: [],
+        });
+        for (
+          let i = 0;
+          i < this.lineChartDataList[0].data.datasets.length;
+          i++
+        ) {
+          const energySource = this.lineChartDataList[0].data.datasets[i];
+          if (
+            energySource.label &&
+            this.chartDataElectricityMix.labels &&
+            j === 0
+          ) {
+            this.chartDataElectricityMix.labels.push(energySource.label);
+          }
+          this.chartDataElectricityMix.datasets[j].data.push(
+            energySource.data[energySource.data.length - 1 - j] as any
+          );
+          (
+            this.chartDataElectricityMix.datasets[j].backgroundColor as string[]
+          ).push(energySource.backgroundColor as string);
+        }
+      }
+    }*/
+  }
+
+  pieToolTip(tooltipItems: TooltipItem<any>[]): string {
+    const displayParameter =
+      this.missionProgressParameter === MissionProgressParameter.influenceAreas
+        ? gameConfig.parameter
+        : gameConfigMoveIt.electricity;
+    for (const key of Object.keys(displayParameter)) {
+      if (displayParameter[key].iconCode === tooltipItems[0].label)
+        return this.$t(`${this.toolTipTranslation}.${key}`);
+    }
+    return '';
+  }
+
+  lineToolTip(tooltipItem: TooltipItem<any>): string {
+    const displayParameter =
+      this.missionProgressParameter === MissionProgressParameter.influenceAreas
+        ? gameConfig.parameter
+        : gameConfigMoveIt.electricity;
+    const unit =
+      this.missionProgressParameter === MissionProgressParameter.influenceAreas
+        ? ' ' + this.$t('module.brainstorming.missionmap.participant.points')
+        : '%';
+    let name = '';
+    for (const key of Object.keys(displayParameter)) {
+      if (displayParameter[key].iconCode === tooltipItem.dataset.label) {
+        name = this.$t(`${this.toolTipTranslation}.${key}`);
+      }
+    }
+    return `${tooltipItem.dataset.label} ${name}: ${tooltipItem.formattedValue}${unit}`;
+  }
+
+  lineToolTipAfter(tooltipItem: TooltipItem<any>): string {
+    return this.convertInfluenceValue(tooltipItem.raw as number);
+  }
+
+  convertInfluenceValue(value: number): string {
+    if (
+      this.missionProgressParameter === MissionProgressParameter.influenceAreas
+    ) {
+      return this.$t(
+        `module.brainstorming.missionmap.enum.influenceResult.${Math.round(
+          value
+        )}`
+      );
+    }
+    return '';
+  }
+
+  convertInfluenceDataSet(index: number): string {
+    const datasets = this.lineChartDataList[0]?.data.datasets;
+    if (datasets && datasets.length > 0) {
+      const value = datasets[datasets.length - 1].data;
+      return this.convertInfluenceValue(value[index] as number);
+    }
+    return '';
+  }
+
+  lineToolTipDescription(
+    tooltipItems: TooltipItem<any>[],
+    ideas: any[]
+  ): string | undefined {
+    if (
+      tooltipItems[0].dataIndex > 0 &&
+      tooltipItems[0].dataIndex <= ideas.length
+    ) {
+      const description = ideas[tooltipItems[0].dataIndex - 1].idea.description
+        .replaceAll('#', '')
+        .replaceAll('*', '')
+        .replaceAll('\n', ' ')
+        .replaceAll('\r', '');
+      if (description.length < 50) return description;
+      return `${description.substring(0, 47)}...`;
+    }
   }
 
   async handleHoverLegend(
@@ -712,6 +980,25 @@ h2 {
 
   svg {
     padding-right: 0.5rem;
+  }
+}
+
+.electricityMix {
+  height: 20vh;
+}
+
+.influenceName {
+  font-weight: var(--font-weight-semibold);
+}
+
+.influenceAreas {
+  .column {
+    text-align: center;
+    width: 33%;
+    max-width: 20rem;
+    flex-basis: unset;
+    flex-grow: unset;
+    flex-shrink: unset;
   }
 }
 </style>

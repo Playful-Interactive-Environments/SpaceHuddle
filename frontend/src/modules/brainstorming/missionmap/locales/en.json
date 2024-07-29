@@ -12,6 +12,7 @@
     "cancel": "cancel",
     "yourPart": "your part",
     "sort": "Sort measures",
+    "points": "points",
     "finished": {
       "header": "finish task",
       "text": "Do you want to finish this task to move on to the next one?",
@@ -30,7 +31,9 @@
       "x": "measures",
       "y-influenceAreas": "development of society",
       "y-electricity": "electricity ratio in %",
-      "y-electricityAmount": "Electricity consumption for the whole of Austria in TWh"
+      "y-electricityAmount": "Electricity consumption for the whole of Austria in TWh",
+      "y-electricity1": "Electricity share in % of initial situation",
+      "y-electricity2": "Electricity share in % due to jointly agreed measures"
     },
     "loi": {
       "title": "declaration of support",
@@ -150,6 +153,29 @@
       "-5": "deterioration",
       "0": "unchanged",
       "5": "improvement"
+    },
+    "influenceResult": {
+      "-10": "urgent need for action",
+      "-9": "urgent need for action",
+      "-8": "urgent need for action",
+      "-7": "urgent need for action",
+      "-6": "urgent need for action",
+      "-5": "need for action",
+      "-4": "need for action",
+      "-3": "need for action",
+      "-2": "improvable",
+      "-1": "improvable",
+      "0": "improvable",
+      "1": "improvable",
+      "2": "improvable",
+      "3": "on the right track",
+      "4": "on the right track",
+      "5": "on the right track",
+      "6": "ideal development",
+      "7": "ideal development",
+      "8": "ideal development",
+      "9": "ideal development",
+      "10": "ideal development"
     }
   }
 }

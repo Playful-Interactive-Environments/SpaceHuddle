@@ -10,7 +10,7 @@
         <el-tab-pane name="measures">
           <template #label>
             <font-awesome-icon :icon="['fac', 'cards']" />
-            &nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;
             <!--
             {{
               $t('module.brainstorming.missionmap.participant.tabs.measures')
@@ -19,8 +19,13 @@
         </el-tab-pane>
         <el-tab-pane :name="MissionProgressParameter.influenceAreas">
           <template #label>
-            <font-awesome-icon icon="chart-line" />
-            <!--&nbsp;
+            <font-awesome-icon icon="leaf" />
+            &nbsp;
+            <font-awesome-icon icon="heart" />
+            &nbsp;
+            <font-awesome-icon icon="sack-dollar" />
+            <!--<font-awesome-icon icon="chart-line" />
+            &nbsp;
             {{
               $t(
                 'module.brainstorming.missionmap.participant.tabs.influenceAreas'
@@ -193,12 +198,12 @@
       >
         {{ selectedIdea?.keywords }}
       </el-form-item>
-      <el-form-item
+      <!--<el-form-item
         class="descending"
         :label="$t('module.brainstorming.missionmap.participant.loi.no')"
       >
         {{ selectedIdea?.id }}
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item
         class="descending"
         v-if="

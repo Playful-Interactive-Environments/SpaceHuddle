@@ -12,6 +12,7 @@
     "cancel": "abbrechen",
     "yourPart": "dein Anteil",
     "sort": "Massnahmen sortieren",
+    "points": "Punkte",
     "finished": {
       "header": "Aufgabe abschließen",
       "text": "Möchten Sie diese Aufgabe beenden, um zur nächsten überzugehen?",
@@ -30,7 +31,9 @@
       "x": "Maßnahmen",
       "y-influenceAreas": "Entwicklung der Gesellschaft",
       "y-electricity": "Stromanteil in %",
-      "y-electricityAmount": "Stromverbrauch für ganz Österreich in TWh"
+      "y-electricityAmount": "Stromverbrauch für ganz Österreich in TWh",
+      "y-electricity1": "Stromanteil in % Ausgangssituation",
+      "y-electricity2": "Stromanteil in % druch gemeinsam vereinbarten Maßnahmen"
     },
     "loi": {
       "title": "Unterstützungserklärung",
@@ -150,6 +153,29 @@
       "-5": "Verschlechterung",
       "0": "unverändert",
       "5": "Verbesserung"
+    },
+    "influenceResult": {
+      "-10": "dingender Handlungsbedarf",
+      "-9": "dingender Handlungsbedarf",
+      "-8": "dingender Handlungsbedarf",
+      "-7": "dingender Handlungsbedarf",
+      "-6": "dingender Handlungsbedarf",
+      "-5": "Handlungsbedarf",
+      "-4": "Handlungsbedarf",
+      "-3": "Handlungsbedarf",
+      "-2": "verbesserungswürdig",
+      "-1": "verbesserungswürdig",
+      "0": "verbesserungswürdig",
+      "1": "verbesserungswürdig",
+      "2": "verbesserungswürdig",
+      "3": "auf einen guten Weg",
+      "4": "auf einen guten Weg",
+      "5": "auf einen guten Weg",
+      "6": "ideale Entwicklung",
+      "7": "ideale Entwicklung",
+      "8": "ideale Entwicklung",
+      "9": "ideale Entwicklung",
+      "10": "ideale Entwicklung"
     }
   }
 }
