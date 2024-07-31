@@ -9,7 +9,10 @@
       :key="question.question.id"
     ></el-step>
   </el-steps>
-  <div v-if="showQuestion && showData" class="fill">
+  <div
+    v-if="showQuestion && showData && !showExplanation && !showStatistics"
+    class="fill"
+  >
     <el-space
       direction="vertical"
       class="fill"
@@ -155,6 +158,7 @@ export default class PublicBase extends Vue {
   @Prop({ default: QuestionState.ACTIVE_CREATE_QUESTION })
   readonly defaultQuestionState!: QuestionState;
   @Prop({ default: false }) readonly showQuestionWinStatistic!: boolean;
+  @Prop({ default: false }) readonly showResult!: boolean;
   readonly intervalTime = 1000;
   interval!: any;
   task: Task | null = null;
@@ -202,7 +206,9 @@ export default class PublicBase extends Vue {
 
   get showExplanation(): boolean {
     return (
-      this.questionState === QuestionState.RESULT_EXPLANATION && this.hasVotes
+      (this.questionState === QuestionState.RESULT_EXPLANATION ||
+        this.showResult) &&
+      this.hasVotes
     );
   }
 
@@ -271,7 +277,7 @@ export default class PublicBase extends Vue {
 
   get publicAnswers(): Hierarchy[] {
     if (this.publicQuestion) {
-      if (this.questionState == QuestionState.ACTIVE_CREATE_QUESTION)
+      if (this.questionState === QuestionState.ACTIVE_CREATE_QUESTION)
         if (this.statePointer > 0) {
           return this.publicQuestion.answers;
         } else return [];
@@ -342,7 +348,7 @@ export default class PublicBase extends Vue {
       this.publicQuestion &&
       this.questionnaireType === QuestionnaireType.QUIZ
     ) {
-      if (this.questionState == QuestionState.RESULT_ANSWER) {
+      if (this.questionState === QuestionState.RESULT_ANSWER) {
         return true;
       }
     }
@@ -354,7 +360,7 @@ export default class PublicBase extends Vue {
       this.publicQuestion &&
       this.questionnaireType === QuestionnaireType.QUIZ
     ) {
-      if (this.questionState == QuestionState.RESULT_ANSWER) {
+      if (this.questionState === QuestionState.RESULT_ANSWER) {
         return answer.parameter.isCorrect;
       }
     }
@@ -366,7 +372,7 @@ export default class PublicBase extends Vue {
       this.publicQuestion &&
       this.questionnaireType === QuestionnaireType.QUIZ
     ) {
-      if (this.questionState == QuestionState.ACTIVE_LAST_CHANGE) {
+      if (this.questionState === QuestionState.ACTIVE_LAST_CHANGE) {
         const index = this.publicQuestion.answers.indexOf(answer);
         return index === this.statePointer;
       }

@@ -212,7 +212,7 @@
               />
             </el-form-item>
             <el-form-item
-              v-if="moderatedQuestionFlow"
+              v-if="moderatedQuestionFlow || showResult"
               :label="
                 $t('module.information.quiz.moderatorContent.explanation')
               "
@@ -469,6 +469,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   answerCount = this.minAnswerCount;
   moduleQuestionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = false;
+  showResult = false;
   defaultQuestionTime: number | null = null;
   hasAnswer = true;
 
@@ -930,6 +931,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       const questionFlowChanged =
         this.moderatedQuestionFlow !== module.parameter.moderatedQuestionFlow;
       this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+      this.showResult = module.parameter.showResult;
       if (init || questionFlowChanged) {
         this.registerPublicScreen();
       }
@@ -938,6 +940,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.answerCount = 1;
       this.moduleQuestionnaireType = QuestionnaireType.QUIZ;
       this.moderatedQuestionFlow = false;
+      this.showResult = false;
       this.defaultQuestionTime = null;
     }
     this.hasAnswer = this.moduleQuestionnaireType !== QuestionnaireType.SURVEY;

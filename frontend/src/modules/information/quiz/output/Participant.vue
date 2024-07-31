@@ -33,19 +33,25 @@
           class="el-button--submit"
           native-type="submit"
           :disabled="!hasPreviousQuestion"
-          v-if="!moderatedQuestionFlow && !submitScreen"
+          v-if="!moderatedQuestionFlow && !submitScreen && !showResult"
           @click="goToPreviousQuestion"
           :class="{ submitScreenButton: submitScreen }"
         >
           {{ $t('module.information.quiz.participant.previous') }}
         </el-button>
+        <div v-else></div>
         <el-button
           type="primary"
           class="el-button--submit"
           native-type="submit"
           :disabled="!hasNextQuestion || !questionAnswered"
-          v-if="!moderatedQuestionFlow && hasNextQuestion && !submitScreen"
-          @click="goToNextQuestion"
+          v-if="
+            !moderatedQuestionFlow &&
+            hasNextQuestion &&
+            !submitScreen &&
+            !showExplanation
+          "
+          @click="nextClick"
         >
           {{ $t('module.information.quiz.participant.next') }}
         </el-button>
@@ -90,6 +96,7 @@
       v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
       v-if="!submitScreen"
       :showData="!initData && !activeAnswer.isSaved"
+      :showResult="showExplanation"
     >
       <template #answers>
         <el-space
@@ -388,6 +395,8 @@ export default class Participant extends Vue {
   quizQuestionCount = 0;
   questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
+  showResult = false;
+  showExplanation = false;
   score = 0;
   voteResults: boolean[] = [];
   savedQuestions: string[] = [];
@@ -906,6 +915,15 @@ export default class Participant extends Vue {
     this.questionAnswered = this.getQuestionAnswered();
   }
 
+  async nextClick(event: PointerEvent | null): Promise<void> {
+    if (this.showResult && this.activeQuestion?.parameter.explanation) {
+      this.showExplanation = true;
+      await delay(5000);
+    }
+    await this.goToNextQuestion(event);
+    this.showExplanation = false;
+  }
+
   showSavingState = false;
   goForward = true;
   async goToNextQuestion(
@@ -1042,6 +1060,7 @@ export default class Participant extends Vue {
       QuestionnaireType[module.parameter.questionType.toUpperCase()];
     this._setQuizQuestionCount();
     this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+    this.showResult = module.parameter.showResult ?? false;
     if (this.moderatedQuestionFlow) this.initData = false;
     if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
       this.activeQuestionIndex = 0;

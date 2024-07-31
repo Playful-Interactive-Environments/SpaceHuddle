@@ -76,6 +76,26 @@
       </div>
     </el-form-item>
     <el-form-item
+      v-if="
+        !modelValue.moderatedQuestionFlow &&
+        modelValue.questionType === QuestionType.QUIZ
+      "
+      :label="$t('module.information.quiz.moderatorConfig.showResult')"
+      :prop="`${rulePropPath}.showResult`"
+    >
+      <div class="level">
+        <span class="level-left">
+          <el-switch
+            class="level-item"
+            v-model="modelValue.showResult"
+            :inactive-text="
+              $t('module.information.quiz.moderatorConfig.showResult')
+            "
+          />
+        </span>
+      </div>
+    </el-form-item>
+    <el-form-item
       :label="$t('module.information.quiz.moderatorConfig.theme')"
       :prop="`${rulePropPath}.theme`"
     >
@@ -152,6 +172,9 @@ export default class CustomConfig
     ) {
       this.modelValue.moderatedQuestionFlow = false;
     }
+    if (this.modelValue && this.modelValue.showResult === undefined) {
+      this.modelValue.showResult = false;
+    }
     if (this.modelValue && !this.modelValue.defaultQuestionTime) {
       this.modelValue.defaultQuestionTime = this.defaultTime;
     }
@@ -218,6 +241,9 @@ export default class CustomConfig
 
     if (this.modelValue && !this.modelValue.moderatedQuestionFlow) {
       delete this.modelValue.defaultQuestionTime;
+    }
+    if (this.modelValue && this.modelValue.moderatedQuestionFlow) {
+      delete this.modelValue.showResult;
     }
   }
 
