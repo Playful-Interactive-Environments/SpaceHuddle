@@ -25,6 +25,28 @@ export function calculateDecidedIdeasFromResult(
   return [];
 }
 
+export function sortDecidedIdeasFromResult(
+  voteResults: VoteParameterResult[],
+  ideas: Idea[]
+): Idea[] {
+  if (voteResults.length > 0) {
+    const decidedIdeas: { idea: Idea; percent: number }[] = [];
+    for (const idea of ideas) {
+      const vote = voteResults.find((vote) => vote.ideaId === idea.id);
+      if (vote) {
+        decidedIdeas.push({
+          idea: idea,
+          percent: vote.sum / idea.parameter.points,
+        });
+      }
+    }
+    return decidedIdeas
+      .sort((a, b) => b.percent - a.percent)
+      .map((item) => item.idea);
+  }
+  return [];
+}
+
 export function calculateDecidedIdeasFromVotes(
   votes: Vote[],
   ideas: Idea[]

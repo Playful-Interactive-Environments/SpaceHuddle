@@ -61,15 +61,13 @@
             {{ $t('module.brainstorming.missionmap.publicScreen.noIdeas') }}
           </p>
         </section>
-        <div v-else class="public-screen__content">
-          <section class="ideaList columns is-multiline is-gapless">
+        <div v-else class="public-screen__content has-auto-count">
+          <section class="ideaList grid">
             <IdeaCard
-              v-for="(idea, index) in ideas.sort(
-                (a, b) => decisionIndex(a.id) - decisionIndex(b.id)
-              )"
+              v-for="(idea, index) in decisionList"
               :idea="idea"
               :key="index"
-              class="ideaCard column"
+              class="ideaCard cell"
               :show-state="false"
               :is-editable="false"
               :background-color="getIdeaColor(idea)"
@@ -165,6 +163,7 @@ export default class PublicScreen extends Vue {
   sizeLoaded = false;
   voteResults: VoteParameterResult[] = [];
   decidedIdeas: Idea[] = [];
+  decisionList: Idea[] = [];
   showProgress = false;
   inputManager!: CombinedInputManager;
   activeProgressTab = MissionProgressParameter.influenceAreas;
@@ -243,6 +242,7 @@ export default class PublicScreen extends Vue {
     );
     this.ideas = ideas;
     this.calculateDecidedIdeas();
+    this.calculateDecisionList();
   }
 
   updateVotes(): void {
@@ -252,10 +252,18 @@ export default class PublicScreen extends Vue {
   updateVoteResult(votes: VoteParameterResult[]): void {
     this.voteResults = votes;
     this.calculateDecidedIdeas();
+    this.calculateDecisionList();
   }
 
   calculateDecidedIdeas(): void {
     this.decidedIdeas = progress.calculateDecidedIdeasFromResult(
+      this.voteResults,
+      this.ideas
+    );
+  }
+
+  calculateDecisionList(): void {
+    this.decisionList = progress.sortDecidedIdeasFromResult(
       this.voteResults,
       this.ideas
     );
@@ -330,17 +338,12 @@ export default class PublicScreen extends Vue {
 }
 
 .ideaList {
-  margin: -0.25rem;
+  --bulma-grid-column-min: 15rem;
 
   > .ideaCard {
-    flex: none;
-    flex-grow: 1;
-    flex-shrink: 0;
-    width: 15rem;
     height: 23rem;
     border-radius: var(--border-radius);
     border: solid var(--color-dark-contrast) 5px;
-    margin: 0.25rem;
   }
 }
 
