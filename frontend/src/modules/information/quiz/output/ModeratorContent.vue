@@ -212,6 +212,7 @@
               />
             </el-form-item>
             <el-form-item
+              v-if="moderatedQuestionFlow"
               :label="
                 $t('module.information.quiz.moderatorContent.explanation')
               "
