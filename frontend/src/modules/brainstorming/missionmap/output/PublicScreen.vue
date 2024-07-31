@@ -47,6 +47,7 @@
           v-if="showProgress"
           :task-id="taskId"
           :mission-progress-parameter="activeProgressTab"
+          :showIdeas="false"
         />
       </el-header>
     </el-aside>
@@ -61,12 +62,14 @@
           </p>
         </section>
         <div v-else class="public-screen__content">
-          <section class="layout__columns">
+          <section class="ideaList columns is-multiline is-gapless">
             <IdeaCard
-              v-for="(idea, index) in ideas"
+              v-for="(idea, index) in ideas.sort(
+                (a, b) => decisionIndex(a.id) - decisionIndex(b.id)
+              )"
               :idea="idea"
               :key="index"
-              class="ideaCard"
+              class="ideaCard column"
               :show-state="false"
               :is-editable="false"
               :background-color="getIdeaColor(idea)"
@@ -178,6 +181,12 @@ export default class PublicScreen extends Vue {
 
   isDecided(ideaId: string): boolean {
     return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
+  }
+
+  decisionIndex(ideaId: string): number {
+    const index = this.decidedIdeas.findIndex((idea) => idea.id === ideaId);
+    if (index >= 0) return index;
+    return 10000;
   }
 
   getInfluenceAreasForIdea(idea: Idea): string[] {
@@ -320,10 +329,19 @@ export default class PublicScreen extends Vue {
   column-width: 15rem;
 }
 
-.ideaCard {
-  height: 23rem;
-  border-radius: var(--border-radius);
-  border: solid var(--color-dark-contrast) 5px;
+.ideaList {
+  margin: -0.25rem;
+
+  > .ideaCard {
+    flex: none;
+    flex-grow: 1;
+    flex-shrink: 0;
+    width: 15rem;
+    height: 23rem;
+    border-radius: var(--border-radius);
+    border: solid var(--color-dark-contrast) 5px;
+    margin: 0.25rem;
+  }
 }
 
 .image_overlay {

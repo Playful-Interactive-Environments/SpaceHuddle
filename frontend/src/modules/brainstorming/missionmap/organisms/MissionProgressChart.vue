@@ -105,7 +105,9 @@
       </div>
     </div>
     <div v-for="(chartData, index) in lineChartDataList" :key="index">
-      <el-collapse>
+      <el-collapse
+        v-if="showIdeas && chartData.data.datasets[0].data.length > 1"
+      >
         <el-collapse-item
           :title="
             $t(
@@ -171,7 +173,7 @@
           </div>
         </el-collapse-item>
       </el-collapse>
-      <div class="chart_area">
+      <div class="chart_area" v-if="chartData.data.datasets[0].data.length > 1">
         <el-tooltip
           :visible="!!hoverLabel && index === hoverChart"
           placement="left"
@@ -325,6 +327,7 @@ export default class MissionProgressChart extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   readonly authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: '' }) readonly yLabel!: string;
+  @Prop({ default: true }) readonly showIdeas!: boolean;
   lineChartDataList: LineChartData[] = [];
   chartDataElectricityMixInitial: ChartData = {
     labels: [],
