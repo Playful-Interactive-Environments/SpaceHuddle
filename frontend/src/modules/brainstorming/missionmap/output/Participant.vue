@@ -327,7 +327,6 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import * as cashService from '@/services/cash-service';
-import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
 import { Vote, VoteParameterResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
@@ -383,7 +382,6 @@ interface ProgressValues {
     MissionProgressChart,
     FontAwesomeIcon,
     ValidationForm,
-    IdeaMap,
     IdeaCard,
     ParticipantModuleDefaultContainer,
     draggable,

@@ -1,6 +1,6 @@
 <template>
   <el-container ref="container">
-    <el-aside width="60vw" class="mapSpace">
+    <el-aside width="50vw" class="mapSpace">
       <el-header height="150px" class="statistic">
         <el-tabs v-model="activeProgressTab">
           <el-tab-pane
@@ -11,6 +11,19 @@
               )
             "
           >
+            <template #label>
+              <font-awesome-icon icon="leaf" />
+              &nbsp;
+              <font-awesome-icon icon="heart" />
+              &nbsp;
+              <font-awesome-icon icon="sack-dollar" />
+              &nbsp;
+              {{
+                $t(
+                  'module.brainstorming.missionmap.participant.tabs.influenceAreas'
+                )
+              }}
+            </template>
           </el-tab-pane>
           <el-tab-pane
             v-if="showProgress && module.parameter.effectElectricity"
@@ -19,6 +32,15 @@
               $t('module.brainstorming.missionmap.participant.tabs.electricity')
             "
           >
+            <template #label>
+              <font-awesome-icon icon="plug-circle-bolt" />
+              &nbsp;
+              {{
+                $t(
+                  'module.brainstorming.missionmap.participant.tabs.electricity'
+                )
+              }}
+            </template>
           </el-tab-pane>
         </el-tabs>
         <MissionProgressChart
@@ -27,18 +49,6 @@
           :mission-progress-parameter="activeProgressTab"
         />
       </el-header>
-      <IdeaMap
-        v-if="sizeLoaded"
-        :ideas="ideas"
-        class="map"
-        :parameter="module?.parameter"
-        :canChangePosition="() => false"
-        :calculate-size="false"
-        v-model:selected-idea="selectedIdea"
-        v-on:visibleIdeasChanged="visibleIdeasChanged"
-        v-on:selectionColorChanged="selectionColor = $event"
-      >
-      </IdeaMap>
     </el-aside>
     <el-container ref="mapSpace" class="ideaSpace">
       <el-main>
@@ -53,35 +63,44 @@
         <div v-else class="public-screen__content">
           <section class="layout__columns">
             <IdeaCard
-              v-for="(idea, index) in visibleIdeas"
+              v-for="(idea, index) in ideas"
               :idea="idea"
               :key="index"
+              class="ideaCard"
+              :show-state="false"
               :is-editable="false"
-              :isSelected="idea.id === selectedIdea?.id"
-              :selectionColor="selectionColor"
               :background-color="getIdeaColor(idea)"
-              v-model:collapseIdeas="filter.collapseIdeas"
-              v-on:click="selectedIdea = idea"
+              fix-height="15rem"
+              image-height="33%"
             >
-              <div>
-                <font-awesome-icon icon="coins" />
-                {{ idea.parameter.points }}
-              </div>
-              <div class="columns is-mobile">
-                <div
-                  class="column"
-                  v-for="parameter of Object.keys(gameConfig.parameter)"
-                  :key="parameter"
-                  :style="{
-                    color: gameConfig.parameter[parameter].color,
-                  }"
-                >
-                  <font-awesome-icon
-                    :icon="gameConfig.parameter[parameter].icon"
-                  />
-                  {{ idea.parameter.influenceAreas[parameter] }}
+              <template #icon>
+                <font-awesome-icon icon="person-booth" />
+              </template>
+              <template #image_overlay>
+                <div class="media image_overlay">
+                  <div class="media-content">
+                    <font-awesome-icon icon="coins" />
+                    {{ getVoteResultForIdea(idea.id)?.sum }} /
+                    <font-awesome-icon icon="greater-than-equal" />
+                    {{ idea.parameter.points }}
+                    <br />
+                    <font-awesome-icon icon="user-pen" />
+                    {{ getVoteResultForIdea(idea.id)?.count }} /
+                    <font-awesome-icon icon="greater-than-equal" />
+                    {{ idea.parameter.minParticipants }}
+                  </div>
+                  <div class="media-right">
+                    <font-awesome-icon
+                      v-for="parameter of getInfluenceAreasForIdea(idea)"
+                      :key="parameter"
+                      :style="{
+                        color: gameConfig.parameter[parameter].color,
+                      }"
+                      :icon="gameConfig.parameter[parameter].icon"
+                    />
+                  </div>
                 </div>
-              </div>
+              </template>
             </IdeaCard>
           </section>
         </div>
@@ -105,10 +124,8 @@ import {
 import { getFilterForTask } from '@/components/moderator/molecules/IdeaFilter.vue';
 import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
-import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
-import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import { VoteParameterResult } from '@/types/api/Vote';
 import MissionProgressChart, {
@@ -128,7 +145,6 @@ import { registerDomElement, unregisterDomElement } from '@/vunit';
     },
   },
   components: {
-    IdeaMap,
     IdeaCard,
     MissionProgressChart,
   },
@@ -144,11 +160,8 @@ export default class PublicScreen extends Vue {
   readonly newTimeSpan = 10000;
   filter: FilterData = { ...defaultFilterData };
   sizeLoaded = false;
-  visibleIdeas: Idea[] = [];
   voteResults: VoteParameterResult[] = [];
-  selectedIdea: Idea | null = null;
   decidedIdeas: Idea[] = [];
-  selectionColor = '#0192d0';
   showProgress = false;
   inputManager!: CombinedInputManager;
   activeProgressTab = MissionProgressParameter.influenceAreas;
@@ -165,6 +178,18 @@ export default class PublicScreen extends Vue {
 
   isDecided(ideaId: string): boolean {
     return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
+  }
+
+  getInfluenceAreasForIdea(idea: Idea): string[] {
+    const areas: string[] = [];
+    for (const parameter of Object.keys(gameConfig.parameter)) {
+      if (idea.parameter.influenceAreas[parameter] > 0) areas.push(parameter);
+    }
+    return areas;
+  }
+
+  getVoteResultForIdea(ideaId: string): VoteParameterResult | undefined {
+    return this.voteResults.find((vote) => vote.ideaId === ideaId);
   }
 
   @Watch('taskId', { immediate: true })
@@ -185,11 +210,6 @@ export default class PublicScreen extends Vue {
     );
     this.inputManager.callbackUpdateIdeas = this.updateIdeas;
     this.inputManager.callbackUpdateVotes = this.updateVotes;
-  }
-
-  @Watch('selectedIdea', { immediate: true })
-  onSelectedIdeaChanged(): void {
-    if (this.selectedIdea) setHash(this.selectedIdea.id);
   }
 
   updateTask(task: Task): void {
@@ -264,10 +284,6 @@ export default class PublicScreen extends Vue {
     this.deregisterAll();
     unregisterDomElement(this.domKey);
   }
-
-  visibleIdeasChanged(ideas: Idea[]): void {
-    this.visibleIdeas = ideas;
-  }
 }
 </script>
 
@@ -298,5 +314,38 @@ export default class PublicScreen extends Vue {
 .statistic {
   height: unset;
   //margin-bottom: 3rem;
+}
+
+.layout__columns {
+  column-width: 15rem;
+}
+
+.ideaCard {
+  height: 23rem;
+  border-radius: var(--border-radius);
+  border: solid var(--color-dark-contrast) 5px;
+}
+
+.image_overlay {
+  padding: 0.2rem;
+  background-color: color-mix(
+    in srgb,
+    var(--color-dark-contrast) 60%,
+    transparent
+  );
+
+  .media-content {
+    color: white;
+    padding-left: 0.5rem;
+  }
+
+  .media-right {
+    color: white;
+    text-align: right;
+  }
+
+  svg {
+    padding-right: 0.5rem;
+  }
 }
 </style>

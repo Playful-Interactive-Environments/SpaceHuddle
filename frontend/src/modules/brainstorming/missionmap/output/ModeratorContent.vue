@@ -8,6 +8,19 @@
           $t('module.brainstorming.missionmap.participant.tabs.influenceAreas')
         "
       >
+        <template #label>
+          <font-awesome-icon icon="leaf" />
+          &nbsp;
+          <font-awesome-icon icon="heart" />
+          &nbsp;
+          <font-awesome-icon icon="sack-dollar" />
+          &nbsp;
+          {{
+            $t(
+              'module.brainstorming.missionmap.participant.tabs.influenceAreas'
+            )
+          }}
+        </template>
       </el-tab-pane>
       <el-tab-pane
         v-if="module.parameter.effectElectricity"
@@ -16,6 +29,13 @@
           $t('module.brainstorming.missionmap.participant.tabs.electricity')
         "
       >
+        <template #label>
+          <font-awesome-icon icon="plug-circle-bolt" />
+          &nbsp;
+          {{
+            $t('module.brainstorming.missionmap.participant.tabs.electricity')
+          }}
+        </template>
       </el-tab-pane>
     </el-tabs>
     <MissionProgressChart
@@ -286,7 +306,6 @@ import {
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilterBase.vue';
 import IdeaFilter from '@/components/moderator/molecules/IdeaFilter.vue';
-import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -319,7 +338,6 @@ import { Bar } from 'vue-chartjs';
   components: {
     MissionSettings,
     FontAwesomeIcon,
-    IdeaMap,
     AddItem,
     IdeaCard,
     CollapseTitle,
