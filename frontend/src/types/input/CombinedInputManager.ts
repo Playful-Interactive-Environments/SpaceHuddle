@@ -192,14 +192,16 @@ export class CombinedInputManager {
           self.findIndex((item) => item === value) === index
       );
     for (const ideaId of ideaList) {
-      const votes = list.filter((item) => item.ideaId === ideaId);
+      const votes = list.filter(
+        (item) => item.ideaId === ideaId && item.sum > 0
+      );
+      const count = votes.reduce((sum, item) => sum + item.count, 0);
+      const sum = votes.reduce((sum, item) => sum + item.sum, 0);
       votingResult.push({
-        ideaId: votes[0].ideaId,
-        sum: votes.reduce((sum, item) => sum + item.sum, 0),
-        count: votes.reduce((sum, item) => sum + item.count, 0),
-        avg:
-          votes.reduce((sum, item) => sum + item.sum, 0) /
-          votes.reduce((sum, item) => sum + item.count, 0),
+        ideaId: ideaId,
+        sum: sum,
+        count: count,
+        avg: sum / count,
         details: undefined,
       });
     }
@@ -220,7 +222,8 @@ export class CombinedInputManager {
         }
         if (
           vote.parameter &&
-          Object.hasOwn(vote.parameter, this._sumVoteParameter)
+          Object.hasOwn(vote.parameter, this._sumVoteParameter) &&
+          vote.parameter[this._sumVoteParameter] > 0
         ) {
           sum[vote.ideaId].sum += vote.parameter[this._sumVoteParameter];
           sum[vote.ideaId].count += 1;
