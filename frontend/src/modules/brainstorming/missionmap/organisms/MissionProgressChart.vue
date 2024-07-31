@@ -796,10 +796,9 @@ export default class MissionProgressChart extends Vue {
     if (
       this.missionProgressParameter === MissionProgressParameter.influenceAreas
     ) {
+      const roundValue = isNaN(value) ? 0 : Math.round(value);
       return this.$t(
-        `module.brainstorming.missionmap.enum.influenceResult.${Math.round(
-          value
-        )}`
+        `module.brainstorming.missionmap.enum.influenceResult.${roundValue}`
       );
     }
     return '';
@@ -809,7 +808,8 @@ export default class MissionProgressChart extends Vue {
     const datasets = this.lineChartDataList[0]?.data.datasets;
     if (datasets && datasets.length > 0) {
       const value = datasets[datasets.length - 1].data;
-      return this.convertInfluenceValue(value[index] as number);
+      const indexValue = (value[index] as number) ?? 0;
+      return this.convertInfluenceValue(indexValue);
     }
     return '';
   }
