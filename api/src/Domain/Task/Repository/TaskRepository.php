@@ -145,7 +145,8 @@ class TaskRepository implements RepositoryInterface
                 "task_participant_state.task_id = task.id",
                 "task_participant_state.participant_id" => $authorisation->id
             ])
-                ->andWhere(["(task_participant_state.state IS NULL OR task_participant_state.state != '$finished')"]);
+                ->innerJoin("module", ["module.task_id = task.id", "module.order = 0"])
+                ->andWhere(["(task_participant_state.state IS NULL OR task_participant_state.state != '$finished' OR module.module_name = 'personalityTest')"]);
         }
 
         $result = $this->fetchAll($query);
