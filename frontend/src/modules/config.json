@@ -122,12 +122,13 @@
        "personalityTest": {  
            "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
+           "participantFinished": "output/ParticipantFinished",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
            "sub_locales": "big5,brainhex,communication,shopping,thinkingHats,",  
-             "icon": "face-rolling-eyes",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": false,  
+             "icon": "face-rolling-eyes",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": false,  "displayFinished": true,  
            "path": "information/personalityTest"  
        },  
        "quiz": {  

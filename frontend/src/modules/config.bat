@@ -91,6 +91,9 @@ EXIT /B 0
                 if exist !modulePath!output\Participant.vue (
                     echo            "participant": "output/Participant",  >> .\..\config.json
                 )
+                if exist !modulePath!output\ParticipantFinished.vue (
+                    echo            "participantFinished": "output/ParticipantFinished",  >> .\..\config.json
+                )
                 if exist !modulePath!output\ModeratorContent.vue (
                     echo            "moderatorContent": "output/ModeratorContent",  >> .\..\config.json
                 )

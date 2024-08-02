@@ -4,6 +4,7 @@ enum ModuleComponentType {
   MODERATOR_CONTENT = 'moderatorContent',
   MODULE_STATISTIC = 'moduleStatistic',
   PARTICIPANT = 'participant',
+  PARTICIPANT_FINISHED = 'participantFinished',
 }
 
 export default ModuleComponentType;

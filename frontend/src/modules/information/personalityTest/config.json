@@ -4,5 +4,6 @@
   "type": "main",
   "input": "no",
   "syncPublicParticipant": false,
-  "finishManuel": false
+  "finishManuel": false,
+  "displayFinished": true
 }

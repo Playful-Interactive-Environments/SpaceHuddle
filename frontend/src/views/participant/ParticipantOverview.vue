@@ -232,7 +232,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import { ElMessageBox } from 'element-plus';
-import { getModuleConfig } from '@/modules';
+import { getModuleConfig, getModuleConfigWithoutWait } from '@/modules';
 
 @Options({
   components: {
@@ -297,6 +297,12 @@ export default class ParticipantOverview extends Vue {
   }
 
   taskIsVisible(task: Task): boolean {
+    const configValue = getModuleConfigWithoutWait(
+      'displayFinished',
+      task.taskType.toLowerCase(),
+      task.modules[0].name
+    );
+    if (configValue) return true;
     const state = this.getStateForTask(task.id);
     return !(state && state.state === TaskParticipantStatesType.FINISHED);
   }

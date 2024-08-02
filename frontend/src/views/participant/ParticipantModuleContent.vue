@@ -69,6 +69,15 @@
         </p>
       </div>
     </participant-tutorial>
+    <ParticipantFinishedModuleComponent
+      v-else-if="
+        task && state && state.state === TaskParticipantStatesType.FINISHED
+      "
+      :task-id="taskId"
+      :module-id="moduleId"
+      v-model:useFullSize="useFullSize"
+      v-model:backgroundClass="backgroundClass"
+    />
     <ParticipantModuleComponent
       v-else-if="task"
       :task-id="taskId"
@@ -86,7 +95,6 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Task } from '@/types/api/Task';
 import TaskType from '@/types/enum/TaskType';
 
-import TaskStates from '@/types/enum/TaskStates';
 import {
   getAsyncDefaultModule,
   getAsyncModule,
@@ -110,6 +118,7 @@ import { RouteName } from '@/types/enum/RouteName';
 import { Session } from '@/types/api/Session';
 import ParticipantTutorial from '@/components/participant/molecules/ParticipantTutorial.vue';
 import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
+import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 
 enum ModuleDisplayState {
   tutorial = 'tutorial',
@@ -123,6 +132,7 @@ enum ModuleDisplayState {
     Timer,
     ParticipantDefaultContainer,
     ParticipantModuleComponent: getEmptyComponent(),
+    ParticipantFinishedModuleComponent: getEmptyComponent(),
   },
 })
 
@@ -135,7 +145,7 @@ export default class ParticipantModuleContent extends Vue {
   state: TaskParticipantState | null = null;
 
   TaskType = TaskType;
-  TaskStates = TaskStates;
+  TaskParticipantStatesType = TaskParticipantStatesType;
   moduleName = '';
   componentLoadIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
@@ -330,7 +340,7 @@ export default class ParticipantModuleContent extends Vue {
   updateState(stateList: TaskParticipantState[]): void {
     if (stateList.length > 0) {
       const state = stateList[0];
-      if (!this.state) {
+      if (!this.state && state.state !== TaskParticipantStatesType.FINISHED) {
         state.count++;
         taskParticipantService.putParticipantState(this.taskId, state);
       }
@@ -392,6 +402,17 @@ export default class ParticipantModuleContent extends Vue {
         if (this.$options.components) {
           this.componentLoadingState = ComponentLoadingState.SELECTED;
           this.$options.components['ParticipantModuleComponent'] = component;
+          this.componentLoadIndex++;
+        }
+      });
+      getAsyncModule(
+        ModuleComponentType.PARTICIPANT_FINISHED,
+        taskType,
+        moduleName
+      ).then((component) => {
+        if (this.$options.components) {
+          this.$options.components['ParticipantFinishedModuleComponent'] =
+            component;
           this.componentLoadIndex++;
         }
       });

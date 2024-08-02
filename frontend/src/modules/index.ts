@@ -228,6 +228,27 @@ export const getModuleConfig = async (
   return null;
 };
 
+export const getModuleConfigWithoutWait = (
+  componentType: string,
+  taskType: string | null = null,
+  moduleName = defaultModuleName,
+  includeFallback = true
+): any => {
+  if (taskType) {
+    const module = moduleConfig[taskType][moduleName];
+    if (Object.hasOwn(module, componentType)) {
+      return module[componentType];
+    } else if (moduleName != defaultModuleName && includeFallback) {
+      return getModuleConfigWithoutWait(
+        componentType,
+        taskType,
+        getFallback(taskType, moduleName)
+      );
+    }
+  }
+  return null;
+};
+
 export const hasModule = async (
   componentType: string,
   taskType: string | null = null,
