@@ -298,6 +298,13 @@
           "topic": "Thema",
           "session": "Session"
         },
+        "taskMoveSettings": {
+          "header": "Aufgabe verschieben",
+          "info": "Verschiebe die Aufgabe in ein anderes Thema oder eine andere Sitzung.",
+          "topic": "Thema",
+          "session": "Session",
+          "submit": "verschieben"
+        },
         "sessionSettings": {
           "header": "Sitzung erstellen",
           "settings": "Sitzungs-Einstellungen",

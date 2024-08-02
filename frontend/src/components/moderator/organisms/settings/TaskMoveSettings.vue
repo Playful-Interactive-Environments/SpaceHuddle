@@ -8,19 +8,19 @@
     <el-dialog v-model="showDialog" :before-close="handleClose">
       <template #header>
         <span class="el-dialog__title">
-          {{ $t('moderator.organism.settings.taskSettings.header') }}
+          {{ $t('moderator.organism.settings.taskMoveSettings.header') }}
         </span>
         <br />
         <br />
         <p>
-          {{ $t('moderator.organism.settings.taskSettings.info') }}
+          {{ $t('moderator.organism.settings.taskMoveSettings.info') }}
         </p>
       </template>
 
       <el-form-item
         v-if="!hasInput"
         prop="sessionId"
-        :label="$t('moderator.organism.settings.taskSettings.session')"
+        :label="$t('moderator.organism.settings.taskMoveSettings.session')"
         :rules="[defaultFormRules.ruleRequired]"
       >
         <el-select v-model="formData.sessionId" class="select--fullwidth">
@@ -35,7 +35,7 @@
       </el-form-item>
       <el-form-item
         prop="topicId"
-        :label="$t('moderator.organism.settings.taskSettings.topic')"
+        :label="$t('moderator.organism.settings.taskMoveSettings.topic')"
         :rules="[defaultFormRules.ruleRequired]"
       >
         <el-select v-model="formData.topicId" class="select--fullwidth">
@@ -51,7 +51,7 @@
       <template #footer>
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
-          submit-label-key="moderator.organism.settings.taskSettings.submit"
+          submit-label-key="moderator.organism.settings.taskMoveSettings.submit"
           :disabled="isSaving"
         />
       </template>
@@ -172,6 +172,8 @@ export default class TaskMoveSettings extends Vue {
       );
     }
     this.isSaving = false;
+    this.reset();
+    this.$emit('update:showModal', false);
   }
 
   reset(): void {

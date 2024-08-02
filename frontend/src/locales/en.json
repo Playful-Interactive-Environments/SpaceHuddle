@@ -298,6 +298,13 @@
           "topic": "topic",
           "session": "session"
         },
+        "taskMoveSettings": {
+          "header": "Move Task",
+          "info": "Move the task to another topic or session.",
+          "topic": "topic",
+          "session": "session",
+          "submit": "move"
+        },
         "sessionSettings": {
           "header": "Create Session",
           "settings": "Session settings",
