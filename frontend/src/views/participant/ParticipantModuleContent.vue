@@ -410,7 +410,7 @@ export default class ParticipantModuleContent extends Vue {
         taskType,
         moduleName
       ).then((component) => {
-        if (this.$options.components) {
+        if (this.$options.components && component) {
           this.$options.components['ParticipantFinishedModuleComponent'] =
             component;
           this.componentLoadIndex++;
