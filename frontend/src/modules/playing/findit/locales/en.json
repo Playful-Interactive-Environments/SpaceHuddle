@@ -66,6 +66,14 @@
           "bottle":{
             "name": "Glass Bottle",
             "description": "It is a myth that left-behind glass bottles of all kinds act like a lens under the right circumstances and focus the light. No one can start a fire at the focal point! However, garbage does not belong in the forest, as animals can get hurt."
+          },
+          "oil": {
+            "name": "Oil Canister",
+            "description": "Oil can get into the environment and contaminate/poison the environment."
+          },
+          "electricalScrap": {
+            "name": "Electrical Scrap",
+            "description": "Batteries in e-waste can get into the environment and contaminate/poison the environment."
           }
         }
       },
@@ -80,9 +88,9 @@
             "name": "Sandbag",
             "description": "Sandbags have to be removed after the flood is over, as they are blocking paths and streets."
           },
-          "person": {
-            "name": "People",
-            "description": "People can drown."
+          "animal": {
+            "name": "Animal",
+            "description": "Animals can drown."
           },
           "garbage": {
             "name": "Garbage",
@@ -95,6 +103,14 @@
           "bottle":{
             "name": "Glass Bottle",
             "description": "It is a myth that left-behind glass bottles of all kinds act like a lens under the right circumstances and focus the light. No one can start a fire at the focal point! However, garbage does not belong in the forest, as animals can get hurt."
+          },
+          "oil": {
+            "name": "Oil Canister",
+            "description": "Oil can get into the water and contaminate/poison the environment."
+          },
+          "electricalScrap": {
+            "name": "Electrical Scrap",
+            "description": "Batteries in e-waste can get into the water and contaminate/poison the environment."
           }
         },
         "red_herring": {

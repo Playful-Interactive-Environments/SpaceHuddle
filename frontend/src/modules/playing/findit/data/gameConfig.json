@@ -91,6 +91,30 @@
             "explanationKey": "bottle",
             "collectKey": "recycle"
           },
+          "oil": {
+            "severity": 1,
+            "maxCount": 2,
+            "width": 4,
+            "shape": "rect",
+            "explanationKey": "oil",
+            "collectKey": "dispose"
+          },
+          "scooter": {
+            "severity": 1,
+            "maxCount": 2,
+            "width": 4,
+            "shape": "rect",
+            "explanationKey": "electricalScrap",
+            "collectKey": "recycle"
+          },
+          "handy": {
+            "severity": 1,
+            "maxCount": 3,
+            "width": 1,
+            "shape": "rect",
+            "explanationKey": "electricalScrap",
+            "collectKey": "recycle"
+          },
           "turtle": {
             "severity": 1,
             "maxCount": 5,
@@ -208,7 +232,26 @@
             "collectKey": "rescue",
             "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
           },
-          "man": {
+          "dog": {
+            "escalationLevels": [
+              {
+                "min": 25,
+                "max": 60
+              },
+              {
+                "min": 30,
+                "max": 45
+              }
+            ],
+            "severity": 1,
+            "maxCount": 2,
+            "width": 5,
+            "shape": "circle",
+            "explanationKey": "animal",
+            "collectKey": "rescue",
+            "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
+          },
+          "cat": {
             "escalationLevels": [
               {
                 "min": 25,
@@ -223,26 +266,7 @@
             "maxCount": 2,
             "width": 4,
             "shape": "circle",
-            "explanationKey": "person",
-            "collectKey": "rescue",
-            "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
-          },
-          "woman": {
-            "escalationLevels": [
-              {
-                "min": 25,
-                "max": 60
-              },
-              {
-                "min": 30,
-                "max": 45
-              }
-            ],
-            "severity": 1,
-            "maxCount": 2,
-            "width": 3,
-            "shape": "circle",
-            "explanationKey": "person",
+            "explanationKey": "animal",
             "collectKey": "rescue",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
@@ -338,6 +362,63 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
+            "collectKey": "recycle",
+            "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
+          },
+          "oil": {
+            "escalationLevels": [
+              {
+                "min": 85,
+                "max": 130
+              },
+              {
+                "min": 45,
+                "max": 60
+              }
+            ],
+            "severity": 2,
+            "maxCount": 5,
+            "width": 4,
+            "shape": "rect",
+            "explanationKey": "oil",
+            "collectKey": "dispose",
+            "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
+          },
+          "scooter": {
+            "escalationLevels": [
+              {
+                "min": 85,
+                "max": 130
+              },
+              {
+                "min": 45,
+                "max": 60
+              }
+            ],
+            "severity": 2,
+            "maxCount": 5,
+            "width": 4,
+            "shape": "rect",
+            "explanationKey": "electricalScrap",
+            "collectKey": "recycle",
+            "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
+          },
+          "handy": {
+            "escalationLevels": [
+              {
+                "min": 85,
+                "max": 130
+              },
+              {
+                "min": 45,
+                "max": 60
+              }
+            ],
+            "severity": 2,
+            "maxCount": 5,
+            "width": 0.5,
+            "shape": "rect",
+            "explanationKey": "electricalScrap",
             "collectKey": "recycle",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           }

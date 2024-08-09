@@ -1,50 +1,65 @@
 {
 "frames": {
-	"bottleWine": {
-		"frame": {"x":998, "y":0, "w":196, "h":726},
-		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":726},
-		"sourceSize": {"w":196,"h":726}
-	},
 	"bottleBeer": {
-		"frame": {"x":1136, "y":727, "w":196, "h":558},
+		"frame": {"x":1164, "y":351, "w":196, "h":558},
 		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":558},
 		"sourceSize": {"w":196,"h":558}
 	},
 	"bottleWhite": {
-		"frame": {"x":1195, "y":0, "w":196, "h":665},
+		"frame": {"x":1361, "y":351, "w":196, "h":665},
 		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":665},
 		"sourceSize": {"w":196,"h":665}
 	},
-	"woman": {
-		"frame": {"x":594, "y":890, "w":541, "h":477},
-		"spriteSourceSize": {"x":0,"y":0,"w":541,"h":477},
-		"sourceSize": {"w":541,"h":477}
-	},
-	"man": {
-		"frame": {"x":0, "y":357, "w":671, "h":532},
-		"spriteSourceSize": {"x":0,"y":0,"w":671,"h":532},
-		"sourceSize": {"w":671,"h":532}
-	},
-	"sandbag": {
-		"frame": {"x":672, "y":357, "w":325, "h":512},
-		"spriteSourceSize": {"x":0,"y":0,"w":325,"h":512},
-		"sourceSize": {"w":325,"h":512}
+	"bottleWine": {
+		"frame": {"x":1402, "y":1017, "w":196, "h":726},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":726},
+		"sourceSize": {"w":196,"h":726}
 	},
 	"branches": {
-		"frame": {"x":0, "y":890, "w":593, "h":350},
+		"frame": {"x":838, "y":0, "w":593, "h":350},
 		"spriteSourceSize": {"x":0,"y":0,"w":593,"h":350},
 		"sourceSize": {"w":593,"h":350}
+	},
+	"cat": {
+		"frame": {"x":0, "y":737, "w":837, "h":349},
+		"spriteSourceSize": {"x":0,"y":0,"w":837,"h":349},
+		"sourceSize": {"w":837,"h":349}
+	},
+	"dog": {
+		"frame": {"x":0, "y":357, "w":837, "h":379},
+		"spriteSourceSize": {"x":0,"y":0,"w":837,"h":379},
+		"sourceSize": {"w":837,"h":379}
 	},
 	"fish": {
 		"frame": {"x":0, "y":0, "w":837, "h":356},
 		"spriteSourceSize": {"x":0,"y":0,"w":837,"h":356},
 		"sourceSize": {"w":837,"h":356}
+	},
+	"handy": {
+		"frame": {"x":1432, "y":0, "w":167, "h":317},
+		"spriteSourceSize": {"x":0,"y":0,"w":167,"h":317},
+		"sourceSize": {"w":167,"h":317}
+	},
+	"oil": {
+		"frame": {"x":0, "y":1087, "w":700, "h":700},
+		"spriteSourceSize": {"x":0,"y":0,"w":700,"h":700},
+		"sourceSize": {"w":700,"h":700}
+	},
+	"sandbag": {
+		"frame": {"x":838, "y":351, "w":325, "h":512},
+		"spriteSourceSize": {"x":0,"y":0,"w":325,"h":512},
+		"sourceSize": {"w":325,"h":512}
+	},
+	"scooter": {
+		"frame": {"x":701, "y":1087, "w":700, "h":700},
+		"spriteSourceSize": {"x":0,"y":0,"w":700,"h":700},
+		"sourceSize": {"w":700,"h":700}
 	}
 
 },
 "meta": {
 	"image": "hazard.png",
-	"size": {"w": 1392, "h": 1368},
+	"size": {"w": 1600, "h": 1788},
 	"scale": "1"
 }
 }

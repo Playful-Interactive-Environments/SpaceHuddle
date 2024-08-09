@@ -66,6 +66,14 @@
           "bottle": {
             "name": "Glasflasche",
             "description": "Es ist ein Mythos, dass zurückgelassene Glasflaschen aller Art unter den richtigen Umständen wie eine Linse wirken und das Licht fokussieren. Am Brennpunkt kann kein ein Feuer entstehen! Allerdings gehört Müll nicht in den Wald, da sich Tier verletzen können"
+          },
+          "oil": {
+            "name": "Ölkanister",
+            "description": "Öl kann in die Umwelt gelangen und dabei die Umwelt verunreinigen/vergiften."
+          },
+          "electricalScrap": {
+            "name": "Elektroschrot",
+            "description": "Akkus in Elektroschrot kann in die Umwelt gelangen und dabei die Umwelt verunreinigen/vergiften."
           }
         }
       },
@@ -80,9 +88,9 @@
             "name": "Sandsack",
             "description": "Sandsäcke müssen nach der Flut weggeräumt werden, da sie Straßen und Wege blockieren."
           },
-          "person": {
-            "name": "Menschen",
-            "description": "Menschen können ertrinken."
+          "animal": {
+            "name": "Tier",
+            "description": "Tiere können ertrinken."
           },
           "garbage": {
             "name": "Müll",
@@ -95,6 +103,14 @@
           "bottle": {
             "name": "Glasflasche",
             "description": "Es ist ein Mythos, dass zurückgelassene Glasflaschen aller Art unter den richtigen Umständen wie eine Linse wirken und das Licht fokussieren. Am Brennpunkt kann kein ein Feuer entstehen! Allerdings gehört Müll nicht in den Wald, da sich Tier verletzen können"
+          },
+          "oil": {
+            "name": "Ölkanister",
+            "description": "Öl kann ins Wasser gelangen und dabei die Umwelt verunreinigen/vergiften."
+          },
+          "electricalScrap": {
+            "name": "Elektroschrot",
+            "description": "Akkus in Elektroschrot kann ins Wasser gelangen und dabei die Umwelt verunreinigen/vergiften."
           }
         },
         "red_herring": {
