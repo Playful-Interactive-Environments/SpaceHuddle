@@ -6,6 +6,7 @@ export enum ConnectState {
 }
 
 export interface Avatar {
+  id: string;
   color: string;
   symbol: string;
 }

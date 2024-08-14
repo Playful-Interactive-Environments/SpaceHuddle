@@ -1,0 +1,28 @@
+{
+  "description": {
+    "title": "Toblola",
+    "description": "Aus allen Teilnehmern wird nach dem Zufallsprinzip ein Gewinner ermittelt."
+  },
+  "moderatorConfig": {
+    "condition": "Kondition",
+    "winText": "Gewinnbenachrichtigung"
+  },
+  "moderatorContent": {
+    "draw": "ziehen",
+    "avatar": "Teilnehmer"
+  },
+  "participant": {
+    "wait": "Du bist noch nicht gezogen worden. Versuch es später noch einmal."
+  },
+  "enum": {
+    "raffleCondition": {
+      "participated": "teilgenommen",
+      "finished": "abgeschlossen",
+      "won": "gewonnen"
+    }
+  },
+  "statistic": {
+  },
+  "publicScreen": {
+  }
+}

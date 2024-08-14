@@ -1,0 +1,28 @@
+{
+  "description": {
+    "title": "Raffle",
+    "description": "Randomly select a winner from all participants."
+  },
+  "moderatorConfig": {
+    "condition": "condition",
+    "winText": "winner notification"
+  },
+  "moderatorContent": {
+    "draw": "draw",
+    "avatar": "participant"
+  },
+  "participant": {
+    "wait": "You haven't been pulled yet. Try again later."
+  },
+  "enum": {
+    "raffleCondition": {
+      "participated": "participated",
+      "finished": "finished",
+      "won": "won"
+    }
+  },
+  "statistic": {
+  },
+  "publicScreen": {
+  }
+}

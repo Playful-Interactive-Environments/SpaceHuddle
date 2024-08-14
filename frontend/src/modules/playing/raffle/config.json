@@ -1,0 +1,12 @@
+{
+  "icon": "clover",
+  "type": "main",
+  "input": "yes",
+  "inputFilterTypes": "[\"task\"]",
+  "inputFilterCategories": "[\"information\"]",
+  "inputFilterModules": "[\"quiz\"]",
+  "maxInputs": 1,
+  "syncPublicParticipant": false,
+  "usable": true,
+  "finishManuel": true
+}
