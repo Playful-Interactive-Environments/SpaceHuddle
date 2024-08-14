@@ -383,7 +383,7 @@
       },
       {
         "type": "hazards",
-        "name": "man",
+        "name": "dog",
         "position": [
           48.172337438396237,
           18.054294508664584
@@ -394,7 +394,7 @@
       },
       {
         "type": "hazards",
-        "name": "woman",
+        "name": "cat",
         "position": [
           55.333333333333339,
           40.25892857142857
@@ -416,7 +416,7 @@
       },
       {
         "type": "hazards",
-        "name": "woman",
+        "name": "cat",
         "position": [
           80.0990414044748,
           54.92105391864375
@@ -427,7 +427,7 @@
       },
       {
         "type": "hazards",
-        "name": "man",
+        "name": "dog",
         "position": [
           94.52380952380952,
           21.973214285714286
