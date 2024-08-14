@@ -959,6 +959,10 @@ export default class Participant extends Vue {
     await this.submitAnswer();
     this.resetQuestion();
     if (this.trackingManager) {
+      let stars = 0;
+      if (this.score > this.quizQuestionCount / 2) stars = 1;
+      if (this.score > (this.quizQuestionCount / 3) * 2) stars = 2;
+      if (this.score === this.quizQuestionCount) stars = 3;
       await this.trackingManager.saveIteration(
         null,
         this.showSummery
@@ -966,8 +970,9 @@ export default class Participant extends Vue {
             ? TaskParticipantIterationStatesType.WIN
             : TaskParticipantIterationStatesType.LOOS
           : TaskParticipantIterationStatesType.PARTICIPATED,
-        null,
-        true
+        stars,
+        true,
+        false
       );
     }
     this.activeQuestionIndex++;

@@ -64,7 +64,7 @@ interface AvatarResult {
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class QuizResult extends Vue {
+export default class Highscore extends Vue {
   @Prop({ default: [] })
   readonly trackingResult!: TaskParticipantIterationStep[];
   @Prop({ default: false }) readonly update!: boolean;

@@ -280,11 +280,16 @@ export class TrackingManager {
     contentChanges: any | null = null,
     changedState: TaskParticipantIterationStatesType | null = null,
     stars: number | null = null,
-    updateStateSum = false
+    updateStateSum = false,
+    calculateStarPoints = true
   ): Promise<void> {
     if (this.iteration) {
-      if (stars !== null)
-        this.iteration.parameter.gameplayResult = this.getGameplayResult(stars);
+      if (stars !== null) {
+        if (calculateStarPoints)
+          this.iteration.parameter.gameplayResult =
+            this.getGameplayResult(stars);
+        else this.iteration.parameter.gameplayResult.stars = stars;
+      }
       if (changedState) this.iteration.state = changedState;
       if (contentChanges) {
         for (const key of Object.keys(contentChanges)) {
@@ -451,7 +456,7 @@ export class TrackingManager {
           null,
           pointsSpent
         );
-      this._saveIterationStep(
+      await this._saveIterationStep(
         ideaId,
         state,
         initContent,
