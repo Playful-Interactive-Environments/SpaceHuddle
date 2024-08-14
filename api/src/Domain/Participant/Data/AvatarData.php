@@ -11,6 +11,12 @@ use Selective\ArrayReader\ArrayReader;
 class AvatarData
 {
     /**
+     * The avatar id.
+     * @var string|null
+     */
+    public ?string $id;
+
+    /**
      * The avatar color.
      * @var string|null
      * @OA\Property(example="red")
@@ -32,6 +38,7 @@ class AvatarData
     public function __construct(array $data = [])
     {
         $reader = new ArrayReader($data);
+        $this->id = $reader->findString("participant_id");
         $this->color = $reader->findString("color");
         $this->symbol = $reader->findString("symbol");
     }
