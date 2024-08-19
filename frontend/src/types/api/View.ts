@@ -21,12 +21,15 @@ export const getViewName = (
     $t !== null
       ? $t(`enum.viewType.${ViewType[view.type]}`)
       : ViewType[view.type];
-  const detailType = view.detailType
-    ? ' - ' +
-      ($t !== null
-        ? $t(`enum.taskType.${TaskType[view.detailType]}`)
-        : TaskType[view.detailType])
-    : '';
+  const detailType =
+    view.detailType &&
+    ViewType[view.type] !== ViewType.VOTE &&
+    ViewType[view.type] !== ViewType.SELECTION
+      ? ' - ' +
+        ($t !== null
+          ? $t(`enum.taskType.${TaskType[view.detailType]}`)
+          : TaskType[view.detailType])
+      : '';
   return `${type}${detailType} - ${view.name}`;
 };
 

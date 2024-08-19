@@ -439,10 +439,13 @@
                 v-model="component.value.parameter"
                 :module-id="component.value.moduleId"
                 :formData="formData"
+                :task-id="taskId"
+                :topic-id="topicId"
+                :views="possibleSessionViews"
                 :is="component.value.componentName"
                 :key="component.value.componentName"
                 :rulePropPath="`moduleParameterComponents[${component.index}].parameter`"
-                :taskType="this.taskType"
+                :taskType="taskType"
                 @update="updateSyncPublicParticipant"
               ></component>
             </el-collapse-item>
@@ -741,6 +744,7 @@ export default class TaskSettings extends Vue {
   sortOrderOptions: SortOrderOption[] = [];
   moduleScrollbar: { sizeWidth: string } = { sizeWidth: '' };
   isEditStep = true;
+  disablePreview = false;
   internalTaskId: string | null = null;
   previewData: Idea[] = [];
   loading = false;
@@ -1020,7 +1024,18 @@ export default class TaskSettings extends Vue {
               view.detailType.toLowerCase()
             ))) &&
         (this.inputFilter.modules.length === 0 ||
-          this.inputFilter.modules.find((item) => view.modules.includes(item)))
+          this.inputFilter.modules.find((item) => {
+            if (item.includes(':')) {
+              const split = item.split(':');
+              return (
+                view.detailType &&
+                view.detailType.toLowerCase() === split[0] &&
+                view.modules.includes(split[1])
+              );
+            } else {
+              return view.modules.includes(item);
+            }
+          }))
     );
     if (this.internalTaskId)
       return filterOptions.filter(
@@ -1083,6 +1098,15 @@ export default class TaskSettings extends Vue {
           }
         });
         await getModuleConfig(
+          'disablePreview',
+          TaskType[module.taskType.toUpperCase()],
+          module.moduleName
+        ).then((result) => {
+          if (result) {
+            this.disablePreview = JSON.parse(result);
+          } else this.disablePreview = false;
+        });
+        await getModuleConfig(
           'inputFilterCategories',
           TaskType[module.taskType.toUpperCase()],
           module.moduleName
@@ -1129,7 +1153,9 @@ export default class TaskSettings extends Vue {
 
   get showPreview(): boolean {
     return (
-      this.inputOption !== InputOption.NO && this.formData.input.length > 0
+      this.inputOption !== InputOption.NO &&
+      this.formData.input.length > 0 &&
+      !this.disablePreview
     );
   }
 
