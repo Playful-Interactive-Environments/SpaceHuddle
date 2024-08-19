@@ -874,7 +874,7 @@ SELECT
     task.id as task_id,
     selection.topic_id,
     selection.name,
-    '' COLLATE utf8mb4_unicode_ci AS detail_type,
+    task.task_type COLLATE utf8mb4_unicode_ci AS detail_type,
     '' COLLATE utf8mb4_unicode_ci AS modules,
     selection.modification_date
 FROM
@@ -907,8 +907,11 @@ SELECT
     id as task_id,
     topic_id,
     name,
-    '' COLLATE utf8mb4_unicode_ci AS detail_type,
-    '' COLLATE utf8mb4_unicode_ci AS modules,
+    task_type COLLATE utf8mb4_unicode_ci AS detail_type,
+    ( SELECT GROUP_CONCAT(module.module_name)
+      FROM module
+      WHERE module.task_id = task.id
+    ) AS modules,
     modification_date
 FROM
     task
