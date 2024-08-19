@@ -6,7 +6,7 @@
     >
       <el-select v-model="modelValue.condition">
         <el-option
-          v-for="item of Object.values(RaffleCondition)"
+          v-for="item of options"
           :key="item"
           :value="item"
           :label="$t(`module.playing.raffle.enum.raffleCondition.${item}`)"
@@ -28,6 +28,8 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import MarkdownEditor from '@/components/shared/molecules/MarkdownEditor.vue';
 import { RaffleCondition } from '@/modules/playing/raffle/types/RaffleCondition';
+import { View } from '@/types/api/View';
+import TaskType from '@/types/enum/TaskType';
 
 @Options({
   components: {
@@ -47,8 +49,22 @@ export default class ModeratorConfig extends Vue {
   @Prop({ default: {} }) modelValue!: any;
   @Prop({ default: {} }) formData!: any;
   @Prop({ default: {} }) taskType!: any;
+  @Prop({ default: [] }) views!: View[];
 
-  RaffleCondition = RaffleCondition;
+  get options(): string[] {
+    const split = this.formData.input[0].view.split('.');
+    const view = this.views.find(
+      (item) => item.type === split[0] && item.taskId === split[1]
+    );
+    if (
+      view &&
+      view.detailType?.toLowerCase() !== TaskType.PLAYING &&
+      view.detailType?.toLowerCase() !== TaskType.INFORMATION
+    ) {
+      return [RaffleCondition.PARTICIPATED, RaffleCondition.FINISHED];
+    }
+    return Object.values(RaffleCondition);
+  }
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {

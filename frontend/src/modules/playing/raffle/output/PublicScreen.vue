@@ -14,7 +14,16 @@
     >
       {{ $t('module.playing.raffle.moderatorContent.draw') }}
     </el-button>
-    <el-space wrap v-for="(raffle, index) in raffleList" :key="index">
+    <br />
+    <el-space
+      wrap
+      v-for="(raffle, index) in [...raffleList].reverse()"
+      :key="index"
+    >
+      <div v-if="raffle.length > 0">
+        {{ raffleList.length - index }}.
+        {{ $t('module.playing.raffle.moderatorContent.raffle') }}:
+      </div>
       <div class="ball" v-for="winner of raffle" :key="winner.id">
         <font-awesome-icon
           :icon="winner.symbol"
@@ -120,7 +129,9 @@ export default class PublicScreen extends Vue implements IModeratorContent {
       const condition = this.task.modules[0].parameter.condition;
       if (condition === RaffleCondition.FINISHED) {
         this.trackingResult = result.filter(
-          (item) => item.state === TaskParticipantStatesType.FINISHED
+          (item) =>
+            item.state === TaskParticipantStatesType.FINISHED &&
+            item.parameter.gameplayResult
         );
       } else if (condition === RaffleCondition.WON) {
         this.trackingResult = result.filter(
@@ -129,7 +140,9 @@ export default class PublicScreen extends Vue implements IModeratorContent {
             item.parameter.gameplayResult?.stars === 3
         );
       } else {
-        this.trackingResult = result;
+        this.trackingResult = result.filter(
+          (item) => item.parameter.gameplayResult
+        );
       }
     } else {
       this.trackingResult = result;
@@ -200,7 +213,8 @@ export default class PublicScreen extends Vue implements IModeratorContent {
 <style scoped>
 .el-space {
   padding-top: 1rem;
-  display: flex;
+  padding-right: 1rem;
+  //display: flex;
 }
 
 .ball {

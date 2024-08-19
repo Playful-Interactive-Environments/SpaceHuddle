@@ -9,10 +9,15 @@
   },
   "moderatorContent": {
     "draw": "ziehen",
+    "raffle": "Ziehung",
     "avatar": "Teilnehmer"
   },
   "participant": {
-    "wait": "Du bist noch nicht gezogen worden. Versuch es später noch einmal."
+    "wait": "Du bist noch nicht gezogen worden. Versuch es später noch einmal.",
+    "win": "Herzlichen Glückwunsch, du wurdest gezogen.",
+    "raffle": "Ziehung",
+    "index": "Ziehungsnummer",
+    "count": "Losnummer"
   },
   "enum": {
     "raffleCondition": {

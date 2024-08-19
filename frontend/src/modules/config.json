@@ -217,7 +217,7 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "clover",  "type": "main",  "input": "yes",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"quiz\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
+             "icon": "clover",  "type": "main",  "input": "yes",  "disablePreview": "true",  "inputFilterTypes": "[\"task\", \"vote\"]",  "inputFilterModules": "[\"quiz\", \"survey\", \"talk\", \"personalityTest\", \"coolit\", \"findit\", \"moveit\", \"shopit\", \"brainstorming:default\", \"chat\", \"map\", \"missionmap\", \"voting:default\", \"slots\", \"vote\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
            "path": "playing/raffle"  
        },  
        "shopit": {  

@@ -9,10 +9,15 @@
   },
   "moderatorContent": {
     "draw": "draw",
+    "raffle": "raffle",
     "avatar": "participant"
   },
   "participant": {
-    "wait": "You haven't been pulled yet. Try again later."
+    "wait": "You haven't been pulled yet. Try again later.",
+    "win": "Congratulations, you were drawn.",
+    "raffle": "raffle",
+    "index": "raffle number",
+    "count": "ticket number"
   },
   "enum": {
     "raffleCondition": {

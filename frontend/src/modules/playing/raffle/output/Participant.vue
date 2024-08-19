@@ -1,10 +1,25 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <div v-if="hasWon">
+    <div v-if="hasWon && module.parameter.winText">
       {{ module.parameter.winText }}
+    </div>
+    <div v-else-if="hasWon">
+      {{ $t('module.playing.raffle.participant.win') }}
     </div>
     <div v-else>
       {{ $t('module.playing.raffle.participant.wait') }}
+    </div>
+
+    <br />
+    <div v-if="hasWon">
+      {{ $t('module.playing.raffle.participant.raffle') }}: {{ winRaffle }}
+    </div>
+    <div v-if="hasWon">
+      {{ $t('module.playing.raffle.participant.index') }}:
+      {{ winRaffleIndex + 1 }}
+    </div>
+    <div v-if="hasWon">
+      {{ $t('module.playing.raffle.participant.count') }}: #{{ winCount }}
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -33,6 +48,9 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   hasWon = false;
+  winRaffle = 0;
+  winCount = 0;
+  winRaffleIndex = 0;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -67,9 +85,21 @@ export default class Participant extends Vue {
   }
 
   updateIdeas(ideas: Idea[]): void {
-    this.hasWon = !!ideas.find(
+    const myState = ideas.find(
       (item) => item.parameter.participant === authService.getParticipantId()
     );
+    if (myState) {
+      const raffleList = ideas
+        .filter((item) => item.parameter.raffle === myState.parameter.raffle)
+        .sort((a, b) => a.parameter.count - b.parameter.count);
+      const index = raffleList.findIndex(
+        (item) => item.parameter.participant === authService.getParticipantId()
+      );
+      this.winRaffle = myState.parameter.raffle + 1;
+      this.winRaffleIndex = index;
+      this.winCount = myState.parameter.count;
+    }
+    this.hasWon = !!myState;
   }
 
   deregisterAll(): void {
