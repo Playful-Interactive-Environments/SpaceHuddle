@@ -56,7 +56,7 @@
               defaultFormRules.ruleSelection,
               { validator: validateModuleSelection },
             ]"
-            v-if="possibleModuleTaskList.length > 1"
+            v-if="possibleModuleTaskList.length > 0"
           >
             <template #label>
               <TutorialStep

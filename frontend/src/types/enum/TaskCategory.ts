@@ -16,11 +16,6 @@ export interface TaskCategoryType {
 }
 
 const TaskCategory: { [name: string]: TaskCategoryType } = {
-  playing: {
-    icon: 'gamepad',
-    color: 'var(--color-playing)',
-    taskTypes: [TaskType.PLAYING],
-  },
   informing: {
     icon: 'info',
     color: 'var(--color-informing)',
@@ -40,6 +35,11 @@ const TaskCategory: { [name: string]: TaskCategoryType } = {
     icon: 'star',
     color: 'var(--color-evaluating)',
     taskTypes: [TaskType.VOTING],
+  },
+  playing: {
+    icon: 'gamepad',
+    color: 'var(--color-playing)',
+    taskTypes: [TaskType.PLAYING],
   },
 };
 
