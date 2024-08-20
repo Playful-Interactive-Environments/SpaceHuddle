@@ -140,7 +140,7 @@ export default class ParticipantJoin extends Vue {
   }
 
   async connectToSession(): Promise<void> {
-    let connectionKey = this.formData.connectionKey
+    let connectionKey: string = this.formData.connectionKey
       ? this.formData.connectionKey
       : this.formData.browserKey;
     if (!connectionKey.includes('.')) {
@@ -150,6 +150,9 @@ export default class ParticipantJoin extends Vue {
       if (recentlyUsedKey) {
         connectionKey = recentlyUsedKey.connectionKey;
       }
+    }
+    if (connectionKey.endsWith('.new')) {
+      connectionKey = connectionKey.slice(0, -4);
     }
 
     if (connectionKey.includes('.')) {

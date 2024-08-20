@@ -8,6 +8,9 @@
       <span class="el-dialog__title">
         {{ $t('moderator.organism.settings.participantSettings.header') }}
         ( {{ participants.length }} )
+        <span @click="() => (showQRCode = true)">
+          <font-awesome-icon icon="qrcode" />
+        </span>
       </span>
       <br />
       <br />
@@ -15,7 +18,7 @@
         {{ $t('moderator.organism.settings.participantSettings.info') }}
       </p>
     </template>
-    <div v-if="!viewDetailsForParticipant">
+    <div v-if="!viewDetailsForParticipant && !showQRCode">
       {{
         $t('moderator.organism.settings.participantSettings.everyoneCanJoin')
       }}
@@ -158,7 +161,7 @@
         {{ $t('moderator.organism.settings.participantSettings.export') }}
       </el-button>
     </div>
-    <div v-else>
+    <div v-else-if="viewDetailsForParticipant">
       <el-page-header
         :title="$t('general.back')"
         @back="viewDetailsForParticipant = null"
@@ -190,6 +193,41 @@
         </div>
       </div>
     </div>
+    <div v-else-if="showQRCode">
+      <el-page-header :title="$t('general.back')" @back="showQRCode = false" />
+      <div class="details">
+        <div class="details-left">
+          <span v-on:click="copyToClipboard(`${session.connectionKey}.new`)">
+            {{ session.connectionKey }}.new
+          </span>
+          <QrcodeVue
+            :foreground="contrastColor"
+            :background="backgroundColor"
+            render-as="svg"
+            :value="getJoinLink(`${session.connectionKey}.new`)"
+            :size="200"
+            level="H"
+            v-on:click="
+              copyToClipboard(getJoinLink(`${session.connectionKey}.new`))
+            "
+          />
+        </div>
+        <div class="details-right">
+          <span v-on:click="copyToClipboard(session.connectionKey)">
+            {{ session.connectionKey }}
+          </span>
+          <QrcodeVue
+            :foreground="contrastColor"
+            :background="backgroundColor"
+            render-as="svg"
+            :value="getJoinLink(session.connectionKey)"
+            :size="200"
+            level="H"
+            v-on:click="copyToClipboard(getJoinLink(session.connectionKey))"
+          />
+        </div>
+      </div>
+    </div>
   </el-dialog>
 </template>
 
@@ -208,9 +246,11 @@ import * as themeColors from '@/utils/themeColors';
 import { copyToClipboard } from '@/utils/date';
 import PDFConverter from '@/components/shared/atoms/PDFConverter.vue';
 import { deleteConfirmDialog } from '@/services/api';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
   components: {
+    FontAwesomeIcon,
     QrcodeVue,
     PDFConverter,
   },
@@ -231,6 +271,7 @@ export default class ParticipantSettings extends Vue {
   addCount = 1;
 
   showSettings = false;
+  showQRCode = false;
 
   get contrastColor(): string {
     return themeColors.getContrastColor();
@@ -245,8 +286,11 @@ export default class ParticipantSettings extends Vue {
   }
 
   get joinLink(): string {
-    if (this.viewDetailsForParticipant)
-      return `${this.baseJoinLink}${this.viewDetailsForParticipant.browserKey}`;
+    return this.getJoinLink(this.viewDetailsForParticipant?.browserKey);
+  }
+
+  getJoinLink(key: string | undefined): string {
+    if (key) return `${this.baseJoinLink}${key}`;
     return this.baseJoinLink;
   }
 
@@ -456,6 +500,15 @@ ${this.$t('moderator.organism.settings.participantSettings.link')}: ${link}`;
     margin-left: var(--side-padding);
     font-size: 1.35rem;
     font-family: monospace;
+    svg {
+      display: flex;
+    }
+  }
+
+  .details-left {
+    font-size: 1.35rem;
+    font-family: monospace;
+    margin: 2rem 0;
     svg {
       display: flex;
     }
