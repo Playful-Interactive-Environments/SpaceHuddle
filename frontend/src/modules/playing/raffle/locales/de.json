@@ -1,7 +1,7 @@
 {
   "description": {
     "title": "Toblola",
-    "description": "Aus allen Teilnehmern wird nach dem Zufallsprinzip ein Gewinner ermittelt."
+    "description": "Aus allen Teilnehmenden wird nach dem Zufallsprinzip ein Gewinner ermittelt."
   },
   "moderatorConfig": {
     "condition": "Kondition",

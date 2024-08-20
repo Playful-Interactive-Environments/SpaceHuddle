@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as taskParticipantService from '@/services/task-participant-service';
 import * as cashService from '@/services/cash-service';
@@ -65,6 +65,7 @@ export default class PublicScreen extends Vue implements IModeratorContent {
   authHeaderTyp!: EndpointAuthorisationType;
   task: Task | null = null;
   trackingResult: TaskParticipantState[] = [];
+  trackingResultBackup: TaskParticipantState[] = [];
   raffleList: Avatar[][] = [];
   winnerList: Avatar[] = [];
   startLottery = false;
@@ -85,7 +86,11 @@ export default class PublicScreen extends Vue implements IModeratorContent {
     );
   }
 
-  mounted(): void {
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateIdeas);
+
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -114,17 +119,26 @@ export default class PublicScreen extends Vue implements IModeratorContent {
   }
 
   updateTask(task: Task): void {
-    this.task = task;
-    cashService.deregisterAllGet(this.updateFinalResult);
+    if (
+      !this.task ||
+      this.task.parameter.input[0].view.id !== task.parameter.input[0].view.id
+    ) {
+      this.task = task;
+      cashService.deregisterAllGet(this.updateFinalResult);
 
-    taskParticipantService.registerGetList(
-      task.parameter.input[0].view.id,
-      this.updateFinalResult,
-      this.authHeaderTyp
-    );
+      taskParticipantService.registerGetList(
+        task.parameter.input[0].view.id,
+        this.updateFinalResult,
+        this.authHeaderTyp
+      );
+    } else {
+      this.task = task;
+      this.updateFinalResult(this.trackingResultBackup);
+    }
   }
 
   updateFinalResult(result: TaskParticipantState[]): void {
+    this.trackingResultBackup = result;
     if (this.task) {
       const condition = this.task.modules[0].parameter.condition;
       if (condition === RaffleCondition.FINISHED) {
@@ -145,12 +159,15 @@ export default class PublicScreen extends Vue implements IModeratorContent {
         );
       }
     } else {
-      this.trackingResult = result;
+      this.trackingResult = [...result];
     }
   }
 
   raffleCount = 0;
   updateIdeas(ideas: Idea[]): void {
+    this.winnerList = [];
+    this.raffleList = [];
+    this.raffleCount = 0;
     if (ideas.length > 0) {
       this.raffleCount =
         ideas.sort((a, b) => b.parameter.raffle - a.parameter.raffle)[0]
@@ -179,6 +196,7 @@ export default class PublicScreen extends Vue implements IModeratorContent {
           });
       }
     }
+    this.raffleList[this.raffleCount] = [];
   }
 
   reloadTaskSettings(): void {

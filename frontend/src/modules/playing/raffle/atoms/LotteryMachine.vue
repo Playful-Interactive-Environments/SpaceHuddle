@@ -73,7 +73,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface Ball {
   avatar: Avatar | null;
-  body: Matter.Body;
+  body: Matter.Body | null;
   x: number;
   y: number;
 }
@@ -105,6 +105,7 @@ export default class LotteryMachine extends Vue {
   runner: Matter.Runner = Matter.Runner.create();
   machineState: MachineState = MachineState.WAIT;
   winner: Avatar | null = null;
+  readonly maxBalls = 50;
 
   MachineState = MachineState;
 
@@ -131,7 +132,20 @@ export default class LotteryMachine extends Vue {
   }
 
   get displayBalls(): Ball[] {
-    return this.balls.filter((item) => item.avatar?.id !== this.winner?.id);
+    const pool = this.balls.filter(
+      (item) => item.avatar?.id !== this.winner?.id
+    );
+    if (pool.length > this.maxBalls) return pool.slice(0, this.maxBalls);
+    return pool;
+  }
+
+  isInside(body: Matter.Body): boolean {
+    const radiusBounds = this.diameter / 2;
+    const radiusBoundsSquare = radiusBounds * radiusBounds;
+    const x = body.position.x - radiusBounds;
+    const y = body.position.y - radiusBounds;
+    const radiusSquare = x * x + y * y;
+    return radiusSquare <= radiusBoundsSquare;
   }
 
   mounted(): void {
@@ -152,7 +166,7 @@ export default class LotteryMachine extends Vue {
     }
     Matter.Composite.add(
       this.engine.world,
-      this.staticBalls.map((item) => item.body)
+      this.staticBalls.map((item) => item.body) as Matter.Body[]
     );
     Matter.Runner.run(this.runner, this.engine);
   }
@@ -169,23 +183,50 @@ export default class LotteryMachine extends Vue {
     const time = 3000;
     const pause = 100;
     for (let i = 0; i < time / pause; i++) {
-      for (const ball of this.balls) {
-        const forceMagnitude = 0.003;
-        Matter.Body.applyForce(ball.body, ball.body.position, {
-          x:
-            (forceMagnitude + Matter.Common.random() * forceMagnitude) *
-            Matter.Common.choose([1, -1]),
-          y: -forceMagnitude + Matter.Common.random() * -forceMagnitude,
-        });
+      for (const ball of this.displayBalls) {
+        if (ball.body) {
+          const forceMagnitude = 0.003;
+          Matter.Body.applyForce(ball.body, ball.body.position, {
+            x:
+              (forceMagnitude + Matter.Common.random() * forceMagnitude) *
+              Matter.Common.choose([1, -1]),
+            y: -forceMagnitude + Matter.Common.random() * -forceMagnitude,
+          });
+        }
       }
       await delay(pause);
     }
     await delay(1000);
 
-    const options = this.options;
-    if (options.length > 0) {
-      const index = Math.floor(Math.random() * options.length);
-      this.winner = options[index];
+    for (const ball of this.displayBalls) {
+      if (ball.body) {
+        if (!this.isInside(ball.body)) {
+          Matter.Body.setPosition(ball.body, {
+            x: this.diameter / 2,
+            y: this.diameter / 2,
+          });
+        }
+      }
+    }
+
+    let winnerBall: Ball | null = null;
+    if (this.balls.length > 0) {
+      const index = Math.floor(Math.random() * this.balls.length);
+      winnerBall = this.balls[index];
+      this.winner = winnerBall.avatar;
+      if (index < this.maxBalls) {
+        if (winnerBall.body)
+          Matter.Composite.remove(this.engine.world, winnerBall.body);
+        if (this.displayBalls.length === this.maxBalls) {
+          const addBall = this.displayBalls[this.maxBalls - 1];
+          addBall.body = Matter.Bodies.circle(
+            addBall.x,
+            addBall.y,
+            this.ballRadius
+          );
+          Matter.Composite.add(this.engine.world, addBall.body);
+        }
+      }
     }
 
     this.liftBallUp()
@@ -199,17 +240,31 @@ export default class LotteryMachine extends Vue {
   onOptionsChanged(): void {
     Matter.Composite.remove(
       this.engine.world,
-      this.balls.map((item) => item.body)
+      this.balls
+        .filter((item) => item.body)
+        .map((item) => item.body) as Matter.Body[]
     );
-    this.balls = this.options.map((item) => {
+    this.balls = this.options.map((item, index) => {
+      const oldBall = this.balls.find((ball) => ball.avatar?.id === item.id);
       const alpha = Math.random() * Math.PI * 2;
       const radius = Math.random() * (this.diameter / 2 - this.ballRadius);
-      const x = Math.sin(alpha) * radius + this.diameter / 2;
-      const y = Math.cos(alpha) * radius + this.diameter / 2;
+      const x = oldBall?.body
+        ? oldBall.body.position.x
+        : oldBall
+        ? oldBall.x
+        : Math.sin(alpha) * radius + this.diameter / 2;
+      const y = oldBall?.body
+        ? oldBall.body.position.y
+        : oldBall
+        ? oldBall.y
+        : Math.cos(alpha) * radius + this.diameter / 2;
 
       return {
         avatar: item,
-        body: Matter.Bodies.circle(x, y, this.ballRadius),
+        body:
+          index < this.maxBalls
+            ? Matter.Bodies.circle(x, y, this.ballRadius)
+            : null,
         x: x,
         y: y,
       };
@@ -217,7 +272,9 @@ export default class LotteryMachine extends Vue {
 
     Matter.Composite.add(
       this.engine.world,
-      this.balls.map((item) => item.body)
+      this.displayBalls
+        .filter((item) => item.body)
+        .map((item) => item.body) as Matter.Body[]
     );
   }
 
