@@ -108,6 +108,12 @@
       >
         {{ $t('module.playing.findit.participant.collectable') }}
       </div>
+      <div
+        v-else-if="clickedPlaceableConfig.notSearched"
+        class="collected-wrong"
+      >
+        {{ $t('module.playing.findit.participant.not-searched') }}
+      </div>
       <div v-else class="collected-wrong">
         {{ $t('module.playing.findit.participant.not-collectable') }}
       </div>

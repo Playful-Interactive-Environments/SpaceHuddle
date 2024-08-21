@@ -162,6 +162,7 @@ export default class Participant extends Vue {
   levelSelected(levelType: string, level: Idea | null) {
     this.selectedLevelType = levelType;
     this.selectedLevel = level;
+    this.loadHighScore();
     this.gameState = GameState.Info;
     this.gameStep = !level ? GameStep.Build : GameStep.Play;
 
@@ -323,11 +324,16 @@ export default class Participant extends Vue {
 
   updateHighScore(votes: Vote[]): void {
     this.votes = votes;
+    this.loadHighScore();
+  }
+
+  loadHighScore(): void {
     if (this.selectedLevel) {
       const levelId = this.selectedLevel.id;
-      const vote = votes.find((item) => item.ideaId === levelId);
+      const vote = this.votes.find((item) => item.ideaId === levelId);
       if (vote) this.highScore = vote;
-    }
+      else this.highScore = null;
+    } else this.highScore = null;
   }
 
   saveHighScore(): void {

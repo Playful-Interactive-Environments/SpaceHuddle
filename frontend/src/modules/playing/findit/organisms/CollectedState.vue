@@ -216,6 +216,7 @@ export default class CollectedState extends Vue {
   textureToken = pixiUtil.createLoadingToken();
 
   endObjects: placeable.PlaceableBase[] = [];
+  objectList: placeable.PlaceableBase[] = [];
   endObjectCount = 0;
   activeObjectId = '';
   activeObject: placeable.PlaceableBase | null = null;
@@ -367,7 +368,8 @@ export default class CollectedState extends Vue {
   gameAreaSize: [number, number] = [0, 0];
   domKey = '';
   mounted(): void {
-    this.endObjects = this.shuffle(this.getEndObjects());
+    this.objectList = this.getEndObjects();
+    this.endObjects = this.shuffle([...this.objectList]);
     this.endObjectCount = this.endObjects.length;
     if (this.endObjectCount > 0) {
       this.collectKeys = this.getCollectKeys();
@@ -419,9 +421,14 @@ export default class CollectedState extends Vue {
     return placeableConfig.explanationKey;
   }
 
-  addToClassification(cagegory: string, event: CustomEvent): void {
-    const id = (event as any).item.id;
-    this.checkType(cagegory, id.split('#')[1], id.split('#')[0]);
+  addToClassification(category: string, event: CustomEvent): void {
+    const itemId = (event as any).item.id.split('#')[1];
+    const itemType = (event as any).item.id.split('#')[0];
+    const object = this.objectList.find(
+      (item) => item.type === itemType && item.name === itemId
+    );
+    this.activeObjectChanged(object, itemId, true);
+    this.checkType(category, itemId, itemType);
   }
   //#endregion interaction
 

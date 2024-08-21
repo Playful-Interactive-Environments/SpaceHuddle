@@ -129,7 +129,8 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           },
           "bug": {
             "severity": 1,
@@ -137,7 +138,8 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           },
           "dragonfly": {
             "severity": 1,
@@ -145,7 +147,8 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           },
           "earthworm": {
             "severity": 1,
@@ -153,7 +156,8 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           }
         }
       },
@@ -439,7 +443,7 @@
             "width": 3,
             "shape": "rect",
             "explanationKey": "turtle",
-            "collectKey": "leave"
+            "collectKey": "rescue"
           },
           "ladybug": {
             "severity": 1,
@@ -447,7 +451,8 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           },
           "bug": {
             "severity": 1,
@@ -455,7 +460,8 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           },
           "dragonfly": {
             "severity": 1,
@@ -463,7 +469,8 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           },
           "earthworm": {
             "severity": 1,
@@ -471,7 +478,8 @@
             "width": 1,
             "shape": "rect",
             "explanationKey": "bug",
-            "collectKey": "leave"
+            "collectKey": "leave",
+            "notSearched": true
           }
         }
       },

@@ -35,6 +35,7 @@
     },
     "collectable": "sehr gut, dieses Objekt wurde gesucht",
     "not-collectable": "dieses Objekt gehört nicht hierher, wird aber in diesem Fall nicht gesucht",
+    "not-searched": "dieses Objekt gehört hierher",
     "correct": "richtig",
     "incorrect": "falsch",
     "placeables": {
