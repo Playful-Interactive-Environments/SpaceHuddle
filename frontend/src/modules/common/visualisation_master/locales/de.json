@@ -1,7 +1,7 @@
 {
   "description": {
-    "title": "Animation",
-    "description": "Animiere Ideen"
+    "title": "Visualisierung",
+    "description": "Visualisiere Ideen"
   },
   "moderatorConfig": {
     "voteUseAverage": "Nimm den Durchschnitt der Abstimmungen"

@@ -55,6 +55,13 @@
       "icon": "layer-group",
       "type": ["INFORMATION", "BRAINSTORMING", "CATEGORISATION", "SELECTION"],
       "allowTimeMod": false
+    },
+    "analytics": {
+      "id": "analytics",
+      "image": "analytics/path",
+      "icon": "layer-group",
+      "type": ["INFORMATION", "BRAINSTORMING", "CATEGORISATION", "SELECTION", "VOTING"],
+      "allowTimeMod": false
     }
   }
 }

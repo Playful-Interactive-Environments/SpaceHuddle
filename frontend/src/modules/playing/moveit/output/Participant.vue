@@ -447,6 +447,7 @@ export default class Participant extends Vue {
           },
           particleState: {},
           rate: 0,
+          finished: false,
         }
       );
       await this.trackingManager.saveIteration({
@@ -484,6 +485,7 @@ export default class Participant extends Vue {
         },
         driveTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
+        finished: true,
       });
       await this.trackingManager.saveIteration({
         gameStep: GameStep.CleanUp,

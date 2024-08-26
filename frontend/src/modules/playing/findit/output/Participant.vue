@@ -257,6 +257,7 @@ export default class Participant extends Vue {
       (result as any).step = GameStep.Play;
       (result as any).state = this.selectedLevel?.parameter.state;
       (result as any).isOwn = this.selectedLevel?.isOwn;
+      (result as any).finished = true;
       await this.trackingManager.createInstanceStep(
         this.selectedLevel.id,
         result.collected === result.total

@@ -442,6 +442,7 @@ export default class Participant extends Vue {
               winReason: '',
             },
             rate: null,
+            finished: false,
           }
         );
         await this.trackingManager.saveIteration({
@@ -469,6 +470,7 @@ export default class Participant extends Vue {
             winReason: '',
           },
           rate: null,
+          finished: false,
         }
       );
       await this.trackingManager.saveIteration({
@@ -503,6 +505,7 @@ export default class Participant extends Vue {
             winReason: winReason,
           },
           rate: rate,
+          finished: true,
         },
         null,
         this.calcRate(win, pointsSpent)
