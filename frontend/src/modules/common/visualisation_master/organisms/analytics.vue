@@ -1,14 +1,30 @@
 <template>
   <div id="analyticsContainer">
-    <el-button>test update</el-button>
-    <div v-if="steps.length > 0" class="allAnimationContainer">
-      <div
-        v-for="stepCategory of steps"
-        :key="stepCategory.module"
-        class="animationContainer"
-        :ref="stepCategory.module"
-      >
+    <div class="contentTop"></div>
+    <div class="contentBottom">
+      <div class="contentLeft">
+        <div v-if="steps.length > 0" class="allAnimationContainer">
+          <div
+            v-for="stepCategory of steps"
+            :key="stepCategory.module"
+            :id="stepCategory.module"
+            class="animationContainer"
+            :ref="stepCategory.module"
+          ></div>
+          <div class="animationBackground">
+            <div id="city" class="backgroundItem">
+              <el-image :src="'/assets/animations/analytics/City.png'" />
+            </div>
+            <div id="hills" class="backgroundItem">
+              <el-image :src="'/assets/animations/analytics/hills.png'" />
+            </div>
+            <div id="street" class="backgroundItem">
+              <el-image :src="'/assets/animations/analytics/Street.png'" />
+            </div>
+          </div>
+        </div>
       </div>
+      <div class="contentRight"></div>
     </div>
   </div>
 </template>
@@ -31,6 +47,9 @@ import * as taskService from '@/services/task-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { getRandomColorList } from '@/utils/colors';
+import * as pixiUtil from '@/utils/pixi';
+import * as PIXI from 'pixi.js';
+import { h } from 'vue';
 
 @Options({
   components: {
@@ -49,6 +68,9 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   filter: FilterData = { ...defaultFilterData };
+
+  vehicleStylesheets: PIXI.Spritesheet | null = null;
+  cloudFolderPath = '/assets/animations/analytics/clouds/';
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
@@ -90,6 +112,7 @@ export default class PublicScreen extends Vue {
         15
       );
     }
+    console.log(this.steps);
   }
 
   updateTasks(tasks: Task[], topicId: string): void {
@@ -107,18 +130,43 @@ export default class PublicScreen extends Vue {
       const element = refArray[0] as HTMLElement; // Assuming you want to target the first element
 
       steps.forEach((step, index) => {
+        //move it car check
+        let name = taskId + index;
+        let imgSource = '';
+        if (step.parameter.vehicle) {
+          name =
+            step.parameter.vehicle.type + '-' + step.parameter.vehicle.category;
+        } else if (step.parameter.coolItTime) {
+          if (step.parameter.gameplayResult) {
+            imgSource = this.cloudFolderPath;
+            if (step.parameter.gameplayResult.stars >= 3) {
+              imgSource +=
+                this.cloudFolderPath +
+                'LightCloud_' +
+                Math.round(Math.random()) + '.png';
+            } else {
+              imgSource +=
+                step.parameter.gameplayResult.stars === 2
+                  ? 'MidCloud_' + Math.round(Math.random()) + '.png'
+                  : 'DarkCloud_' + Math.round(Math.random()) + '.png';
+            }
+          }
+        }
+
         const divElement = document.createElement('div');
         divElement.setAttribute('key', step.id + Date.now());
 
-        // Inside the div
-        const pElement = document.createElement('p');
-        pElement.textContent = taskId + index;
+        const imgElement = document.createElement('img');
+        imgElement.setAttribute('src', imgSource);
+        imgElement.style.objectFit = 'contain';
 
-        divElement.appendChild(pElement);
+        divElement.appendChild(imgElement);
         element.appendChild(divElement);
 
-        divElement.style.animationDuration = this.animationTimeInSeconds + 's';
+        divElement.style.animationDuration = this.animationTimeInSeconds + 's !important';
+        divElement.style.top = Math.round(Math.random() * 80) + '%';
         divElement.classList.add('animateMoveLeftRight');
+        divElement.classList.add('animatedAnalyticsContainer');
 
         setTimeout(() => {
           element.removeChild(divElement);
@@ -230,33 +278,142 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.analyticsContainer {
+#analyticsContainer {
+  position: relative;
   width: 100%;
   height: 100%;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  .contentTop {
+    height: 20%;
+    width: 100%;
+    border: 1px solid magenta;
+  }
+  .contentBottom {
+    height: 80%;
+    width: 100%;
+    border: 1px solid yellow;
+    display: flex;
+    flex-direction: row;
+    .contentLeft {
+      position: relative;
+      height: 100%;
+      width: 80%;
+    }
+    .contentRight {
+      height: 100%;
+      width: 20%;
+      border: 1px solid brown;
+    }
+  }
 }
 
-.animationContainer {
-  border: 1px solid red;
+.allAnimationContainer {
+  position: relative;
   width: 100%;
-  height: 10vh;
+  height: 100%;
+  overflow: hidden;
+
+  background-color: var(--color-informing-light);
+  .el-image {
+    object-fit: contain;
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+  }
+}
+
+.animationBackground {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  justify-content: flex-end;
+  align-items: center;
+  bottom: 0;
+  .backgroundItem {
+    position: absolute;
+  }
+  #street {
+    bottom: 0;
+    height: 12%;
+    width: 100%;
+    z-index: 5;
+  }
+  #hills {
+    bottom: 11%;
+    height: 20%;
+    width: 100%;
+    z-index: 2;
+  }
+  #city {
+    bottom: 11.5%;
+    width: 70%;
+    height: auto;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+
+    .el-image {
+      object-fit: contain;
+      max-height: 100%;
+      width: 100%;
+    }
+  }
+}
+
+#coolit {
+  border: 2px solid white;
+  height: 45%;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  background-size: cover;
+  z-index: 1;
+}
+
+#moveit {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 12%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
 }
 </style>
 
 <style lang="scss">
-
 .animateMoveLeftRight {
-  animation: moveLeftRight 100s forwards ease !important;
-  background-color: red !important;
+  animation: moveLeftRight 25s forwards linear !important;
 }
 
 @keyframes moveLeftRight {
   0% {
-    transform: translateX(0);
+    transform: translateX(-50%);
   }
   100% {
     transform: translateX(100%);
   }
 }
 
+.animatedAnalyticsContainer {
+  position: absolute;
+  height: 40% !important;
+  width: 100%;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  img {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+  }
+}
 </style>
