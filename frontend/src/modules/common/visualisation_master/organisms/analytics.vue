@@ -23,6 +23,14 @@
             <div id="city" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/City.png'" />
             </div>
+<!--            <div id="birds" class="backgroundItem">
+              <video width="200" height="200" loop autoplay>
+                <source
+                  :src="'/assets/animations/analytics/birds.webm'"
+                  type="video/webm"
+                />
+              </video>
+            </div>-->
             <div id="hills" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/hills.png'" />
             </div>
@@ -32,7 +40,32 @@
           </div>
         </div>
       </div>
-      <div class="contentRight"></div>
+      <div class="contentRight">
+        <div
+          v-for="(game, index) of gameTasks"
+          class="HighScoreContainer"
+          :key="game.id"
+          :id="'Highscore' + index"
+        >
+          <p class="highScoreHeading">{{ game.name }}</p>
+          <coolItHighScore
+            v-if="game.modules.find((module) => module.name === 'coolit')"
+            :task-id="game.id"
+          />
+          <moveItHighScore
+            v-if="game.modules.find((module) => module.name === 'moveit')"
+            :task-id="game.id"
+          />
+          <shopItHighScore
+            v-if="game.modules.find((module) => module.name === 'shopit')"
+            :task-id="game.id"
+          />
+          <findItHighScore
+            v-if="game.modules.find((module) => module.name === 'findit')"
+            :task-id="game.id"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -57,9 +90,15 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import { getRandomColorList } from '@/utils/colors';
 import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
-import {createApp, h } from 'vue';
+import { createApp, h } from 'vue';
 import shopItGameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import moveItGameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+
+import coolItHighScore from '@/modules/playing/coolit/organisms/Highscore.vue';
+import moveItHighScore from '@/modules/playing/moveit/organisms/Highscore.vue';
+import shopItHighScore from '@/modules/playing/shopit/organisms/Highscore.vue';
+import findItHighScore from '@/modules/playing/findit/organisms/Highscore.vue';
+
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { delay } from '@/utils/wait';
@@ -88,6 +127,10 @@ interface VehicleData {
   components: {
     SpriteCanvas,
     IdeaCard,
+    coolItHighScore,
+    moveItHighScore,
+    shopItHighScore,
+    findItHighScore,
   },
 })
 
@@ -120,6 +163,8 @@ export default class PublicScreen extends Vue {
     newSteps: TaskParticipantIterationStep[];
   }[] = [];
 
+  HighscoreInterval: number | null = null;
+
   mounted() {
     pixiUtil
       .loadTexture(
@@ -134,6 +179,28 @@ export default class PublicScreen extends Vue {
         }
         await delay(100);
       });
+
+    this.HighscoreInterval = window.setInterval(this.HighscoreSwitch, 30000);
+  }
+
+  highscoreIndex = 0;
+  HighscoreSwitch() {
+    const elements = document.getElementsByClassName(
+      'HighScoreContainer'
+    ) as HTMLCollectionOf<HTMLElement>;
+    if (elements) {
+      for (const element of elements) {
+        if (!(element.id === 'Highscore' + this.highscoreIndex)) {
+          element.style.opacity = '0';
+          element.style.pointerEvents = 'none';
+        } else {
+          element.style.opacity = '1';
+          element.style.pointerEvents = 'all';
+        }
+      }
+    }
+    this.highscoreIndex =
+      this.highscoreIndex + 1 <= 3 ? this.highscoreIndex + 1 : 0;
   }
 
   get topicId(): string | null {
@@ -173,6 +240,7 @@ export default class PublicScreen extends Vue {
     this.gameTasks = this.tasks
       .filter((task) => task.taskType === 'PLAYING')
       .sort();
+    console.log(this.gameTasks);
   }
 
   handleNewEntries(taskId: string, steps: TaskParticipantIterationStep[]) {
@@ -343,14 +411,16 @@ export default class PublicScreen extends Vue {
       }, this.animationTimeInSeconds * 1000);
     });
   }
-  createElementsMoveit(steps: TaskParticipantIterationStep[], parent: HTMLElement) {
+  createElementsMoveit(
+    steps: TaskParticipantIterationStep[],
+    parent: HTMLElement
+  ) {
     steps.forEach((step, index) => {
       const divElement = document.createElement('div');
       divElement.setAttribute('key', step.id + Date.now());
 
       // Dynamically create a Vue app instance for the SpriteCanvas component
       const vehicle = this.getVehicleByType(step.parameter.vehicle.type);
-      console.log(vehicle);
       const app = createApp({
         render() {
           return h(SpriteCanvas, {
@@ -365,10 +435,31 @@ export default class PublicScreen extends Vue {
       // Mount the Vue instance into the divElement
       app.mount(divElement);
 
+      const pElement = document.createElement('p');
+      pElement.innerHTML =
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.drivingStats.maxSpeed`
+        ) + ': ' + +
+        Math.round(step.parameter.drive.maxSpeed) +
+        ' km/h<br />' +
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.drivingStats.avgSpeed`
+        ) + ': ' + +
+        Math.round(step.parameter.drive.averageSpeed) +
+        ' km/h<br />' +
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.drivingStats.consumption`
+        ) + ': ' +
+        Math.round(step.parameter.drive.consumption) + ' litres';
+
+      pElement.classList.add('drivingStats');
+      divElement.appendChild(pElement);
+
       parent.appendChild(divElement);
 
       // Apply styles and classes
-      divElement.style.animationDuration = this.animationTimeInSeconds + 's !important';
+      divElement.style.animationDuration =
+        this.animationTimeInSeconds + 's !important';
       divElement.classList.add('animateMoveLeftRight');
       divElement.classList.add('moveItAnimatedContainer');
 
@@ -381,7 +472,11 @@ export default class PublicScreen extends Vue {
   }
 
   getVehicleByType(type: string) {
-    return this.vehicleList[this.vehicleList.findIndex((vehicleEntry) => vehicleEntry.vehicle.name === type)];
+    return this.vehicleList[
+      this.vehicleList.findIndex(
+        (vehicleEntry) => vehicleEntry.vehicle.name === type
+      )
+    ];
   }
 
   createElementsShopit(
@@ -542,11 +637,16 @@ export default class PublicScreen extends Vue {
       width: 80%;
     }
     .contentRight {
+      position: relative;
       height: 100%;
-      width: 20%;
-      border: 1px solid brown;
+      width: 30%;
     }
   }
+}
+
+.HighScoreContainer {
+  height: 100%;
+  width: auto;
 }
 
 .allAnimationContainer {
@@ -603,6 +703,9 @@ export default class PublicScreen extends Vue {
       width: 100%;
     }
   }
+  #birds {
+    z-index: 100;
+  }
 }
 
 #coolit {
@@ -646,6 +749,38 @@ export default class PublicScreen extends Vue {
     filter: drop-shadow(-1px 0 0 var(--color-brown));
   }
 }
+
+.HighScoreContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background);
+  padding: 0.5rem;
+  opacity: 0;
+  transition: opacity 1s ease;
+  overflow-y: scroll;
+  text-align: center;
+  .highScoreHeading {
+    font-size: var(--font-size-xlarge);
+    font-weight: var(--font-weight-bold);
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+}
+
+.birdsFlyingLeftRightAnimation {
+  animation: birdFlyingLeftRight 15s linear forwards;
+}
+
+@keyframes birdFlyingLeftRight {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 </style>
 
 <style lang="scss">
@@ -683,7 +818,7 @@ export default class PublicScreen extends Vue {
 
 .moveItAnimatedContainer {
   position: absolute;
-  height: 40% !important;
+  height: auto;
   width: 100%;
   left: 0;
   bottom: 25%;
@@ -692,6 +827,14 @@ export default class PublicScreen extends Vue {
   justify-content: center;
   align-items: flex-end;
   animation: moveLeftRight 30s forwards linear !important;
+  .drivingStats {
+    position: absolute;
+    top: -80%;
+    padding: 0.5rem;
+    background-color: var(--color-structuring-light);
+    border-radius: var(--border-radius-xs);
+    border: 2px solid var(--color-evaluating-dark);
+  }
 }
 
 /*.shopItAnimatedContainer {

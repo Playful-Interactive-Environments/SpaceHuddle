@@ -61,7 +61,17 @@
         "description": "Erhalte eine übersicht über alle Spiele."
       },
       "module": {
-        "billboard": "Problemprodukte"
+        "billboard": "Problemprodukte",
+        "drivingStats": {
+          "maxSpeed": "Max",
+          "avgSpeed": "Ø",
+          "consumption": "Verbrauch",
+          "distance": "Fahrstreckenlänge",
+          "persons": "Personen",
+          "collected": "eingesammelt",
+          "time": "Gefahrene Zeit",
+          "goal": "Ziel erreicht!"
+        }
       }
     }
   }

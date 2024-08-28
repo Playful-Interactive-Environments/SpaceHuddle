@@ -61,7 +61,17 @@
         "description": "Get an overview over all games."
       },
       "module": {
-        "billboard": "Problem Products"
+        "billboard": "Problem Products",
+        "drivingStats": {
+          "maxSpeed": "max",
+          "avgSpeed": "average",
+          "consumption": "fuel",
+          "distance": "travel distance",
+          "persons": "persons",
+          "collected": "collected",
+          "time": "Time driven",
+          "goal": "Goal reached!"
+        }
       }
     }
   }

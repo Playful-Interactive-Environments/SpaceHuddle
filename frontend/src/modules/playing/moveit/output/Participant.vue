@@ -485,7 +485,6 @@ export default class Participant extends Vue {
         },
         driveTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
-        finished: true,
       });
       await this.trackingManager.saveIteration({
         gameStep: GameStep.CleanUp,
@@ -512,6 +511,7 @@ export default class Participant extends Vue {
           particleState: particleState,
           cleanupTime: Date.now() - this.stepTime,
           playTime: Date.now() - this.startTime,
+          finished: true,
         },
         successRate === 3
           ? TaskParticipantIterationStepStatesType.CORRECT
