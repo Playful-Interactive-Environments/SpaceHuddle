@@ -1,6 +1,13 @@
 <template>
   <div id="analyticsContainer">
-    <div class="contentTop"></div>
+    <div class="contentTop">
+      <PublicScreenComponent
+        v-if="task"
+        :task-id="taskId"
+        :key="componentLoadIndex"
+        :authHeaderTyp="authHeaderTyp"
+      />
+    </div>
     <div class="contentBottom">
       <div class="contentLeft">
         <div v-if="steps.length > 0" class="allAnimationContainer">
@@ -23,7 +30,7 @@
             <div id="city" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/City.png'" />
             </div>
-<!--            <div id="birds" class="backgroundItem">
+            <!--<div id="birds" class="backgroundItem">
               <video width="200" height="200" loop autoplay>
                 <source
                   :src="'/assets/animations/analytics/birds.webm'"
@@ -81,13 +88,16 @@ import {
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilterBase.vue';
 import { Task } from '@/types/api/Task';
-import { hasModule } from '@/modules';
+import {
+  getAsyncDefaultModule,
+  getAsyncModule,
+  getEmptyComponent,
+} from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import { getRandomColorList } from '@/utils/colors';
 import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
 import { createApp, h } from 'vue';
@@ -100,9 +110,9 @@ import shopItHighScore from '@/modules/playing/shopit/organisms/Highscore.vue';
 import findItHighScore from '@/modules/playing/findit/organisms/Highscore.vue';
 
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
-import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { delay } from '@/utils/wait';
-import { registerDomElement } from '@/vunit';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 
 interface Card {
   CO2: number;
@@ -131,11 +141,10 @@ interface VehicleData {
     moveItHighScore,
     shopItHighScore,
     findItHighScore,
+    PublicScreenComponent: getEmptyComponent(),
   },
 })
-
-/* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class PublicScreen extends Vue {
+export default class AnalyticsDashboard extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly task!: Task;
   @Prop({ default: 0 }) readonly timeModifier!: number;
@@ -148,14 +157,13 @@ export default class PublicScreen extends Vue {
 
   textureToken = pixiUtil.createLoadingToken();
   vehicleSpritesheet: PIXI.Spritesheet | null = null;
-  vehicleWidth = 150;
-  vehicleHeight = 200;
   cloudFolderPath = '/assets/animations/analytics/clouds/';
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
 
   animationTimeInSeconds = 30;
+  componentLoadIndex = 0;
 
   steps: {
     module: string;
@@ -181,6 +189,15 @@ export default class PublicScreen extends Vue {
       });
 
     this.HighscoreInterval = window.setInterval(this.HighscoreSwitch, 30000);
+
+    getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN).then(
+      (component) => {
+        if (this.$options.components && this.componentLoadIndex === 0) {
+          this.$options.components['PublicScreenComponent'] = component;
+          this.componentLoadIndex++;
+        }
+      }
+    );
   }
 
   highscoreIndex = 0;
@@ -220,6 +237,30 @@ export default class PublicScreen extends Vue {
     }
   }
 
+  getModuleName(task: Task): string[] {
+    if (task && task.modules && task.modules.length > 0)
+      return task.modules.map((module) => module.name);
+    return ['default'];
+  }
+
+  @Watch('task', { immediate: true })
+  async onTaskChanged(): Promise<void> {
+    if (this.$options.components) {
+      const taskType = TaskType[this.task.taskType];
+      await getAsyncModule(
+        ModuleComponentType.PUBLIC_SCREEN,
+        taskType,
+        this.getModuleName(this.task),
+        false
+      ).then((component) => {
+        if (this.$options.components) {
+          this.$options.components['PublicScreenComponent'] = component;
+          this.componentLoadIndex++;
+        }
+      });
+    }
+  }
+
   @Watch('gameTasks', { immediate: true })
   onGameTasksChanged(): void {
     for (const task of this.gameTasks) {
@@ -235,6 +276,7 @@ export default class PublicScreen extends Vue {
     console.log(this.steps);
   }
 
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTasks(tasks: Task[], topicId: string): void {
     this.tasks = tasks;
     this.gameTasks = this.tasks
@@ -371,6 +413,7 @@ export default class PublicScreen extends Vue {
     steps: TaskParticipantIterationStep[],
     parent: HTMLElement
   ) {
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     steps.forEach((step, index) => {
       //move it car check
       let imgSource = '';
@@ -415,6 +458,7 @@ export default class PublicScreen extends Vue {
     steps: TaskParticipantIterationStep[],
     parent: HTMLElement
   ) {
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     steps.forEach((step, index) => {
       const divElement = document.createElement('div');
       divElement.setAttribute('key', step.id + Date.now());
@@ -439,18 +483,22 @@ export default class PublicScreen extends Vue {
       pElement.innerHTML =
         this.$t(
           `module.common.visualisation_master.visModules.analytics.module.drivingStats.maxSpeed`
-        ) + ': ' + +
-        Math.round(step.parameter.drive.maxSpeed) +
+        ) +
+        ': ' +
+        +Math.round(step.parameter.drive.maxSpeed) +
         ' km/h<br />' +
         this.$t(
           `module.common.visualisation_master.visModules.analytics.module.drivingStats.avgSpeed`
-        ) + ': ' + +
-        Math.round(step.parameter.drive.averageSpeed) +
+        ) +
+        ': ' +
+        +Math.round(step.parameter.drive.averageSpeed) +
         ' km/h<br />' +
         this.$t(
           `module.common.visualisation_master.visModules.analytics.module.drivingStats.consumption`
-        ) + ': ' +
-        Math.round(step.parameter.drive.consumption) + ' litres';
+        ) +
+        ': ' +
+        Math.round(step.parameter.drive.consumption) +
+        ' litres';
 
       pElement.classList.add('drivingStats');
       divElement.appendChild(pElement);
@@ -492,6 +540,7 @@ export default class PublicScreen extends Vue {
       }, 2000);
     }
 
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     steps.forEach((step, index) => {
       const divElement = document.createElement('div');
       let columnCount = 1;
@@ -523,7 +572,9 @@ export default class PublicScreen extends Vue {
   }
 
   createElementsFindit(
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     steps: TaskParticipantIterationStep[],
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     parent: HTMLElement
   ) {
     return null;
@@ -624,7 +675,8 @@ export default class PublicScreen extends Vue {
   .contentTop {
     height: 20%;
     width: 100%;
-    border: 1px solid magenta;
+    //border: 1px solid magenta;
+    overflow: auto;
   }
   .contentBottom {
     height: 80%;
@@ -780,7 +832,6 @@ export default class PublicScreen extends Vue {
     transform: translateX(100%);
   }
 }
-
 </style>
 
 <style lang="scss">

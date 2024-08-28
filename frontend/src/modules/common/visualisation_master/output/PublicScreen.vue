@@ -94,9 +94,9 @@
       :paused="paused"
     />
     <analytics-dashboard
-        v-if="currentVisModule === 'analytics'"
-        :task-id="this.taskId"
-        :task="this.task"
+      v-if="currentVisModule === 'analytics'"
+      :task-id="this.taskId"
+      :task="this.task"
     />
   </div>
 </template>
@@ -128,7 +128,7 @@ import * as viewService from '@/services/view-service';
 import CanvasModule from '@/modules/common/visualisation_master/organisms/canvasModule.vue';
 import { Category } from '@/types/api/Category';
 import * as categorisationService from '@/services/categorisation-service';
-import AnalyticsDashboard from "@/modules/common/visualisation_master/organisms/analyticsDashboard.vue";
+import AnalyticsDashboard from '@/modules/common/visualisation_master/organisms/analyticsDashboard.vue';
 
 @Options({
   components: {
