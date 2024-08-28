@@ -73,8 +73,45 @@
         :autoplay="false"
         indicator-position="none"
         arrow="always"
-        height="100%"
+        height="80%"
+        @change="slideChanged"
       >
+        <div id="votingSection">
+          <div class="sideMedia">
+            <p>available:</p>
+            <p class="pointsDisplay">
+              <font-awesome-icon icon="coins" /> {{ points }}
+            </p>
+          </div>
+          <div class="pointsSelection">
+            <div class="numberSelection">
+              <el-button type="primary" @click="pointsSpendChange(-100)"
+                >-</el-button
+              >
+              <el-input type="number" v-model="pointsToSpend">{{
+                pointsToSpend
+              }}</el-input>
+              <el-button type="primary" @click="pointsSpendChange(100)"
+                >+</el-button
+              >
+            </div>
+            <el-button
+              type="primary"
+              @click="applyPoints"
+              :disabled="pointsToSpend > points"
+              >Vote<span v-if="pointsToSpend > points"
+                >&nbsp;(min. {{ selectedIdea.parameter.minPoints }})</span
+              ></el-button
+            >
+          </div>
+          <div class="sideMedia">
+            <p>spent:</p>
+            <p class="pointsDisplay">
+              <font-awesome-icon icon="coins" />
+              {{ selectedVote.previousSpendPoints + selectedVote.points }}
+            </p>
+          </div>
+        </div>
         <el-carousel-item v-for="element of orderedIdeas" :key="element.id">
           <IdeaCard
             :idea="element"
@@ -163,6 +200,113 @@
       </el-carousel>
     </div>
   </ParticipantModuleDefaultContainer>
+  <el-dialog v-model="showSort" :module-theme="theme">
+    <template #header>
+      <h2>
+        <font-awesome-icon icon="sort" />&nbsp;
+        {{ $t('module.brainstorming.missionmap.participant.sort') }}
+      </h2>
+    </template>
+    <draggable
+      v-model="orderedIdeas"
+      item-key="id"
+      @end="dragDone"
+      class="measureList"
+      handle=".card__drag"
+    >
+      <template v-slot:item="{ element }">
+        <IdeaCard
+          :idea="element"
+          :isDraggable="true"
+          :portrait="false"
+          :is-selectable="true"
+          :isSelected="element.id === selectedIdea?.id"
+          :selectionColor="selectionColor"
+          :is-editable="
+            element.isOwn &&
+            !element.parameter.shareData &&
+            inputManager.isCurrentIdea(element.id)
+          "
+          :show-state="false"
+          :canChangeState="false"
+          :handleEditable="false"
+          :background-color="getIdeaColor(element)"
+          :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+          :showDragArea="true"
+          :image-overlay-is-clickable="false"
+          fix-height="7rem"
+          v-on:click="ideaClicked(element)"
+          @ideaDeleted="refreshIdeas"
+          @ideaStartEdit="editIdea(element)"
+          @click="() => (showDetails = true)"
+        >
+          <template #icon>
+            <font-awesome-icon icon="person-booth" />
+          </template>
+          <template #image_overlay>
+            <el-rate
+              v-if="element.id in ideaRate && module?.parameter"
+              v-model="ideaRate[element.id]"
+              :max="
+                module.parameter.maxRatingStars
+                  ? module.parameter.maxRatingStars
+                  : 3
+              "
+              @change="saveRate(element)"
+            ></el-rate>
+          </template>
+          <!--<div class="columns is-mobile" v-if="element.parameter.shareData">
+            <div class="column">
+              <font-awesome-icon icon="coins" />
+              {{ element.parameter.points }}
+            </div>
+            <div class="column" @click="() => (showDetails = true)">
+              <font-awesome-icon icon="person-booth" />
+              {{ getVoteResultForIdea(element.id)?.sum }}
+            </div>
+          </div>
+          <div
+            v-if="getInfluenceAreasForIdea(element).length > 0"
+            class="columns is-mobile"
+          >
+            <div
+              class="column"
+              v-for="parameter of getInfluenceAreasForIdea(element)"
+              :key="parameter"
+              :style="{
+                color: gameConfig.parameter[parameter].color,
+              }"
+            >
+              <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+            </div>
+          </div>
+          <div
+            v-if="element.state.toLowerCase() === IdeaStates.THUMBS_DOWN"
+            class="rejection"
+          >
+            {{ element.parameter.reasonsForRejection }}
+          </div>
+          <div
+            v-if="
+              element.state.toLowerCase() === IdeaStates.THUMBS_UP &&
+              element.isOwn
+            "
+            class="accept"
+          >
+            <font-awesome-icon icon="thumbs-up" />
+          </div>-->
+        </IdeaCard>
+      </template>
+      <!--<template v-slot:footer>
+        <AddItem
+          v-if="module && module.parameter.allowParticipationMeasures"
+          :text="$t('module.brainstorming.missionmap.participant.add')"
+          :is-column="true"
+          @addNew="editNewImage"
+        />
+      </template>-->
+    </draggable>
+  </el-dialog>
   <ValidationForm
     :form-data="selectedVote"
     :use-default-submit="false"
@@ -284,6 +428,8 @@
           {{ selectedIdea.parameter.minParticipants }}
         </div>
         <div class="pointsInfo">
+          {{ $t('module.brainstorming.missionmap.participant.target') }}:
+          {{ selectedIdea?.parameter.points }}
           <font-awesome-icon icon="coins" />
           {{ selectedVote.previousSpendTotalPoints + selectedVote.points }} /
           <font-awesome-icon icon="greater-than-equal" />
@@ -293,9 +439,100 @@
           {{ $t('module.brainstorming.missionmap.participant.loi.own') }}:
           {{ selectedVote.previousSpendPoints + selectedVote.points }}
         </div>
+        <el-button
+          v-if="points >= minSpentPoints && maxSpentPoints >= minSpentPoints"
+          type="primary"
+          @click="showSpentPoints = true"
+        >
+          {{ $t('module.brainstorming.missionmap.participant.spentHeader') }}
+        </el-button>
+        <el-button
+          v-else-if="points < minSpentPoints"
+          type="primary"
+          :disabled="true"
+        >
+          {{ $t('module.brainstorming.missionmap.participant.nothingToSpent') }}
+        </el-button>
+        <el-button v-else type="primary" :disabled="true">
+          {{ $t('module.brainstorming.missionmap.participant.maxSpent') }}
+        </el-button>
+      </el-form-item>
+      <!--<el-form-item
+        :label="$t('module.brainstorming.missionmap.participant.rate')"
+        prop="points"
+      >
+        <el-rate
+          v-model="selectedVote.rate"
+          :max="
+            module.parameter.maxRatingStars
+              ? module.parameter.maxRatingStars
+              : 3
+          "
+        ></el-rate>
+      </el-form-item>-->
+      <el-form-item
+        :label="$t('module.brainstorming.missionmap.participant.explanation')"
+        prop="explanation"
+      >
+        <el-button
+          class="explanationOption"
+          style="width: 100%; justify-content: left"
+          v-for="(explanation, index) of selectedIdea?.parameter
+            .explanationList"
+          :key="index"
+          @click="
+            () => {
+              selectedVote.explanation = explanation;
+              selectedVote.explanationIndex = index;
+            }
+          "
+        >
+          <template #icon>
+            <span style="width: 1.5rem; text-align: left">
+              {{ index + 1 }}.
+            </span>
+          </template>
+          {{ explanation }}
+        </el-button>
+        <el-input
+          v-model="selectedVote.explanation"
+          type="textarea"
+          :rows="3"
+          :placeholder="
+            $t('module.brainstorming.missionmap.participant.freeExplanation')
+          "
+        >
+          <!--<template #prefix>
+            <span style="width: 1.5rem">
+              {{ selectedIdea?.parameter.explanationList.length + 1 }}.
+            </span>
+          </template>-->
+        </el-input>
       </el-form-item>
     </el-dialog>
   </ValidationForm>
+  <el-dialog v-model="showSpentPoints">
+    <template #header>
+      {{ $t('module.brainstorming.missionmap.participant.spentHeader') }}
+    </template>
+    <template #footer>
+      <el-button type="primary" @click="showSpentPoints = false">
+        {{ $t('module.brainstorming.missionmap.participant.cancel') }}
+      </el-button>
+      <el-button type="primary" @click="applyPoints">
+        {{ $t('module.brainstorming.missionmap.participant.spent') }}
+      </el-button>
+    </template>
+    <el-slider
+      v-if="minSpentPoints <= maxSpentPoints"
+      v-model="selectedVote.spentPoints"
+      :min="minSpentPoints"
+      :max="maxSpentPoints"
+      :step="100"
+      :marks="spentMarks"
+      :disabled="minSpentPoints === maxSpentPoints"
+    />
+  </el-dialog>
 
   <MissionSettings
     v-model:show-modal="showIdeaSettings"
@@ -310,6 +547,80 @@
     ref="ideaSettings"
   >
   </MissionSettings>
+  <el-dialog
+    v-if="activeTab === 'map' && selectedIdea"
+    v-model="showSelectedIdea"
+    :with-header="false"
+    :show-close="false"
+    class="idea-card-overlay"
+  >
+    <IdeaCard
+      class="ideaCard"
+      :idea="selectedIdea"
+      :is-editable="
+        selectedIdea?.isOwn && inputManager.isCurrentIdea(selectedIdea?.id)
+      "
+      :show-state="false"
+      :canChangeState="false"
+      :handleEditable="false"
+      :background-color="getIdeaColor(selectedIdea)"
+      :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+      :fix-height="`${targetHeight - 50}px`"
+      image-height="33%"
+      v-on:click="ideaClicked(selectedIdea)"
+      @ideaDeleted="refreshIdeas"
+      @ideaStartEdit="editIdea(selectedIdea)"
+      @click="() => (showDetails = true)"
+    >
+      <template #icon>
+        <font-awesome-icon icon="person-booth" />
+      </template>
+      <template #image_overlay>
+        <div class="media image_overlay">
+          <div class="media-content">
+            <font-awesome-icon icon="coins" />
+            {{ getVoteResultForIdea(selectedIdea?.id)?.sum }} /
+            {{ selectedIdea?.parameter.points }}
+          </div>
+          <div class="media-right">
+            <font-awesome-icon
+              v-for="parameter of getInfluenceAreasForIdea(selectedIdea)"
+              :key="parameter"
+              :style="{
+                color: gameConfig.parameter[parameter].color,
+              }"
+              :icon="gameConfig.parameter[parameter].icon"
+            />
+          </div>
+        </div>
+      </template>
+      <!--<div class="columns is-mobile" v-if="selectedIdea.parameter.shareData">
+        <div class="column">
+          <font-awesome-icon icon="coins" />
+          {{ selectedIdea.parameter.points }}
+        </div>
+        <div class="column" @click="() => (showDetails = true)">
+          <font-awesome-icon icon="person-booth" />
+          {{ getVoteResultForIdea(selectedIdea.id)?.sum }}
+        </div>
+      </div>
+      <div
+        v-if="getInfluenceAreasForIdea(selectedIdea).length > 0"
+        class="columns is-mobile"
+      >
+        <div
+          class="column"
+          v-for="parameter of getInfluenceAreasForIdea(selectedIdea)"
+          :key="parameter"
+          :style="{
+            color: gameConfig.parameter[parameter].color,
+          }"
+        >
+          <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+        </div>
+      </div>-->
+    </IdeaCard>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -327,6 +638,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import * as cashService from '@/services/cash-service';
+import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
 import { Vote, VoteParameterResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
@@ -382,6 +694,7 @@ interface ProgressValues {
     MissionProgressChart,
     FontAwesomeIcon,
     ValidationForm,
+    IdeaMap,
     IdeaCard,
     ParticipantModuleDefaultContainer,
     draggable,
@@ -401,6 +714,8 @@ export default class Participant extends Vue {
   ideas: Idea[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   selectedIdea: Idea | null = null;
+  showSelectedIdea = false;
+  selectionColor = '#0192d0';
   visibleIdeas: Idea[] = [];
   votes: Vote[] = [];
   voteResults: VoteParameterResult[] = [];
@@ -408,6 +723,7 @@ export default class Participant extends Vue {
   sessionId!: string;
   points = 0;
   showDetails = false;
+  showSpentPoints = false;
   selectedVote = {
     rate: 0,
     order: 0,
@@ -427,6 +743,7 @@ export default class Participant extends Vue {
   inputManager!: CombinedInputManager;
   activeTab = 'measures';
   startingPoints = 0;
+  showSort = false;
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -522,6 +839,17 @@ export default class Participant extends Vue {
     return result;
   }
 
+  pointsToSpend = 0;
+  pointsSpendChange(num: number): void {
+    if (
+      this.pointsToSpend + num <= this.points &&
+      this.pointsToSpend + num <= this.maxSpentPoints &&
+      this.pointsToSpend + num >= this.minSpentPoints
+    ) {
+      this.pointsToSpend += num;
+    }
+  }
+
   getInfluenceAreasForIdea(idea: Idea): string[] {
     const areas: string[] = [];
     for (const parameter of Object.keys(gameConfig.parameter)) {
@@ -568,19 +896,36 @@ export default class Participant extends Vue {
   onSelectedIdeaChanged(): void {
     if (this.selectedIdea) {
       this.loadSelectedVote();
+      if (this.activeTab === 'map') this.showSelectedIdea = true;
     }
   }
 
-  @Watch('showDetails', { immediate: true })
+  @Watch('showSelectedIdea', { immediate: true })
+  onShowSelectedIdeaChanged(): void {
+    if (!this.showSelectedIdea && this.activeTab === 'map') {
+      this.selectedIdea = null;
+    }
+  }
+
+  @Watch('activeTab', { immediate: true })
+  onActiveTabChanged(): void {
+    if (!this.showSelectedIdea && this.activeTab === 'map') {
+      this.selectedIdea = null;
+    }
+  }
+
+  @Watch('showSpentPoints', { immediate: true })
   onShowSpentPoints(): void {
-    if (this.showDetails)
+    if (this.showSpentPoints)
       this.selectedVote.spentPoints = this.selectedVote.points;
   }
 
   applyPoints(): void {
+    this.selectedVote.spentPoints = this.pointsToSpend;
+    this.pointsToSpend = 0;
     this.selectedVote.points += this.selectedVote.spentPoints;
+    this.showSpentPoints = false;
     this.saveVoting(true);
-    this.showDetails = false;
   }
 
   getCurrentVoteForIdea(ideaId: string): Vote | undefined {
@@ -636,6 +981,8 @@ export default class Participant extends Vue {
   updateIdeas(): void {
     const ideas = this.inputManager.ideas;
     this.ideas = ideas.filter((idea) => idea.parameter.shareData || idea.isOwn);
+    if (this.orderedIdeas.length === 0 && this.ideas.length > 0)
+      this.showSort = true;
     this.orderedIdeas = [
       ...this.ideas, //.filter((idea) => idea.parameter.shareData),
     ];
@@ -688,6 +1035,8 @@ export default class Participant extends Vue {
           return b.rate - a.rate;
         })
         .map((item) => item.idea);
+      if (this.orderedIdeas.length === 0 && this.ideas.length > 0)
+        this.showSort = true;
       this.orderedIdeas = [
         ...this.ideas, // .filter((idea) => idea.parameter.shareData),
       ];
@@ -935,6 +1284,13 @@ export default class Participant extends Vue {
 
   ideaClicked(idea: Idea): void {
     this.selectedIdea = idea;
+  }
+
+  slideChanged(index: number): void {
+    this.selectedIdea = this.orderedIdeas[index];
+    this.loadSelectedVote();
+    this.pointsToSpend = 0;
+    console.log(this.selectedIdea);
   }
 
   reset(previousSpendTotalPoints = 0, participantCount = 0): void {
@@ -1365,7 +1721,6 @@ export default class Participant extends Vue {
 .el-dialog {
   h2 {
     font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-xlarge);
   }
 }
 
@@ -1393,10 +1748,54 @@ export default class Participant extends Vue {
 }
 
 .el-carousel {
+  height: 80%;
   .ideaCard {
     margin: 0 auto;
     width: calc(100% - 6rem);
     height: calc(100% - 10px);
+  }
+}
+
+#votingSection {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  bottom: -20%;
+  height: 20%;
+  width: 100%;
+  .pointsSelection {
+    width: 40%;
+    height: 100%;
+    .numberSelection {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .el-input {
+        width: 50%;
+        margin-left: 3%;
+        margin-right: 3%;
+        text-align: center;
+      }
+      .el-button {
+        width: 22%;
+      }
+    }
+    .el-button {
+      width: 100%;
+    }
+  }
+  .sideMedia {
+    width: 30%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .pointsDisplay {
+      font-weight: var(--font-weight-bold);
+    }
   }
 }
 

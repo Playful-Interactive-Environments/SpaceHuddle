@@ -10,7 +10,15 @@
             :id="stepCategory.module"
             class="animationContainer"
             :ref="stepCategory.module"
-          ></div>
+          >
+            <p v-if="stepCategory.module === 'shopit'" class="billboardText">
+              {{
+                $t(
+                    'module.common.visualisation_master.visModules.analytics.module.billboard'
+                )
+              }}
+            </p>
+          </div>
           <div class="animationBackground">
             <div id="city" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/City.png'" />
@@ -50,6 +58,20 @@ import { getRandomColorList } from '@/utils/colors';
 import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
 import { h } from 'vue';
+import shopItGameConfig from '@/modules/playing/shopit/data/gameConfig.json';
+
+interface Card {
+  CO2: number;
+  category: string;
+  condition: number;
+  cost: number;
+  energy: number;
+  infoKey: string;
+  lifetime: number;
+  money: number;
+  name: string;
+  water: number;
+}
 
 @Options({
   components: {
@@ -129,49 +151,20 @@ export default class PublicScreen extends Vue {
     if (Array.isArray(refArray) && refArray.length > 0) {
       const element = refArray[0] as HTMLElement; // Assuming you want to target the first element
 
-      steps.forEach((step, index) => {
-        //move it car check
-        let name = taskId + index;
-        let imgSource = '';
-        if (step.parameter.vehicle) {
-          name =
-            step.parameter.vehicle.type + '-' + step.parameter.vehicle.category;
-        } else if (step.parameter.coolItTime) {
-          if (step.parameter.gameplayResult) {
-            imgSource = this.cloudFolderPath;
-            if (step.parameter.gameplayResult.stars >= 3) {
-              imgSource +=
-                this.cloudFolderPath +
-                'LightCloud_' +
-                Math.round(Math.random()) + '.png';
-            } else {
-              imgSource +=
-                step.parameter.gameplayResult.stars === 2
-                  ? 'MidCloud_' + Math.round(Math.random()) + '.png'
-                  : 'DarkCloud_' + Math.round(Math.random()) + '.png';
-            }
-          }
-        }
-
-        const divElement = document.createElement('div');
-        divElement.setAttribute('key', step.id + Date.now());
-
-        const imgElement = document.createElement('img');
-        imgElement.setAttribute('src', imgSource);
-        imgElement.style.objectFit = 'contain';
-
-        divElement.appendChild(imgElement);
-        element.appendChild(divElement);
-
-        divElement.style.animationDuration = this.animationTimeInSeconds + 's !important';
-        divElement.style.top = Math.round(Math.random() * 80) + '%';
-        divElement.classList.add('animateMoveLeftRight');
-        divElement.classList.add('animatedAnalyticsContainer');
-
-        setTimeout(() => {
-          element.removeChild(divElement);
-        }, this.animationTimeInSeconds * 1000);
-      });
+      switch (taskId) {
+        case 'coolit':
+          this.createElementsCoolit(steps, element);
+          break;
+        case 'moveit':
+          this.createElementsMoveit(steps, element);
+          break;
+        case 'shopit':
+          this.createElementsShopit(steps, element);
+          break;
+        case 'findit':
+          this.createElementsFindit(steps, element);
+          break;
+      }
     }
   }
 
@@ -274,6 +267,195 @@ export default class PublicScreen extends Vue {
 
     return true;
   }
+
+  createElementsCoolit(
+    steps: TaskParticipantIterationStep[],
+    parent: HTMLElement
+  ) {
+    steps.forEach((step, index) => {
+      //move it car check
+      let imgSource = '';
+      if (step.parameter.gameplayResult) {
+        imgSource = this.cloudFolderPath;
+        if (step.parameter.gameplayResult.stars >= 3) {
+          imgSource +=
+            this.cloudFolderPath +
+            'LightCloud_' +
+            Math.round(Math.random()) +
+            '.png';
+        } else {
+          imgSource +=
+            step.parameter.gameplayResult.stars === 2
+              ? 'MidCloud_' + Math.round(Math.random()) + '.png'
+              : 'DarkCloud_' + Math.round(Math.random()) + '.png';
+        }
+      }
+
+      const divElement = document.createElement('div');
+      divElement.setAttribute('key', step.id + Date.now());
+
+      const imgElement = document.createElement('img');
+      imgElement.setAttribute('src', imgSource);
+      imgElement.style.objectFit = 'contain';
+
+      divElement.appendChild(imgElement);
+      parent.appendChild(divElement);
+
+      divElement.style.animationDuration =
+        this.animationTimeInSeconds + 's !important';
+      divElement.style.top = Math.round(Math.random() * 80) + '%';
+      divElement.classList.add('animateMoveLeftRight');
+      divElement.classList.add('coolItAnimatedContainer');
+
+      setTimeout(() => {
+        parent.removeChild(divElement);
+      }, this.animationTimeInSeconds * 1000);
+    });
+  }
+  createElementsMoveit(
+    steps: TaskParticipantIterationStep[],
+    parent: HTMLElement
+  ) {
+    steps.forEach((step, index) => {
+      //move it car check
+      let name = 'moveit' + index;
+      let imgSource = '';
+      if (step.parameter.vehicle) {
+        name =
+          step.parameter.vehicle.type + '-' + step.parameter.vehicle.category;
+        imgSource = ''; //insert move it grafik here
+      }
+
+      const divElement = document.createElement('div');
+      divElement.setAttribute('key', step.id + Date.now());
+
+      const imgElement = document.createElement('img');
+      imgElement.setAttribute('src', imgSource);
+      imgElement.style.objectFit = 'contain';
+
+      divElement.appendChild(imgElement);
+      parent.appendChild(divElement);
+
+      divElement.style.animationDuration =
+        this.animationTimeInSeconds + 's !important';
+      divElement.style.top = Math.round(Math.random() * 80) + '%';
+      divElement.classList.add('animateMoveLeftRight');
+      divElement.classList.add('coolItAnimatedContainer');
+
+      setTimeout(() => {
+        parent.removeChild(divElement);
+      }, this.animationTimeInSeconds * 1000);
+    });
+  }
+
+  createElementsShopit(
+    steps: TaskParticipantIterationStep[],
+    parent: HTMLElement
+  ) {
+
+    const elementsToRemove = parent.getElementsByClassName('shopItAnimatedContainer') as HTMLCollectionOf<HTMLElement>;
+    for (const element of elementsToRemove) {
+      setTimeout(() => {
+        parent.removeChild(element);
+      }, 2000);
+    }
+
+    steps.forEach((step, index) => {
+      const divElement = document.createElement('div');
+      let columnCount = 1;
+      divElement.setAttribute('key', step.id + Date.now());
+      if (step.parameter.game.cardsPlayed) {
+        const mostExpensiveCards = this.calculateMostExpensiveCards(
+          step.parameter.game.cardsPlayed
+        );
+        for (const card of mostExpensiveCards) {
+          const imgSource =
+            shopItGameConfig.gameValues.spriteFolder + card.name + '.png';
+
+          const imgElement = document.createElement('img');
+          imgElement.setAttribute('src', imgSource);
+          imgElement.style.objectFit = 'contain';
+
+          divElement.appendChild(imgElement);
+          columnCount += 1;
+        }
+      }
+      divElement.style.columns = columnCount + '';
+      parent.appendChild(divElement);
+
+      divElement.style.animationDuration =
+        this.animationTimeInSeconds + 's !important';
+      //divElement.classList.add('animateMoveLeftRight');
+      divElement.classList.add('shopItAnimatedContainer');
+    });
+  }
+
+  createElementsFindit(
+    steps: TaskParticipantIterationStep[],
+    parent: HTMLElement
+  ) {
+    return null;
+  }
+
+  calculateMostExpensiveCards(cardsArray: Card[]): Card[] {
+    const cards: any = [];
+
+    const clothing = cardsArray.filter((card) => card.category === 'clothing');
+    const electronics = cardsArray.filter(
+      (card) => card.category === 'electronics'
+    );
+    const food = cardsArray.filter((card) => card.category === 'food');
+
+    let clothingItem: any = [];
+    let electronicsItem: any = [];
+    let foodItem: any = [];
+    clothingItem.cost = 0;
+    electronicsItem.cost = 0;
+    foodItem.cost = 0;
+
+    for (const card of clothing) {
+      if (clothingItem.cost < card.cost) {
+        clothingItem = card;
+      }
+    }
+    for (const card of electronics) {
+      if (electronicsItem.cost < card.cost) {
+        electronicsItem = card;
+      }
+    }
+    for (const card of food) {
+      if (foodItem.cost < card.cost) {
+        foodItem = card;
+      }
+    }
+
+    console.log(clothingItem);
+    if (clothingItem) {
+      clothingItem.infoKey = this.$t(
+        'module.playing.shopit.participant.cardCategories.clothing'
+      );
+    }
+
+    console.log(electronicsItem);
+    if (electronicsItem) {
+      electronicsItem.infoKey = this.$t(
+        'module.playing.shopit.participant.cardCategories.electronics'
+      );
+    }
+
+    console.log(foodItem);
+    if (foodItem) {
+      foodItem.infoKey = this.$t(
+        'module.playing.shopit.participant.cardCategories.food'
+      );
+    }
+
+    cards.push(clothingItem);
+    cards.push(electronicsItem);
+    cards.push(foodItem);
+
+    return cards;
+  }
 }
 </script>
 
@@ -292,7 +474,6 @@ export default class PublicScreen extends Vue {
   .contentBottom {
     height: 80%;
     width: 100%;
-    border: 1px solid yellow;
     display: flex;
     flex-direction: row;
     .contentLeft {
@@ -349,8 +530,8 @@ export default class PublicScreen extends Vue {
   }
   #city {
     bottom: 11.5%;
-    width: 70%;
-    height: auto;
+    width: auto;
+    height: 55%;
     z-index: 3;
     display: flex;
     justify-content: center;
@@ -365,7 +546,6 @@ export default class PublicScreen extends Vue {
 }
 
 #coolit {
-  border: 2px solid white;
   height: 45%;
   position: absolute;
   top: 0;
@@ -383,14 +563,37 @@ export default class PublicScreen extends Vue {
   display: flex;
   align-items: center;
 }
+
+#shopit {
+  position: absolute;
+  border: 5px solid var(--color-evaluating-dark);
+  padding: 0.5rem 5px;
+  background-color: var(--color-structuring-light);
+  width: 15rem;
+  height: 10rem;
+  border-radius: var(--border-radius-small);
+  bottom: 14%;
+  right: 12.5%;
+  z-index: 4;
+  filter: drop-shadow(-10px 0 0 var(--color-brown));
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  .billboardText {
+    color: var(--color-evaluating-dark);
+    font-weight: var(--font-weight-bold);
+    filter: drop-shadow(-1px 0 0 var(--color-brown));
+  }
+}
 </style>
 
 <style lang="scss">
 .animateMoveLeftRight {
-  animation: moveLeftRight 25s forwards linear !important;
+  animation: moveLeftRight 300s forwards linear !important;
 }
 
-@keyframes moveLeftRight {
+@keyframes moveLeftRightCoolIt {
   0% {
     transform: translateX(-50%);
   }
@@ -399,7 +602,16 @@ export default class PublicScreen extends Vue {
   }
 }
 
-.animatedAnalyticsContainer {
+@keyframes moveLeftRightShopIt {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.coolItAnimatedContainer {
   position: absolute;
   height: 40% !important;
   width: 100%;
@@ -409,11 +621,59 @@ export default class PublicScreen extends Vue {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
+  animation: moveLeftRightCoolIt 25s forwards linear !important;
   img {
     position: relative;
     height: 100%;
     width: 100%;
     object-fit: contain;
+  }
+}
+
+/*.shopItAnimatedContainer {
+  position: absolute;
+  height: 65% !important;
+  width: auto;
+  min-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  animation: moveLeftRightShopIt 200s forwards linear !important;
+  img {
+    position: relative;
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    border: 2px solid var(--color-evaluating-dark);
+    border-radius: var(--border-radius-xs);
+  }
+}*/
+.shopItAnimatedContainer {
+  position: absolute;
+  height: 70%;
+  width: 95%;
+  column-gap: 0.2rem;
+  bottom: 0.5rem;
+  opacity: 0;
+  background-color: var(--color-structuring-light);
+  animation: appear 2s ease forwards;
+  img {
+    object-fit: contain;
+    border: 2px solid var(--color-evaluating-dark);
+    border-radius: var(--border-radius-xs);
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 </style>

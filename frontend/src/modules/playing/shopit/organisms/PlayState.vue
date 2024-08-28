@@ -523,50 +523,6 @@ export default class PlayState extends Vue {
   calculateMostExpensiveCards() {
     const cards: any = [];
 
-    /*let co2Card: any = [];
-    let electricityCard: any = [];
-    let lifetimeCard: any = [];
-    let waterCard: any = [];
-    let moneyCard: any = [];
-    let co2 = 0;
-    let electricity = 0;
-    let lifetime = 1000;
-    let water = 0;
-    let money = 0;*/
-
-    /*for (let i = 0; i < this.ownCardsPlayed.length; i++) {
-      if (this.ownCardsPlayed[i].CO2 > co2) {
-        co2 = this.ownCardsPlayed[i].CO2;
-        co2Card = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
-        co2Card.infoKey = 'CO²';
-      }
-      if (this.ownCardsPlayed[i].energy > electricity) {
-        electricity = this.ownCardsPlayed[i].energy;
-        electricityCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
-        electricityCard.infoKey = 'electricity';
-      }
-      if (this.ownCardsPlayed[i].lifetime < lifetime) {
-        lifetime = this.ownCardsPlayed[i].lifetime;
-        lifetimeCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
-        lifetimeCard.infoKey = 'lifetime';
-      }
-      if (this.ownCardsPlayed[i].water > water) {
-        water = this.ownCardsPlayed[i].water;
-        waterCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
-        waterCard.infoKey = 'water';
-      }
-      if (this.ownCardsPlayed[i].money > money) {
-        money = this.ownCardsPlayed[i].money;
-        moneyCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
-        moneyCard.infoKey = 'money';
-      }
-    }*/
-    /*cards.push(co2Card);
-    cards.push(electricityCard);
-    cards.push(lifetimeCard);
-    cards.push(waterCard);
-    cards.push(moneyCard);*/
-
     const clothing = this.ownCardsPlayed.filter(
       (card) => card.category === 'clothing'
     );

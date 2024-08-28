@@ -54,6 +54,15 @@
         "title": "Canvas",
         "description": "Bewege Ideen und zeichne."
       }
+    },
+    "analytics": {
+      "description": {
+        "title": "Dashboard",
+        "description": "Erhalte eine übersicht über alle Spiele."
+      },
+      "module": {
+        "billboard": "Problemprodukte"
+      }
     }
   }
 }

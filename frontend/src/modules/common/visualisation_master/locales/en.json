@@ -54,6 +54,15 @@
         "title": "Canvas",
         "description": "Move ideas around and draw."
       }
+    },
+    "analytics": {
+      "description": {
+        "title": "Dashboard",
+        "description": "Get an overview over all games."
+      },
+      "module": {
+        "billboard": "Problem Products"
+      }
     }
   }
 }
