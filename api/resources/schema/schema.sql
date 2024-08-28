@@ -29,7 +29,7 @@ USE `spacehuddle`;
 -- Tabellenstruktur für Tabelle `hierarchy`
 --
 
-CREATE TABLE `hierarchy` (
+CREATE TABLE IF NOT EXISTS `hierarchy` (
                              `category_idea_id` char(36) NOT NULL,
                              `sub_idea_id` char(36) NOT NULL,
                              `order` int(11) NOT NULL DEFAULT 0,
@@ -42,7 +42,7 @@ CREATE TABLE `hierarchy` (
 -- Tabellenstruktur für Tabelle `idea`
 --
 
-CREATE TABLE `idea` (
+CREATE TABLE IF NOT EXISTS `idea` (
                         `id` char(36) NOT NULL,
                         `task_id` char(36) NOT NULL,
                         `participant_id` char(36) DEFAULT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE `idea` (
 -- Tabellenstruktur für Tabelle `user`
 --
 
-CREATE TABLE `user` (
+CREATE TABLE IF NOT EXISTS `user` (
                         `id` char(36) NOT NULL,
                         `username` varchar(255) NOT NULL,
                         `password` varchar(255) NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE `user` (
 -- Tabellenstruktur für Tabelle `module`
 --
 
-CREATE TABLE `module` (
+CREATE TABLE IF NOT EXISTS `module` (
                           `id` char(36) NOT NULL,
                           `task_id` char(36) NOT NULL,
                           `module_name` varchar(255) NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE `module` (
 -- Tabellenstruktur für Tabelle `module_state`
 --
 
-CREATE TABLE `module_state` (
+CREATE TABLE IF NOT EXISTS `module_state` (
                                 `module_id` char(36) NOT NULL,
                                 `participant_id` char(36) NOT NULL,
                                 `state` varchar(255) NOT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE `module_state` (
 -- Tabellenstruktur für Tabelle `participant`
 --
 
-CREATE TABLE `participant` (
+CREATE TABLE IF NOT EXISTS `participant` (
                                `id` char(36) NOT NULL,
                                `session_id` char(36) NOT NULL,
                                `browser_key` varchar(255) NOT NULL,
@@ -128,7 +128,7 @@ CREATE TABLE `participant` (
 -- Tabellenstruktur für Tabelle `random_idea`
 --
 
-CREATE TABLE `random_idea` (
+CREATE TABLE IF NOT EXISTS `random_idea` (
                                `idea_id` char(36) NOT NULL,
                                `participant_id` char(36) NOT NULL,
                                `modification_date` datetime NOT NULL DEFAULT current_timestamp()
@@ -140,7 +140,7 @@ CREATE TABLE `random_idea` (
 -- Tabellenstruktur für Tabelle `resource`
 --
 
-CREATE TABLE `resource` (
+CREATE TABLE IF NOT EXISTS `resource` (
                             `id` char(36) NOT NULL,
                             `session_id` char(36) NOT NULL,
                             `title` varchar(255) NOT NULL,
@@ -155,7 +155,7 @@ CREATE TABLE `resource` (
 -- Tabellenstruktur für Tabelle `selection`
 --
 
-CREATE TABLE `selection` (
+CREATE TABLE IF NOT EXISTS `selection` (
                              `id` char(36) NOT NULL,
                              `topic_id` char(36) NOT NULL,
                              `name` varchar(255) NOT NULL,
@@ -168,7 +168,7 @@ CREATE TABLE `selection` (
 -- Tabellenstruktur für Tabelle `selection_idea`
 --
 
-CREATE TABLE `selection_idea` (
+CREATE TABLE IF NOT EXISTS `selection_idea` (
                                   `selection_id` char(36) NOT NULL,
                                   `idea_id` char(36) NOT NULL,
                                   `order` int(11) NOT NULL DEFAULT 0,
@@ -181,7 +181,7 @@ CREATE TABLE `selection_idea` (
 -- Tabellenstruktur für Tabelle `session`
 --
 
-CREATE TABLE `session` (
+CREATE TABLE IF NOT EXISTS `session` (
                            `id` char(36) NOT NULL,
                            `title` varchar(255) NOT NULL,
                            `description` text DEFAULT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE `session` (
                            `modification_date` datetime NOT NULL DEFAULT current_timestamp(),
                            `public_screen_module_id` char(36) DEFAULT NULL,
                            `allow_anonymous` TINYINT(1) DEFAULT 0,
-                           `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+                           `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -204,7 +204,7 @@ CREATE TABLE `session` (
 -- Tabellenstruktur für Tabelle `session_role`
 --
 
-CREATE TABLE `session_role` (
+CREATE TABLE IF NOT EXISTS `session_role` (
                                 `session_id` char(36) NOT NULL,
                                 `user_id` char(36) NOT NULL,
                                 `role` varchar(255) NOT NULL,
@@ -217,7 +217,7 @@ CREATE TABLE `session_role` (
 -- Tabellenstruktur für Tabelle `task`
 --
 
-CREATE TABLE `task` (
+CREATE TABLE IF NOT EXISTS `task` (
                         `id` char(36) NOT NULL,
                         `topic_id` char(36) NOT NULL,
                         `task_type` varchar(255) NOT NULL,
@@ -240,7 +240,7 @@ CREATE TABLE `task` (
 -- Tabellenstruktur für Tabelle `task_participant_state`
 --
 
-CREATE TABLE `task_participant_state` (
+CREATE TABLE IF NOT EXISTS `task_participant_state` (
                                           `id` char(36) NOT NULL,
                                           `task_id` char(36) NOT NULL,
                                           `participant_id` char(36) NOT NULL,
@@ -256,7 +256,7 @@ CREATE TABLE `task_participant_state` (
 -- Tabellenstruktur für Tabelle `task_participant_iteration`
 --
 
-CREATE TABLE `task_participant_iteration` (
+CREATE TABLE IF NOT EXISTS `task_participant_iteration` (
                                               `id` char(36) NOT NULL,
                                               `task_id` char(36) NOT NULL,
                                               `participant_id` char(36) NOT NULL,
@@ -272,7 +272,7 @@ CREATE TABLE `task_participant_iteration` (
 -- Tabellenstruktur für Tabelle `task_participant_iteration_step`
 --
 
-CREATE TABLE `task_participant_iteration_step` (
+CREATE TABLE IF NOT EXISTS `task_participant_iteration_step` (
                                                    `id` char(36) NOT NULL,
                                                    `task_id` char(36) NOT NULL,
                                                    `participant_id` char(36) NOT NULL,
@@ -290,7 +290,7 @@ CREATE TABLE `task_participant_iteration_step` (
 -- Tabellenstruktur für Tabelle `topic`
 --
 
-CREATE TABLE `topic` (
+CREATE TABLE IF NOT EXISTS `topic` (
                          `id` char(36) NOT NULL,
                          `session_id` char(36) NOT NULL,
                          `title` varchar(255) NOT NULL,
@@ -307,7 +307,7 @@ CREATE TABLE `topic` (
 -- Tabellenstruktur für Tabelle `vote`
 --
 
-CREATE TABLE `vote` (
+CREATE TABLE IF NOT EXISTS `vote` (
                         `id` char(36) NOT NULL,
                         `task_id` char(36) NOT NULL,
                         `participant_id` char(36) DEFAULT NULL,
@@ -325,7 +325,7 @@ CREATE TABLE `vote` (
 -- Tabellenstruktur für Tabelle `tutorial`
 --
 
-CREATE TABLE `tutorial` (
+CREATE TABLE IF NOT EXISTS `tutorial` (
                             `user_id` CHAR(36) NOT NULL,
                             `step` VARCHAR(255) NOT NULL,
                             `type` VARCHAR(255) NOT NULL,
@@ -337,7 +337,7 @@ CREATE TABLE `tutorial` (
 -- Tabellenstruktur für Tabelle `tutorial_participant`
 --
 
-CREATE TABLE `tutorial_participant` (
+CREATE TABLE IF NOT EXISTS `tutorial_participant` (
                             `participant_id` CHAR(36) NOT NULL,
                             `step` VARCHAR(255) NOT NULL,
                             `type` VARCHAR(255) NOT NULL,
@@ -349,7 +349,7 @@ CREATE TABLE `tutorial_participant` (
 -- Tabellenstruktur für Tabelle `clone_helper`
 --
 
-CREATE TABLE `clone_helper` (
+CREATE TABLE IF NOT EXISTS `clone_helper` (
                                 `target_id` CHAR(36) NOT NULL,
                                 `source_id` CHAR(36) NOT NULL,
                                 `table_name` VARCHAR(255) NOT NULL
