@@ -4,6 +4,7 @@
     :width="width"
     :height="height"
     :backgroundColor="backgroundColor"
+    :backgroundAlpha="backgroundAlpha"
     :style="{ 'touch-action': 'auto' }"
   >
     <slot></slot>
@@ -54,6 +55,7 @@ export default class SpriteCanvas extends Vue {
   @Prop({ default: 1 }) readonly scaleFactor!: number;
   @Prop({ default: 1 }) readonly aspectRation!: number;
   @Prop({ default: '#f4f4f4' }) readonly backgroundColor!: string;
+  @Prop({ default: 1 }) readonly backgroundAlpha: number | undefined;
   @Prop({ default: '#ffffff' }) tint!: string;
   @Prop() texture!: string | PIXI.Texture | PIXI.Texture[] | string[];
   @Prop({ default: 0.1 }) animationSpeed!: number;

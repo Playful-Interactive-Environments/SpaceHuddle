@@ -14,7 +14,7 @@
             <p v-if="stepCategory.module === 'shopit'" class="billboardText">
               {{
                 $t(
-                    'module.common.visualisation_master.visModules.analytics.module.billboard'
+                  'module.common.visualisation_master.visModules.analytics.module.billboard'
                 )
               }}
             </p>
@@ -57,8 +57,13 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import { getRandomColorList } from '@/utils/colors';
 import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
-import { h } from 'vue';
+import {createApp, h } from 'vue';
 import shopItGameConfig from '@/modules/playing/shopit/data/gameConfig.json';
+import moveItGameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { delay } from '@/utils/wait';
+import { registerDomElement } from '@/vunit';
 
 interface Card {
   CO2: number;
@@ -73,8 +78,15 @@ interface Card {
   water: number;
 }
 
+interface VehicleData {
+  vehicle: any;
+  category: string;
+  animation: PIXI.Texture[];
+}
+
 @Options({
   components: {
+    SpriteCanvas,
     IdeaCard,
   },
 })
@@ -91,19 +103,38 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   filter: FilterData = { ...defaultFilterData };
 
-  vehicleStylesheets: PIXI.Spritesheet | null = null;
+  textureToken = pixiUtil.createLoadingToken();
+  vehicleSpritesheet: PIXI.Spritesheet | null = null;
+  vehicleWidth = 150;
+  vehicleHeight = 200;
   cloudFolderPath = '/assets/animations/analytics/clouds/';
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
 
-  animationTimeInSeconds = 100;
+  animationTimeInSeconds = 30;
 
   steps: {
     module: string;
     steps: TaskParticipantIterationStep[];
     newSteps: TaskParticipantIterationStep[];
   }[] = [];
+
+  mounted() {
+    pixiUtil
+      .loadTexture(
+        '/assets/games/moveit/vehicle/vehicle_animation.json',
+        this.textureToken
+      )
+      .then(async (sheet) => {
+        this.vehicleSpritesheet = sheet;
+        for (const vehicle of this.vehicleList) {
+          if (vehicle.animation.length === 0)
+            vehicle.animation = this.getAnimationForVehicle(vehicle.vehicle);
+        }
+        await delay(100);
+      });
+  }
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -312,48 +343,54 @@ export default class PublicScreen extends Vue {
       }, this.animationTimeInSeconds * 1000);
     });
   }
-  createElementsMoveit(
-    steps: TaskParticipantIterationStep[],
-    parent: HTMLElement
-  ) {
+  createElementsMoveit(steps: TaskParticipantIterationStep[], parent: HTMLElement) {
     steps.forEach((step, index) => {
-      //move it car check
-      let name = 'moveit' + index;
-      let imgSource = '';
-      if (step.parameter.vehicle) {
-        name =
-          step.parameter.vehicle.type + '-' + step.parameter.vehicle.category;
-        imgSource = ''; //insert move it grafik here
-      }
-
       const divElement = document.createElement('div');
       divElement.setAttribute('key', step.id + Date.now());
 
-      const imgElement = document.createElement('img');
-      imgElement.setAttribute('src', imgSource);
-      imgElement.style.objectFit = 'contain';
+      // Dynamically create a Vue app instance for the SpriteCanvas component
+      const vehicle = this.getVehicleByType(step.parameter.vehicle.type);
+      console.log(vehicle);
+      const app = createApp({
+        render() {
+          return h(SpriteCanvas, {
+            texture: vehicle.animation || [],
+            width: 200,
+            height: 100,
+            backgroundAlpha: 0,
+          });
+        },
+      });
 
-      divElement.appendChild(imgElement);
+      // Mount the Vue instance into the divElement
+      app.mount(divElement);
+
       parent.appendChild(divElement);
 
-      divElement.style.animationDuration =
-        this.animationTimeInSeconds + 's !important';
-      divElement.style.top = Math.round(Math.random() * 80) + '%';
+      // Apply styles and classes
+      divElement.style.animationDuration = this.animationTimeInSeconds + 's !important';
       divElement.classList.add('animateMoveLeftRight');
-      divElement.classList.add('coolItAnimatedContainer');
+      divElement.classList.add('moveItAnimatedContainer');
 
+      // Cleanup after animation ends
       setTimeout(() => {
+        app.unmount(); // Unmount the Vue instance
         parent.removeChild(divElement);
       }, this.animationTimeInSeconds * 1000);
     });
+  }
+
+  getVehicleByType(type: string) {
+    return this.vehicleList[this.vehicleList.findIndex((vehicleEntry) => vehicleEntry.vehicle.name === type)];
   }
 
   createElementsShopit(
     steps: TaskParticipantIterationStep[],
     parent: HTMLElement
   ) {
-
-    const elementsToRemove = parent.getElementsByClassName('shopItAnimatedContainer') as HTMLCollectionOf<HTMLElement>;
+    const elementsToRemove = parent.getElementsByClassName(
+      'shopItAnimatedContainer'
+    ) as HTMLCollectionOf<HTMLElement>;
     for (const element of elementsToRemove) {
       setTimeout(() => {
         parent.removeChild(element);
@@ -455,6 +492,29 @@ export default class PublicScreen extends Vue {
     cards.push(foodItem);
 
     return cards;
+  }
+
+  get vehicleList(): VehicleData[] {
+    const list: VehicleData[] = [];
+    for (const category of Object.keys(moveItGameConfig.vehicles)) {
+      list.push(
+        ...moveItGameConfig.vehicles[category].types.map((vehicle) => {
+          return {
+            vehicle: vehicle,
+            category: category,
+            animation: this.getAnimationForVehicle(vehicle),
+          };
+        })
+      );
+    }
+    return list;
+  }
+  getAnimationForVehicle(vehicle: any): PIXI.Texture[] {
+    if (this.vehicleSpritesheet) {
+      const animationName = vehicle.image.slice(0, -4);
+      return this.vehicleSpritesheet.animations[animationName];
+    }
+    return [];
   }
 }
 </script>
@@ -593,18 +653,9 @@ export default class PublicScreen extends Vue {
   animation: moveLeftRight 300s forwards linear !important;
 }
 
-@keyframes moveLeftRightCoolIt {
+@keyframes moveLeftRight {
   0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes moveLeftRightShopIt {
-  0% {
-    transform: translateX(-100%);
+    transform: translateX(-75%);
   }
   100% {
     transform: translateX(100%);
@@ -621,13 +672,26 @@ export default class PublicScreen extends Vue {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  animation: moveLeftRightCoolIt 25s forwards linear !important;
+  animation: moveLeftRight 30s forwards linear !important;
   img {
     position: relative;
     height: 100%;
     width: 100%;
     object-fit: contain;
   }
+}
+
+.moveItAnimatedContainer {
+  position: absolute;
+  height: 40% !important;
+  width: 100%;
+  left: 0;
+  bottom: 25%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  animation: moveLeftRight 30s forwards linear !important;
 }
 
 /*.shopItAnimatedContainer {
