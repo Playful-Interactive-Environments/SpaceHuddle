@@ -87,7 +87,7 @@ export default class PublicScreen extends Vue {
 }
 
 .public-idea.landscape {
-  max-width: unset;
+  max-width: 30rem;
 }
 
 .gallery-item {
