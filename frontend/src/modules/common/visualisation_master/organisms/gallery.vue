@@ -1,24 +1,31 @@
 <template>
-  <el-carousel
-    v-if="ideas.length > 0"
-    height="calc(var(--app-height) * 0.6)"
-    type="card"
-    arrow="always"
-    :initial-index="0"
-    :interval="paused ? 0 : 7000 / timeModifier"
-    v-on:change="galleryIndexChanged"
-    trigger="click"
-  >
-    <el-carousel-item
-      v-for="(idea, index) in ideas"
-      :key="index"
-      :name="index.toString()"
+  <div ref="gallery" class="gallery">
+    <el-carousel
+      v-if="ideas.length > 0"
+      :height="`${this.contentHeight}px`"
+      type="card"
+      arrow="always"
+      :initial-index="0"
+      :interval="paused ? 0 : 7000 / timeModifier"
+      v-on:change="galleryIndexChanged"
+      trigger="click"
     >
-      <div class="gallery-item">
-        <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
-      </div>
-    </el-carousel-item>
-  </el-carousel>
+      <el-carousel-item
+        v-for="(idea, index) in ideas"
+        :key="index"
+        :name="index.toString()"
+      >
+        <div class="gallery-item">
+          <IdeaCard
+            :idea="idea"
+            :is-editable="false"
+            class="public-idea"
+            :portrait="portrait"
+          />
+        </div>
+      </el-carousel-item>
+    </el-carousel>
+  </div>
 </template>
 
 <script lang="ts">
@@ -44,25 +51,16 @@ export default class PublicScreen extends Vue {
   @Prop({ default: false }) readonly paused!: boolean;
   galleryIndex = 0;
 
-  useIdeas: Idea[] = [];
+  contentHeight = 100;
 
-  updateIdeas(): void {
-    if (this.useIdeas.length == 0) {
-      this.useIdeas = this.ideas;
-    } else {
-      const newIdees: Idea[] = this.ideas.filter(
-        (idea) => !this.useIdeas.some((old) => old.id == idea.id)
-      );
-      this.useIdeas.splice(this.galleryIndex + 2, 0, ...newIdees);
-      let deleteIndex = 0;
-      while (deleteIndex > -1) {
-        deleteIndex = this.useIdeas.findIndex(
-          (old) => !this.ideas.some((idea) => idea.id == old.id)
-        );
-        if (deleteIndex > -1) {
-          this.useIdeas.splice(deleteIndex, 1);
-        }
-      }
+  get portrait(): boolean {
+    return this.contentHeight > 200;
+  }
+
+  mounted(): void {
+    const gallery = this.$refs.gallery as HTMLElement;
+    if (gallery && gallery) {
+      this.contentHeight = gallery.clientHeight;
     }
   }
 
@@ -73,6 +71,11 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.gallery {
+  height: 100%;
+  width: 100%;
+}
+
 .el-carousel::v-deep(.el-carousel__item) {
   display: flex;
   justify-content: center;
@@ -83,12 +86,16 @@ export default class PublicScreen extends Vue {
   max-width: 20rem;
 }
 
+.public-idea.landscape {
+  max-width: unset;
+}
+
 .gallery-item {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
-  width: 20rem;
+  //width: 20rem;
   max-height: 500px;
 }
 
@@ -107,6 +114,10 @@ export default class PublicScreen extends Vue {
   justify-content: space-between;
 }
 
+.el-card.landscape::v-deep(.el-card__body) {
+  flex-direction: row;
+}
+
 .el-card::v-deep(.card__text) {
   flex-basis: auto;
   flex-grow: 1;
@@ -115,8 +126,9 @@ export default class PublicScreen extends Vue {
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  //justify-content: center;
   align-items: center;
   gap: 0.5rem;
+  overflow-y: auto;
 }
 </style>

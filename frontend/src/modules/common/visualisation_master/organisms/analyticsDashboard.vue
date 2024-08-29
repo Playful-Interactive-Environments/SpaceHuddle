@@ -1,15 +1,7 @@
 <template>
   <div id="analyticsContainer">
-    <div class="contentTop">
-      <PublicScreenComponent
-        v-if="task"
-        :task-id="taskId"
-        :key="componentLoadIndex"
-        :authHeaderTyp="authHeaderTyp"
-      />
-    </div>
-    <div class="contentBottom">
-      <div class="contentLeft">
+    <div class="contentMain">
+      <div class="contentAnimation">
         <div v-if="steps.length > 0" class="allAnimationContainer">
           <div
             v-for="stepCategory of steps"
@@ -47,31 +39,67 @@
           </div>
         </div>
       </div>
-      <div class="contentRight">
-        <div
-          v-for="(game, index) of gameTasks"
-          class="HighScoreContainer"
-          :key="game.id"
-          :id="'Highscore' + index"
-        >
-          <p class="highScoreHeading">{{ game.name }}</p>
-          <coolItHighScore
-            v-if="game.modules.find((module) => module.name === 'coolit')"
-            :task-id="game.id"
-          />
-          <moveItHighScore
-            v-if="game.modules.find((module) => module.name === 'moveit')"
-            :task-id="game.id"
-          />
-          <shopItHighScore
-            v-if="game.modules.find((module) => module.name === 'shopit')"
-            :task-id="game.id"
-          />
-          <findItHighScore
-            v-if="game.modules.find((module) => module.name === 'findit')"
-            :task-id="game.id"
-          />
-        </div>
+      <div class="contentSide">
+        <el-carousel height="100%" :interval="10000">
+          <el-carousel-item
+            v-for="game of gameTasks"
+            class="HighScoreContainer"
+            :key="game.id"
+          >
+            <p class="highScoreHeading">{{ game.name }}</p>
+            <coolItHighScore
+              v-if="game.modules.find((module) => module.name === 'coolit')"
+              :task-id="game.id"
+            />
+            <moveItHighScore
+              v-if="game.modules.find((module) => module.name === 'moveit')"
+              :task-id="game.id"
+            />
+            <shopItHighScore
+              v-if="game.modules.find((module) => module.name === 'shopit')"
+              :task-id="game.id"
+            />
+            <findItHighScore
+              v-if="game.modules.find((module) => module.name === 'findit')"
+              :task-id="game.id"
+            />
+          </el-carousel-item>
+        </el-carousel>
+      </div>
+    </div>
+    <div ref="contentBanner" class="contentBanner media">
+      <div class="media-content">
+        <Gallery
+          v-if="ideas.length > 0"
+          :task-id="taskId"
+          :timeModifier="timeModifier"
+          :ideas="ideas"
+          :paused="paused"
+        />
+        <PublicScreenComponent
+          v-else-if="task"
+          :task-id="taskId"
+          :key="componentLoadIndex"
+          :authHeaderTyp="authHeaderTyp"
+        />
+      </div>
+      <div
+        v-if="session"
+        class="media-right"
+        :style="{
+          '--connection-key-length': session.connectionKey.length,
+          '--qr-code-size': qrCodeSize,
+        }"
+      >
+        {{ session.connectionKey }}
+        <QrcodeVue
+          :foreground="contrastColor"
+          :background="backgroundColor"
+          render-as="svg"
+          :value="joinLink"
+          :size="qrCodeSize"
+          level="H"
+        />
       </div>
     </div>
   </div>
@@ -96,13 +124,16 @@ import {
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
+import * as sessionService from '@/services/session-service';
 import * as taskParticipantService from '@/services/task-participant-service';
+import * as cashService from '@/services/cash-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
 import { createApp, h } from 'vue';
 import shopItGameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import moveItGameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
 
 import coolItHighScore from '@/modules/playing/coolit/organisms/Highscore.vue';
 import moveItHighScore from '@/modules/playing/moveit/organisms/Highscore.vue';
@@ -111,6 +142,9 @@ import findItHighScore from '@/modules/playing/findit/organisms/Highscore.vue';
 
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import { delay } from '@/utils/wait';
+import { Session } from '@/types/api/Session';
+import * as themeColors from '@/utils/themeColors';
+import QrcodeVue from 'qrcode.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -141,6 +175,8 @@ interface VehicleData {
     moveItHighScore,
     shopItHighScore,
     findItHighScore,
+    Gallery,
+    QrcodeVue,
     PublicScreenComponent: getEmptyComponent(),
   },
 })
@@ -161,9 +197,11 @@ export default class AnalyticsDashboard extends Vue {
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
+  session: Session | null = null;
 
   animationTimeInSeconds = 30;
   componentLoadIndex = 0;
+  bannerHeight = 100;
 
   steps: {
     module: string;
@@ -171,7 +209,33 @@ export default class AnalyticsDashboard extends Vue {
     newSteps: TaskParticipantIterationStep[];
   }[] = [];
 
-  HighscoreInterval: number | null = null;
+  get topicId(): string | null {
+    if (this.task) return this.task.topicId;
+    return null;
+  }
+
+  get sessionId(): string | null {
+    if (this.task) return this.task.sessionId;
+    return null;
+  }
+
+  get joinLink(): string {
+    if (this.session)
+      return `${window.location.origin}/join/${this.session.connectionKey}`;
+    return `${window.location.origin}/join/`;
+  }
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
+
+  get backgroundColor(): string {
+    return themeColors.getBackgroundColor();
+  }
+
+  get qrCodeSize(): number {
+    return this.bannerHeight * 0.65;
+  }
 
   mounted() {
     pixiUtil
@@ -188,8 +252,6 @@ export default class AnalyticsDashboard extends Vue {
         await delay(100);
       });
 
-    this.HighscoreInterval = window.setInterval(this.HighscoreSwitch, 30000);
-
     getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN).then(
       (component) => {
         if (this.$options.components && this.componentLoadIndex === 0) {
@@ -198,43 +260,27 @@ export default class AnalyticsDashboard extends Vue {
         }
       }
     );
-  }
 
-  highscoreIndex = 0;
-  HighscoreSwitch() {
-    const elements = document.getElementsByClassName(
-      'HighScoreContainer'
-    ) as HTMLCollectionOf<HTMLElement>;
-    if (elements) {
-      for (const element of elements) {
-        if (!(element.id === 'Highscore' + this.highscoreIndex)) {
-          element.style.opacity = '0';
-          element.style.pointerEvents = 'none';
-        } else {
-          element.style.opacity = '1';
-          element.style.pointerEvents = 'all';
-        }
-      }
+    const banner = this.$refs.contentBanner as HTMLElement;
+    if (banner) {
+      this.bannerHeight = banner.clientHeight;
     }
-    this.highscoreIndex =
-      this.highscoreIndex + 1 <= 3 ? this.highscoreIndex + 1 : 0;
   }
 
-  get topicId(): string | null {
-    if (this.task) return this.task.topicId;
-    return null;
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateTasks);
+    cashService.deregisterAllGet(this.updateSession);
+    this.deregisterSteps();
   }
 
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    if (this.topicId) {
-      taskService.registerGetTaskList(
-        this.topicId,
-        this.updateTasks,
-        this.authHeaderTyp,
-        30 * 60
-      );
+  deregisterSteps(): void {
+    for (const task of this.gameTasks) {
+      taskParticipantService.deregisterGetIterationStepList(task.id);
     }
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   getModuleName(task: Task): string[] {
@@ -259,6 +305,26 @@ export default class AnalyticsDashboard extends Vue {
         }
       });
     }
+
+    if (this.topicId) {
+      cashService.deregisterAllGet(this.updateTasks);
+      taskService.registerGetTaskList(
+        this.topicId,
+        this.updateTasks,
+        this.authHeaderTyp,
+        30 * 60
+      );
+    }
+
+    if (this.sessionId) {
+      cashService.deregisterAllGet(this.updateSession);
+      sessionService.registerGetById(
+        this.sessionId,
+        this.updateSession,
+        this.authHeaderTyp,
+        30 * 60
+      );
+    }
   }
 
   @Watch('gameTasks', { immediate: true })
@@ -273,26 +339,29 @@ export default class AnalyticsDashboard extends Vue {
         15
       );
     }
-    console.log(this.steps);
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTasks(tasks: Task[], topicId: string): void {
+    this.deregisterSteps();
     this.tasks = tasks;
     this.gameTasks = this.tasks
       .filter((task) => task.taskType === 'PLAYING')
       .sort();
-    console.log(this.gameTasks);
   }
 
-  handleNewEntries(taskId: string, steps: TaskParticipantIterationStep[]) {
-    const refArray = this.$refs[taskId];
+  updateSession(session: Session): void {
+    this.session = session;
+  }
+
+  handleNewEntries(moduleName: string, steps: TaskParticipantIterationStep[]) {
+    const refArray = this.$refs[moduleName];
 
     // Ensure the refArray is not undefined and is an array
     if (Array.isArray(refArray) && refArray.length > 0) {
       const element = refArray[0] as HTMLElement; // Assuming you want to target the first element
 
-      switch (taskId) {
+      switch (moduleName) {
         case 'coolit':
           this.createElementsCoolit(steps, element);
           break;
@@ -310,32 +379,29 @@ export default class AnalyticsDashboard extends Vue {
   }
 
   updateIterationSteps(
-    taskId: string,
+    moduleName: string,
     steps: TaskParticipantIterationStep[]
   ): void {
     let newEntries: TaskParticipantIterationStep[] = [];
-    if (this.steps.find((entry) => entry.module === taskId)) {
-      newEntries = this.findNewIterations(
-        this.steps.find((entry) => entry.module === taskId)?.steps,
-        steps
-      );
+    const step = this.steps.find((entry) => entry.module === moduleName);
+    if (step) {
+      newEntries = this.findNewIterations(step.steps, steps);
       if (newEntries.length > 0) {
-        this.handleNewEntries(taskId, newEntries);
+        this.handleNewEntries(moduleName, newEntries);
       }
     }
 
-    const stepsEntry = { module: taskId, steps: steps, newSteps: newEntries };
-    if (
-      this.steps.findIndex((entry) => entry.module === stepsEntry.module) !=
-        -1 &&
-      stepsEntry.newSteps.length > 0
-    ) {
-      this.steps[
-        this.steps.findIndex((entry) => entry.module === stepsEntry.module)
-      ] = stepsEntry;
-    } else if (
-      this.steps.findIndex((entry) => entry.module === stepsEntry.module) === -1
-    ) {
+    const stepsEntry = {
+      module: moduleName,
+      steps: [...steps],
+      newSteps: newEntries,
+    };
+    const index = this.steps.findIndex(
+      (entry) => entry.module === stepsEntry.module
+    );
+    if (index != -1 && stepsEntry.newSteps.length > 0) {
+      this.steps[index] = stepsEntry;
+    } else if (index === -1) {
       this.steps.push(stepsEntry);
     }
   }
@@ -454,6 +520,7 @@ export default class AnalyticsDashboard extends Vue {
       }, this.animationTimeInSeconds * 1000);
     });
   }
+
   createElementsMoveit(
     steps: TaskParticipantIterationStep[],
     parent: HTMLElement
@@ -486,19 +553,32 @@ export default class AnalyticsDashboard extends Vue {
         ) +
         ': ' +
         +Math.round(step.parameter.drive.maxSpeed) +
-        ' km/h<br />' +
+        ' ' +
+        this.$t('module.playing.moveit.enums.units.km/h') +
+        '<br />' +
         this.$t(
           `module.common.visualisation_master.visModules.analytics.module.drivingStats.avgSpeed`
         ) +
         ': ' +
         +Math.round(step.parameter.drive.averageSpeed) +
-        ' km/h<br />' +
+        ' ' +
+        this.$t('module.playing.moveit.enums.units.km/h') +
+        '<br />' +
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.drivingStats.distance`
+        ) +
+        ': ' +
+        Math.round(step.parameter.drive.drivenPathLength * 10) / 10 +
+        ' ' +
+        this.$t('module.playing.moveit.enums.units.km') +
+        '<br />' +
         this.$t(
           `module.common.visualisation_master.visModules.analytics.module.drivingStats.consumption`
         ) +
         ': ' +
-        Math.round(step.parameter.drive.consumption) +
-        ' litres';
+        Math.round(step.parameter.drive.consumption * 100) / 100 +
+        ' ' +
+        this.$t('module.playing.moveit.enums.units.liters');
 
       pElement.classList.add('drivingStats');
       divElement.appendChild(pElement);
@@ -655,6 +735,7 @@ export default class AnalyticsDashboard extends Vue {
     }
     return list;
   }
+
   getAnimationForVehicle(vehicle: any): PIXI.Texture[] {
     if (this.vehicleSpritesheet) {
       const animationName = vehicle.image.slice(0, -4);
@@ -672,33 +753,29 @@ export default class AnalyticsDashboard extends Vue {
   height: 100%;
   display: flex;
   flex-direction: column;
-  .contentTop {
+  .contentBanner {
     height: 20%;
     width: 100%;
     //border: 1px solid magenta;
     overflow: auto;
   }
-  .contentBottom {
+  .contentMain {
+    padding-bottom: 0.5rem;
     height: 80%;
     width: 100%;
     display: flex;
     flex-direction: row;
-    .contentLeft {
+    .contentAnimation {
       position: relative;
       height: 100%;
       width: 80%;
     }
-    .contentRight {
+    .contentSide {
       position: relative;
       height: 100%;
       width: 30%;
     }
   }
-}
-
-.HighScoreContainer {
-  height: 100%;
-  width: auto;
 }
 
 .allAnimationContainer {
@@ -803,14 +880,11 @@ export default class AnalyticsDashboard extends Vue {
 }
 
 .HighScoreContainer {
-  position: absolute;
   width: 100%;
   height: 100%;
   background-color: var(--color-background);
   padding: 0.5rem;
-  opacity: 0;
-  transition: opacity 1s ease;
-  overflow-y: scroll;
+  overflow-y: auto;
   text-align: center;
   .highScoreHeading {
     font-size: var(--font-size-xlarge);
@@ -933,5 +1007,22 @@ export default class AnalyticsDashboard extends Vue {
   100% {
     opacity: 1;
   }
+}
+
+.el-carousel {
+  height: 100%;
+}
+
+.media-right {
+  padding-right: 0.5rem;
+  font-size: calc(1.8px * var(--qr-code-size) / var(--connection-key-length));
+  font-family: monospace;
+  svg {
+    display: flex;
+  }
+}
+
+.media-content {
+  height: 100%;
 }
 </style>

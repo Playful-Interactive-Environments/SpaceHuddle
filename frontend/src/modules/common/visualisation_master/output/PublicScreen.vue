@@ -97,6 +97,9 @@
       v-if="currentVisModule === 'analytics'"
       :task-id="this.taskId"
       :task="this.task"
+      :timeModifier="timeModifier"
+      :ideas="this.ideas"
+      :paused="paused"
     />
   </div>
 </template>
@@ -150,8 +153,8 @@ export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: false }) readonly timerEnd!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
-  task: Task | null = null;
   authHeaderTyp!: EndpointAuthorisationType;
+  task: Task | null = null;
   allIdeas: Idea[] = [];
   ideas: Idea[] = [];
   votes: VoteResult[] = [];

@@ -489,6 +489,18 @@ export default class Participant extends Vue {
       await this.trackingManager.saveIteration({
         gameStep: GameStep.CleanUp,
         trackingData: trackingData,
+        drive: {
+          stops: stops,
+          persons: personCount,
+          routePath: routePath,
+          routePathLength: turf.length(routePath),
+          drivenPath: drivenPath,
+          drivenPathLength: turf.length(drivenPath),
+          trackingData: trackingData,
+          averageSpeed: averageSpeed(trackingData),
+          maxSpeed: maxSpeed(trackingData),
+          consumption: consumption(trackingData),
+        },
       });
     }
     this.stepTime = Date.now();

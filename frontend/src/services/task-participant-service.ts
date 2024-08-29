@@ -238,7 +238,7 @@ export const addReplayCountToSteps = (
 
 export const deregisterGetIterationStepList = (
   taskId: string,
-  callback: (result: any) => void
+  callback: null | ((result: any) => void) = null
 ): void => {
   cashService.deregisterGet(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}`,

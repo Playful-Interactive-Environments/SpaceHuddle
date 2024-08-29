@@ -28,6 +28,7 @@ import { Idea } from '@/types/api/Idea';
     IdeaCard,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: 0 }) readonly timeModifier!: number;

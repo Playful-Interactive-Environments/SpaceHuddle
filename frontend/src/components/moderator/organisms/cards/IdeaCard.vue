@@ -724,7 +724,7 @@ export default class IdeaCard extends Vue {
 }
 
 .fix-height.landscape {
-  overflow: unset;
+  overflow: hidden;
 
   .card__text {
     overflow: auto;

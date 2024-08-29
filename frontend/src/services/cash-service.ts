@@ -397,11 +397,12 @@ export function registerGet<TIn = any, TOut = any>(
 
 export function deregisterGet(
   url: string,
-  callback: (result: any, ...args) => void
+  callback: null | ((result: any, ...args) => void)
 ): void {
   const key = url.split('?')[0];
   if (key in dataCash) {
-    dataCash[key].removeCallback(callback);
+    if (callback !== null) dataCash[key].removeCallback(callback);
+    else dataCash[key].callbackList.splice(0);
     if (dataCash[key].callbackList.length === 0) {
       setTimeout(() => {
         if (dataCash[key] && dataCash[key].callbackList.length === 0)

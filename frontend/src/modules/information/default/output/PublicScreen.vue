@@ -1,11 +1,17 @@
 <template>
-  <section class="layout__columns">
+  <section
+    ref="content"
+    class="layout__columns"
+    :style="{ '--column-width': portrait ? '10rem' : '20rem' }"
+  >
     <IdeaCard
       v-for="(idea, index) in ideas"
       :idea="idea"
       :key="index"
       :is-editable="false"
       :show-state="false"
+      :portrait="portrait"
+      :fix-height="fixCardHeight"
     />
   </section>
 </template>
@@ -32,6 +38,16 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
+  contentHeight = 100;
+
+  get portrait(): boolean {
+    return this.contentHeight > 200;
+  }
+
+  get fixCardHeight(): string | null {
+    if (this.portrait) return null;
+    return `${this.contentHeight * 0.95}px`;
+  }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -54,10 +70,22 @@ export default class PublicScreen extends Vue {
     cashService.deregisterAllGet(this.updateIdeas);
   }
 
+  mounted(): void {
+    const content = this.$refs.content as HTMLElement;
+    if (content) {
+      this.contentHeight = content.clientHeight;
+    }
+  }
+
   unmounted(): void {
     this.deregisterAll();
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.layout__columns {
+  height: 100%;
+  column-width: var(--column-width);
+}
+</style>

@@ -30,15 +30,15 @@
           :style="{ color: entry.avatar.color }"
         ></font-awesome-icon>
       </td>
-      <td>{{ entry.value.pointsSpent }}</td>
+      <td>{{ Math.round(entry.value.pointsSpent * 10) / 10 }}</td>
       <td>
-        {{ entry.value.co2 }}
+        {{ Math.round(entry.value.co2 * 10) / 10 }}
       </td>
       <td>
-        {{ entry.value.water }}
+        {{ Math.round(entry.value.water * 10) / 10 }}
       </td>
       <td>
-        {{ entry.value.lifetime }}
+        {{ Math.round(entry.value.lifetime * 10) / 10 }}
       </td>
       <td>
         <el-rate
