@@ -44,6 +44,7 @@
     "quaternion": "^1.5.1",
     "randomcolor": "^0.6.2",
     "shake.js": "^1.2.2",
+    "tweedle.js": "^2.1.0",
     "uuid": "^9.0.1",
     "vec2": "^1.6.1",
     "vue": "3.3.6",

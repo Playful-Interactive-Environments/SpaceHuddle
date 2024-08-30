@@ -62,6 +62,8 @@
       },
       "module": {
         "billboard": "Problem Products",
+        "highscore": "Highscore",
+        "join": "Join Session",
         "drivingStats": {
           "maxSpeed": "max",
           "avgSpeed": "average",
@@ -71,6 +73,11 @@
           "collected": "collected",
           "time": "Time driven",
           "goal": "Goal reached!"
+        },
+        "coolItStats": {
+          "temperature": "temperature",
+          "normalisedTime": "time",
+          "moleculeHitCount": "molecule hit"
         }
       }
     }

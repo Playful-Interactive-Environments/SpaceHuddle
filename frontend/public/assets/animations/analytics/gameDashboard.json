@@ -1,0 +1,55 @@
+{
+"frames": {
+	"City.png": {
+		"frame": {"x":0, "y":293, "w":1208, "h":453},
+		"spriteSourceSize": {"x":0,"y":0,"w":1208,"h":453},
+		"sourceSize": {"w":1208,"h":453}
+	},
+	"DarkCloud_0.png": {
+		"frame": {"x":0, "y":1247, "w":495, "h":249},
+		"spriteSourceSize": {"x":0,"y":0,"w":495,"h":249},
+		"sourceSize": {"w":495,"h":249}
+	},
+	"DarkCloud_1.png": {
+		"frame": {"x":0, "y":1957, "w":493, "h":229},
+		"spriteSourceSize": {"x":0,"y":0,"w":493,"h":229},
+		"sourceSize": {"w":493,"h":229}
+	},
+	"LightCloud_0.png": {
+		"frame": {"x":0, "y":997, "w":495, "h":249},
+		"spriteSourceSize": {"x":0,"y":0,"w":495,"h":249},
+		"sourceSize": {"w":495,"h":249}
+	},
+	"LightCloud_1.png": {
+		"frame": {"x":0, "y":1727, "w":493, "h":229},
+		"spriteSourceSize": {"x":0,"y":0,"w":493,"h":229},
+		"sourceSize": {"w":493,"h":229}
+	},
+	"MidCloud_0.png": {
+		"frame": {"x":0, "y":747, "w":495, "h":249},
+		"spriteSourceSize": {"x":0,"y":0,"w":495,"h":249},
+		"sourceSize": {"w":495,"h":249}
+	},
+	"MidCloud_1.png": {
+		"frame": {"x":0, "y":1497, "w":493, "h":229},
+		"spriteSourceSize": {"x":0,"y":0,"w":493,"h":229},
+		"sourceSize": {"w":493,"h":229}
+	},
+	"Street.png": {
+		"frame": {"x":0, "y":0, "w":3000, "h":83},
+		"spriteSourceSize": {"x":0,"y":0,"w":3000,"h":83},
+		"sourceSize": {"w":3000,"h":83}
+	},
+	"hills.png": {
+		"frame": {"x":0, "y":84, "w":3000, "h":208},
+		"spriteSourceSize": {"x":0,"y":0,"w":3000,"h":208},
+		"sourceSize": {"w":3000,"h":208}
+	}
+
+},
+"meta": {
+	"image": "gameDashboard.png",
+	"size": {"w": 3001, "h": 2187},
+	"scale": "1"
+}
+}

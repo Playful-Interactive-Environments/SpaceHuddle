@@ -1,42 +1,207 @@
 <template>
   <div id="analyticsContainer">
     <div class="contentMain">
-      <div class="contentAnimation">
+      <div ref="contentAnimation" class="contentAnimation">
         <div v-if="steps.length > 0" class="allAnimationContainer">
-          <div
-            v-for="stepCategory of steps"
-            :key="stepCategory.module"
-            :id="stepCategory.module"
-            class="animationContainer"
-            :ref="stepCategory.module"
+          <Application
+            ref="pixi"
+            :width="canvasWidth"
+            :height="canvasHeight"
+            backgroundColor="#a0d4d9"
           >
-            <p v-if="stepCategory.module === 'shopit'" class="billboardText">
-              {{
-                $t(
-                  'module.common.visualisation_master.visModules.analytics.module.billboard'
-                )
-              }}
-            </p>
-          </div>
-          <div class="animationBackground">
-            <div id="city" class="backgroundItem">
-              <el-image :src="'/assets/animations/analytics/City.png'" />
-            </div>
-            <!--<div id="birds" class="backgroundItem">
-              <video width="200" height="200" loop autoplay>
-                <source
-                  :src="'/assets/animations/analytics/birds.webm'"
-                  type="video/webm"
+            <container v-if="dashboardSpritesheet">
+              <sprite
+                :texture="dashboardSpritesheet.textures['hills.png']"
+                :width="canvasWidth"
+                :height="
+                  getTextureHeight(dashboardSpritesheet.textures['hills.png'])
+                "
+                :anchor="[0, 1]"
+                :x="0"
+                :y="
+                  canvasHeight -
+                  getTextureHeight(dashboardSpritesheet.textures['Street.png'])
+                "
+              />
+              <sprite
+                :texture="dashboardSpritesheet.textures['Street.png']"
+                :width="canvasWidth"
+                :height="
+                  getTextureHeight(dashboardSpritesheet.textures['Street.png'])
+                "
+                :anchor="[0, 1]"
+                :x="0"
+                :y="canvasHeight"
+              />
+              <sprite
+                :texture="dashboardSpritesheet.textures['City.png']"
+                :width="
+                  getTextureWidth(dashboardSpritesheet.textures['City.png']) *
+                  0.55
+                "
+                :height="canvasHeight * 0.55"
+                :anchor="[0.5, 1]"
+                :x="canvasWidth / 2"
+                :y="
+                  canvasHeight -
+                  getTextureHeight(dashboardSpritesheet.textures['Street.png'])
+                "
+              />
+            </container>
+            <container v-if="dashboardSpritesheet">
+              <container
+                v-for="(step, index) in coolItAnimations"
+                :key="step.id"
+              >
+                <sprite
+                  v-if="step.texture"
+                  :texture="step.texture"
+                  :animation-speed="0.1"
+                  :width="getTextureWidth(step.texture) * 0.4"
+                  :height="canvasHeight * 0.4"
+                  :anchor="[0.5, 0]"
+                  :x="cloudX[index]"
+                  :y="0"
                 />
-              </video>
-            </div>-->
-            <div id="hills" class="backgroundItem">
-              <el-image :src="'/assets/animations/analytics/hills.png'" />
-            </div>
-            <div id="street" class="backgroundItem">
-              <el-image :src="'/assets/animations/analytics/Street.png'" />
-            </div>
-          </div>
+                <External tag="div">
+                  <div
+                    class="infoTop"
+                    :style="{
+                      '--x': `${cloudX[index]}px`,
+                      '--y': `${canvasHeight * 0.1}px`,
+                    }"
+                  >
+                    <p>
+                      {{
+                        $t(
+                          `module.common.visualisation_master.visModules.analytics.module.coolItStats.temperature`
+                        )
+                      }}: {{ Math.round(step.parameter.state.temperature) }}
+                      °C
+                    </p>
+                    <p>
+                      {{
+                        $t(
+                          `module.common.visualisation_master.visModules.analytics.module.coolItStats.normalisedTime`
+                        )
+                      }}: {{ Math.round(step.parameter.state.normalisedTime) }}
+                    </p>
+                    <p>
+                      {{
+                        $t(
+                          `module.common.visualisation_master.visModules.analytics.module.coolItStats.moleculeHitCount`
+                        )
+                      }}:
+                      {{ step.parameter.state.moleculeHitCount }}
+                    </p>
+                  </div>
+                </External>
+              </container>
+            </container>
+            <container v-if="vehicleSpritesheet">
+              <container
+                v-for="(step, index) in moveItAnimations"
+                :key="step.id"
+              >
+                <animated-sprite
+                  v-if="step.animation.length > 0"
+                  :textures="step.animation"
+                  :animation-speed="0.1"
+                  :width="getTextureWidth(step.animation[0]) * 0.1"
+                  :height="canvasHeight * 0.1"
+                  playing
+                  :anchor="[0, 1]"
+                  :x="vehicleX[index]"
+                  :y="
+                    canvasHeight -
+                    getTextureHeight(
+                      dashboardSpritesheet.textures['Street.png']
+                    ) /
+                      2
+                  "
+                />
+                <External tag="div">
+                  <div
+                    class="info"
+                    :style="{
+                      '--x': `${vehicleX[index]}px`,
+                      '--y': `${
+                        getTextureHeight(
+                          dashboardSpritesheet.textures['Street.png']
+                        ) +
+                        canvasHeight * 0.1
+                      }px`,
+                    }"
+                  >
+                    <p>
+                      {{
+                        $t(
+                          `module.common.visualisation_master.visModules.analytics.module.drivingStats.maxSpeed`
+                        )
+                      }}: {{ Math.round(step.parameter.drive.maxSpeed) }}
+                      {{ $t('module.playing.moveit.enums.units.km/h') }}
+                    </p>
+                    <p>
+                      {{
+                        $t(
+                          `module.common.visualisation_master.visModules.analytics.module.drivingStats.avgSpeed`
+                        )
+                      }}: {{ Math.round(step.parameter.drive.averageSpeed) }}
+                      {{ $t('module.playing.moveit.enums.units.km/h') }}
+                    </p>
+                    <p>
+                      {{
+                        $t(
+                          `module.common.visualisation_master.visModules.analytics.module.drivingStats.distance`
+                        )
+                      }}:
+                      {{
+                        Math.round(step.parameter.drive.drivenPathLength * 10) /
+                        10
+                      }}
+                      {{ $t('module.playing.moveit.enums.units.km') }}
+                    </p>
+                    <p>
+                      {{
+                        $t(
+                          `module.common.visualisation_master.visModules.analytics.module.drivingStats.consumption`
+                        )
+                      }}:
+                      {{
+                        Math.round(step.parameter.drive.consumption * 100) / 100
+                      }}
+                      {{ $t('module.playing.moveit.enums.units.liters') }}
+                    </p>
+                  </div>
+                </External>
+              </container>
+            </container>
+            <External tag="div">
+              <div
+                v-for="stepCategory of steps"
+                :key="stepCategory.module"
+                :id="stepCategory.module"
+                class="animationContainer"
+                :ref="stepCategory.module"
+              >
+                <div v-if="stepCategory.module === 'shopit'">
+                  <p class="billboardText">
+                    {{
+                      $t(
+                        'module.common.visualisation_master.visModules.analytics.module.billboard'
+                      )
+                    }}
+                  </p>
+                  <img
+                    v-for="(item, index) in mostExpensiveCards"
+                    :key="index"
+                    :src="getCardImage(item)"
+                    :alt="item.cardName"
+                  />
+                </div>
+              </div>
+            </External>
+          </Application>
         </div>
       </div>
       <div class="contentSide">
@@ -90,14 +255,7 @@
           :authHeaderTyp="authHeaderTyp"
         />
       </div>
-      <div
-        v-if="session"
-        class="contentSide media"
-        :style="{
-          '--connection-key-length': session.connectionKey.length,
-          '--qr-code-size': qrCodeSize,
-        }"
-      >
+      <div v-if="session" class="contentSide media">
         <h1 class="media-content">
           {{
             $t(
@@ -152,7 +310,6 @@ import * as cashService from '@/services/cash-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
-import { createApp, h } from 'vue';
 import shopItGameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import moveItGameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
@@ -163,10 +320,12 @@ import shopItHighScore from '@/modules/playing/shopit/organisms/Highscore.vue';
 import findItHighScore from '@/modules/playing/findit/organisms/Highscore.vue';
 
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
-import { delay } from '@/utils/wait';
+import { delay, until } from '@/utils/wait';
 import { Session } from '@/types/api/Session';
 import * as themeColors from '@/utils/themeColors';
 import QrcodeVue from 'qrcode.vue';
+import { Application, External } from 'vue3-pixi';
+import * as TWEEDLE from 'tweedle.js';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -199,6 +358,8 @@ interface VehicleData {
     findItHighScore,
     Gallery,
     QrcodeVue,
+    Application,
+    External,
     PublicScreenComponent: getEmptyComponent(),
   },
 })
@@ -213,9 +374,10 @@ export default class AnalyticsDashboard extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   filter: FilterData = { ...defaultFilterData };
 
-  textureToken = pixiUtil.createLoadingToken();
+  textureTokenVehicles = pixiUtil.createLoadingToken();
+  textureTokenDashboad = pixiUtil.createLoadingToken();
   vehicleSpritesheet: PIXI.Spritesheet | null = null;
-  cloudFolderPath = '/assets/animations/analytics/clouds/';
+  dashboardSpritesheet: PIXI.Spritesheet | null = null;
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
@@ -224,12 +386,38 @@ export default class AnalyticsDashboard extends Vue {
   animationTimeInSeconds = 30;
   componentLoadIndex = 0;
   bannerHeight = 100;
+  canvasWidth = 100;
+  canvasHeight = 100;
 
   steps: {
     module: string;
     steps: TaskParticipantIterationStep[];
     newSteps: TaskParticipantIterationStep[];
   }[] = [];
+
+  moveItAnimations: {
+    id: string;
+    parameter: any;
+    animation: PIXI.Texture[];
+    position: {
+      x: number;
+    };
+    tween: TWEEDLE.Tween<{ x: number }>;
+  }[] = [];
+  vehicleX: number[] = [];
+
+  coolItAnimations: {
+    id: string;
+    parameter: any;
+    texture: PIXI.Texture | undefined;
+    position: {
+      x: number;
+    };
+    tween: TWEEDLE.Tween<{ x: number }>;
+  }[] = [];
+  cloudX: number[] = [];
+
+  mostExpensiveCards: Card[] = [];
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -256,14 +444,39 @@ export default class AnalyticsDashboard extends Vue {
   }
 
   get qrCodeSize(): number {
-    return this.bannerHeight * 0.65;
+    return this.bannerHeight * 0.7;
   }
 
-  mounted() {
+  getTextureHeight(texture: PIXI.Texture): number {
+    return this.canvasWidth / pixiUtil.getTextureAspect(texture);
+  }
+
+  getTextureWidth(texture: PIXI.Texture): number {
+    return this.canvasHeight * pixiUtil.getTextureAspect(texture);
+  }
+
+  getCardImage(card: Card): string {
+    return shopItGameConfig.gameValues.spriteFolder + card.name + '.png';
+  }
+
+  async mounted(): Promise<void> {
+    until(() => this.$refs.pixi).then(() => {
+      const app = (this.$refs.pixi as any).app as PIXI.Application;
+      app.ticker.add(() => TWEEDLE.Group.shared.update());
+    });
+
+    pixiUtil
+      .loadTexture(
+        '/assets/animations/analytics/gameDashboard.json',
+        this.textureTokenDashboad
+      )
+      .then(async (sheet) => {
+        this.dashboardSpritesheet = sheet;
+      });
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/vehicle/vehicle_animation.json',
-        this.textureToken
+        this.textureTokenVehicles
       )
       .then(async (sheet) => {
         this.vehicleSpritesheet = sheet;
@@ -282,10 +495,21 @@ export default class AnalyticsDashboard extends Vue {
         }
       }
     );
+    this.calcSize();
+    await delay(2000);
+    this.calcSize();
+  }
 
+  calcSize(): void {
     const banner = this.$refs.contentBanner as HTMLElement;
     if (banner) {
       this.bannerHeight = banner.clientHeight;
+    }
+
+    const contentAnimation = this.$refs.contentAnimation as HTMLElement;
+    if (contentAnimation) {
+      this.canvasWidth = contentAnimation.clientWidth;
+      this.canvasHeight = contentAnimation.clientHeight;
     }
   }
 
@@ -303,13 +527,20 @@ export default class AnalyticsDashboard extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
-    pixiUtil.cleanupToken(this.textureToken);
+    pixiUtil.cleanupToken(this.textureTokenVehicles);
+    pixiUtil.cleanupToken(this.textureTokenDashboad);
   }
 
   getModuleName(task: Task): string[] {
     if (task && task.modules && task.modules.length > 0)
       return task.modules.map((module) => module.name);
     return ['default'];
+  }
+
+  getModuleSteps(moduleName: string): TaskParticipantIterationStep[] {
+    const data = this.steps.find((item) => item.module === moduleName);
+    if (data) return data.newSteps;
+    return [];
   }
 
   @Watch('task', { immediate: true })
@@ -377,30 +608,6 @@ export default class AnalyticsDashboard extends Vue {
     this.session = session;
   }
 
-  handleNewEntries(moduleName: string, steps: TaskParticipantIterationStep[]) {
-    const refArray = this.$refs[moduleName];
-
-    // Ensure the refArray is not undefined and is an array
-    if (Array.isArray(refArray) && refArray.length > 0) {
-      const element = refArray[0] as HTMLElement; // Assuming you want to target the first element
-
-      switch (moduleName) {
-        case 'coolit':
-          this.createElementsCoolit(steps, element);
-          break;
-        case 'moveit':
-          this.createElementsMoveit(steps, element);
-          break;
-        case 'shopit':
-          this.createElementsShopit(steps, element);
-          break;
-        case 'findit':
-          this.createElementsFindit(steps, element);
-          break;
-      }
-    }
-  }
-
   updateIterationSteps(
     moduleName: string,
     steps: TaskParticipantIterationStep[]
@@ -409,9 +616,6 @@ export default class AnalyticsDashboard extends Vue {
     const step = this.steps.find((entry) => entry.module === moduleName);
     if (step) {
       newEntries = this.findNewIterations(step.steps, steps);
-      if (newEntries.length > 0) {
-        this.handleNewEntries(moduleName, newEntries);
-      }
     }
 
     const stepsEntry = {
@@ -423,9 +627,113 @@ export default class AnalyticsDashboard extends Vue {
       (entry) => entry.module === stepsEntry.module
     );
     if (index != -1 && stepsEntry.newSteps.length > 0) {
-      this.steps[index] = stepsEntry;
+      this.steps[index].steps = stepsEntry.steps;
+      this.steps[index].newSteps.push(...stepsEntry.newSteps);
     } else if (index === -1) {
       this.steps.push(stepsEntry);
+    }
+    this.setupCoolIt();
+    this.setupMoveIt();
+    this.setupShopIt();
+  }
+
+  setupCoolIt(): void {
+    const moduleName = 'coolit';
+    const coolIt = this.getModuleSteps(moduleName);
+    this.coolItAnimations = coolIt.map((item) => {
+      const stars = item.parameter.gameplayResult.stars;
+      let textureName = `DarkCloud_${Math.round(Math.random())}.png`;
+      if (stars === 2)
+        textureName = `MidCloud_${Math.round(Math.random())}.png`;
+      else if (stars === 3)
+        textureName = `LightCloud_${Math.round(Math.random())}.png`;
+      const texture = this.dashboardSpritesheet?.textures[textureName];
+      const startX = texture ? -this.getTextureWidth(texture) * 0.4 : 0;
+      const position = {
+        x: startX,
+      };
+      const tween = new TWEEDLE.Tween(position)
+        .easing(TWEEDLE.Easing.Quadratic.InOut)
+        .from({ x: startX / 2 })
+        .to(
+          { x: this.canvasWidth - startX / 2 },
+          this.animationTimeInSeconds * 1000
+        )
+        .onComplete(() => this.animationend(moduleName, item.id))
+        .onUpdate(() => this.animationUpdate(moduleName))
+        .start();
+      return {
+        id: item.id,
+        parameter: item.parameter,
+        texture: texture,
+        position: position,
+        tween: tween,
+      };
+    });
+    this.cloudX = this.coolItAnimations.map((item) => item.position.x);
+  }
+
+  setupMoveIt(): void {
+    const moduleName = 'moveit';
+    const moveIt = this.getModuleSteps(moduleName);
+    this.moveItAnimations = moveIt.map((item) => {
+      const animation = this.getVehicleByType(
+        item.parameter.vehicle.type
+      ).animation;
+      const startX = -this.getTextureWidth(animation[0]) * 0.1;
+      const position = {
+        x: startX,
+      };
+      const tween = new TWEEDLE.Tween(position)
+        .easing(TWEEDLE.Easing.Quadratic.InOut)
+        .from({ x: startX })
+        .to({ x: this.canvasWidth }, this.animationTimeInSeconds * 1000)
+        .onComplete(() => this.animationend(moduleName, item.id))
+        .onUpdate(() => this.animationUpdate(moduleName))
+        .start();
+      return {
+        id: item.id,
+        parameter: item.parameter,
+        animation: animation,
+        position: position,
+        tween: tween,
+      };
+    });
+    this.vehicleX = this.moveItAnimations.map((item) => item.position.x);
+  }
+
+  setupShopIt(): void {
+    const moduleName = 'shopit';
+    const shopIt = this.getModuleSteps(moduleName);
+    this.mostExpensiveCards = [];
+    for (const step of shopIt) {
+      this.mostExpensiveCards.push(
+        ...this.calculateMostExpensiveCards(step.parameter.game.cardsPlayed)
+      );
+    }
+  }
+
+  animationUpdate(moduleName: string): void {
+    if (moduleName === 'moveit') {
+      this.vehicleX = this.moveItAnimations.map((item) => item.position.x);
+    }
+    if (moduleName === 'coolit') {
+      this.cloudX = this.coolItAnimations.map((item) => item.position.x);
+    }
+  }
+
+  animationend(moduleName: string, id: string): void {
+    if (moduleName === 'moveit') {
+      const index = this.moveItAnimations.findIndex((item) => item.id === id);
+      if (index > -1) {
+        this.moveItAnimations.splice(index, 1);
+      }
+    }
+    if (moduleName === 'coolit') {
+      const index = this.coolItAnimations.findIndex((item) => item.id === id);
+      if (index > -1) {
+        this.coolItAnimations.splice(index, 1);
+      }
     }
   }
 
@@ -498,189 +806,12 @@ export default class AnalyticsDashboard extends Vue {
     return true;
   }
 
-  createElementsCoolit(
-    steps: TaskParticipantIterationStep[],
-    parent: HTMLElement
-  ) {
-    //eslint-disable-next-line @typescript-eslint/no-unused-vars
-    steps.forEach((step, index) => {
-      //move it car check
-      let imgSource = '';
-      if (step.parameter.gameplayResult) {
-        imgSource = this.cloudFolderPath;
-        if (step.parameter.gameplayResult.stars >= 3) {
-          imgSource +=
-            this.cloudFolderPath +
-            'LightCloud_' +
-            Math.round(Math.random()) +
-            '.png';
-        } else {
-          imgSource +=
-            step.parameter.gameplayResult.stars === 2
-              ? 'MidCloud_' + Math.round(Math.random()) + '.png'
-              : 'DarkCloud_' + Math.round(Math.random()) + '.png';
-        }
-      }
-
-      const divElement = document.createElement('div');
-      divElement.setAttribute('key', step.id + Date.now());
-
-      const imgElement = document.createElement('img');
-      imgElement.setAttribute('src', imgSource);
-      imgElement.style.objectFit = 'contain';
-
-      divElement.appendChild(imgElement);
-      parent.appendChild(divElement);
-
-      divElement.style.animationDuration =
-        this.animationTimeInSeconds + 's !important';
-      divElement.style.top = Math.round(Math.random() * 80) + '%';
-      divElement.classList.add('animateMoveLeftRight');
-      divElement.classList.add('coolItAnimatedContainer');
-
-      setTimeout(() => {
-        parent.removeChild(divElement);
-      }, this.animationTimeInSeconds * 1000);
-    });
-  }
-
-  createElementsMoveit(
-    steps: TaskParticipantIterationStep[],
-    parent: HTMLElement
-  ) {
-    //eslint-disable-next-line @typescript-eslint/no-unused-vars
-    steps.forEach((step, index) => {
-      const divElement = document.createElement('div');
-      divElement.setAttribute('key', step.id + Date.now());
-
-      // Dynamically create a Vue app instance for the SpriteCanvas component
-      const vehicle = this.getVehicleByType(step.parameter.vehicle.type);
-      const app = createApp({
-        render() {
-          return h(SpriteCanvas, {
-            texture: vehicle.animation || [],
-            width: 200,
-            height: 100,
-            backgroundAlpha: 0,
-          });
-        },
-      });
-
-      // Mount the Vue instance into the divElement
-      app.mount(divElement);
-
-      const pElement = document.createElement('p');
-      pElement.innerHTML =
-        this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.maxSpeed`
-        ) +
-        ': ' +
-        +Math.round(step.parameter.drive.maxSpeed) +
-        ' ' +
-        this.$t('module.playing.moveit.enums.units.km/h') +
-        '<br />' +
-        this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.avgSpeed`
-        ) +
-        ': ' +
-        +Math.round(step.parameter.drive.averageSpeed) +
-        ' ' +
-        this.$t('module.playing.moveit.enums.units.km/h') +
-        '<br />' +
-        this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.distance`
-        ) +
-        ': ' +
-        Math.round(step.parameter.drive.drivenPathLength * 10) / 10 +
-        ' ' +
-        this.$t('module.playing.moveit.enums.units.km') +
-        '<br />' +
-        this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.consumption`
-        ) +
-        ': ' +
-        Math.round(step.parameter.drive.consumption * 100) / 100 +
-        ' ' +
-        this.$t('module.playing.moveit.enums.units.liters');
-
-      pElement.classList.add('drivingStats');
-      divElement.appendChild(pElement);
-
-      parent.appendChild(divElement);
-
-      // Apply styles and classes
-      divElement.style.animationDuration =
-        this.animationTimeInSeconds + 's !important';
-      divElement.classList.add('animateMoveLeftRight');
-      divElement.classList.add('moveItAnimatedContainer');
-
-      // Cleanup after animation ends
-      setTimeout(() => {
-        app.unmount(); // Unmount the Vue instance
-        parent.removeChild(divElement);
-      }, this.animationTimeInSeconds * 1000);
-    });
-  }
-
   getVehicleByType(type: string) {
     return this.vehicleList[
       this.vehicleList.findIndex(
         (vehicleEntry) => vehicleEntry.vehicle.name === type
       )
     ];
-  }
-
-  createElementsShopit(
-    steps: TaskParticipantIterationStep[],
-    parent: HTMLElement
-  ) {
-    const elementsToRemove = parent.getElementsByClassName(
-      'shopItAnimatedContainer'
-    ) as HTMLCollectionOf<HTMLElement>;
-    for (const element of elementsToRemove) {
-      setTimeout(() => {
-        parent.removeChild(element);
-      }, 2000);
-    }
-
-    //eslint-disable-next-line @typescript-eslint/no-unused-vars
-    steps.forEach((step, index) => {
-      const divElement = document.createElement('div');
-      let columnCount = 1;
-      divElement.setAttribute('key', step.id + Date.now());
-      if (step.parameter.game.cardsPlayed) {
-        const mostExpensiveCards = this.calculateMostExpensiveCards(
-          step.parameter.game.cardsPlayed
-        );
-        for (const card of mostExpensiveCards) {
-          const imgSource =
-            shopItGameConfig.gameValues.spriteFolder + card.name + '.png';
-
-          const imgElement = document.createElement('img');
-          imgElement.setAttribute('src', imgSource);
-          imgElement.style.objectFit = 'contain';
-
-          divElement.appendChild(imgElement);
-          columnCount += 1;
-        }
-      }
-      divElement.style.columns = columnCount + '';
-      parent.appendChild(divElement);
-
-      divElement.style.animationDuration =
-        this.animationTimeInSeconds + 's !important';
-      //divElement.classList.add('animateMoveLeftRight');
-      divElement.classList.add('shopItAnimatedContainer');
-    });
-  }
-
-  createElementsFindit(
-    //eslint-disable-next-line @typescript-eslint/no-unused-vars
-    steps: TaskParticipantIterationStep[],
-    //eslint-disable-next-line @typescript-eslint/no-unused-vars
-    parent: HTMLElement
-  ) {
-    return null;
   }
 
   calculateMostExpensiveCards(cardsArray: Card[]): Card[] {
@@ -824,50 +955,6 @@ export default class AnalyticsDashboard extends Vue {
   }
 }
 
-.animationBackground {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  justify-content: flex-end;
-  align-items: center;
-  bottom: 0;
-  .backgroundItem {
-    position: absolute;
-  }
-  #street {
-    bottom: 0;
-    height: 12%;
-    width: 100%;
-    z-index: 5;
-  }
-  #hills {
-    bottom: 11%;
-    height: 20%;
-    width: 100%;
-    z-index: 2;
-  }
-  #city {
-    bottom: 11.5%;
-    width: auto;
-    height: 55%;
-    z-index: 3;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-
-    .el-image {
-      object-fit: contain;
-      max-height: 100%;
-      width: 100%;
-    }
-  }
-  #birds {
-    z-index: 100;
-  }
-}
-
 #coolit {
   height: 45%;
   position: absolute;
@@ -908,6 +995,18 @@ export default class AnalyticsDashboard extends Vue {
     font-weight: var(--font-weight-bold);
     filter: drop-shadow(-1px 0 0 var(--color-brown));
   }
+  div {
+    height: 100%;
+  }
+  img {
+    object-fit: contain;
+    border: 2px solid var(--color-evaluating-dark);
+    border-radius: var(--border-radius-xs);
+    width: 30%;
+    height: 40%;
+    margin-top: 0.8rem;
+    margin-right: 0.3rem;
+  }
 }
 
 .HighScoreContainer {
@@ -922,19 +1021,6 @@ export default class AnalyticsDashboard extends Vue {
     font-weight: var(--font-weight-bold);
     text-align: center;
     margin-bottom: 1rem;
-  }
-}
-
-.birdsFlyingLeftRightAnimation {
-  animation: birdFlyingLeftRight 15s linear forwards;
-}
-
-@keyframes birdFlyingLeftRight {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
   }
 }
 
@@ -959,112 +1045,34 @@ export default class AnalyticsDashboard extends Vue {
   margin: auto;
 }
 
+.info {
+  position: absolute;
+  z-index: 20;
+  width: auto;
+  bottom: var(--y);
+  left: var(--x);
+  padding: 0.5rem;
+  background-color: var(--color-structuring-light);
+  border-radius: var(--border-radius-xs);
+  border: 2px solid var(--color-evaluating-dark);
+}
+
+.infoTop {
+  position: absolute;
+  z-index: 20;
+  width: auto;
+  top: var(--y);
+  left: var(--x);
+  padding: 0.5rem;
+  background-color: var(--color-structuring-light);
+  border-radius: var(--border-radius-xs);
+  border: 2px solid var(--color-evaluating-dark);
+}
+
 h1 {
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-xlarge);
   color: var(--color-primary);
   text-align: center;
-}
-</style>
-
-<style lang="scss">
-.animateMoveLeftRight {
-  animation: moveLeftRight 300s forwards linear !important;
-}
-
-@keyframes moveLeftRight {
-  0% {
-    transform: translateX(-75%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.coolItAnimatedContainer {
-  position: absolute;
-  height: 40% !important;
-  width: 100%;
-  left: 0;
-  top: 0;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  animation: moveLeftRight 30s forwards linear !important;
-  img {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    object-fit: contain;
-  }
-}
-
-.moveItAnimatedContainer {
-  position: absolute;
-  height: auto;
-  width: 100%;
-  left: 0;
-  bottom: 25%;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  animation: moveLeftRight 30s forwards linear !important;
-  .drivingStats {
-    position: absolute;
-    top: -80%;
-    padding: 0.5rem;
-    background-color: var(--color-structuring-light);
-    border-radius: var(--border-radius-xs);
-    border: 2px solid var(--color-evaluating-dark);
-  }
-}
-
-/*.shopItAnimatedContainer {
-  position: absolute;
-  height: 65% !important;
-  width: auto;
-  min-width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
-  animation: moveLeftRightShopIt 200s forwards linear !important;
-  img {
-    position: relative;
-    height: 100%;
-    width: auto;
-    object-fit: contain;
-    border: 2px solid var(--color-evaluating-dark);
-    border-radius: var(--border-radius-xs);
-  }
-}*/
-.shopItAnimatedContainer {
-  position: absolute;
-  height: 70%;
-  width: 95%;
-  column-gap: 0.2rem;
-  bottom: 0.5rem;
-  opacity: 0;
-  background-color: var(--color-structuring-light);
-  animation: appear 2s ease forwards;
-  img {
-    object-fit: contain;
-    border: 2px solid var(--color-evaluating-dark);
-    border-radius: var(--border-radius-xs);
-  }
-}
-
-@keyframes appear {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
 }
 </style>
