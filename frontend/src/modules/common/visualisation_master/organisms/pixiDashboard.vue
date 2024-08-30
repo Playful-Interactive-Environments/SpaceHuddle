@@ -627,8 +627,12 @@ export default class AnalyticsDashboard extends Vue {
       (entry) => entry.module === stepsEntry.module
     );
     if (index != -1 && stepsEntry.newSteps.length > 0) {
-      this.steps[index].steps = stepsEntry.steps;
-      this.steps[index].newSteps.push(...stepsEntry.newSteps);
+      if (moduleName === 'coolit' || moduleName === 'moveit') {
+        this.steps[index].steps = stepsEntry.steps;
+        this.steps[index].newSteps.push(...stepsEntry.newSteps);
+      } else {
+        this.steps[index] = stepsEntry;
+      }
     } else if (index === -1) {
       this.steps.push(stepsEntry);
     }
@@ -1025,7 +1029,7 @@ export default class AnalyticsDashboard extends Vue {
 }
 
 .el-carousel {
-  height: 100%;
+  height: calc(100% - var(--font-size-xlarge));
 }
 
 .media-right {
