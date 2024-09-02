@@ -546,23 +546,23 @@ export default class AnalyticsDashboard extends Vue {
 
       const pElement = document.createElement('p');
       pElement.innerHTML =
-          this.$t(
-              `module.common.visualisation_master.visModules.analytics.module.coolItStats.temperature`
-          ) +
-          ': ' +
-          + Math.round(step.parameter.state.temperature) +
-          '°C<br />' +
-          this.$t(
-              `module.common.visualisation_master.visModules.analytics.module.coolItStats.normalisedTime`
-          ) +
-          ': ' +
-          +Math.round(step.parameter.state.normalisedTime/1000) +
-          's<br />' +
-          this.$t(
-              `module.common.visualisation_master.visModules.analytics.module.coolItStats.moleculeHitCount`
-          ) +
-          ': ' +
-          Math.round(step.parameter.state.moleculeHitCount);
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.coolItStats.temperature`
+        ) +
+        ': ' +
+        +Math.round(step.parameter.state.temperature) +
+        '°C<br />' +
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.coolItStats.normalisedTime`
+        ) +
+        ': ' +
+        +Math.round(step.parameter.state.normalisedTime / 1000) +
+        's<br />' +
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.coolItStats.moleculeHitCount`
+        ) +
+        ': ' +
+        Math.round(step.parameter.state.moleculeHitCount);
 
       pElement.classList.add('coolItStats');
       divElement.appendChild(pElement);
