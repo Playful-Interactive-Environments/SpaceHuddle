@@ -1241,7 +1241,7 @@ h1 {
   .shopItElementsContainer {
     position: relative;
     width: 21rem;
-    height: 180%;
+    height: 220%;
     background-color: var(--color-background);
     border-radius: var(--border-radius-xs);
     padding: 0.3rem;
