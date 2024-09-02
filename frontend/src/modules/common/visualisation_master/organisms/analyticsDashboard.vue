@@ -18,23 +18,31 @@
               }}
             </p>
           </div>
-          <div class="animationBackground">
+          <div class="animationBackground" ref="background">
             <div id="city" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/City.png'" />
             </div>
-            <!--<div id="birds" class="backgroundItem">
-              <video width="200" height="200" loop autoplay>
-                <source
-                  :src="'/assets/animations/analytics/birds.webm'"
-                  type="video/webm"
-                />
-              </video>
-            </div>-->
             <div id="hills" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/hills.png'" />
             </div>
             <div id="street" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/Street.png'" />
+            </div>
+            <div
+              class="balloon backgroundItem"
+              :style="{ left: '40%', top: '25%' }"
+            >
+              <el-image
+                :src="'/assets/animations/analytics/hotAirBalloon.png'"
+              />
+            </div>
+            <div
+              class="balloon backgroundItem"
+              :style="{ right: '40%', top: '32%', animationDelay: '4s' }"
+            >
+              <el-image
+                :src="'/assets/animations/analytics/hotAirBalloon-1.png'"
+              />
             </div>
           </div>
         </div>
@@ -232,6 +240,9 @@ export default class AnalyticsDashboard extends Vue {
   }[] = [];
 
   intervalRandomCars = -1;
+  intervalRandomBirds = -1;
+
+  maxCarNumber = 3;
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -290,6 +301,7 @@ export default class AnalyticsDashboard extends Vue {
       this.bannerHeight = banner.clientHeight;
     }
     this.intervalRandomCars = setInterval(this.randomVehicles, 5000);
+    this.intervalRandomBirds = setInterval(this.randomBirds, 6000);
   }
 
   deregisterAll(): void {
@@ -308,6 +320,7 @@ export default class AnalyticsDashboard extends Vue {
     this.deregisterAll();
     pixiUtil.cleanupToken(this.textureToken);
     clearInterval(this.intervalRandomCars);
+    clearInterval(this.intervalRandomBirds);
   }
 
   getModuleName(task: Task): string[] {
@@ -564,8 +577,8 @@ export default class AnalyticsDashboard extends Vue {
         render() {
           return h(SpriteCanvas, {
             texture: vehicle.animation || [],
-            width: vehicleSize.width/4,
-            height: vehicleSize.height/4,
+            width: vehicleSize.width / 4,
+            height: vehicleSize.height / 4,
             backgroundAlpha: 0,
           });
         },
@@ -771,13 +784,13 @@ export default class AnalyticsDashboard extends Vue {
   }
 
   randomVehicles() {
-    if (Math.random() >= 0.5) {
-      const refArray = this.$refs['moveit'];
-      let parent: HTMLElement | null = null;
-      if (Array.isArray(refArray) && refArray.length > 0) {
-        parent = refArray[0] as HTMLElement;
-      }
-      if (parent) {
+    const refArray = this.$refs['moveit'];
+    let parent: HTMLElement | null = null;
+    if (Array.isArray(refArray) && refArray.length > 0) {
+      parent = refArray[0] as HTMLElement;
+    }
+    if (parent) {
+      if (Math.random() >= 0.5 && parent.children.length <= this.maxCarNumber) {
         const vehicleList = this.vehicleList.filter(
           (vehicle) => vehicle.category != 'motorcycle'
         );
@@ -788,8 +801,8 @@ export default class AnalyticsDashboard extends Vue {
           render() {
             return h(SpriteCanvas, {
               texture: vehicle.animation || [],
-              width: vehicleSize.width/4,
-              height: vehicleSize.height/4,
+              width: vehicleSize.width / 4,
+              height: vehicleSize.height / 4,
               backgroundAlpha: 0,
             });
           },
@@ -811,8 +824,57 @@ export default class AnalyticsDashboard extends Vue {
     }
   }
 
-  getVehicleSize(vehicle: VehicleData): {width: number, height: number} {
-    return {width: vehicle.animation[0].orig.width, height: vehicle.animation[0].orig.height};
+  getVehicleSize(vehicle: VehicleData): { width: number; height: number } {
+    return {
+      width: vehicle.animation[0].orig.width,
+      height: vehicle.animation[0].orig.height,
+    };
+  }
+
+  randomBirds() {
+    if (Math.random() > 0.7) {
+      const parent = this.$refs.background as HTMLElement | null;
+      if (parent) {
+        const divElement = document.createElement('div');
+        if (Math.random() >= 0.5) {
+          divElement.classList.add('birdsFlyingLeftRightAnimation');
+        } else {
+          divElement.classList.add('birdsFlyingRightLeftAnimation');
+        }
+        divElement.classList.add('birds');
+        const vidElement = document.createElement('video');
+
+        const dimensionsModifier = Math.round(Math.random() * 100) - 50;
+
+        vidElement.height = 150 + dimensionsModifier;
+        vidElement.width = 150 + dimensionsModifier;
+        vidElement.loop = true;
+        vidElement.autoplay = true;
+        vidElement.muted = true;
+        vidElement.playsInline = true;
+
+        const sourceElement = document.createElement('source');
+        sourceElement.src = '/assets/animations/analytics/birds.webm';
+        sourceElement.type = 'video/webm';
+
+        vidElement.play().catch((error) => {
+          console.error('Autoplay failed:', error);
+        });
+
+        vidElement.appendChild(sourceElement);
+        divElement.appendChild(vidElement);
+        parent.appendChild(divElement);
+
+        divElement.style.top = Math.random() * 40 + '%';
+        if (dimensionsModifier > 35) {
+          divElement.style.zIndex = '6';
+        }
+
+        setTimeout(() => {
+          parent?.removeChild(divElement);
+        }, 15000);
+      }
+    }
   }
 }
 </script>
@@ -863,8 +925,16 @@ export default class AnalyticsDashboard extends Vue {
   width: 100%;
   height: 100%;
   overflow: hidden;
-
-  background-color: var(--color-informing-light);
+  background: radial-gradient(
+      circle at bottom,
+      #a1d6da 0,
+      #a1d6da 60%,
+      #75d4de 60%,
+      #75d4de 85%,
+      #59c5d2 85%,
+      #59c5d2 100%
+    )
+    bottom;
   .el-image {
     object-fit: contain;
     height: 100%;
@@ -912,8 +982,24 @@ export default class AnalyticsDashboard extends Vue {
       width: 100%;
     }
   }
-  #birds {
-    z-index: 100;
+  .balloon {
+    height: 18%;
+    animation: float 15s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  33.3% {
+    transform: translateY(15%);
+  }
+  66.6% {
+    transform: translateY(-10%);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
@@ -952,6 +1038,7 @@ export default class AnalyticsDashboard extends Vue {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+
   .billboardText {
     color: var(--color-evaluating-dark);
     font-weight: var(--font-weight-bold);
@@ -971,19 +1058,6 @@ export default class AnalyticsDashboard extends Vue {
     font-weight: var(--font-weight-bold);
     text-align: center;
     margin-bottom: 1rem;
-  }
-}
-
-.birdsFlyingLeftRightAnimation {
-  animation: birdFlyingLeftRight 15s linear forwards;
-}
-
-@keyframes birdFlyingLeftRight {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
   }
 }
 
@@ -1107,6 +1181,37 @@ h1 {
   }
   100% {
     opacity: 1;
+  }
+}
+
+.birds {
+  position: absolute;
+  width: 100%;
+}
+
+.birdsFlyingLeftRightAnimation {
+  animation: birdFlyingLeftRight 15s linear forwards;
+}
+
+.birdsFlyingRightLeftAnimation {
+  animation: birdFlyingRightLeft 15s linear forwards;
+}
+
+@keyframes birdFlyingLeftRight {
+  0% {
+    transform: translateX(-100%) scaleX(-1);
+  }
+  100% {
+    transform: translateX(100%) scaleX(-1);
+  }
+}
+
+@keyframes birdFlyingRightLeft {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
   }
 }
 </style>
