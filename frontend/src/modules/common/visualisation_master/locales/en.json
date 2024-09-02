@@ -77,7 +77,7 @@
         "coolItStats": {
           "temperature": "temperature",
           "normalisedTime": "time",
-          "moleculeHitCount": "molecule hit"
+          "moleculeHitCount": "molecule hits"
         },
         "shopItStats": {
           "units": {

@@ -544,6 +544,29 @@ export default class AnalyticsDashboard extends Vue {
       imgElement.setAttribute('src', imgSource);
       imgElement.style.objectFit = 'contain';
 
+      const pElement = document.createElement('p');
+      pElement.innerHTML =
+          this.$t(
+              `module.common.visualisation_master.visModules.analytics.module.coolItStats.temperature`
+          ) +
+          ': ' +
+          + Math.round(step.parameter.state.temperature) +
+          '°C<br />' +
+          this.$t(
+              `module.common.visualisation_master.visModules.analytics.module.coolItStats.normalisedTime`
+          ) +
+          ': ' +
+          +Math.round(step.parameter.state.normalisedTime/1000) +
+          's<br />' +
+          this.$t(
+              `module.common.visualisation_master.visModules.analytics.module.coolItStats.moleculeHitCount`
+          ) +
+          ': ' +
+          Math.round(step.parameter.state.moleculeHitCount);
+
+      pElement.classList.add('coolItStats');
+      divElement.appendChild(pElement);
+
       divElement.appendChild(imgElement);
       parent.appendChild(divElement);
 
@@ -768,24 +791,6 @@ export default class AnalyticsDashboard extends Vue {
       }
     }
 
-    if (clothingItem) {
-      clothingItem.infoKey = this.$t(
-        'module.playing.shopit.participant.cardCategories.clothing'
-      );
-    }
-
-    if (electronicsItem) {
-      electronicsItem.infoKey = this.$t(
-        'module.playing.shopit.participant.cardCategories.electronics'
-      );
-    }
-
-    if (foodItem) {
-      foodItem.infoKey = this.$t(
-        'module.playing.shopit.participant.cardCategories.food'
-      );
-    }
-
     cards.push(clothingItem);
     cards.push(electronicsItem);
     cards.push(foodItem);
@@ -831,31 +836,30 @@ export default class AnalyticsDashboard extends Vue {
         const vehicle =
           vehicleList[Math.round(Math.random() * (vehicleList.length - 1))];
 
-          const vehicleSize = this.getVehicleSize(vehicle);
-          const app = createApp({
-            render() {
-              return h(SpriteCanvas, {
-                texture: vehicle.animation || [],
-                width: vehicleSize.width / 4,
-                height: vehicleSize.height / 4,
-                backgroundAlpha: 0,
-              });
-            },
-          });
-          const divElement = document.createElement('div');
-          divElement.classList.add('moveItAnimatedContainer');
+        const vehicleSize = this.getVehicleSize(vehicle);
+        const app = createApp({
+          render() {
+            return h(SpriteCanvas, {
+              texture: vehicle.animation || [],
+              width: vehicleSize.width / 4,
+              height: vehicleSize.height / 4,
+              backgroundAlpha: 0,
+            });
+          },
+        });
+        const divElement = document.createElement('div');
+        divElement.classList.add('moveItAnimatedContainer');
 
-          if (Math.random() >= 0.5) {
-            divElement.classList.add('reverseMoveIt');
-          }
-          app.mount(divElement);
-          parent.appendChild(divElement);
+        if (Math.random() >= 0.5) {
+          divElement.classList.add('reverseMoveIt');
+        }
+        app.mount(divElement);
+        parent.appendChild(divElement);
 
-          setTimeout(() => {
-            app.unmount();
-            parent?.removeChild(divElement);
-          }, 30000);
-
+        setTimeout(() => {
+          app.unmount();
+          parent?.removeChild(divElement);
+        }, 30000);
       }
     }
   }
@@ -1156,6 +1160,7 @@ h1 {
   .coolItStats {
     position: absolute;
     top: -80%;
+    left: 50%;
     padding: 0.5rem;
     background-color: var(--color-structuring-light);
     border-radius: var(--border-radius-xs);
