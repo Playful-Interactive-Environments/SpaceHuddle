@@ -307,6 +307,7 @@ export default class AnalyticsDashboard extends Vue {
   unmounted(): void {
     this.deregisterAll();
     pixiUtil.cleanupToken(this.textureToken);
+    clearInterval(this.intervalRandomCars);
   }
 
   getModuleName(task: Task): string[] {
