@@ -477,7 +477,6 @@ export default class AnalyticsDashboard extends Vue {
         }
       }
     }
-    console.log(extraElements);
     return extraElements;
   }
 
@@ -830,8 +829,8 @@ export default class AnalyticsDashboard extends Vue {
           (vehicle) => vehicle.category != 'motorcycle'
         );
         const vehicle =
-          vehicleList[Math.round(Math.random() * vehicleList.length - 1)];
-        if (vehicle.animation) {
+          vehicleList[Math.round(Math.random() * (vehicleList.length - 1))];
+
           const vehicleSize = this.getVehicleSize(vehicle);
           const app = createApp({
             render() {
@@ -856,7 +855,7 @@ export default class AnalyticsDashboard extends Vue {
             app.unmount();
             parent?.removeChild(divElement);
           }, 30000);
-        }
+
       }
     }
   }
