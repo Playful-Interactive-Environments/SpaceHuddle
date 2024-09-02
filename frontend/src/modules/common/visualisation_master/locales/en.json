@@ -78,6 +78,22 @@
           "temperature": "temperature",
           "normalisedTime": "time",
           "moleculeHitCount": "molecule hit"
+        },
+        "shopItStats": {
+          "units": {
+            "kg": "kg",
+            "kwh": "kwh",
+            "years": "years",
+            "l": "l",
+            "price": "€"
+          },
+          "cardProperties": {
+            "CO²": "CO²",
+            "electricity": "Energy",
+            "lifetime": "Lifetime",
+            "water": "Water",
+            "money": "Money"
+          }
         }
       }
     }

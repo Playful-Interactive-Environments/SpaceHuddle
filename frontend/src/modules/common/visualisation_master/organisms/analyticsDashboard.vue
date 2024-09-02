@@ -10,13 +10,12 @@
             class="animationContainer"
             :ref="stepCategory.module"
           >
-            <p v-if="stepCategory.module === 'shopit'" class="billboardText">
-              {{
-                $t(
-                  'module.common.visualisation_master.visModules.analytics.module.billboard'
-                )
-              }}
-            </p>
+            <!--            <div v-if="stepCategory.module === 'shopit'" class="plane">
+              <div class="shopItElementsContainer">
+                <el-image :src="'/assets/animations/analytics/plane.png'" />
+              </div>
+              <el-image :src="'/assets/animations/analytics/plane.png'" class="planeGraphic"/>
+            </div>-->
           </div>
           <div class="animationBackground" ref="background">
             <div id="city" class="backgroundItem">
@@ -651,20 +650,22 @@ export default class AnalyticsDashboard extends Vue {
     steps: TaskParticipantIterationStep[],
     parent: HTMLElement
   ) {
-    const elementsToRemove = parent.getElementsByClassName(
-      'shopItAnimatedContainer'
-    ) as HTMLCollectionOf<HTMLElement>;
-    for (const element of elementsToRemove) {
-      setTimeout(() => {
-        parent.removeChild(element);
-      }, 2000);
-    }
-
     //eslint-disable-next-line @typescript-eslint/no-unused-vars
     steps.forEach((step, index) => {
-      const divElement = document.createElement('div');
-      let columnCount = 1;
-      divElement.setAttribute('key', step.id + Date.now());
+      const planeDiv = document.createElement('div');
+      planeDiv.className = 'shopItAnimatedContainer';
+
+      const shopItElementsContainer = document.createElement('div');
+      shopItElementsContainer.className = 'shopItElementsContainer';
+
+      planeDiv.appendChild(shopItElementsContainer);
+
+      const image2 = document.createElement('img');
+      image2.src = '/assets/animations/analytics/plane.png';
+      image2.className = 'planeGraphic';
+
+      planeDiv.appendChild(image2);
+
       if (step.parameter.game.cardsPlayed) {
         const mostExpensiveCards = this.calculateMostExpensiveCards(
           step.parameter.game.cardsPlayed
@@ -675,18 +676,55 @@ export default class AnalyticsDashboard extends Vue {
 
           const imgElement = document.createElement('img');
           imgElement.setAttribute('src', imgSource);
-          imgElement.style.objectFit = 'contain';
+          imgElement.classList.add('shopItElement');
 
-          divElement.appendChild(imgElement);
-          columnCount += 1;
+          shopItElementsContainer.appendChild(imgElement);
         }
       }
-      divElement.style.columns = columnCount + '';
-      parent.appendChild(divElement);
 
-      divElement.style.animationDuration =
-        this.animationTimeInSeconds + 's !important';
-      divElement.classList.add('shopItAnimatedContainer');
+      const pElement = document.createElement('p');
+      pElement.innerHTML =
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.shopItStats.cardProperties.CO²`
+        ) +
+        ': ' +
+        +Math.round(step.parameter.game.co2) +
+        ' ' +
+        this.$t(
+          'module.common.visualisation_master.visModules.analytics.module.shopItStats.units.kg'
+        ) +
+        '<br />' +
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.shopItStats.cardProperties.electricity`
+        ) +
+        ': ' +
+        +Math.round(step.parameter.game.electricity) +
+        ' ' +
+        this.$t(
+          'module.common.visualisation_master.visModules.analytics.module.shopItStats.units.kwh'
+        ) +
+        '<br />' +
+        this.$t(
+          `module.common.visualisation_master.visModules.analytics.module.shopItStats.cardProperties.water`
+        ) +
+        ': ' +
+        Math.round(step.parameter.game.water) +
+        ' ' +
+        this.$t(
+          'module.common.visualisation_master.visModules.analytics.module.shopItStats.units.l'
+        );
+
+      pElement.classList.add('shopItStats');
+      planeDiv.appendChild(pElement);
+
+      parent.appendChild(planeDiv);
+      planeDiv.classList.add('animateMoveLeftRight');
+
+      planeDiv.style.top = Math.random() * 70 + '%';
+
+      setTimeout(() => {
+        parent.removeChild(planeDiv);
+      }, 30000);
     });
   }
 
@@ -731,21 +769,18 @@ export default class AnalyticsDashboard extends Vue {
       }
     }
 
-    console.log(clothingItem);
     if (clothingItem) {
       clothingItem.infoKey = this.$t(
         'module.playing.shopit.participant.cardCategories.clothing'
       );
     }
 
-    console.log(electronicsItem);
     if (electronicsItem) {
       electronicsItem.infoKey = this.$t(
         'module.playing.shopit.participant.cardCategories.electronics'
       );
     }
 
-    console.log(foodItem);
     if (foodItem) {
       foodItem.infoKey = this.$t(
         'module.playing.shopit.participant.cardCategories.food'
@@ -796,30 +831,32 @@ export default class AnalyticsDashboard extends Vue {
         );
         const vehicle =
           vehicleList[Math.round(Math.random() * vehicleList.length - 1)];
-        const vehicleSize = this.getVehicleSize(vehicle);
-        const app = createApp({
-          render() {
-            return h(SpriteCanvas, {
-              texture: vehicle.animation || [],
-              width: vehicleSize.width / 4,
-              height: vehicleSize.height / 4,
-              backgroundAlpha: 0,
-            });
-          },
-        });
-        const divElement = document.createElement('div');
-        divElement.classList.add('moveItAnimatedContainer');
+        if (vehicle.animation) {
+          const vehicleSize = this.getVehicleSize(vehicle);
+          const app = createApp({
+            render() {
+              return h(SpriteCanvas, {
+                texture: vehicle.animation || [],
+                width: vehicleSize.width / 4,
+                height: vehicleSize.height / 4,
+                backgroundAlpha: 0,
+              });
+            },
+          });
+          const divElement = document.createElement('div');
+          divElement.classList.add('moveItAnimatedContainer');
 
-        if (Math.random() >= 0.5) {
-          divElement.classList.add('reverseMoveIt');
+          if (Math.random() >= 0.5) {
+            divElement.classList.add('reverseMoveIt');
+          }
+          app.mount(divElement);
+          parent.appendChild(divElement);
+
+          setTimeout(() => {
+            app.unmount();
+            parent?.removeChild(divElement);
+          }, 30000);
         }
-        app.mount(divElement);
-        parent.appendChild(divElement);
-
-        setTimeout(() => {
-          app.unmount(); // Unmount the Vue instance
-          parent?.removeChild(divElement);
-        }, 30000);
       }
     }
   }
@@ -1006,7 +1043,7 @@ export default class AnalyticsDashboard extends Vue {
 #coolit {
   height: 45%;
   position: absolute;
-  top: 0;
+  top: 13%;
   width: 100%;
   background-size: cover;
   z-index: 1;
@@ -1024,26 +1061,13 @@ export default class AnalyticsDashboard extends Vue {
 
 #shopit {
   position: absolute;
-  border: 5px solid var(--color-evaluating-dark);
-  padding: 0.5rem 5px;
-  background-color: var(--color-structuring-light);
-  width: 15rem;
-  height: 10rem;
-  border-radius: var(--border-radius-small);
-  bottom: 14%;
-  right: 12.5%;
-  z-index: 4;
-  filter: drop-shadow(-10px 0 0 var(--color-brown));
-  overflow: hidden;
+  width: 100%;
+  height: 25%;
+  top: 3%;
+  z-index: 2;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-
-  .billboardText {
-    color: var(--color-evaluating-dark);
-    font-weight: var(--font-weight-bold);
-    filter: drop-shadow(-1px 0 0 var(--color-brown));
-  }
+  align-items: center;
 }
 
 .HighScoreContainer {
@@ -1092,7 +1116,7 @@ h1 {
 
 <style lang="scss">
 .animateMoveLeftRight {
-  animation: moveLeftRight 300s forwards linear !important;
+  animation: moveLeftRight 30s forwards linear !important;
 }
 
 @keyframes moveLeftRight {
@@ -1130,6 +1154,14 @@ h1 {
     width: 100%;
     object-fit: contain;
   }
+  .coolItStats {
+    position: absolute;
+    top: -80%;
+    padding: 0.5rem;
+    background-color: var(--color-structuring-light);
+    border-radius: var(--border-radius-xs);
+    border: 2px solid var(--color-evaluating-dark);
+  }
 }
 
 .moveItAnimatedContainer {
@@ -1157,22 +1189,6 @@ h1 {
   animation: moveRightLeft 30s forwards linear !important;
   bottom: -20% !important;
   z-index: 50;
-}
-
-.shopItAnimatedContainer {
-  position: absolute;
-  height: 70%;
-  width: 95%;
-  column-gap: 0.2rem;
-  bottom: 0.5rem;
-  opacity: 0;
-  background-color: var(--color-structuring-light);
-  animation: appear 2s ease forwards;
-  img {
-    object-fit: contain;
-    border: 2px solid var(--color-evaluating-dark);
-    border-radius: var(--border-radius-xs);
-  }
 }
 
 @keyframes appear {
@@ -1212,6 +1228,50 @@ h1 {
   }
   100% {
     transform: translateX(-100%);
+  }
+}
+
+.shopItAnimatedContainer {
+  height: 30%;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .shopItElementsContainer {
+    position: relative;
+    width: 21rem;
+    height: 180%;
+    background-color: var(--color-background);
+    border-radius: var(--border-radius-xs);
+    padding: 0.3rem;
+
+    overflow: hidden;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+  .planeGraphic {
+    object-fit: contain;
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+  }
+  .shopItElement {
+    object-fit: contain;
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    border: 2px solid var(--color-brown);
+    border-radius: var(--border-radius-xs);
+  }
+  .shopItStats {
+    position: absolute;
+    bottom: -200%;
+    padding: 0.5rem;
+    background-color: var(--color-structuring-light);
+    border-radius: var(--border-radius-xs);
+    border: 2px solid var(--color-evaluating-dark);
   }
 }
 </style>
