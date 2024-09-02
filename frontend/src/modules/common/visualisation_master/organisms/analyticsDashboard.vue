@@ -231,6 +231,8 @@ export default class AnalyticsDashboard extends Vue {
     newSteps: TaskParticipantIterationStep[];
   }[] = [];
 
+  intervalRandomCars = -1;
+
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
     return null;
@@ -287,6 +289,7 @@ export default class AnalyticsDashboard extends Vue {
     if (banner) {
       this.bannerHeight = banner.clientHeight;
     }
+    this.intervalRandomCars = setInterval(this.randomVehicles, 5000);
   }
 
   deregisterAll(): void {
@@ -380,9 +383,8 @@ export default class AnalyticsDashboard extends Vue {
   handleNewEntries(moduleName: string, steps: TaskParticipantIterationStep[]) {
     const refArray = this.$refs[moduleName];
 
-    // Ensure the refArray is not undefined and is an array
     if (Array.isArray(refArray) && refArray.length > 0) {
-      const element = refArray[0] as HTMLElement; // Assuming you want to target the first element
+      const element = refArray[0] as HTMLElement;
 
       switch (moduleName) {
         case 'coolit':
@@ -462,6 +464,7 @@ export default class AnalyticsDashboard extends Vue {
         }
       }
     }
+    console.log(extraElements);
     return extraElements;
   }
 
@@ -555,12 +558,13 @@ export default class AnalyticsDashboard extends Vue {
 
       // Dynamically create a Vue app instance for the SpriteCanvas component
       const vehicle = this.getVehicleByType(step.parameter.vehicle.type);
+      const vehicleSize = this.getVehicleSize(vehicle);
       const app = createApp({
         render() {
           return h(SpriteCanvas, {
             texture: vehicle.animation || [],
-            width: 200,
-            height: 100,
+            width: vehicleSize.width/4,
+            height: vehicleSize.height/4,
             backgroundAlpha: 0,
           });
         },
@@ -611,7 +615,6 @@ export default class AnalyticsDashboard extends Vue {
       // Apply styles and classes
       divElement.style.animationDuration =
         this.animationTimeInSeconds + 's !important';
-      divElement.classList.add('animateMoveLeftRight');
       divElement.classList.add('moveItAnimatedContainer');
 
       // Cleanup after animation ends
@@ -669,7 +672,6 @@ export default class AnalyticsDashboard extends Vue {
 
       divElement.style.animationDuration =
         this.animationTimeInSeconds + 's !important';
-      //divElement.classList.add('animateMoveLeftRight');
       divElement.classList.add('shopItAnimatedContainer');
     });
   }
@@ -766,6 +768,51 @@ export default class AnalyticsDashboard extends Vue {
     }
     return [];
   }
+
+  randomVehicles() {
+    if (Math.random() >= 0.5) {
+      const refArray = this.$refs['moveit'];
+      let parent: HTMLElement | null = null;
+      if (Array.isArray(refArray) && refArray.length > 0) {
+        parent = refArray[0] as HTMLElement;
+      }
+      if (parent) {
+        const vehicleList = this.vehicleList.filter(
+          (vehicle) => vehicle.category != 'motorcycle'
+        );
+        const vehicle =
+          vehicleList[Math.round(Math.random() * vehicleList.length - 1)];
+        const vehicleSize = this.getVehicleSize(vehicle);
+        const app = createApp({
+          render() {
+            return h(SpriteCanvas, {
+              texture: vehicle.animation || [],
+              width: vehicleSize.width/4,
+              height: vehicleSize.height/4,
+              backgroundAlpha: 0,
+            });
+          },
+        });
+        const divElement = document.createElement('div');
+        divElement.classList.add('moveItAnimatedContainer');
+
+        if (Math.random() >= 0.5) {
+          divElement.classList.add('reverseMoveIt');
+        }
+        app.mount(divElement);
+        parent.appendChild(divElement);
+
+        setTimeout(() => {
+          app.unmount(); // Unmount the Vue instance
+          parent?.removeChild(divElement);
+        }, 30000);
+      }
+    }
+  }
+
+  getVehicleSize(vehicle: VehicleData): {width: number, height: number} {
+    return {width: vehicle.animation[0].orig.width, height: vehicle.animation[0].orig.height};
+  }
 }
 </script>
 
@@ -810,6 +857,7 @@ export default class AnalyticsDashboard extends Vue {
 }
 
 .allAnimationContainer {
+  border-radius: var(--border-radius);
   position: relative;
   width: 100%;
   height: 100%;
@@ -981,6 +1029,15 @@ h1 {
   }
 }
 
+@keyframes moveRightLeft {
+  0% {
+    transform: translateX(100%) scaleX(-1);
+  }
+  100% {
+    transform: translateX(-75%) scaleX(-1);
+  }
+}
+
 .coolItAnimatedContainer {
   position: absolute;
   height: 40% !important;
@@ -1005,7 +1062,7 @@ h1 {
   height: auto;
   width: 100%;
   left: 0;
-  bottom: 25%;
+  bottom: 30%;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -1021,28 +1078,12 @@ h1 {
   }
 }
 
-/*.shopItAnimatedContainer {
-  position: absolute;
-  height: 65% !important;
-  width: auto;
-  min-width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
-  animation: moveLeftRightShopIt 200s forwards linear !important;
-  img {
-    position: relative;
-    height: 100%;
-    width: auto;
-    object-fit: contain;
-    border: 2px solid var(--color-evaluating-dark);
-    border-radius: var(--border-radius-xs);
-  }
-}*/
+.reverseMoveIt {
+  animation: moveRightLeft 30s forwards linear !important;
+  bottom: -20% !important;
+  z-index: 50;
+}
+
 .shopItAnimatedContainer {
   position: absolute;
   height: 70%;
