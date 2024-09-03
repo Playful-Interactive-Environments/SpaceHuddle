@@ -237,7 +237,7 @@ export default class AnalyticsDashboard extends Vue {
   intervalRandomCars = -1;
   intervalRandomBirds = -1;
 
-  maxCarNumber = 3;
+  maxCarNumber = 2;
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -616,12 +616,17 @@ export default class AnalyticsDashboard extends Vue {
       // Dynamically create a Vue app instance for the SpriteCanvas component
       const vehicle = this.getVehicleByType(step.parameter.vehicle.type);
       const vehicleSize = this.getVehicleSize(vehicle);
+      let sizeMod = 4.5;
+      if (vehicle.category === 'bus') {
+        sizeMod = 3.2;
+      }
+
       const app = createApp({
         render() {
           return h(SpriteCanvas, {
             texture: vehicle.animation || [],
-            width: vehicleSize.width / 4,
-            height: vehicleSize.height / 4,
+            width: vehicleSize.width / sizeMod,
+            height: vehicleSize.height / sizeMod,
             backgroundAlpha: 0,
           });
         },
@@ -857,12 +862,17 @@ export default class AnalyticsDashboard extends Vue {
           vehicleList[Math.round(Math.random() * (vehicleList.length - 1))];
 
         const vehicleSize = this.getVehicleSize(vehicle);
+        let sizeMod = 4.5;
+        if (vehicle.category === 'bus') {
+          sizeMod = 3.2;
+        }
+
         const app = createApp({
           render() {
             return h(SpriteCanvas, {
               texture: vehicle.animation || [],
-              width: vehicleSize.width / 4,
-              height: vehicleSize.height / 4,
+              width: vehicleSize.width / sizeMod,
+              height: vehicleSize.height / sizeMod,
               backgroundAlpha: 0,
             });
           },
