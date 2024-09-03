@@ -892,7 +892,7 @@ export default class AnalyticsDashboard extends Vue {
   }
 
   randomBirds() {
-    if (Math.random() > 0.7) {
+    if (Math.random() > 0) {
       const parent = this.$refs.background as HTMLElement | null;
       if (parent) {
         const divElement = document.createElement('div');
@@ -924,10 +924,13 @@ export default class AnalyticsDashboard extends Vue {
         vidElement.appendChild(sourceElement);
         divElement.appendChild(vidElement);
         parent.appendChild(divElement);
-
+        
+        divElement.style.zIndex = '2';
         divElement.style.top = Math.random() * 40 + '%';
         if (dimensionsModifier > 35) {
           divElement.style.zIndex = '6';
+        } else if (dimensionsModifier < -25) {
+          divElement.style.zIndex = '0';
         }
 
         setTimeout(() => {
@@ -1048,6 +1051,7 @@ export default class AnalyticsDashboard extends Vue {
   .balloon {
     height: 18%;
     animation: float 15s ease-in-out infinite;
+    z-index: 1;
   }
 }
 
