@@ -9,14 +9,7 @@
             :id="stepCategory.module"
             class="animationContainer"
             :ref="stepCategory.module"
-          >
-            <!--            <div v-if="stepCategory.module === 'shopit'" class="plane">
-              <div class="shopItElementsContainer">
-                <el-image :src="'/assets/animations/analytics/plane.png'" />
-              </div>
-              <el-image :src="'/assets/animations/analytics/plane.png'" class="planeGraphic"/>
-            </div>-->
-          </div>
+          ></div>
           <div class="animationBackground" ref="background">
             <div id="city" class="backgroundItem">
               <el-image :src="'/assets/animations/analytics/City.png'" />
@@ -111,6 +104,8 @@
               'module.common.visualisation_master.visModules.analytics.module.join'
             )
           }}
+          <br />
+          <font-awesome-icon :icon="['fas', 'arrow-right']" />
         </h1>
         <div
           class="qrcode media-right"
@@ -222,6 +217,7 @@ export default class AnalyticsDashboard extends Vue {
 
   textureToken = pixiUtil.createLoadingToken();
   vehicleSpritesheet: PIXI.Spritesheet | null = null;
+  lightningSpritesheet: PIXI.Spritesheet | null = null;
   cloudFolderPath = '/assets/animations/analytics/clouds/';
 
   tasks: Task[] = [];
@@ -284,6 +280,14 @@ export default class AnalyticsDashboard extends Vue {
             vehicle.animation = this.getAnimationForVehicle(vehicle.vehicle);
         }
         await delay(100);
+      });
+    pixiUtil
+      .loadTexture(
+        '/assets/games/coolit/city/lightning.json',
+        this.textureToken
+      )
+      .then((sheet) => {
+        this.lightningSpritesheet = sheet;
       });
 
     getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN).then(
@@ -565,9 +569,26 @@ export default class AnalyticsDashboard extends Vue {
         Math.round(step.parameter.state.moleculeHitCount);
 
       pElement.classList.add('coolItStats');
-      divElement.appendChild(pElement);
 
+      let lightningAnimation: any = [];
+      if (this.lightningSpritesheet)
+        lightningAnimation = this.lightningSpritesheet.animations['lightning'];
+
+      const app = createApp({
+        render() {
+          return h(SpriteCanvas, {
+            texture: lightningAnimation || [],
+            width: lightningAnimation[0].orig.width / 4 || 200,
+            height: lightningAnimation[0].orig.height / 4 || 600,
+            backgroundAlpha: 0,
+            class: 'lightning',
+          });
+        },
+      });
+
+      app.mount(divElement);
       divElement.appendChild(imgElement);
+      divElement.appendChild(pElement);
       parent.appendChild(divElement);
 
       divElement.style.animationDuration =
@@ -577,6 +598,7 @@ export default class AnalyticsDashboard extends Vue {
       divElement.classList.add('coolItAnimatedContainer');
 
       setTimeout(() => {
+        app.unmount();
         parent.removeChild(divElement);
       }, this.animationTimeInSeconds * 1000);
     });
@@ -680,13 +702,9 @@ export default class AnalyticsDashboard extends Vue {
       const shopItElementsContainer = document.createElement('div');
       shopItElementsContainer.className = 'shopItElementsContainer';
 
-      planeDiv.appendChild(shopItElementsContainer);
-
       const image2 = document.createElement('img');
       image2.src = '/assets/animations/analytics/plane.png';
       image2.className = 'planeGraphic';
-
-      planeDiv.appendChild(image2);
 
       if (step.parameter.game.cardsPlayed) {
         const mostExpensiveCards = this.calculateMostExpensiveCards(
@@ -738,6 +756,8 @@ export default class AnalyticsDashboard extends Vue {
 
       pElement.classList.add('shopItStats');
       planeDiv.appendChild(pElement);
+      planeDiv.appendChild(shopItElementsContainer);
+      planeDiv.appendChild(image2);
 
       parent.appendChild(planeDiv);
       planeDiv.classList.add('animateMoveLeftRight');
@@ -926,12 +946,14 @@ export default class AnalyticsDashboard extends Vue {
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
   .contentBanner {
     height: 20%;
     width: 100%;
     display: flex;
     flex-direction: row;
     overflow: hidden;
+    gap: 0.5rem;
   }
   .contentMain {
     padding-bottom: 0.5rem;
@@ -939,6 +961,7 @@ export default class AnalyticsDashboard extends Vue {
     width: 100%;
     display: flex;
     flex-direction: row;
+    gap: 0.5rem;
   }
 }
 
@@ -1005,7 +1028,7 @@ export default class AnalyticsDashboard extends Vue {
     bottom: 11%;
     height: 20%;
     width: 100%;
-    z-index: 2;
+    z-index: 0;
   }
   #city {
     bottom: 11.5%;
@@ -1046,7 +1069,7 @@ export default class AnalyticsDashboard extends Vue {
 #coolit {
   height: 45%;
   position: absolute;
-  top: 13%;
+  top: 10%;
   width: 100%;
   background-size: cover;
   z-index: 1;
@@ -1066,7 +1089,7 @@ export default class AnalyticsDashboard extends Vue {
   position: absolute;
   width: 100%;
   height: 25%;
-  top: 3%;
+  top: 7%;
   z-index: 2;
   display: flex;
   justify-content: center;
@@ -1124,7 +1147,7 @@ h1 {
 
 @keyframes moveLeftRight {
   0% {
-    transform: translateX(-75%);
+    transform: translateX(-100%);
   }
   100% {
     transform: translateX(100%);
@@ -1148,23 +1171,28 @@ h1 {
   top: 0;
   box-sizing: border-box;
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   animation: moveLeftRight 30s forwards linear !important;
   img {
     position: relative;
     height: 100%;
     width: 100%;
     object-fit: contain;
+    z-index: 2;
   }
   .coolItStats {
     position: absolute;
     top: -80%;
-    left: 50%;
     padding: 0.5rem;
     background-color: var(--color-structuring-light);
     border-radius: var(--border-radius-xs);
     border: 2px solid var(--color-evaluating-dark);
+  }
+  .lightning {
+    position: absolute;
+    top: 90%;
+    z-index: 1;
   }
 }
 
@@ -1270,12 +1298,12 @@ h1 {
     border-radius: var(--border-radius-xs);
   }
   .shopItStats {
-    position: absolute;
-    bottom: -200%;
     padding: 0.5rem;
     background-color: var(--color-structuring-light);
     border-radius: var(--border-radius-xs);
     border: 2px solid var(--color-evaluating-dark);
+    margin-right: -1rem;
+    z-index: 1;
   }
 }
 </style>
