@@ -892,7 +892,7 @@ export default class AnalyticsDashboard extends Vue {
   }
 
   randomBirds() {
-    if (Math.random() > 0) {
+    if (Math.random() > 0.7) {
       const parent = this.$refs.background as HTMLElement | null;
       if (parent) {
         const divElement = document.createElement('div');
@@ -924,7 +924,7 @@ export default class AnalyticsDashboard extends Vue {
         vidElement.appendChild(sourceElement);
         divElement.appendChild(vidElement);
         parent.appendChild(divElement);
-        
+
         divElement.style.zIndex = '2';
         divElement.style.top = Math.random() * 40 + '%';
         if (dimensionsModifier > 35) {
