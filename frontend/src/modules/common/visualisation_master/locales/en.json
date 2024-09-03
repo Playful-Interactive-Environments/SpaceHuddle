@@ -63,7 +63,7 @@
       "module": {
         "billboard": "Problem Products",
         "highscore": "Highscore",
-        "join": "Join Session on play.ecopolis.at",
+        "join": "Join Session on:",
         "drivingStats": {
           "maxSpeed": "max",
           "avgSpeed": "average",

@@ -103,7 +103,7 @@
             $t(
               'module.common.visualisation_master.visModules.analytics.module.join'
             )
-          }}
+          }} <span style="font-size: 14pt">&nbsp;play.ecopolis.at/join/{{ session.connectionKey }}</span>
           <br />
           <font-awesome-icon :icon="['fas', 'arrow-right']" />
         </h1>
@@ -927,8 +927,10 @@ export default class AnalyticsDashboard extends Vue {
         sourceElement.src = '/assets/animations/analytics/birds.webm';
         sourceElement.type = 'video/webm';
 
-        vidElement.play().catch((error) => {
-          console.error('Autoplay failed:', error);
+        vidElement.addEventListener('canplay', () => {
+          vidElement.play().catch((error) => {
+            console.error('Autoplay failed:', error);
+          });
         });
 
         vidElement.appendChild(sourceElement);
