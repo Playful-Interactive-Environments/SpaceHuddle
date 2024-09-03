@@ -1,16 +1,27 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <div v-if="hasWon && module.parameter.winText">
-      {{ module.parameter.winText }}
+      <markdown-render class="markdown" :source="module.parameter.winText" />
     </div>
     <div v-else-if="hasWon">
       {{ $t('module.playing.raffle.participant.win') }}
     </div>
-    <div v-else>
+    <div v-else-if="hasRaffle">
       {{ $t('module.playing.raffle.participant.wait') }}
+    </div>
+    <div v-else>
+      {{ $t('module.playing.raffle.participant.no-raffle') }}
     </div>
 
     <br />
+    <div v-if="hasWon">
+      {{ $t('module.playing.raffle.participant.code') }}:
+      <font-awesome-icon
+        :icon="avatar.symbol"
+        :style="{ color: avatar.color }"
+      ></font-awesome-icon>
+      {{ avatar.symbol }}{{ avatar.color }}
+    </div>
     <div v-if="hasWon">
       {{ $t('module.playing.raffle.participant.raffle') }}: {{ winRaffle }}
     </div>
@@ -35,10 +46,13 @@ import * as cashService from '@/services/cash-service';
 import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import * as authService from '@/services/auth-service';
+import MarkdownRender from '@/components/shared/molecules/MarkdownRender.vue';
+import { Avatar } from '@/types/api/Participant';
 
 @Options({
   components: {
     ParticipantModuleDefaultContainer,
+    MarkdownRender,
   },
 })
 export default class Participant extends Vue {
@@ -47,10 +61,12 @@ export default class Participant extends Vue {
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
+  hasRaffle = false;
   hasWon = false;
   winRaffle = 0;
   winCount = 0;
   winRaffleIndex = 0;
+  avatar: Avatar | null = null;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -58,6 +74,7 @@ export default class Participant extends Vue {
   }
 
   mounted(): void {
+    this.avatar = authService.getAvatar();
     ideaService.registerGetIdeasForTask(
       this.taskId,
       null,
@@ -85,6 +102,7 @@ export default class Participant extends Vue {
   }
 
   updateIdeas(ideas: Idea[]): void {
+    this.hasRaffle = ideas.length > 0;
     const myState = ideas.find(
       (item) => item.parameter.participant === authService.getParticipantId()
     );

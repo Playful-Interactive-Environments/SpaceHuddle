@@ -14,10 +14,12 @@
   },
   "participant": {
     "wait": "You haven't been pulled yet. Try again later.",
+    "no-raffle": "There hasn't been a draw yet. Try again later.",
     "win": "Congratulations, you were drawn.",
     "raffle": "raffle",
     "index": "raffle number",
-    "count": "ticket number"
+    "count": "ticket number",
+    "code": "winning code"
   },
   "enum": {
     "raffleCondition": {

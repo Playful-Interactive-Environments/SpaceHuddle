@@ -1,6 +1,6 @@
 {
   "description": {
-    "title": "Toblola",
+    "title": "Tombola",
     "description": "Aus allen Teilnehmenden wird nach dem Zufallsprinzip ein Gewinner ermittelt."
   },
   "moderatorConfig": {
@@ -14,10 +14,12 @@
   },
   "participant": {
     "wait": "Du bist noch nicht gezogen worden. Versuch es später noch einmal.",
+    "no-raffle": "Es gab noch keine Ziehung. Versuch es später noch einmal.",
     "win": "Herzlichen Glückwunsch, du wurdest gezogen.",
     "raffle": "Ziehung",
     "index": "Ziehungsnummer",
-    "count": "Losnummer"
+    "count": "Losnummer",
+    "code": "Gewinncode"
   },
   "enum": {
     "raffleCondition": {
