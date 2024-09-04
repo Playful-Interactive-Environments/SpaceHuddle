@@ -1199,7 +1199,7 @@ h1 {
   }
   .coolItStats {
     position: absolute;
-    top: -80%;
+    bottom: -80%;
     padding: 0.5rem;
     background-color: var(--color-structuring-light);
     border-radius: var(--border-radius-xs);
@@ -1225,7 +1225,7 @@ h1 {
   animation: moveLeftRight 30s forwards linear !important;
   .drivingStats {
     position: absolute;
-    top: -80%;
+    top: -150%;
     padding: 0.5rem;
     background-color: var(--color-structuring-light);
     border-radius: var(--border-radius-xs);
