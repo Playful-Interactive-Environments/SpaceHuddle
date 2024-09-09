@@ -10,7 +10,9 @@
   "moderatorContent": {
     "draw": "draw",
     "raffle": "raffle",
-    "avatar": "participant"
+    "avatar": "participant",
+    "noData": "There are no suitable participants yet.",
+    "allSelected": "All suitable participants have already been drawn."
   },
   "participant": {
     "wait": "You haven't been pulled yet. Try again later.",

@@ -1,11 +1,19 @@
 <template>
   <div>
     <lottery-machine
-      v-if="options.length > 0"
       v-model="startLottery"
       :options="options.map((item) => item.avatar)"
       @lotteryDone="lotteryDone"
     />
+    <div
+      v-if="options.length === 0 && winnerList.length === 0"
+      class="raffle-info"
+    >
+      {{ $t('module.playing.raffle.moderatorContent.noData') }}
+    </div>
+    <div v-else-if="options.length === 0" class="raffle-info">
+      {{ $t('module.playing.raffle.moderatorContent.allSelected') }}
+    </div>
     <el-button
       v-if="hasAdditionAvatar"
       type="primary"
@@ -242,5 +250,11 @@ export default class PublicScreen extends Vue implements IModeratorContent {
   height: calc(var(--font-size-default) * 2);
   padding-top: calc(var(--font-size-default) * 0.4);
   text-align: center;
+}
+
+.raffle-info {
+  color: var(--color-playing);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xlarge);
 }
 </style>

@@ -10,7 +10,9 @@
   "moderatorContent": {
     "draw": "ziehen",
     "raffle": "Ziehung",
-    "avatar": "Teilnehmer"
+    "avatar": "Teilnehmer",
+    "noData": "Es gibt noch keine passenden Teilnehmer.",
+    "allSelected": "Alle geeigneten Teilnehmer sind bereits ausgelost worden."
   },
   "participant": {
     "wait": "Du bist noch nicht gezogen worden. Versuch es später noch einmal.",
