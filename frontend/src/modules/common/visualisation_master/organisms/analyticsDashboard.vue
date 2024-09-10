@@ -527,6 +527,10 @@ export default class AnalyticsDashboard extends Vue {
       const divElement = document.createElement('div');
       divElement.setAttribute('key', step.id + Date.now());
 
+      let lightningAnimation: any = [];
+      if (this.lightningSpritesheet)
+        lightningAnimation = this.lightningSpritesheet.animations['lightning'];
+
       const app = createApp({
         render() {
           return h(SpriteCanvas, {
@@ -581,10 +585,6 @@ export default class AnalyticsDashboard extends Vue {
         Math.round(step.parameter.state.moleculeHitCount);
 
       pElement.classList.add('coolItStats');
-
-      let lightningAnimation: any = [];
-      if (this.lightningSpritesheet)
-        lightningAnimation = this.lightningSpritesheet.animations['lightning'];
 
       divElement.appendChild(imgElement);
       divElement.appendChild(pElement);
