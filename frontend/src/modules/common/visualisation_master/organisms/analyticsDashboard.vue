@@ -527,6 +527,18 @@ export default class AnalyticsDashboard extends Vue {
       const divElement = document.createElement('div');
       divElement.setAttribute('key', step.id + Date.now());
 
+      const app = createApp({
+        render() {
+          return h(SpriteCanvas, {
+            texture: lightningAnimation || [],
+            width: lightningAnimation[0].orig.width / 4 || 200,
+            height: lightningAnimation[0].orig.height / 4 || 600,
+            backgroundAlpha: 0,
+            class: 'lightning',
+          });
+        },
+      });
+
       let imgSource = '';
       if (step.parameter.gameplayResult) {
         imgSource = this.cloudFolderPath;
@@ -540,17 +552,6 @@ export default class AnalyticsDashboard extends Vue {
           imgSource += 'MidCloud_' + Math.round(Math.random()) + '.png';
         } else {
           imgSource += 'DarkCloud_' + Math.round(Math.random()) + '.png';
-          const app = createApp({
-            render() {
-              return h(SpriteCanvas, {
-                texture: lightningAnimation || [],
-                width: lightningAnimation[0].orig.width / 4 || 200,
-                height: lightningAnimation[0].orig.height / 4 || 600,
-                backgroundAlpha: 0,
-                class: 'lightning',
-              });
-            },
-          });
           app.mount(divElement);
         }
       }
