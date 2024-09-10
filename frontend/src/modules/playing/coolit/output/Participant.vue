@@ -196,6 +196,7 @@ export default class Participant extends Vue {
           temperature: state.temperature,
           moleculeState: state.moleculeState,
           obstacleState: state.obstacleState,
+          finished: true,
         },
         state.stars === 3
           ? TaskParticipantIterationStepStatesType.CORRECT
@@ -233,7 +234,7 @@ export default class Participant extends Vue {
       this.trackingManager.saveIterationStep({
         replayTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
-        finished: true,
+        finished: false,
       });
     }
     this.stepTime = Date.now();
