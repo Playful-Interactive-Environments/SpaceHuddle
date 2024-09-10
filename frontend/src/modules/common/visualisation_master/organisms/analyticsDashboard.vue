@@ -524,6 +524,9 @@ export default class AnalyticsDashboard extends Vue {
     //eslint-disable-next-line @typescript-eslint/no-unused-vars
     steps.forEach((step, index) => {
       //move it car check
+      const divElement = document.createElement('div');
+      divElement.setAttribute('key', step.id + Date.now());
+
       let imgSource = '';
       if (step.parameter.gameplayResult) {
         imgSource = this.cloudFolderPath;
@@ -533,16 +536,24 @@ export default class AnalyticsDashboard extends Vue {
             'LightCloud_' +
             Math.round(Math.random()) +
             '.png';
+        } else if (step.parameter.gameplayResult.stars === 2) {
+          imgSource += 'MidCloud_' + Math.round(Math.random()) + '.png';
         } else {
-          imgSource +=
-            step.parameter.gameplayResult.stars === 2
-              ? 'MidCloud_' + Math.round(Math.random()) + '.png'
-              : 'DarkCloud_' + Math.round(Math.random()) + '.png';
+          imgSource += 'DarkCloud_' + Math.round(Math.random()) + '.png';
+          const app = createApp({
+            render() {
+              return h(SpriteCanvas, {
+                texture: lightningAnimation || [],
+                width: lightningAnimation[0].orig.width / 4 || 200,
+                height: lightningAnimation[0].orig.height / 4 || 600,
+                backgroundAlpha: 0,
+                class: 'lightning',
+              });
+            },
+          });
+          app.mount(divElement);
         }
       }
-
-      const divElement = document.createElement('div');
-      divElement.setAttribute('key', step.id + Date.now());
 
       const imgElement = document.createElement('img');
       imgElement.setAttribute('src', imgSource);
@@ -574,19 +585,6 @@ export default class AnalyticsDashboard extends Vue {
       if (this.lightningSpritesheet)
         lightningAnimation = this.lightningSpritesheet.animations['lightning'];
 
-      const app = createApp({
-        render() {
-          return h(SpriteCanvas, {
-            texture: lightningAnimation || [],
-            width: lightningAnimation[0].orig.width / 4 || 200,
-            height: lightningAnimation[0].orig.height / 4 || 600,
-            backgroundAlpha: 0,
-            class: 'lightning',
-          });
-        },
-      });
-
-      app.mount(divElement);
       divElement.appendChild(imgElement);
       divElement.appendChild(pElement);
       parent.appendChild(divElement);
