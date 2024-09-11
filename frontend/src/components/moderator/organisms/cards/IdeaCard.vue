@@ -64,6 +64,7 @@
         <span
           ref="title"
           class="line-break"
+          :lang="$i18n.locale"
           :class="{ threeLineText: cutLongTexts || limitedTextLength }"
         >
           <span v-if="idea.count > 1" class="idea-count">
@@ -180,6 +181,7 @@
         ref="description"
         v-if="hasKeywords && idea.description && showKeyword"
         class="card__content line-break"
+        :lang="$i18n.locale"
         :class="{
           threeLineText:
             cutLongTexts ||
@@ -750,5 +752,16 @@ export default class IdeaCard extends Vue {
     var(--color-dark-contrast) 20%,
     transparent
   );
+}
+
+.line-break {
+  -moz-hyphens: auto;
+  -o-hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+  hyphenate-limit-chars: 8;
+  hyphenate-limit-lines: 2;
+  word-wrap: break-word;
 }
 </style>
