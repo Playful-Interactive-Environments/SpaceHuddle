@@ -25,7 +25,17 @@
       "atmosphere": "Die Atmosphäre setzt sich aus unterschiedlichsten Gasen wie Sauerstoff, Stickstoff, Wasserdampf und vielen Anderen zusammen. Ohne sie wäre das Überleben auf der Erde nicht möglich. Erkundige dich vor dem spielen, welchen Einfluss die verschiedenen Gase haben. Das wird dir später helfen.",
       "light": "Licht kommt in allen Formen von der Sonne zu uns. Das sichtbare Licht kommt durch die Atmosphäre und trifft auf die Erde. Beobachte was mit dem sichtbaren (hier gelbes) Licht passiert, wenn es auf ein Objekt trifft.",
       "heat": "Deine Mission: der überschüssigen Wärmestrahlung Platz machen, dass sie wieder von der Erde entweichen kann. Schiebe dazu die Treibhausgase aus dem Weg. Woran liegt das eigentlich, dass die Erde wärmer wird?",
-      "play": "Der Balken oben zeigt dir die aktuelle Temperaturentwicklung an. Versuche, im mittleren Bereich zu bleiben. Wenn deine Durchschnittstemperatur oder 3 Gebäude den markierten Grenzwert über- oder unterschreiten, ist das Spiel vorbei."
+      "play": "Der Balken oben zeigt dir die aktuelle Temperaturentwicklung an. Versuche, im mittleren Bereich zu bleiben. Wenn deine Durchschnittstemperatur oder 3 Gebäude den markierten Grenzwert über- oder unterschreiten, ist das Spiel vorbei.",
+      "button": {
+        "skip": "überspringen",
+        "continueButton": "weiter"
+      },
+      "order": {
+        "globalWarmingFactorReal": "Ordne die Treibhausgase nach CO2-Äquivalenten vom niedrigsten zum höchsten",
+        "lifespan": "Ordne die Treibhausgase nach Lebensdauer vom niedrigsten zum höchsten",
+        "rationGreenhouse": "Ordne die Treibhausgase nach ihrem Anteil an Treibhausgasen in der Atmosphäre vom niedrigsten zum höchsten"
+      },
+      "unknown": "unbekannt"
     },
     "placeables": {
       "city": {

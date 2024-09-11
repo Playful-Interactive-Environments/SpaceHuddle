@@ -25,7 +25,18 @@
       "atmosphere": "The atmosphere is made up of a wide variety of gases such as oxygen, nitrogen, water vapor and many others. Without them, survival on earth would not be possible. Before playing, find out what influence the different gases have. This will help you later.",
       "light": "Light comes to us in all forms from the sun. Visible light comes through the atmosphere and hits the earth. Observe what happens to the visible (here yellow) light when it hits an object.",
       "heat": "Your mission: to make room for the excess heat radiation so that it can escape from the earth again. To do this, push the greenhouse gases out of the way. Why is the earth getting warmer?",
-      "play": "The bar at the top shows you the current temperature development. Try to stay in the middle range. If your average temperature or 3 buildings exceed or fall below the marked limit, the game is over."    },
+      "play": "The bar at the top shows you the current temperature development. Try to stay in the middle range. If your average temperature or 3 buildings exceed or fall below the marked limit, the game is over.",
+      "button": {
+        "skip": "skip",
+        "continueButton": "continue"
+      },
+      "order": {
+        "globalWarmingFactorReal": "Order the greenhouse gases by CO2 equivalent from the lowest to the highest",
+        "lifespan": "Order the greenhouse gases by lifespan from the lowest to the highest",
+        "rationGreenhouse": "Order the greenhouse gases by proportion of greenhouse gases in the atmosphere from the lowest to the highest"
+      },
+      "unknown": "unknown"
+    },
     "placeables": {
       "city": {
         "name": "city"

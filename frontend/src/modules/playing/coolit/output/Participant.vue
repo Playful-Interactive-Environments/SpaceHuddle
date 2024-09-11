@@ -5,7 +5,10 @@
       translation-path="module.playing.coolit.participant.tutorial"
       image-directory="/assets/games/coolit/tutorial"
       :module-info-entry-data-list="tutorialList"
-      @infoRead="gameState = GameState.Game"
+      @infoRead="
+        gameState =
+          gameStep === GameStep.Play ? GameState.Tutorial : GameState.Game
+      "
       :info-type="`cool-it-${gameStep}`"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
@@ -17,6 +20,13 @@
       :open-high-score="levelDone"
       :win-time="180000"
       @play="startLevel"
+    />
+    <TutorialGame
+      v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"
+      :tracking-manager="trackingManager"
+      :task-id="taskId"
+      :module="module"
+      @done="gameState = GameState.Game"
     />
     <play-level
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
@@ -54,6 +64,7 @@ import PlayLevel from '@/modules/playing/coolit/organisms/PlayLevel.vue';
 import { PlayStateResult } from '@/modules/playing/coolit/organisms/PlayLevel.vue';
 import { Idea } from '@/types/api/Idea';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import TutorialGame from '@/modules/playing/coolit/organisms/TutorialGame.vue';
 
 export enum GameStep {
   Select = 'select',
@@ -63,6 +74,7 @@ export enum GameStep {
 enum GameState {
   Info = 'info',
   Game = 'game',
+  Tutorial = 'tutorial',
 }
 
 @Options({
@@ -70,6 +82,7 @@ enum GameState {
     PlayLevel,
     SelectLevel,
     ModuleInfo,
+    TutorialGame,
   },
   emits: [],
 })
