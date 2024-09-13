@@ -2,16 +2,16 @@
 
 namespace App\Domain\User\Repository;
 
-use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\EncryptTrait;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\User\Data\UserAdminData;
 use App\Domain\User\Data\UserData;
 use App\Domain\Session\Type\SessionRoleType;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
-use DomainException;
 
 /**
  * Repository.
@@ -68,6 +68,51 @@ final class UserRepository implements RepositoryInterface
     public function getUserByName(string $username): object|null
     {
         return $this->get(["username" => $username]);
+    }
+
+    /**
+     * Get list of entities for the parent ID.
+     * @param string $parentId The entity parent ID.
+     * @return array<UserAdminData> The result entity list.
+     * @throws GenericException
+     */
+    public function getAll(string $parentId): array
+    {
+        $query = $this->queryFactory->newSelect('user_state');
+        $query->select(["*"]);
+
+        $rows = $query->execute()->fetchAll("assoc");
+        $result = [];
+        foreach ($rows as $resultItem) {
+            array_push($result, new UserAdminData($resultItem));
+        }
+        return $result;
+    }
+
+    /**
+     * Is Admin.
+     * @return bool Is Admin.
+     * @throws GenericException
+     */
+    public function isAdmin(): bool {
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isUser()) {
+            $userData = $this->get(["id" => $authorisation->id]);
+            return ($userData->role === UserRoleType::ADMIN);
+        }
+        return false;
+    }
+
+    /**
+     * Confirm email address.
+     * @param string $id The userId
+     * @throws GenericException
+     */
+    public function confirmUser(string $id): void
+    {
+        $this->queryFactory->newUpdate("user", ["confirmed" => 1])
+            ->andWhere(["id" => $id])
+            ->execute();
     }
 
     /**

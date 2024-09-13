@@ -61,11 +61,13 @@ use App\Action\Selection\SelectionReadSingleAction;
 use App\Action\Selection\SelectionUpdateAction;
 use App\Action\Session\PublicScreenReadAction;
 use App\Action\Session\PublicScreenUpdateAction;
+use App\Action\Session\SessionCreateFromTemplateAction;
 use App\Action\Session\SessionDeleteAction;
 use App\Action\Session\SessionExportAction;
 use App\Action\Session\SessionParticipantReadAction;
 use App\Action\Session\SessionReadInfosAction;
 use App\Action\Session\SessionSubjectReadAction;
+use App\Action\Session\SessionTemplateReadAction;
 use App\Action\Session\SessionUpdateAction;
 use App\Action\SessionRole\SessionRoleCreateAction;
 use App\Action\SessionRole\SessionRoleDeleteAction;
@@ -105,9 +107,11 @@ use App\Action\Tutorial\TutorialReadAllAction;
 use App\Action\User\UserChangeParameterAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserConfirmAction;
+use App\Action\User\UserConfirmOtherAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserForgetPasswordAction;
 use App\Action\User\UserLoginAction;
+use App\Action\User\UserReadAllAction;
 use App\Action\User\UserRegisterAction;
 use \App\Action\Session\SessionCreateAction;
 use \App\Action\Session\SessionCloneAction;
@@ -181,8 +185,16 @@ return function (App $app) {
 
     // Password protected area
     $app->group(
+        "/users",
+        function (RouteCollectorProxy $app) {
+            $app->get("[/]", UserReadAllAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
         "/user",
         function (RouteCollectorProxy $app) {
+            $app->put("/{id}/confirm[/]", UserConfirmOtherAction::class);
             $app->put("/parameter[/]", UserChangeParameterAction::class);
             $app->put("[/]", UserChangePasswordAction::class);
             $app->delete("[/]", UserDeleteAction::class);
@@ -211,6 +223,7 @@ return function (App $app) {
     $app->group(
         "/sessions",
         function (RouteCollectorProxy $app) {
+            $app->get("/templates[/]", SessionTemplateReadAction::class);
             $app->get("/subjects[/]", SessionSubjectReadAction::class);
             $app->get("[/]", SessionReadAllAction::class);
         }
@@ -249,6 +262,8 @@ return function (App $app) {
 
             $app->get("/{sessionId}/participants[/]", SessionParticipantReadAction::class);
             $app->get("/{sessionId}/views[/]", ViewReadSessionAction::class);
+
+            $app->post("/{templateId}/template[/]", SessionCreateFromTemplateAction::class);
 
             $app->post("[/]", SessionCreateAction::class);
             //$app->get("/{id}[/]", SessionReadSingleAction::class);

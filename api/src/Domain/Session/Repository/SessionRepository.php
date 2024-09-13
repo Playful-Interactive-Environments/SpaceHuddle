@@ -20,6 +20,7 @@ use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\Topic\Type\ExportType;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
 use DomainException;
@@ -38,6 +39,7 @@ class SessionRepository implements RepositoryInterface
     use KeyGeneratorTrait;
     use RepositoryTrait {
         RepositoryTrait::insert as private genericInsert;
+        RepositoryTrait::update as private genericUpdate;
     }
 
     /**
@@ -304,6 +306,36 @@ class SessionRepository implements RepositoryInterface
     }
 
     /**
+     * Get list all public template sessions.
+     * @return array<SessionData> The result entity list.
+     * @throws GenericException
+     */
+    public function getTemplates(): array
+    {
+        $sortConditions = ["creation_date"];
+        $authorisation_conditions = ["visibility" => 'template'];
+
+        $query = $this->queryFactory->newSelect($this->getEntityName())->select(["*"])
+            ->andWhere($authorisation_conditions)
+            ->order($sortConditions);
+
+        $result = $this->fetchAll($query);
+        if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $this->getInfos($resultItem);
+            }
+        } elseif (is_object($result)) {
+            $this->getInfos($result);
+        }
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
      * Get list of entities for the connection keys.
      * @param array $keys The entity connection keys.
      * @return array<SessionData> The result entity list.
@@ -426,6 +458,21 @@ class SessionRepository implements RepositoryInterface
             $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         $data->creationDate = date("Y-m-d");
         return $this->genericInsert($data, $insertDependencies);
+    }
+
+    /**
+     * Update entity row.
+     * @param object|array $data The entity to change.
+     * @return object|null The result entity.
+     * @throws GenericException
+     */
+    public function update(object|array $data): ?object
+    {
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->role != UserRoleType::ADMIN) {
+            unset($data->visibility);
+        }
+        return $this->genericUpdate($data);
     }
 
     /**
@@ -579,6 +626,7 @@ class SessionRepository implements RepositoryInterface
             "description" => $data->description ?? null,
             "subject" => $data->subject ?? null,
             "theme" => $data->theme ?? null,
+            "visibility" => $data->visibility ?? 'private',
             "topic_activation" => $data->topicActivation ?? null,
             "connection_key" => $data->connectionKey ?? null,
             "max_participants" => $data->maxParticipants ?? null,
@@ -766,6 +814,34 @@ class SessionRepository implements RepositoryInterface
     }*/
 
     /**
+     * create session from Template.
+     * @param object $data The session data
+     * @return object|null The new session
+     */
+    public function createFromTemplate(object $data): ?object
+    {
+        $templateId = $data->templateId;
+        if (!isset($data->connectionKey))
+            $data->connectionKey = $this->generateNewConnectionKey("connection_key");
+        $data->creationDate = date("Y-m-d");
+        $session = $this->genericInsert($data, false);
+
+        if ($session->id) {
+            $this->queryFactory->newInsert(
+                'clone_helper',
+                [
+                    'target_id' => $session->id,
+                    'source_id' => $templateId,
+                    'table_name' => $this->getEntityName()
+                ]
+            )->execute();
+        }
+        $this->cloneDependencies($templateId, $session->id, false);
+
+        return $session;
+    }
+
+    /**
      * Clone entity row.
      * @param string $oldId Old table primary key
      * @param string | null $newParentId New parent key value to be inserted
@@ -804,18 +880,28 @@ class SessionRepository implements RepositoryInterface
      * Include dependent data.
      * @param string $oldId Old table primary key
      * @param string $newId Old table primary key
+     * @param bool $cloneRoles clone roles
      * @return void
      */
-    protected function cloneDependencies(string $oldId, string $newId): void
+    protected function cloneDependencies(string $oldId, string $newId, bool $cloneRoles = true): void
     {
-        $this->queryFactory->newClone(
-            "session_role",
-            ["session_id" => $oldId],
-            ["user_id", "role"],
-            "session_id",
-            $newId,
-            false
-        );
+        if ($cloneRoles) {
+            $this->queryFactory->newClone(
+                "session_role",
+                ["session_id" => $oldId],
+                ["user_id", "role"],
+                "session_id",
+                $newId,
+                false
+            );
+        } else {
+            $authorisation = $this->getAuthorisation();
+            $this->queryFactory->newInsert("session_role", [
+                "session_id" => $newId,
+                "user_id" => $authorisation->id,
+                "role" => strtoupper(SessionRoleType::OWNER)
+            ])->execute();
+        }
 
         $topicRepository = new TopicRepository($this->queryFactory);
         $topicRepository->setAuthorisation($this->getAuthorisation());

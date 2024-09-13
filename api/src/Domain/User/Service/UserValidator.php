@@ -148,6 +148,23 @@ final class UserValidator
     }
 
     /**
+     * Validate admin.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     * @throws GenericException
+     */
+    public function validateAdmin(array $data): void
+    {
+        if (!$this->repository->isAdmin()) {
+            $result = new ValidationResult();
+            $result->addError("role", "NoPermission: Only the admin can view this data.");
+            throw new ValidationException("Please check your login", $result);
+        }
+    }
+
+    /**
      * Validate password update.
      *
      * @param array<string, mixed> $data The data

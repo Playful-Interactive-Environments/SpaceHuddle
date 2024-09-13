@@ -4,6 +4,7 @@ namespace App\Domain\Session\Service;
 
 use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\Session\Type\SessionVisibilityType;
 use App\Domain\Topic\Type\ExportType;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
@@ -124,6 +125,28 @@ final class SessionValidator
         if (!$this->getRepository()->hasExportData($data["id"])) {
             $result = new ValidationResult();
             $result->addError("id", "NoData: This topic does not contain data to export.");
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
+
+    /**
+     * Create from template validator.
+     * @param array $data Data to be verified.
+     * @return void
+     */
+    public function validateCreateFromTemplate(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("templateId", "Empty: This field cannot be left empty")
+                ->requirePresence("templateId", message: "Required: This field is required")
+        );
+
+        $template = $this->getRepository()->getById($data["templateId"]);
+        if ($template && $template->visibilty !== SessionVisibilityType::TEMPLATE) {
+            $result = new ValidationResult();
+            $result->addError("templateId", "NoTemplate: Session is not a template");
             throw new ValidationException("Please check your input", $result);
         }
     }

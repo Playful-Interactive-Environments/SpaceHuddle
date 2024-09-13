@@ -44,7 +44,8 @@ final class UserLogin
             [
                 "action" => "login",
                 "userId" => $result->id,
-                "username" => $result->username
+                "username" => $result->username,
+                "role" => $result->role
             ]
         );
 

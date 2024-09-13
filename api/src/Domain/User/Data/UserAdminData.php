@@ -8,7 +8,7 @@ use Selective\ArrayReader\ArrayReader;
  * Data Model for User.
  * @OA\Schema(description="User description")
  */
-final class UserData
+final class UserAdminData
 {
     /**
      * The entity ID.
@@ -25,18 +25,25 @@ final class UserData
     public ?string $username = null;
 
     /**
-     * The role of the user.
-     * @var string|null
-     * @OA\Property(ref="#/components/schemas/UserRoleType")
+     * EMail is confirmed.
+     * @var bool|null
+     * @OA\Property()
      */
-    public ?string $role = null;
+    public ?bool $confirmed = null;
 
     /**
-     * Variable json parameters depending on the task type.
-     * @var object|null
-     * @OA\Property(type="object", format="json")
+     * Own sessions count.
+     * @var int|null
+     * @OA\Property()
      */
-    public ?object $parameter;
+    public ?int $ownSessions = null;
+
+    /**
+     * Shared sessions count.
+     * @var int|null
+     * @OA\Property()
+     */
+    public ?int $sharedSessions = null;
 
     /**
      * Creates a new User.
@@ -47,7 +54,8 @@ final class UserData
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->username = $reader->findString("username");
-        $this->role = $reader->findString("role");
-        $this->parameter = (object)json_decode((string)$reader->findString("parameter"));
+        $this->confirmed = $reader->findBool("confirmed");
+        $this->ownSessions = $reader->findInt("own_sessions");
+        $this->sharedSessions = $reader->findInt("shared_sessions");
     }
 }

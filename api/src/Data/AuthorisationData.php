@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use App\Domain\Participant\Type\ParticipantState;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
 use Lcobucci\JWT\Token\DataSet;
 
@@ -25,6 +26,13 @@ class AuthorisationData
     public ?string $type = null;
 
     /**
+     * The login role (user oder admin).
+     * @var string|null
+     * @OA\Property(ref="#/components/schemas/UserRoleType")
+     */
+    public ?string $role = null;
+
+    /**
      * The constructor.
      *
      * @param QueryFactory $queryFactory The query factory
@@ -32,6 +40,7 @@ class AuthorisationData
      */
     public function __construct(?DataSet $data = null)
     {
+        $this->role = UserRoleType::USER;
         if (isset($data) && $data->get("action") == "login") {
             $userId = $data->get("userId");
             $participantId = $data->get("participantId");
@@ -39,6 +48,7 @@ class AuthorisationData
             if (isset($userId)) {
                 $this->id = $userId;
                 $this->type = AuthorisationType::USER;
+                $this->role = $data->get("role");
             } elseif (isset($participantId)) {
                 $this->id = $participantId;
                 $this->type = AuthorisationType::PARTICIPANT;

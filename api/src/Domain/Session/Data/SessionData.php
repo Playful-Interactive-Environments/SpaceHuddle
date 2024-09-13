@@ -90,9 +90,16 @@ class SessionData
     /**
      * Role in the session.
      * @var string|null
-     * @OA\Property()
+     * @OA\Property(ref="#/components/schemas/SessionRoleType")
      */
     public ?string $role;
+
+    /**
+     * Visibility of the session.
+     * @var string|null
+     * @OA\Property(ref="#/components/schemas/SessionVisibilityType")
+     */
+    public ?string $visibility;
 
     /**
      * Number of topics assigned to the session.
@@ -141,6 +148,7 @@ class SessionData
         $this->creationDate = $reader->findString("creation_date");
         $this->publicScreenModuleId = $reader->findString("public_screen_module_id");
         $this->role = $reader->findString("role");
+        $this->visibility = $reader->findString("visibility");
         $this->topicCount = $reader->findInt("topic_count") ?? 0;
         $this->taskCount = $reader->findInt("task_count") ?? 0;
         $this->allowAnonymous = $reader->findBool("allow_anonymous") ?? false;

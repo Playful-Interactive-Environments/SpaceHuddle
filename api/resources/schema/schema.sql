@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS `user` (
                         `id` char(36) NOT NULL,
                         `username` varchar(255) NOT NULL,
                         `password` varchar(255) NOT NULL,
+                        `role` varchar(10) NOT NULL DEFAULT 'user',
                         `confirmed` TINYINT(1) DEFAULT 0,
                         `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
@@ -189,6 +190,7 @@ CREATE TABLE IF NOT EXISTS `session` (
                            `theme` varchar(255) DEFAULT NULL,
                            `topic_activation` varchar(255) DEFAULT NULL,
                            `connection_key` varchar(255) NOT NULL,
+                           `visibility` VARCHAR(10) NOT NULL DEFAULT 'private',
                            `max_participants` int(11) DEFAULT NULL,
                            `expiration_date` date DEFAULT NULL,
                            `creation_date` date NOT NULL DEFAULT current_timestamp(),
@@ -1379,6 +1381,30 @@ FROM
         INNER JOIN task ON task.id = task_info.task_id
 GROUP BY
     task_id;
+
+CREATE OR REPLACE VIEW user_state (id, username, confirmed, own_sessions, shared_sessions) AS
+SELECT
+    user.id,
+    user.username,
+    user.confirmed,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            session_role
+        WHERE
+                session_role.user_id = user.id AND session_role.role = 'owner'
+    ) AS own_sessions,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            session_role
+        WHERE
+                session_role.user_id = user.id AND session_role.role != 'owner'
+    ) AS shared_sessions
+FROM
+    user;
 
 COMMIT;
 
