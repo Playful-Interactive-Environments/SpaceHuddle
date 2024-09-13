@@ -35,7 +35,11 @@
         "lifespan": "Order the greenhouse gases by lifespan from the lowest to the highest",
         "rationGreenhouse": "Order the greenhouse gases by proportion of greenhouse gases in the atmosphere from the lowest to the highest"
       },
-      "unknown": "unknown"
+      "unknown": "unknown",
+      "heatGame": {
+        "move": "push out of the way",
+        "hit": "Greenhouse gas was hit by heat radiation."
+      }
     },
     "placeables": {
       "city": {

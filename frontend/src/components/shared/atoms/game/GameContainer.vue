@@ -380,6 +380,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: null }) readonly pixiFilterList!: any[] | null;
   @Prop({ default: null }) readonly pixiFilterListBackground!: any[] | null;
   @Prop({ default: 0.4 }) readonly autoPanSpeed!: number;
+  @Prop({ default: [1, 0] }) readonly autoPanDirection!: [number, number];
   @Prop({ default: 2 }) readonly manualPanSpeed!: number;
   @Prop({ default: false }) readonly resetPositionOnSpeedChanged!: boolean;
   @Prop({ default: false }) readonly enableSleeping!: boolean;
@@ -2140,7 +2141,10 @@ export default class GameContainer extends Vue {
     await until(() => this.isContainerReady);
     if (resetPosition)
       this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
-    this.beginPan([-this.autoPanSpeed, 0]);
+    this.beginPan([
+      this.autoPanDirection[0] * -this.autoPanSpeed,
+      this.autoPanDirection[1] * -this.autoPanSpeed,
+    ]);
     this.autoPlayIsRunning = true;
   }
 

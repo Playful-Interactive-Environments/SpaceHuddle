@@ -21,13 +21,16 @@
       :win-time="180000"
       @play="startLevel"
     />
-    <TutorialGame
+    <TutorialGameHeat
+      v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"
+    />
+    <!--<TutorialGameMolecule
       v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"
       :tracking-manager="trackingManager"
       :task-id="taskId"
       :module="module"
       @done="gameState = GameState.Game"
-    />
+    />-->
     <play-level
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
       :task-id="taskId"
@@ -64,7 +67,8 @@ import PlayLevel from '@/modules/playing/coolit/organisms/PlayLevel.vue';
 import { PlayStateResult } from '@/modules/playing/coolit/organisms/PlayLevel.vue';
 import { Idea } from '@/types/api/Idea';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
-import TutorialGame from '@/modules/playing/coolit/organisms/TutorialGame.vue';
+import TutorialGameMolecule from '@/modules/playing/coolit/organisms/tutorial/molecule.vue';
+import TutorialGameHeat from '@/modules/playing/coolit/organisms/tutorial/heat.vue';
 
 export enum GameStep {
   Select = 'select',
@@ -82,7 +86,8 @@ enum GameState {
     PlayLevel,
     SelectLevel,
     ModuleInfo,
-    TutorialGame,
+    TutorialGameMolecule,
+    TutorialGameHeat,
   },
   emits: [],
 })

@@ -35,7 +35,11 @@
         "lifespan": "Ordne die Treibhausgase nach Lebensdauer vom niedrigsten zum höchsten",
         "rationGreenhouse": "Ordne die Treibhausgase nach ihrem Anteil an Treibhausgasen in der Atmosphäre vom niedrigsten zum höchsten"
       },
-      "unknown": "unbekannt"
+      "unknown": "unbekannt",
+      "heatGame": {
+        "move": "aus dem Weg schieben",
+        "hit": "Das Treibhausgas wurde von der Wärmestrahlung getroffen."
+      }
     },
     "placeables": {
       "city": {

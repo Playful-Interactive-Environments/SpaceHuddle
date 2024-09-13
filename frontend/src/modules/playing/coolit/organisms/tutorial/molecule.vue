@@ -211,7 +211,7 @@ enum Step {
   emits: ['done'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class TutorialGame extends Vue {
+export default class TutorialMolecule extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
   @Prop() readonly taskId!: string;
   @Prop() readonly module!: Module;
