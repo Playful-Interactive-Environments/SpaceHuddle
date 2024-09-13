@@ -6,13 +6,15 @@
       v-model:height="height"
       :detect-collision="true"
       :use-gravity="false"
-      :wind-force="3"
+      :wind-force="!hit ? 3 : 0"
       :border-category="CollisionGroups.BORDER"
       :show-bounds="false"
       background-color="#a0d4d9"
       background-texture="/assets/games/coolit/tutorial/sky.png"
       :background-position="BackgroundPosition.Cover"
-      :background-movement="BackgroundMovement.Auto"
+      :background-movement="
+        !hit ? BackgroundMovement.Auto : BackgroundMovement.Break
+      "
       :collision-borders="CollisionBorderType.Background"
       :auto-pan-speed="0.8"
       :auto-pan-direction="[0, -1]"
@@ -23,7 +25,7 @@
         <container>
           <GameObject
             v-if="weatherStylesheets"
-            shape="circle"
+            shape="rect"
             :object-space="ObjectSpace.Absolute"
             :posX="width / 2"
             :posY="height / 2"
@@ -41,9 +43,7 @@
             }"
             :is-static="true"
             :affectedByForce="false"
-            :show-bounds="false"
-            :fix-size="rayParticleSize"
-            :keep-inside="false"
+            :objectAnchor="[0.5, 0]"
             @collision="rayCollision"
           >
             <container>
@@ -483,6 +483,10 @@ export default class heat extends Vue {
   ): Promise<void> {
     this.activeMoleculeName = obstacleObject.options.name as string;
     this.hit = true;
+    Matter.Body.setPosition(obstacleBody, {
+      x: this.width * 0.1,
+      y: obstacleBody.position.y,
+    });
   }
 
   updateLoop(): void {

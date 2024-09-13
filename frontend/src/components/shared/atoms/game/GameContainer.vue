@@ -272,7 +272,7 @@ export enum BackgroundMovement {
   Pan = 'pan',
   Auto = 'auto',
   Map = 'map',
-  Pause = 'pause',
+  Break = 'break',
 }
 
 export enum CollisionBorderType {
@@ -1762,10 +1762,10 @@ export default class GameContainer extends Vue {
   @Watch('backgroundMovement', { immediate: true })
   onBackgroundMovementChanged(): void {
     const restartFromPause =
-      this.previousBackgroundMovement === BackgroundMovement.Pause;
+      this.previousBackgroundMovement === BackgroundMovement.Break;
     if (this.isContainerReady) {
       switch (this.backgroundMovement) {
-        case BackgroundMovement.Pause:
+        case BackgroundMovement.Break:
           this.panSpeed = 0;
           this.panVector = [0, 0];
           break;

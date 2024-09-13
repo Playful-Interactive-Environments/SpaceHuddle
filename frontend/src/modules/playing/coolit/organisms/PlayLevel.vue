@@ -327,7 +327,7 @@
       :background-position="BackgroundPosition.Cover"
       :background-movement="
         showObstacleSelection
-          ? BackgroundMovement.Pause
+          ? BackgroundMovement.Break
           : BackgroundMovement.Auto
       "
       :collisionRegions="collisionRegions"
