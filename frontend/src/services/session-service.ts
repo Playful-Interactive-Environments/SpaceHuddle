@@ -229,6 +229,18 @@ export const clone = async (
   );
 };
 
+export const createFromTemplate = async (
+  sessionId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Session> => {
+  return apiExecutePostHandled<Session>(
+    `/${EndpointType.SESSION}/${sessionId}/template`,
+    null,
+    null,
+    authHeaderType
+  );
+};
+
 export const getQueryParameter = (orderType: string | null = null): string => {
   let queryParameter = getSessionListParameter(orderType);
   if (queryParameter.length > 0) queryParameter = `?${queryParameter}`;
@@ -357,4 +369,18 @@ export const filterSessions = (
     sessionList = sessionList.filter((session) => session.role === role);
   }
   return sessionList;
+};
+
+export const registerGetTemplateList = (
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Session[]> => {
+  return cashService.registerSimplifiedGet<Session[]>(
+    `/${EndpointType.SESSIONS}/templates`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
 };

@@ -1,4 +1,5 @@
 import UserType from '@/types/enum/UserType';
+import { SessionVisibilityType } from '@/types/enum/SessionVisibilityType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export interface Session {
@@ -20,6 +21,7 @@ export interface Session {
   taskCount: number;
   allowAnonymous: boolean;
   parameter: any;
+  visibility: SessionVisibilityType;
 }
 
 export interface SessionInfo {

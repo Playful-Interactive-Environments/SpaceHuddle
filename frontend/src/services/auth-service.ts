@@ -2,6 +2,7 @@ import jwt_decode from 'jwt-decode';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Avatar } from '@/types/api/Participant';
 import { useCookies } from 'vue3-cookies';
+import { UserRoleType } from '@/types/enum/UserRoleType';
 const { cookies } = useCookies();
 
 const JWT_KEY = 'jwt';
@@ -75,6 +76,13 @@ export const getUserId = (): string => {
     'userId',
     EndpointAuthorisationType.MODERATOR
   ) as string;
+};
+
+export const getUserRole = (): UserRoleType => {
+  return getAuthorisationProperty(
+    'role',
+    EndpointAuthorisationType.MODERATOR
+  ) as UserRoleType;
 };
 
 export const getAccessToken = (

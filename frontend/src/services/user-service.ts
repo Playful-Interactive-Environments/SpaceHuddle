@@ -7,6 +7,7 @@ import ApiResponse from '@/types/api/ApiResponse';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
+import { UserState } from '@/types/api/UserState';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -104,6 +105,30 @@ export const confirmEmail = async (token: string): Promise<ApiResponse> => {
 export const sendConfirmMail = async (email: string): Promise<ApiResponse> => {
   return await apiExecutePut<ApiResponse>(
     `/${EndpointType.USER}/send-confirm/${email}/`,
+    null,
+    EndpointAuthorisationType.UNAUTHORISED
+  );
+};
+
+export const registerGetUserList = (
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<UserState[]> => {
+  return cashService.registerSimplifiedGet<UserState[]>(
+    `/users`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const confirmOtherUser = async (
+  userId: string
+): Promise<ApiResponse> => {
+  return await apiExecutePut<ApiResponse>(
+    `/${EndpointType.USER}/${userId}/confirm/`,
     null,
     EndpointAuthorisationType.UNAUTHORISED
   );
