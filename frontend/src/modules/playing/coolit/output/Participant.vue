@@ -23,6 +23,7 @@
     />
     <TutorialGameHeat
       v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"
+      @done="gameState = GameState.Game"
     />
     <!--<TutorialGameMolecule
       v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"

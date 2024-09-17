@@ -490,7 +490,10 @@ export default class ObjectPhysics {
                   pos[0] = this.body.position.x + possibleSpace[0];
                 else if (outsideRight)
                   pos[0] = this.body.position.x - possibleSpace[0];*/
-                pos[0] = this.body.position.x;
+                if (!this.gameContainer.useDefaultBoundsX)
+                  pos[0] = this.body.position.x;
+                if (!this.gameContainer.useDefaultBoundsY)
+                  pos[1] = this.body.position.y;
               }
               Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
               Matter.Body.setVelocity(this.body, { x: 0, y: 0 });

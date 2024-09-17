@@ -38,7 +38,10 @@
       "unknown": "unbekannt",
       "heatGame": {
         "move": "aus dem Weg schieben",
-        "hit": "Das Treibhausgas wurde von der Wärmestrahlung getroffen."
+        "hit": "Das Treibhausgas wurde von der Wärmestrahlung getroffen.",
+        "hitCount": "Trefferzahl",
+        "temperature": "Temperatur",
+        "goal": "Ziel"
       }
     },
     "placeables": {

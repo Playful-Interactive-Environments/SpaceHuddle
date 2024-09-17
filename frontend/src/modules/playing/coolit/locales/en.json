@@ -38,7 +38,10 @@
       "unknown": "unknown",
       "heatGame": {
         "move": "push out of the way",
-        "hit": "Greenhouse gas was hit by heat radiation."
+        "hit": "Greenhouse gas was hit by heat radiation.",
+        "hitCount": "hit count",
+        "temperature": "temperature",
+        "goal": "goal"
       }
     },
     "placeables": {

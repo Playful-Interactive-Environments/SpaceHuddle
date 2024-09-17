@@ -487,8 +487,12 @@ export default class GameContainer extends Vue {
       ];
     }
     return [
-      this.backgroundPositionOffset[0] - this.backgroundTextureSize[0] / 2,
-      this.backgroundPositionOffset[1],
+      this.backgroundPositionOffset[0] -
+        (this.backgroundTextureSize[0] / 2) *
+          Math.abs(this.autoPanDirection[0]),
+      this.backgroundPositionOffset[1] -
+        (this.backgroundTextureSize[1] / 2) *
+          Math.abs(this.autoPanDirection[1]),
     ];
   }
 
@@ -500,7 +504,10 @@ export default class GameContainer extends Vue {
         this.backgroundTextureSize[1] * 2,
       ];
     }
-    return [this.backgroundTextureSize[0] * 2, this.backgroundTextureSize[1]];
+    return [
+      this.backgroundTextureSize[0] * (Math.abs(this.autoPanDirection[0]) + 1),
+      this.backgroundTextureSize[1] * (Math.abs(this.autoPanDirection[1]) + 1),
+    ];
   }
 
   get backgroundTexturePositionSprite(): PIXI.Texture | null {
@@ -646,11 +653,41 @@ export default class GameContainer extends Vue {
     return this.ready && !this.loading && !this.waitForDataLoad;
   }
 
+  get autoPanX(): boolean {
+    return Math.abs(this.autoPanDirection[0]) > 0;
+  }
+
+  get autoPanY(): boolean {
+    return Math.abs(this.autoPanDirection[1]) > 0;
+  }
+
+  get useDefaultBoundsX(): boolean {
+    if (this.backgroundMovement === BackgroundMovement.Pan) {
+      return false;
+    } else if (this.backgroundMovement === BackgroundMovement.Auto) {
+      if (this.autoPanX) return false;
+    }
+    return true;
+  }
+
+  get useDefaultBoundsY(): boolean {
+    if (this.backgroundMovement === BackgroundMovement.Pan) {
+      return false;
+    } else if (this.backgroundMovement === BackgroundMovement.Auto) {
+      if (this.autoPanY) return false;
+    }
+    return true;
+  }
+
+  get boundsScaleFactor(): [number, number] {
+    return [this.useDefaultBoundsX ? 1 : 3, this.useDefaultBoundsY ? 1 : 3];
+  }
+
   get boundsWidth(): number {
     const gameWidth = this.gameWidth ? this.gameWidth : 100;
     const backgroundTextureWidth =
       this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
-        ? this.backgroundTextureSize[0] * 3
+        ? this.backgroundTextureSize[0] * this.boundsScaleFactor[0]
         : this.backgroundTextureSize[0];
     return this.collisionBorders !== CollisionBorderType.Background
       ? gameWidth
@@ -661,8 +698,7 @@ export default class GameContainer extends Vue {
     const gameHeight = this.gameDisplayHeight ? this.gameDisplayHeight : 100;
     const backgroundTextureHeight =
       this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
-        ? this.backgroundTextureSize[1] *
-          (this.backgroundMovement === BackgroundMovement.Pan ? 3 : 1)
+        ? this.backgroundTextureSize[1] * this.boundsScaleFactor[1]
         : this.backgroundTextureSize[1];
     return this.collisionBorders !== CollisionBorderType.Background
       ? gameHeight
@@ -1426,7 +1462,7 @@ export default class GameContainer extends Vue {
       await until(
         () =>
           containerChildren(container).length > 1 &&
-          Date.now() - startTime < 30000
+          Date.now() - startTime < 60000
       );
       if (containerChildren(container).length === 0) return;
       const subContainerList = containerContainer(container);
@@ -1551,16 +1587,15 @@ export default class GameContainer extends Vue {
   async setupCollisionBound(
     collisionBorderType: CollisionBorderType,
     borderCategory: number
-  ): Promise<CollisionBounds | undefined> {
+  ): Promise<CollisionBounds | null> {
     const gameWidth = this.gameWidth ? this.gameWidth : 100;
     await until(() => this.isGameDisplayHeightReady);
     const gameHeight = this.gameDisplayHeight ? this.gameDisplayHeight : 100;
     const backgroundTextureSize =
       this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
         ? [
-            this.backgroundTextureSize[0] * 3,
-            this.backgroundTextureSize[1] *
-              (this.backgroundMovement === BackgroundMovement.Pan ? 3 : 1),
+            this.backgroundTextureSize[0] * this.boundsScaleFactor[0],
+            this.backgroundTextureSize[1] * this.boundsScaleFactor[1],
           ]
         : this.backgroundTextureSize;
     const boundsWidth =
@@ -1722,10 +1757,10 @@ export default class GameContainer extends Vue {
       containerBorders.rightPosition = [bounds.right.x, bounds.right.y];
       return containerBorders;
     }
-    return undefined;
+    return null;
   }
 
-  borders: undefined | CollisionBounds = undefined;
+  borders: null | CollisionBounds = null;
   async setupBound(): Promise<void> {
     this.borders = await this.setupCollisionBound(
       this.collisionBorders,
@@ -2204,9 +2239,14 @@ export default class GameContainer extends Vue {
     }
   }
 
+  totalPanDistance = 0;
   pan(): void {
     const x = this.backgroundPositionOffset[0] + this.panVector[0];
     const y = this.backgroundPositionOffset[1] + this.panVector[1];
+    if (this.backgroundMovement === BackgroundMovement.Auto) {
+      if (this.autoPanX) this.totalPanDistance += this.panVector[0];
+      if (this.autoPanY) this.totalPanDistance += this.panVector[1];
+    }
     const previousPosition = [...this.backgroundPositionOffset] as [
       number,
       number
@@ -2567,15 +2607,18 @@ export default class GameContainer extends Vue {
     if (this.endlessPanning) {
       await until(() => !!this.app);
       if (this.app) {
-        const backgroundPositions: [number, number][] = [
-          [0, 0],
-          [texture.width, 0],
-        ];
+        const backgroundPositions: [number, number][] = [[0, 0]];
         if (this.backgroundMovement === BackgroundMovement.Pan) {
           backgroundPositions.push(
+            [texture.width, 0],
             [0, texture.height],
             [texture.width, texture.height]
           );
+        } else if (this.backgroundMovement === BackgroundMovement.Auto) {
+          backgroundPositions.push([
+            texture.width * Math.abs(this.autoPanDirection[0]),
+            texture.height * Math.abs(this.autoPanDirection[1]),
+          ]);
         }
         const background = new PIXI.Graphics();
         for (const position of backgroundPositions) {
