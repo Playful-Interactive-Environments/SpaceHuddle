@@ -194,9 +194,22 @@ export class ObjectTransform {
     if (this.gameContainer.endlessPanning) {
       const maxX = this.gameContainer.backgroundTextureSize[0];
       const maxY = this.gameContainer.backgroundTextureSize[1];
-      if (this.position[0] < 0) this.position[0] = maxX + this.position[0];
-      if (this.position[0] > maxX) this.position[0] = this.position[0] - maxX;
-      if (this.gameContainer.backgroundMovement === BackgroundMovement.Pan) {
+      const pan =
+        this.gameContainer.backgroundMovement === BackgroundMovement.Pan;
+      const autoMove =
+        this.gameContainer.backgroundMovement === BackgroundMovement.Auto;
+
+      if (
+        pan ||
+        (autoMove && Math.abs(this.gameContainer.autoPanDirection[0]) > 0)
+      ) {
+        if (this.position[0] < 0) this.position[0] = maxX + this.position[0];
+        if (this.position[0] > maxX) this.position[0] = this.position[0] - maxX;
+      }
+      if (
+        pan ||
+        (autoMove && Math.abs(this.gameContainer.autoPanDirection[1]) > 0)
+      ) {
         if (this.position[1] < 0) this.position[1] = maxY + this.position[1];
         if (this.position[1] > maxY) this.position[1] = this.position[1] - maxY;
       }
