@@ -152,7 +152,8 @@
       "navigation": {
         "sessions": "Sessions",
         "profile": "Profile",
-        "settings": "Settings"
+        "settings": "Settings",
+        "userlist": "User List"
       },
       "sessionCode": {
         "shareSubject": "join spacehuddle.io session",
@@ -475,6 +476,13 @@
         "clonePrompt": "Do you really want to clone this task?",
         "statistic": "Statistics for",
         "settings": "task settings"
+      },
+      "userList": {
+        "header": "user list",
+        "username": "email",
+        "confirmed": "email confirmed",
+        "ownSessions": "created sessions",
+        "sharedSessions": "sessions invited by others"
       }
     }
   },

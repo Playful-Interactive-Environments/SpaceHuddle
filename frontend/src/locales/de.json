@@ -152,7 +152,8 @@
       "navigation": {
         "sessions": "Sitzungen",
         "profile": "Profil",
-        "settings": "Einstellungen"
+        "settings": "Einstellungen",
+        "userlist": "Benutzerliste"
       },
       "sessionCode": {
         "shareSubject": "Tritt der Spacehuddle.io Sitzung bei",
@@ -475,6 +476,13 @@
         "clonePrompt": "Wollen die diese Aufgabe wirklich duplizieren?",
         "statistic": "Statistik für",
         "settings": "Einstellungen"
+      },
+      "userList": {
+        "header": "Benutzerliste",
+        "username": "Email",
+        "confirmed": "Email bestätigt",
+        "ownSessions": "erstellte Sitzungen",
+        "sharedSessions": "von anderen eingeladene Sitzungen"
       }
     }
   },

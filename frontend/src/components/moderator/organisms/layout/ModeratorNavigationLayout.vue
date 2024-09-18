@@ -30,6 +30,10 @@
                 'nav--white': white,
               }"
             >
+              <router-link v-if="isAdmin" to="/user-list" class="level-item">
+                <font-awesome-icon icon="users" class="nav__item-icon" />
+                {{ $t('moderator.molecule.navigation.userlist') }}
+              </router-link>
               <router-link to="/sessions" class="level-item">
                 <font-awesome-icon icon="home" class="nav__item-icon" />
                 {{ $t('moderator.molecule.navigation.sessions') }}
@@ -74,6 +78,8 @@ import { Prop } from 'vue-property-decorator';
 import Sidebar from '@/components/moderator/organisms/layout/Sidebar.vue';
 import SidebarHeader from '@/components/moderator/organisms/layout/SidebarHeader.vue';
 import { EventType } from '@/types/enum/EventType';
+import { getUserRole } from '@/services/auth-service';
+import { UserRoleType } from '@/types/enum/UserRoleType';
 
 @Options({
   components: {
@@ -87,6 +93,10 @@ export default class ModeratorNavigationLayout extends Vue {
   @Prop({ default: '' }) readonly currentRouteTitle!: string;
   @Prop({ default: null }) readonly contentClass!: string | null;
   displaySettings = false;
+
+  get isAdmin(): boolean {
+    return getUserRole() === UserRoleType.ADMIN;
+  }
 
   mounted(): void {
     this.eventBus.off(EventType.CHANGE_SIDEBAR_VISIBILITY);

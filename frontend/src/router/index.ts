@@ -14,14 +14,16 @@ import ConfirmEmail from '@/views/moderator/User/ConfirmEmail.vue';
 import ChangePassword from '@/views/moderator/User/ChangePassword.vue';
 import ForgetPassword from '@/views/moderator/User/ForgetPassword.vue';
 import ResetPassword from '@/views/moderator/User/ResetPassword.vue';
+import UserList from '@/views/moderator/Admin/UserList.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
 import ParticipantModuleContent from '@/views/participant/ParticipantModuleContent.vue';
 import Imprint from '@/views/shared/Imprint.vue';
 
 import {
-  isParticipant,
+  getUserRole,
   isAuthenticated,
+  isParticipant,
   isUser,
   removeAccessToken,
 } from '@/services/auth-service';
@@ -30,6 +32,7 @@ import { ElMessage } from 'element-plus';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { useI18n } from 'vue-i18n';
 import { RouteName } from '@/types/enum/RouteName';
+import { UserRoleType } from '@/types/enum/UserRoleType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -172,6 +175,16 @@ const routes: Array<RouteRecordRaw> = [
     }),
   },
   {
+    path: '/user-list',
+    name: 'user-list',
+    component: UserList,
+    meta: {
+      requiresAuth: true,
+      requiresUser: true,
+      requiresAdmin: true,
+    },
+  },
+  {
     path: '/:catchAll(.*)',
     component: NotFound,
   },
@@ -226,11 +239,14 @@ router.beforeEach((to, from, next) => {
   const requiresParticipant = to.matched.some(
     (record) => record.meta.requiresParticipant
   );
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
+  const role = getUserRole();
 
   if (
     (requiresAuth && !isAuthenticated()) ||
     (requiresUser && !isUser()) ||
-    (requiresParticipant && !isParticipant())
+    (requiresParticipant && !isParticipant()) ||
+    (requiresAdmin && role !== UserRoleType.ADMIN)
   ) {
     let errorMessage = 'authorisationExpired';
     if (isAuthenticated()) errorMessage = 'incorrectAuthorisationType';
