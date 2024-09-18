@@ -96,8 +96,22 @@ export function resetBody(
   mouseConstraint: Matter.MouseConstraint | null = null
 ): void {
   if (mouseConstraint && mouseConstraint.body?.id === body.id) {
+    Matter.Events.trigger(mouseConstraint, 'enddrag', {
+      mouse: mouseConstraint.mouse,
+      source: mouseConstraint,
+      body: body,
+      name: 'enddrag',
+    });
+    Matter.Events.trigger(mouseConstraint, 'mouseup', {
+      mouse: mouseConstraint.mouse,
+      source: mouseConstraint,
+      name: 'mouseup',
+    });
     mouseConstraint.body = null;
-    Matter.Mouse.clearSourceEvents(mouseConstraint.mouse);
+    mouseConstraint.constraint.bodyB = null;
+    mouseConstraint.constraint.bodyA = null;
+    mouseConstraint.mouse.button = -1;
+    //Matter.Mouse.clearSourceEvents(mouseConstraint.mouse);
   }
   Matter.Body.setVelocity(body, { x: 0, y: 0 });
   Matter.Body.setAngularVelocity(body, 0);

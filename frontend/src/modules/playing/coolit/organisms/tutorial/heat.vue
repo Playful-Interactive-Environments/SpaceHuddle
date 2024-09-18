@@ -301,7 +301,7 @@
           }}
         </div>
         <div>
-          {{ temperature }}°C
+          {{ Math.round(temperature) }}°C
           <el-slider
             class="thermometer"
             v-model="temperature"
@@ -313,11 +313,25 @@
         </div>
       </div>
     </div>
+    <div v-else class="overlay">
+      <div>
+        <el-slider
+          class="thermometer"
+          v-model="temperature"
+          disabled
+          vertical
+          height="200px"
+          :max="40"
+        />
+      </div>
+      <div>{{ Math.round(temperature) }}°C</div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Watch } from 'vue-property-decorator';
 import GameContainer, {
   BackgroundMovement,
   CollisionBorderType,
@@ -494,6 +508,14 @@ export default class heat extends Vue {
     clearInterval(this.interval);
   }
 
+  closeInfoTime = 0;
+  @Watch('isHit', { immediate: true })
+  onIsHitChanged(): void {
+    if (!this.isHit) {
+      this.closeInfoTime = Date.now();
+    }
+  }
+
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
     this.circleGradientTexture = pixiUtil.generateCircleGradientTexture(
@@ -536,6 +558,7 @@ export default class heat extends Vue {
     });
   }
 
+  readonly reactTime = 2000;
   async rayCollision(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     rayObject: GameObject,
@@ -545,22 +568,24 @@ export default class heat extends Vue {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     obstacleBody: Matter.Body
   ): Promise<void> {
-    this.activeMoleculeName = obstacleObject.options.name as string;
-    this.isHit = true;
-    this.hitCount++;
-    this.temperature +=
-      gameConfig.molecules[this.activeMoleculeName].globalWarmingFactor;
+    if (!this.isHit && this.closeInfoTime + this.reactTime < Date.now()) {
+      this.activeMoleculeName = obstacleObject.options.name as string;
+      this.isHit = true;
+      this.hitCount++;
+      this.temperature +=
+        gameConfig.molecules[this.activeMoleculeName].globalWarmingFactor;
 
-    const gameContainer = this.$refs['gameContainer'] as GameContainer;
-    if (gameContainer) {
-      matterUtil.resetBody(obstacleBody, gameContainer.mouseConstraint);
-    } else {
-      Matter.Body.setVelocity(obstacleBody, { x: 0, y: 0 });
+      const gameContainer = this.$refs['gameContainer'] as GameContainer;
+      if (gameContainer) {
+        matterUtil.resetBody(obstacleBody, gameContainer.mouseConstraint);
+      } else {
+        Matter.Body.setVelocity(obstacleBody, {x: 0, y: 0});
+      }
+      Matter.Body.setPosition(obstacleBody, {
+        x: this.width * 0.1,
+        y: obstacleBody.position.y,
+      });
     }
-    Matter.Body.setPosition(obstacleBody, {
-      x: this.width * 0.1,
-      y: obstacleBody.position.y,
-    });
   }
 
   totalPanDistance = 0;
@@ -780,6 +805,19 @@ export default class heat extends Vue {
 
 .thermometer::v-deep(.el-slider__bar) {
   background-color: var(--color-red);
+}
+
+.overlay {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+
+  div {
+    margin: auto;
+    text-align: right;
+  }
 }
 
 .overlay-container {
