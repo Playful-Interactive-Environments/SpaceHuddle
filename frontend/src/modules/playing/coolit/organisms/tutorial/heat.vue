@@ -579,7 +579,7 @@ export default class heat extends Vue {
       if (gameContainer) {
         matterUtil.resetBody(obstacleBody, gameContainer.mouseConstraint);
       } else {
-        Matter.Body.setVelocity(obstacleBody, {x: 0, y: 0});
+        Matter.Body.setVelocity(obstacleBody, { x: 0, y: 0 });
       }
       Matter.Body.setPosition(obstacleBody, {
         x: this.width * 0.1,
