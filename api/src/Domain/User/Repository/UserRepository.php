@@ -107,7 +107,7 @@ final class UserRepository implements RepositoryInterface
     public function getAll(string $parentId): array
     {
         $query = $this->queryFactory->newSelect('user_state');
-        $query->select(["*"]);
+        $query->select(["*"])->order(["creation_date"]);
 
         $rows = $query->execute()->fetchAll("assoc");
         $result = [];

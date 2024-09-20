@@ -25,6 +25,13 @@ final class UserAdminData
     public ?string $username = null;
 
     /**
+     * When was the session created?
+     * @var string|null
+     * @OA\Property(format="date")
+     */
+    public ?string $creationDate;
+
+    /**
      * EMail is confirmed.
      * @var bool|null
      * @OA\Property()
@@ -54,6 +61,7 @@ final class UserAdminData
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->username = $reader->findString("username");
+        $this->creationDate = $reader->findString("creation_date");
         $this->confirmed = $reader->findBool("confirmed");
         $this->ownSessions = $reader->findInt("own_sessions");
         $this->sharedSessions = $reader->findInt("shared_sessions");

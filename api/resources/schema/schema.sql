@@ -1382,10 +1382,11 @@ FROM
 GROUP BY
     task_id;
 
-CREATE OR REPLACE VIEW user_state (id, username, confirmed, own_sessions, shared_sessions) AS
+CREATE OR REPLACE VIEW user_state (id, username, creation_date, confirmed, own_sessions, shared_sessions) AS
 SELECT
     user.id,
     user.username,
+    user.creation_date,
     user.confirmed,
     (
         SELECT
