@@ -1,5 +1,5 @@
 <template>
-  <div class="participant-background">
+  <div class="participant-background" :lang="$i18n.locale">
     <el-container
       class="participant-container full-height"
       :class="backgroundClass"

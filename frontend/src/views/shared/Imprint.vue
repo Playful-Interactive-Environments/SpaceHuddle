@@ -1,6 +1,6 @@
 <template>
   <PublicHeader />
-  <div class="imprint">
+  <div class="imprint" :lang="$i18n.locale">
     <h1>{{ $t('shared.view.imprint.imprint') }}</h1>
     <markdown-render :source="imprint.imprint" />
 
@@ -16,7 +16,7 @@
     <h2>{{ $t('shared.view.imprint.liability') }}</h2>
     <markdown-render :source="imprint.liability" />
   </div>
-  <footer>
+  <footer :lang="$i18n.locale">
     <footer>
       <a @click="$router.push(`/`)">
         {{ $t('shared.view.imprint.home') }}

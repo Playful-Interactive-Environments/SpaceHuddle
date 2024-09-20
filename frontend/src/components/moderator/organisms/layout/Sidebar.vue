@@ -1,5 +1,10 @@
 <template>
-  <el-scrollbar class="sidebar" height="100%" max-height="var(--app-height)">
+  <el-scrollbar
+    class="sidebar"
+    height="100%"
+    max-height="var(--app-height)"
+    :lang="$i18n.locale"
+  >
     <el-container class="sidebar__container">
       <el-header>
         <div class="sidebar__top">
@@ -51,7 +56,7 @@
       </el-main>
     </el-container>
   </el-scrollbar>
-  <div class="sidebar__footer">
+  <div class="sidebar__footer" :lang="$i18n.locale">
     <div class="sidebar__bottom session-code" v-if="session">
       <SessionCode :code="session.connectionKey" />
       <TutorialStep type="sessionDetails" step="publicScreen" :order="3">

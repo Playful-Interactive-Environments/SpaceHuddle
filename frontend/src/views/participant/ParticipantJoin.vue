@@ -1,5 +1,5 @@
 <template>
-  <div class="participant-background">
+  <div class="participant-background" :lang="$i18n.locale">
     <div
       class="participant-container join full-height centered-horizontal flex-column"
     >

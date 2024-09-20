@@ -1,5 +1,5 @@
 <template>
-  <header class="media">
+  <header class="media" :lang="$i18n.locale">
     <font-awesome-icon :icon="getIconName()" class="media-left logo" />
     <span class="media-content">
       <slot></slot>

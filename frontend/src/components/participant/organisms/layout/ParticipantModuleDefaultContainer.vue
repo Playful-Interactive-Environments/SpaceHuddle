@@ -1,5 +1,9 @@
 <template>
-  <el-container class="module-content" v-loading="showLoadingState">
+  <el-container
+    class="module-content"
+    v-loading="showLoadingState"
+    :lang="$i18n.locale"
+  >
     <el-header v-if="$slots.header" class="slotsHeader moduleHeader">
       <slot name="header"></slot>
       <TaskInfo

@@ -1,5 +1,5 @@
 <template>
-  <el-container class="main-layout">
+  <el-container class="main-layout" :lang="$i18n.locale">
     <el-aside class="sidebar" v-if="hasSidebar">
       <slot name="sidebar"></slot>
     </el-aside>

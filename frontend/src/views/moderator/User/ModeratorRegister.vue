@@ -1,5 +1,5 @@
 <template>
-  <div class="register">
+  <div class="register" :lang="$i18n.locale">
     <section class="register__bg-section full-height flex-column centered">
       <h2 class="heading heading--medium heading--white">
         {{ $t('moderator.view.register.login.header') }}

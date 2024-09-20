@@ -1,5 +1,9 @@
 <template>
-  <el-container class="no-public-screen" v-if="isModerator && task === null">
+  <el-container
+    class="no-public-screen"
+    v-if="isModerator && task === null"
+    :lang="$i18n.locale"
+  >
     <el-header>
       <PublicHeader class="public-header">
         {{ $t('shared.view.publicScreen.connectTo') }}
@@ -40,6 +44,7 @@
     class="public-screen"
     :key="componentLoadIndex"
     v-else-if="isModerator"
+    :lang="$i18n.locale"
   >
     <el-header class="public-screen__header star-header">
       <PublicHeader class="public-header"> </PublicHeader>
@@ -95,6 +100,7 @@
     v-else
     class="public-screen participant"
     :key="componentLoadIndex"
+    :lang="$i18n.locale"
   >
     <el-header class="public-screen__header">
       <el-page-header

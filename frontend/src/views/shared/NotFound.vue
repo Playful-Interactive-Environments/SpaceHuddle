@@ -1,5 +1,5 @@
 <template>
-  <div class="not-found">
+  <div class="not-found" :lang="$i18n.locale">
     <h1 class="heading heading--regular heading--white">
       {{ $t('shared.view.notFound.header') }}
     </h1>

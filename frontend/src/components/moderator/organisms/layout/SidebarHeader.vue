@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar__page-header">
+  <div class="sidebar__page-header" :lang="$i18n.locale">
     <span class="toggleSidebarButton link" @click="toggleVisible">
       <font-awesome-icon :icon="displaySettings ? 'xmark' : 'bars'" />
     </span>

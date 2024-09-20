@@ -127,7 +127,7 @@ export const fac = {
     prefix: 'fac' as IconPrefix,
     iconName: 'EcopolisLogoWithName' as IconName,
     icon: [
-      200,
+      1500,
       200,
       [],
       'e0013',

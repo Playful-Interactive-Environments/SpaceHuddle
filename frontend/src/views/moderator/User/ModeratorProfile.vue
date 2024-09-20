@@ -40,6 +40,7 @@
   <LanguageSettings
     v-model:show-modal="showLanguageSettings"
     :isParticipant="false"
+    :lang="$i18n.locale"
   />
 </template>
 

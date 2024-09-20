@@ -1,5 +1,5 @@
 <template>
-  <div class="confirm__content full-height-header">
+  <div class="confirm__content full-height-header" :lang="$i18n.locale">
     <h1>{{ $t('moderator.view.forgetPassword.header') }}</h1>
     <p class="profile__email">
       {{ $t('moderator.view.forgetPassword.info') }} {{ email }}

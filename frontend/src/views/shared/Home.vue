@@ -1,5 +1,5 @@
 <template>
-  <div class="background">
+  <div class="background" :lang="$i18n.locale">
     <PublicHeader />
     <div class="home full-height-header">
       <section class="home__content">

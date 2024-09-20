@@ -1,5 +1,5 @@
 <template>
-  <div class="login">
+  <div class="login" :lang="$i18n.locale">
     <section class="full-height flex-column centered">
       <div class="login__content">
         <h1 class="heading heading--medium">

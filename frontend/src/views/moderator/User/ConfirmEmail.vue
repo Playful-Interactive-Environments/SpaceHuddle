@@ -1,5 +1,5 @@
 <template>
-  <div class="confirm__content full-height-header">
+  <div class="confirm__content full-height-header" :lang="$i18n.locale">
     <div v-if="confirmed">
       <h1>{{ $t('moderator.view.confirmEmail.thanks') }}</h1>
       <p class="profile__email">
