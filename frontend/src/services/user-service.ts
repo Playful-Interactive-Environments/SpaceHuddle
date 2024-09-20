@@ -130,6 +130,6 @@ export const confirmOtherUser = async (
   return await apiExecutePut<ApiResponse>(
     `/${EndpointType.USER}/${userId}/confirm/`,
     null,
-    EndpointAuthorisationType.UNAUTHORISED
+    EndpointAuthorisationType.MODERATOR
   );
 };

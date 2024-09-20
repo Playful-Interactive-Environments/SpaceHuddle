@@ -231,11 +231,12 @@ export const clone = async (
 
 export const createFromTemplate = async (
   sessionId: string,
+  data: Partial<Session>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Session> => {
   return apiExecutePostHandled<Session>(
     `/${EndpointType.SESSION}/${sessionId}/template`,
-    null,
+    data,
     null,
     authHeaderType
   );

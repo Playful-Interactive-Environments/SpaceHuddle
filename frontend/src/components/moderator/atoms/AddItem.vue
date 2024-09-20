@@ -5,7 +5,7 @@
     :class="{ 'add--column': isColumn, readonly: !isClickable }"
     @click="$emit('addNew')"
   >
-    <font-awesome-icon v-if="displayPlus" icon="plus" />
+    <font-awesome-icon v-if="displayPlus" :icon="icon" />
     <span class="add__text">{{ text }}</span>
   </el-card>
 </template>
@@ -22,6 +22,7 @@ export default class AddItem extends Vue {
   @Prop({ default: false }) isColumn!: boolean;
   @Prop({ default: true }) isClickable!: boolean;
   @Prop({ default: true }) displayPlus!: boolean;
+  @Prop({ default: 'plus' }) icon!: boolean;
 }
 </script>
 

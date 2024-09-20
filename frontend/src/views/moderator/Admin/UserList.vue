@@ -20,7 +20,12 @@
             :label="$t('moderator.view.userList.confirmed')"
           >
             <template #default="scope">
-              <el-checkbox v-model="scope.row.confirmed" disabled />
+              <font-awesome-icon
+                v-if="scope.row.confirmed"
+                class="icon"
+                icon="check"
+              />
+              <font-awesome-icon v-else class="icon" icon="xmark" />
             </template>
           </el-table-column>
           <el-table-column
@@ -31,11 +36,15 @@
             prop="sharedSessions"
             :label="$t('moderator.view.userList.sharedSessions')"
           />
-          <el-table-column width="120">
+          <el-table-column width="170">
             <template #default="scope">
-              <span v-on:click="confirmUser(scope.$index)">
-                <font-awesome-icon class="icon link" icon="check" />
-              </span>
+              <el-button
+                v-if="!scope.row.confirmed"
+                type="primary"
+                v-on:click="confirmUser(scope.$index)"
+              >
+                {{ $t('moderator.view.userList.confirm') }}
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -59,8 +68,9 @@ import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/M
 export default class UserList extends Vue {
   userList: UserState[] = [];
 
+  userCash!: cashService.SimplifiedCashEntry<UserState[]>;
   mounted(): void {
-    userService.registerGetUserList(this.updateList);
+    this.userCash = userService.registerGetUserList(this.updateList);
   }
 
   unmounted(): void {
@@ -73,9 +83,16 @@ export default class UserList extends Vue {
 
   async confirmUser(index: number): Promise<void> {
     const user = this.userList[index];
-    userService.confirmOtherUser(user.id);
+    userService.confirmOtherUser(user.id).then(() => {
+      this.userCash.refreshData();
+    });
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+h1 {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-large);
+}
+</style>

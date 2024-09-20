@@ -329,7 +329,10 @@
           "submit": "Sitzung speichern",
           "customKey": "Automatische Schlüsselgenerierung",
           "topicActivation": "Themensichtbarkeit",
-          "startingPoints": "Startpunkte"
+          "startingPoints": "Startpunkte",
+          "visibility": "Sichtbarkeit",
+          "template": "Vorlage",
+          "empty": "leer"
         },
         "topicSettings": {
           "header": "Thema erstellen",
@@ -482,7 +485,8 @@
         "username": "Email",
         "confirmed": "Email bestätigt",
         "ownSessions": "erstellte Sitzungen",
-        "sharedSessions": "von anderen eingeladene Sitzungen"
+        "sharedSessions": "von anderen eingeladene Sitzungen",
+        "confirm": "bestätigen"
       }
     }
   },
@@ -663,6 +667,11 @@
       "always": "Standard",
       "after_previous_started": "nachdem alle vorherigen Aufgaben gestartet wurden",
       "after_previous_finished": "nachdem alle vorherigen Aufgaben abgeschlossen wurden"
+    },
+    "sessionVisibilityType": {
+      "private": "privat",
+      "public": "öffentlich",
+      "template": "Vorlage"
     }
   },
   "general": {

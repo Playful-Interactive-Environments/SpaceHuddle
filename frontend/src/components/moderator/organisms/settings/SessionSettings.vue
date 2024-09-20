@@ -20,6 +20,33 @@
       </template>
 
       <el-form-item
+        v-if="templates.length > 0 && !sessionId"
+        :label="$t('moderator.organism.settings.sessionSettings.template')"
+      >
+        <el-scrollbar always>
+          <div class="flex-content">
+            <el-card
+              v-for="item of templates"
+              :key="item.id"
+              shadow="hover"
+              class="template"
+              :class="{ selected: template?.id === item.id }"
+              @click="template = item"
+            >
+              <div class="title">{{ item.title }}</div>
+              <div class="descending">{{ item.description }}</div>
+            </el-card>
+            <AddItem
+              :text="$t('moderator.organism.settings.sessionSettings.empty')"
+              :isColumn="true"
+              @addNew="template = null"
+              :class="{ selected: !template }"
+              class="template"
+            />
+          </div>
+        </el-scrollbar>
+      </el-form-item>
+      <el-form-item
         prop="title"
         :label="$t('moderator.organism.settings.sessionSettings.title')"
         :rules="[
@@ -75,6 +102,20 @@
               {{ subject }}
             </span>
           </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item
+        v-if="isAdmin"
+        prop="visibility"
+        :label="$t('moderator.organism.settings.sessionSettings.visibility')"
+      >
+        <el-select v-model="formData.visibility">
+          <el-option
+            v-for="key in SessionVisibilityType"
+            :key="key"
+            :value="key"
+            :label="$t(`enum.sessionVisibilityType.${key}`)"
+          />
         </el-select>
       </el-form-item>
       <el-form-item
@@ -174,9 +215,14 @@ import { Session } from '@/types/api/Session';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import { TopicActivation } from '@/types/enum/TopicActivation';
+import { SessionVisibilityType } from '@/types/enum/SessionVisibilityType';
+import { getUserRole } from '@/services/auth-service';
+import { UserRoleType } from '@/types/enum/UserRoleType';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
 
 @Options({
   components: {
+    AddItem,
     ValidationForm,
     FromSubmitItem,
   },
@@ -200,6 +246,8 @@ export default class SessionSettings extends Vue {
   subjectCash!: cashService.SimplifiedCashEntry<string[]>;
   hasAutoKey = true;
   session: Session | null = null;
+  templates: Session[] = [];
+  template: Session | null = null;
 
   formData: ValidationData = {
     title: '',
@@ -207,15 +255,21 @@ export default class SessionSettings extends Vue {
     subject: '',
     theme: '',
     topicActivation: TopicActivation.ALWAYS,
+    visibility: SessionVisibilityType.PRIVATE,
     startingPoints: 0,
     connectionKey: null,
     expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
   };
 
   TopicActivation = TopicActivation;
+  SessionVisibilityType = SessionVisibilityType;
 
   get showCoins(): boolean {
     return JSON.parse(process.env.VUE_APP_SHOW_COINS);
+  }
+
+  get isAdmin(): boolean {
+    return getUserRole() === UserRoleType.ADMIN;
   }
 
   showDialog = false;
@@ -238,12 +292,29 @@ export default class SessionSettings extends Vue {
         EndpointAuthorisationType.MODERATOR,
         60 * 60
       );
+      this.template = null;
     } else {
       this.subjectCash = sessionService.registerGetSubjects(
         this.updateSubjects,
         EndpointAuthorisationType.MODERATOR,
         60 * 60
       );
+      this.reset();
+    }
+  }
+
+  @Watch('template', { immediate: true })
+  onTemplateChanged(): void {
+    if (this.template) {
+      this.formData.title = this.template.title;
+      this.formData.description = this.template.description;
+      this.formData.subject = this.template.subject;
+      this.formData.theme = this.template.theme ?? '';
+      this.formData.topicActivation = this.template.topicActivation ?? '';
+      this.formData.visibility = SessionVisibilityType.PRIVATE;
+      this.formData.startingPoints =
+        this.template.parameter?.startingPoints ?? 0;
+    } else {
       this.reset();
     }
   }
@@ -256,6 +327,8 @@ export default class SessionSettings extends Vue {
     this.formData.subject = session.subject;
     this.formData.theme = session.theme ?? '';
     this.formData.topicActivation = session.topicActivation ?? '';
+    this.formData.visibility =
+      session.visibility ?? SessionVisibilityType.PRIVATE;
     this.formData.startingPoints = session.parameter?.startingPoints ?? 0;
     this.formData.connectionKey = session.connectionKey;
     this.formData.expirationDate = new Date(session.expirationDate);
@@ -264,6 +337,10 @@ export default class SessionSettings extends Vue {
   updateSubjects(subjects: string[]): void {
     this.subjectList = subjects;
     this.removeNullEntries(this.subjectList);
+  }
+
+  updateTemplates(list: Session[]): void {
+    this.templates = list;
   }
 
   removeNullEntries(subjectList: string[]): void {
@@ -276,9 +353,18 @@ export default class SessionSettings extends Vue {
     this.subjectList = tempList;
   }
 
+  mounted(): void {
+    sessionService.registerGetTemplateList(
+      this.updateTemplates,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+  }
+
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateSubjects);
+    cashService.deregisterAllGet(this.updateTemplates);
   }
 
   unmounted(): void {
@@ -292,6 +378,7 @@ export default class SessionSettings extends Vue {
   }
 
   reset(): void {
+    this.template = null;
     if (!this.sessionId) {
       this.hasAutoKey = true;
       this.formData.title = '';
@@ -299,6 +386,7 @@ export default class SessionSettings extends Vue {
       this.formData.subject = null;
       this.formData.theme = null;
       this.formData.topicActivation = TopicActivation.ALWAYS;
+      this.formData.visibility = SessionVisibilityType.PRIVATE;
       this.formData.startingPoints = 0;
       this.formData.connectionKey = null;
       this.formData.expirationDate = new Date(
@@ -311,6 +399,8 @@ export default class SessionSettings extends Vue {
       this.formData.subject = this.session.subject;
       this.formData.theme = this.session.theme ?? '';
       this.formData.topicActivation = this.session.topicActivation ?? '';
+      this.formData.visibility =
+        this.session.visibility ?? SessionVisibilityType.PRIVATE;
       this.formData.startingPoints =
         this.session.parameter?.startingPoints ?? 0;
       this.formData.connectionKey = this.session.connectionKey;
@@ -343,6 +433,7 @@ export default class SessionSettings extends Vue {
         subject: this.formData.subject,
         theme: this.formData.theme,
         topicActivation: this.formData.topicActivation,
+        visibility: this.formData.visibility,
         expirationDate: this.isoExpirationDate,
         parameter: this.showCoins
           ? { startingPoints: this.formData.startingPoints }
@@ -350,7 +441,10 @@ export default class SessionSettings extends Vue {
       };
       if (!this.hasAutoKey && this.formData.connectionKey)
         data.connectionKey = this.formData.connectionKey;
-      await sessionService.post(data).then(
+      const result = this.template
+        ? sessionService.createFromTemplate(this.template.id, data)
+        : sessionService.post(data);
+      await result.then(
         (session) => {
           this.$emit('update:showModal', false);
           this.$emit('update:subject', this.subjectState);
@@ -386,6 +480,7 @@ export default class SessionSettings extends Vue {
           subject: this.formData.subject,
           theme: this.formData.theme,
           topicActivation: this.formData.topicActivation,
+          visibility: this.formData.visibility,
           expirationDate: this.isoExpirationDate,
           parameter: this.showCoins
             ? { startingPoints: this.formData.startingPoints }
@@ -409,4 +504,33 @@ export default class SessionSettings extends Vue {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.template {
+  color: var(--color-highlight-dark);
+  border-color: var(--color-highlight-dark);
+  cursor: pointer;
+  min-height: calc(110rem / 16);
+  height: 100%;
+  background-color: unset;
+}
+
+.flex-content {
+  display: flex;
+  margin-bottom: 1rem;
+
+  .el-card {
+    flex-shrink: 0;
+    width: 15rem;
+    margin: 0 0.5rem;
+
+    .title {
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-large);
+    }
+  }
+}
+
+.selected {
+  background-color: white;
+}
+</style>

@@ -329,7 +329,10 @@
           "submit": "Save session",
           "customKey": "Automatic key generation",
           "topicActivation": "topic visibility",
-          "startingPoints": "starting points"
+          "startingPoints": "starting points",
+          "visibility": "visibility",
+          "template": "template",
+          "empty": "empty"
         },
         "topicSettings": {
           "header": "Create Topic",
@@ -482,7 +485,8 @@
         "username": "email",
         "confirmed": "email confirmed",
         "ownSessions": "created sessions",
-        "sharedSessions": "sessions invited by others"
+        "sharedSessions": "sessions invited by others",
+        "confirm": "confirm"
       }
     }
   },
@@ -663,6 +667,11 @@
       "always": "default",
       "after_previous_started": "after all previous tasks started",
       "after_previous_finished": "after all previous tasks finished"
+    },
+    "sessionVisibilityType": {
+      "private": "private",
+      "public": "public",
+      "template": "template"
     }
   },
   "general": {
