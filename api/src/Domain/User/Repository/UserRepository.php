@@ -2,6 +2,7 @@
 
 namespace App\Domain\User\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\EncryptTrait;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
@@ -57,6 +58,33 @@ final class UserRepository implements RepositoryInterface
     {
         $data->password = self::encryptText($data->password);
         return $this->genericInsert($data, $insertDependencies);
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $id Primary key of the linked table entry
+     * @param array|object|null $parameter Dependent data to be included.
+     * @return void
+     */
+    protected function insertDependencies(string $id, array|object|null $parameter): void
+    {
+        $sessionRepository = new SessionRepository($this->queryFactory);
+        $list = $sessionRepository->getPublicSessions(false);
+        foreach ($list as $item) {
+            $data = (object)((array)$item);
+            $data->templateId = $item->id;
+            unset($data->id);
+            unset($data->connectionKey);
+            unset($data->creationDate);
+            unset($data->publicScreenModuleId);
+            unset($data->role);
+            unset($data->visibility);
+            unset($data->topicCount);
+            unset($data->taskCount);
+            unset($data->allowAnonymous);
+            $sessionRepository->setAuthorisation(AuthorisationData::instanceFromUserId($id));
+            $sessionRepository->createFromTemplate($data);
+        }
     }
 
     /**

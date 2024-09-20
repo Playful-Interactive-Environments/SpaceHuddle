@@ -2,7 +2,6 @@
 
 namespace App\Data;
 
-use App\Domain\Participant\Type\ParticipantState;
 use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
 use Lcobucci\JWT\Token\DataSet;
@@ -28,7 +27,6 @@ class AuthorisationData
     /**
      * The login role (user oder admin).
      * @var string|null
-     * @OA\Property(ref="#/components/schemas/UserRoleType")
      */
     public ?string $role = null;
 
@@ -58,6 +56,13 @@ class AuthorisationData
         } else {
             $this->type = AuthorisationType::NONE;
         }
+    }
+
+    public static function instanceFromUserId(string $userId): AuthorisationData {
+        $instance = new self();
+        $instance->id = $userId;
+        $instance->type = AuthorisationType::USER;
+        return $instance;
     }
 
     /**

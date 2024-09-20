@@ -16,13 +16,13 @@ use Fig\Http\Message\StatusCodeInterface;
  *   path="/session/{templateId}/template",
  *   summary="Create a session from a public template.",
  *   tags={"Session"},
+ *   @OA\Parameter(in="path", name="templateId", description="ID of cloning session", required=true),
  *   @OA\RequestBody(
  *     @OA\MediaType(
  *       mediaType="application/json",
  *       @OA\Schema(required={"title", "maxParticipants", "expirationDate"},
  *         @OA\Property(property="title", type="string"),
  *         @OA\Property(property="description", type="string"),
- *         @OA\Property(property="templateId", type="string"),
  *         @OA\Property(property="maxParticipants", type="integer", example=100),
  *         @OA\Property(property="expirationDate", type="string", format="date")
  *       )

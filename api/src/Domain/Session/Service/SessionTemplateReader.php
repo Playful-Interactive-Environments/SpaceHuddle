@@ -24,6 +24,6 @@ class SessionTemplateReader
     protected function serviceExecution(
         array $data
     ): array|object|null {
-        return $this->repository->getTemplates();
+        return $this->repository->getPublicSessions();
     }
 }

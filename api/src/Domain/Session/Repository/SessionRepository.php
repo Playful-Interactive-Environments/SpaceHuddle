@@ -2,6 +2,7 @@
 
 namespace App\Domain\Session\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
@@ -12,6 +13,7 @@ use App\Domain\Participant\Data\ParticipantInfoData;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Data\SessionInfo;
+use App\Domain\Session\Type\SessionVisibilityType;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Topic\Data\ExportData;
@@ -69,6 +71,7 @@ class SessionRepository implements RepositoryInterface
     {
         $authorisation = $this->getAuthorisation();
         if (!is_null($authorisation->id)) {
+            if ($detailEntity == 'template') return strtoupper(SessionRoleType::FACILITATOR);
             $conditions = [
                 "session_id" => $id,
                 "user_id" => $authorisation->id,
@@ -116,10 +119,18 @@ class SessionRepository implements RepositoryInterface
         }
 
         $authorisation = $this->getAuthorisation();
-        $authorisation_conditions = [
-            "session_permission.user_id" => $authorisation->id,
-            "session_permission.user_type" => $authorisation->type
-        ];
+        if (array_key_exists("session.id", $conditions)) {
+            $authorisation_conditions = ["OR" => [
+                "AND" => ["session_permission.user_id" => $authorisation->id,
+                    "session_permission.user_type" => $authorisation->type,
+                    "session.visibility !=" => SessionVisibilityType::TEMPLATE],
+                ["session.visibility" => SessionVisibilityType::TEMPLATE,
+                    "session_permission.role" => SessionRoleType::OWNER]
+            ]];
+        } else {
+            $authorisation_conditions = ["session_permission.user_id" => $authorisation->id,
+                    "session_permission.user_type" => $authorisation->type];
+        }
 
         if ($authorisation->isParticipant()) {
             array_push($conditions, "session.expiration_date >= current_timestamp()");
@@ -307,13 +318,16 @@ class SessionRepository implements RepositoryInterface
 
     /**
      * Get list all public template sessions.
+     * @param bool $findTemplates If true: find templates, if false: find public sessions.
      * @return array<SessionData> The result entity list.
      * @throws GenericException
      */
-    public function getTemplates(): array
+    public function getPublicSessions(bool $findTemplates = true): array
     {
         $sortConditions = ["creation_date"];
-        $authorisation_conditions = ["visibility" => 'template'];
+        $authorisation_conditions = [
+            "visibility" => $findTemplates ? SessionVisibilityType::TEMPLATE : SessionVisibilityType::PUBLIC
+        ];
 
         $query = $this->queryFactory->newSelect($this->getEntityName())->select(["*"])
             ->andWhere($authorisation_conditions)
@@ -824,21 +838,30 @@ class SessionRepository implements RepositoryInterface
         if (!isset($data->connectionKey))
             $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         $data->creationDate = date("Y-m-d");
-        $session = $this->genericInsert($data, false);
 
-        if ($session->id) {
+        $data->id = uuid_create();
+
+        $usedKeys = array_values($this->translateKeys((array)$data));
+        $row = $this->formatDatabaseInput($data);
+        $row = $this->unsetUnused($row, $usedKeys);
+
+        $itemCount = $this->queryFactory->newInsert($this->getEntityName(), $row)
+            ->execute()->rowCount();
+
+        if ($itemCount > 0) {
             $this->queryFactory->newInsert(
                 'clone_helper',
                 [
-                    'target_id' => $session->id,
+                    'target_id' => $data->id,
                     'source_id' => $templateId,
                     'table_name' => $this->getEntityName()
                 ]
             )->execute();
-        }
-        $this->cloneDependencies($templateId, $session->id, false);
+            $this->cloneDependencies($templateId, $data->id, false);
 
-        return $session;
+            return $this->getById($data->id);
+        }
+        return (object)[];
     }
 
     /**
@@ -880,11 +903,13 @@ class SessionRepository implements RepositoryInterface
      * Include dependent data.
      * @param string $oldId Old table primary key
      * @param string $newId Old table primary key
-     * @param bool $cloneRoles clone roles
+     * @param bool $cloneRoles Clone roles
      * @return void
      */
     protected function cloneDependencies(string $oldId, string $newId, bool $cloneRoles = true): void
     {
+        $authorisation = $this->getAuthorisation();
+
         if ($cloneRoles) {
             $this->queryFactory->newClone(
                 "session_role",
@@ -895,7 +920,6 @@ class SessionRepository implements RepositoryInterface
                 false
             );
         } else {
-            $authorisation = $this->getAuthorisation();
             $this->queryFactory->newInsert("session_role", [
                 "session_id" => $newId,
                 "user_id" => $authorisation->id,
@@ -904,7 +928,7 @@ class SessionRepository implements RepositoryInterface
         }
 
         $topicRepository = new TopicRepository($this->queryFactory);
-        $topicRepository->setAuthorisation($this->getAuthorisation());
+        $topicRepository->setAuthorisation($authorisation);
 
         $rows_topic = $this->queryFactory->newSelect("topic")
             ->select([
@@ -937,7 +961,7 @@ class SessionRepository implements RepositoryInterface
             ->fetchAll("assoc");
         if (is_array($rows_task) and sizeof($rows_task) > 0) {
             $taskRepository = new TaskRepository($this->queryFactory);
-            $taskRepository->setAuthorisation($this->getAuthorisation());
+            $taskRepository->setAuthorisation($authorisation);
             foreach ($rows_task as $resultItem) {
                 $reader = new ArrayReader($resultItem);
                 $taskId = $reader->findString("id");

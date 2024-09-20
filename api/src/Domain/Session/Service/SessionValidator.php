@@ -144,7 +144,7 @@ final class SessionValidator
         );
 
         $template = $this->getRepository()->getById($data["templateId"]);
-        if ($template && $template->visibilty !== SessionVisibilityType::TEMPLATE) {
+        if ($template && $template->visibility !== SessionVisibilityType::TEMPLATE) {
             $result = new ValidationResult();
             $result->addError("templateId", "NoTemplate: Session is not a template");
             throw new ValidationException("Please check your input", $result);
