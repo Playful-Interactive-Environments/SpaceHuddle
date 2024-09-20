@@ -483,6 +483,7 @@
       "userList": {
         "header": "Benutzerliste",
         "username": "Email",
+        "creationDate": "erstellt am",
         "confirmed": "Email bestätigt",
         "ownSessions": "erstellte Sitzungen",
         "sharedSessions": "von anderen eingeladene Sitzungen",

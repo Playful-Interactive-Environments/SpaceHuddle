@@ -844,3 +844,9 @@ $--font-size: (
         -webkit-box-orient: vertical;
         overflow: hidden;
 }
+
+.el-table {
+        .cell {
+                word-break: unset;
+        }
+}

@@ -215,7 +215,7 @@
 }
 
 .full-height-header {
-  min-height: calc(var(--app-height) - var(--header-height));
+  min-height: calc(var(--app-height) - var(--header-height) - 1rem);
 }
 
 .fill {
