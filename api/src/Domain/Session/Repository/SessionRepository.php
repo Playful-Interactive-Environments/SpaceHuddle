@@ -120,13 +120,15 @@ class SessionRepository implements RepositoryInterface
 
         $authorisation = $this->getAuthorisation();
         if (array_key_exists("session.id", $conditions)) {
-            $authorisation_conditions = ["OR" => [
+            /*$authorisation_conditions = ["OR" => [
                 "AND" => ["session_permission.user_id" => $authorisation->id,
                     "session_permission.user_type" => $authorisation->type,
                     "session.visibility !=" => SessionVisibilityType::TEMPLATE],
                 ["session.visibility" => SessionVisibilityType::TEMPLATE,
                     "session_permission.role" => SessionRoleType::OWNER]
-            ]];
+            ]];*/
+            $authorisation_conditions = ["session_permission.user_id" => $authorisation->id,
+                "session_permission.user_type" => $authorisation->type];
         } else {
             $authorisation_conditions = ["session_permission.user_id" => $authorisation->id,
                     "session_permission.user_type" => $authorisation->type];
