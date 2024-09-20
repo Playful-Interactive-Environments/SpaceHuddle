@@ -666,6 +666,38 @@ CREATE OR REPLACE VIEW session_permission (
     'ACTIVE' COLLATE utf8mb4_unicode_ci AS user_state,
     session_id,
     role
+ FROM session_role
+ UNION ALL
+ SELECT
+     id as user_id,
+     'PARTICIPANT' COLLATE utf8mb4_unicode_ci AS user_type,
+     state COLLATE utf8mb4_unicode_ci AS user_state,
+     session_id,
+     'PARTICIPANT' COLLATE utf8mb4_unicode_ci AS role
+ from participant
+ where state = 'ACTIVE'
+ UNION ALL
+ SELECT
+     id as user_id,
+     'PARTICIPANT' COLLATE utf8mb4_unicode_ci AS user_type,
+     state COLLATE utf8mb4_unicode_ci AS user_state,
+     session_id,
+     'INACTIVE' COLLATE utf8mb4_unicode_ci AS role
+ from participant
+ where state = 'INACTIVE';
+
+/*CREATE OR REPLACE VIEW session_permission (
+    user_id,
+    user_type,
+    user_state,
+    session_id,
+    role
+) AS SELECT
+    user_id,
+    'USER' COLLATE utf8mb4_unicode_ci AS user_type,
+    'ACTIVE' COLLATE utf8mb4_unicode_ci AS user_state,
+    session_id,
+    role
 FROM session_role
 UNION ALL
 SELECT
@@ -677,7 +709,7 @@ SELECT
         WHEN 'ACTIVE' THEN 'PARTICIPANT'
         WHEN 'INACTIVE' THEN 'INACTIVE'
         END AS role
-from participant;
+from participant;*/
 
 CREATE OR REPLACE VIEW hierarchy_idea(
     parent_idea_id,
