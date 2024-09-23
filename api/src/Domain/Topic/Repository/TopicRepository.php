@@ -862,17 +862,19 @@ class TopicRepository implements RepositoryInterface
             $newParentId
         );
 
-        $selectParentId = $this->queryFactory->newQuery()->from($this->getEntityName())
-            ->select([$this->parentIdName])
-            ->where(["id" => $oldId]);
+        if (!$newParentId) {
+            $selectParentId = $this->queryFactory->newQuery()->from($this->getEntityName())
+                ->select([$this->parentIdName])
+                ->where(["id" => $oldId]);
 
-        $select = $this->queryFactory->newQuery()->from($this->getEntityName())
-            ->select(["(count(*) - 1) as count"])
-            ->where([$this->parentIdName => $selectParentId]);
+            $select = $this->queryFactory->newQuery()->from($this->getEntityName())
+                ->select(["(count(*) - 1) as count"])
+                ->where([$this->parentIdName => $selectParentId]);
 
-        $this->queryFactory->newUpdate($this->getEntityName(), ["order" => $select])
-            ->andWhere(["id" => $newId])
-            ->execute();
+            $this->queryFactory->newUpdate($this->getEntityName(), ["order" => $select])
+                ->andWhere(["id" => $newId])
+                ->execute();
+        }
 
         if ($newId) {
             $this->queryFactory->newInsert(

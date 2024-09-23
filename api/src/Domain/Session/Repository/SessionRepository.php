@@ -324,7 +324,7 @@ class SessionRepository implements RepositoryInterface
      */
     public function getPublicSessions(bool $findTemplates = true): array
     {
-        $sortConditions = ["creation_date"];
+        $sortConditions = ["title"];
         $authorisation_conditions = [
             "visibility" => $findTemplates ? SessionVisibilityType::TEMPLATE : SessionVisibilityType::PUBLIC
         ];
