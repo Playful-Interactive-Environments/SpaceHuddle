@@ -25,6 +25,13 @@
       >
         <el-scrollbar always>
           <div class="flex-content">
+            <AddItem
+              :text="$t('moderator.organism.settings.sessionSettings.empty')"
+              :isColumn="true"
+              @addNew="template = null"
+              :class="{ selected: !template }"
+              class="template"
+            />
             <el-card
               v-for="item of templates"
               :key="item.id"
@@ -36,13 +43,6 @@
               <div class="title">{{ item.title }}</div>
               <div class="descending">{{ item.description }}</div>
             </el-card>
-            <AddItem
-              :text="$t('moderator.organism.settings.sessionSettings.empty')"
-              :isColumn="true"
-              @addNew="template = null"
-              :class="{ selected: !template }"
-              class="template"
-            />
           </div>
         </el-scrollbar>
       </el-form-item>
