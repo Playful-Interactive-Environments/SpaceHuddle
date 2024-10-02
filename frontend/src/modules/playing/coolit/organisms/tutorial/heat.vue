@@ -6,40 +6,47 @@
       v-model:height="height"
       :detect-collision="true"
       :use-gravity="false"
-      :wind-force="!isHit && !isDone ? 3 : 0"
+      :wind-force="!showInfo && !isHit && !isDone ? 3 : 0"
       :border-category="CollisionGroups.BORDER"
       :show-bounds="false"
       background-color="#a0d4d9"
       background-texture="/assets/games/coolit/tutorial/sky.png"
       :background-position="BackgroundPosition.Cover"
       :background-movement="
-        !isHit && !isDone ? BackgroundMovement.Auto : BackgroundMovement.Break
+        !showInfo && !isHit && !isDone
+          ? BackgroundMovement.Auto
+          : BackgroundMovement.Break
       "
       :collision-borders="CollisionBorderType.Background"
       :auto-pan-speed="0.8"
       :auto-pan-direction="[0, -1]"
       :endless-panning="true"
       @initRenderer="initRenderer"
+      :pixi-filter-list="[hitAnimation]"
     >
       <template v-slot:default>
         <container>
-          <container :y="getTotalPanDistance() - height * 1.33">
-            <graphics :x="0" :y="height / 3" @render="onDrawLine" />
-            <graphics :x="0" :y="(height / 3) * 2" @render="onDrawLine" />
-            <graphics :x="0" :y="(height / 3) * 3" @render="onDrawLine" />
-            <graphics :x="0" :y="(height / 3) * 4" @render="onDrawLine" />
-            <graphics :x="0" :y="(height / 3) * 5" @render="onDrawLine" />
-            <graphics :x="0" :y="(height / 3) * 6" @render="onDrawLine" />
+          <container :y="outsideY">
+            <graphics :x="0" :y="0" @render="onDrawRect" />
+          </container>
+          <container :y="getTotalPanDistance() - goalY + height">
+            <graphics :x="0" :y="0" @render="onDrawLine" />
+            <graphics :x="0" :y="goalY / 6" @render="onDrawLine" />
+            <graphics :x="0" :y="(goalY / 6) * 2" @render="onDrawLine" />
+            <graphics :x="0" :y="(goalY / 6) * 3" @render="onDrawLine" />
+            <graphics :x="0" :y="(goalY / 6) * 4" @render="onDrawLine" />
+            <graphics :x="0" :y="(goalY / 6) * 5" @render="onDrawLine" />
+            <graphics :x="0" :y="goalY" @render="onDrawLine" />
             <text
-              :anchor="0.5"
+              :anchor="[0.5, 1]"
               :style="{
                 fontFamily: 'Arial',
-                fontSize: 18,
-                fill: contrastColor,
+                fontSize: 34,
+                fill: greenColor,
               }"
               :scale="textScaleFactor"
               :x="width / 2"
-              :y="(height / 3) * 2.5"
+              :y="0"
             >
               {{
                 $t('module.playing.coolit.participant.tutorial.heatGame.goal')
@@ -47,7 +54,25 @@
             </text>
           </container>
           <GameObject
-            v-if="weatherStylesheets"
+            v-if="getTotalPanDistance() > 0"
+            shape="rect"
+            :object-space="ObjectSpace.Absolute"
+            :posX="0"
+            :posY="outsideY"
+            :is-static="true"
+            :affectedByForce="false"
+            :objectAnchor="[0, 0]"
+            :fix-size="[width, height]"
+            :options="{
+              name: 'border',
+              frictionAir: 0,
+              mass: 0,
+              collisionFilter: { group: 0b0001, category: 1 },
+            }"
+          >
+          </GameObject>
+          <GameObject
+            v-if="weatherStylesheets && !(showInfo && activeMoleculeUuid)"
             shape="rect"
             :object-space="ObjectSpace.Absolute"
             :posX="width / 2"
@@ -56,6 +81,7 @@
             :scale="3"
             :options="{
               name: 'heat',
+              isSensor: true,
               frictionAir: 0,
               mass: 0,
               collisionFilter: {
@@ -113,14 +139,33 @@
               :height="molecule.size * moleculeSize"
               :anchor="0.5"
               :tint="molecule.color"
-              :alpha="molecule.controllable ? 1 : 0.4"
+              :alpha="
+                molecule.controllable && !(showInfo && activeMoleculeUuid)
+                  ? 1
+                  : 0.4
+              "
+            />
+            <simple-rope
+              v-if="
+                showInfo &&
+                activeMoleculeUuid === molecule.gameObject?.uuid &&
+                infoTextKey === InfoTextKey.hit
+              "
+              :texture="getMoleculeTexture(molecule.type)"
+              :x="(molecule.size * moleculeSize) / 3"
+              :width="molecule.size * moleculeSize"
+              :height="molecule.size * moleculeSize"
+              :tint="molecule.color"
+              :alpha="1"
+              :points="moleculeDisplayPoints"
             />
             <text
               v-if="
                 molecule.controllable &&
                 molecule.gameObject &&
                 molecule.gameObject.transformation.inputPosition[0] < 65 &&
-                molecule.gameObject.transformation.inputPosition[0] > 35
+                molecule.gameObject.transformation.inputPosition[0] > 35 &&
+                !(showInfo && activeMoleculeUuid === molecule.gameObject?.uuid)
               "
               :anchor="[0.5, 3]"
               :style="{
@@ -140,8 +185,11 @@
       </template>
     </GameContainer>
     <DrawerBottomOverlay
+      v-if="!showInfo"
       v-model="isHit"
-      :title="$t('module.playing.coolit.participant.tutorial.heatGame.hit')"
+      :title="
+        $t('module.playing.coolit.participant.tutorial.heatGame.dialogTitle')
+      "
     >
       <div class="moleculeInfo" v-if="activeMoleculeName">
         <div class="title">
@@ -313,6 +361,30 @@
         </div>
       </div>
     </div>
+    <div v-else-if="showInfo" class="overlay-info">
+      <div>
+        <div>
+          {{
+            $t(
+              `module.playing.coolit.participant.tutorial.heatGame.${infoTextKey}`
+            )
+          }}
+        </div>
+        <div v-if="infoTextKey === InfoTextKey.heat">
+          <el-slider
+            class="thermometer"
+            v-model="temperature"
+            disabled
+            vertical
+            height="200px"
+            :max="40"
+          />
+        </div>
+        <div v-if="infoTextKey === InfoTextKey.heat">
+          {{ Math.round(temperature) }}°C
+        </div>
+      </div>
+    </div>
     <div v-else class="overlay">
       <div>
         <el-slider
@@ -334,8 +406,8 @@ import { Options, Vue } from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
 import GameContainer, {
   BackgroundMovement,
-  CollisionBorderType,
   BackgroundPosition,
+  CollisionBorderType,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpaceType } from '@/types/enum/ObjectSpaceType';
 import GameObject, {
@@ -348,8 +420,11 @@ import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
 import { v4 as uuidv4 } from 'uuid';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
-import { delay } from '@/utils/wait';
+import { delay, until } from '@/utils/wait';
 import * as matterUtil from '@/utils/matter';
+import * as TWEEDLE from 'tweedle.js';
+import { ShockwaveFilter } from 'pixi-filters';
+import { InfoTextKey } from '@/modules/playing/coolit/types/InfoTextKey';
 
 enum GasType {
   atmosphericGas = 'atmosphericGas',
@@ -409,20 +484,47 @@ export default class heat extends Vue {
   textureToken = pixiUtil.createLoadingToken();
   rayPath: { x: number; y: number }[][] = [];
   rayDisplayPoints = [...this.calculateInitRayPoints(1, 0)];
+  moleculeDisplayPoints = [...this.calculateInitMoleculePoints(1, 0)];
   readonly intervalTime = 100;
   interval!: any;
   moleculeList: MoleculeData[] = [];
   circleGradientTexture: PIXI.Texture | null = null;
   moleculeTextures: { [key: string]: PIXI.Texture } = {};
   activeMoleculeName = '';
+  activeMoleculeUuid = '';
   isHit = false;
   isDone = false;
+  showInfo = false;
+  infoStartTime = 0;
+  infoTime = 5000;
   moleculeImages: { [key: string]: string } = {};
   temperature = 20;
   hitCount = 0;
+  totalPanDistance = 0;
+  goalDistance = 1000;
+  tween = new TWEEDLE.Tween(this);
+  hitAnimation: ShockwaveFilter = new ShockwaveFilter(
+    [0, 0],
+    {
+      amplitude: 100,
+      wavelength: 200,
+      speed: 100,
+      brightness: 1.1,
+      radius: 50,
+    },
+    -1
+  );
+  tweenHit = new TWEEDLE.Tween(this.hitAnimation);
+  infoTextKey: InfoTextKey = InfoTextKey.intro1;
+
+  InfoTextKey = InfoTextKey;
 
   get redColor(): string {
     return themeColors.getRedColor();
+  }
+
+  get greenColor(): string {
+    return themeColors.getGreenColor();
   }
 
   get contrastColor(): string {
@@ -435,6 +537,14 @@ export default class heat extends Vue {
 
   get moleculeSize(): number {
     return this.textScaleFactor * 270;
+  }
+
+  get goalY(): number {
+    return this.goalDistance + this.height / 2;
+  }
+
+  get outsideY(): number {
+    return this.getTotalPanDistance() - this.height / 2 - this.goalDistance;
   }
 
   getRotation(rayPoints: { x: number; y: number }[]): number {
@@ -478,7 +588,50 @@ export default class heat extends Vue {
       });
     this.initMolecules();
 
-    this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
+    setTimeout(() => {
+      this.infoStartTime = Date.now();
+      this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
+    }, 1000);
+  }
+
+  @Watch('infoStartTime', { immediate: true })
+  onInfoChanged(): void {
+    if (this.infoStartTime > 0) {
+      this.showInfo = true;
+      setTimeout(() => {
+        switch (this.infoTextKey) {
+          case InfoTextKey.intro1:
+            this.infoStartTime = Date.now();
+            this.infoTextKey = InfoTextKey.intro2;
+            break;
+          case InfoTextKey.hit:
+            this.infoStartTime = Date.now();
+            this.infoTextKey = InfoTextKey.heat;
+            this.tween
+              .from({ temperature: this.temperature })
+              .to({
+                temperature:
+                  this.temperature +
+                  gameConfig.molecules[this.activeMoleculeName]
+                    .globalWarmingFactor,
+              })
+              .duration(this.infoTime)
+              .start();
+            this.tweenHit
+              .from({ time: 0 })
+              .to({
+                time: 10,
+              })
+              .duration(this.infoTime)
+              .start()
+              .onComplete(() => (this.hitAnimation.time = -1));
+            break;
+          default:
+            this.showInfo = false;
+        }
+      }, this.infoTime);
+      //this.tween.duration(this.infoTime).start().onComplete(() => {})
+    }
   }
 
   async generateMoleculeTextures(): Promise<void> {
@@ -558,7 +711,19 @@ export default class heat extends Vue {
     });
   }
 
-  readonly reactTime = 2000;
+  calculateInitMoleculePoints(
+    intensity: number,
+    animationStep: number
+  ): { x: number; y: number }[] {
+    return this.rayPath[animationStep % this.animationSteps].map((item) => {
+      return {
+        x: item.y / intensity,
+        y: item.x / intensity,
+      };
+    });
+  }
+
+  readonly reactTime = 500;
   async rayCollision(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     rayObject: GameObject,
@@ -568,36 +733,88 @@ export default class heat extends Vue {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     obstacleBody: Matter.Body
   ): Promise<void> {
-    if (!this.isHit && this.closeInfoTime + this.reactTime < Date.now()) {
+    if (
+      this.infoStartTime > 0 &&
+      !this.isHit &&
+      this.closeInfoTime + this.reactTime < Date.now()
+    ) {
       this.activeMoleculeName = obstacleObject.options.name as string;
+      this.activeMoleculeUuid = obstacleObject.uuid as string;
+      this.infoTime = 2000;
+      this.infoStartTime = Date.now();
+      this.infoTextKey = InfoTextKey.hit;
+      this.showInfo = true;
       this.isHit = true;
       this.hitCount++;
-      this.temperature +=
-        gameConfig.molecules[this.activeMoleculeName].globalWarmingFactor;
+      this.hitAnimation.center = [
+        obstacleObject.transform.position.x,
+        obstacleObject.transform.position.y,
+      ];
+      this.hitAnimation.radius = this.height;
+      const config = this.getMoleculeConfig(this.activeMoleculeName);
+      this.hitAnimation.amplitude = config.globalWarmingFactor * 25;
+      this.hitAnimation.wavelength = config.globalWarmingFactor * 50;
 
       const gameContainer = this.$refs['gameContainer'] as GameContainer;
       if (gameContainer) {
         matterUtil.resetBody(obstacleBody, gameContainer.mouseConstraint);
+        for (const molecule of this.moleculeList) {
+          const body = molecule.gameObject?.physcics.body;
+          if (body) {
+            matterUtil.resetBody(body, gameContainer.mouseConstraint);
+          }
+        }
       } else {
         Matter.Body.setVelocity(obstacleBody, { x: 0, y: 0 });
       }
+      until(() => !this.showInfo).then(() => {
+        Matter.Body.setPosition(obstacleBody, {
+          x:
+            obstacleBody.position.x < this.width / 2
+              ? this.width * 0.3
+              : this.width * 0.7,
+          y: obstacleBody.position.y,
+        });
+      });
+    } else {
       Matter.Body.setPosition(obstacleBody, {
-        x: this.width * 0.1,
+        x:
+          obstacleBody.position.x < this.width / 2
+            ? this.width * 0.3
+            : this.width * 0.7,
         y: obstacleBody.position.y,
       });
     }
   }
 
-  totalPanDistance = 0;
   updateLoop(): void {
-    this.animationStep++;
-    const points = this.calculateInitRayPoints(1, this.animationStep);
-    for (let i = 0; i < this.rayDisplayPoints.length; i++) {
-      this.rayDisplayPoints[i] = points[i];
-    }
-    this.totalPanDistance = this.getTotalPanDistance();
-    if (this.totalPanDistance > 1000) {
-      this.done();
+    this.showInfo = this.infoStartTime > Date.now() - this.infoTime;
+    if (!this.showInfo && !this.isHit && !this.isDone) {
+      this.animationStep++;
+      const points = this.calculateInitRayPoints(1, this.animationStep);
+      for (let i = 0; i < this.rayDisplayPoints.length; i++) {
+        this.rayDisplayPoints[i] = points[i];
+      }
+      this.totalPanDistance = this.getTotalPanDistance();
+      if (this.totalPanDistance > this.goalDistance) {
+        this.done();
+      }
+      const outsideMin = this.outsideY;
+      const outsideMax = this.outsideY + this.height;
+      for (const molecule of this.moleculeList) {
+        if (molecule.gameObject) {
+          molecule.gameObject.visible = !(
+            molecule.gameObject.y > outsideMin &&
+            molecule.gameObject.y < outsideMax
+          );
+        }
+      }
+    } else if (this.showInfo) {
+      this.animationStep++;
+      const points = this.calculateInitMoleculePoints(1, this.animationStep);
+      for (let i = 0; i < this.moleculeDisplayPoints.length; i++) {
+        this.moleculeDisplayPoints[i] = points[i];
+      }
     }
   }
 
@@ -693,6 +910,19 @@ export default class heat extends Vue {
           options: this.getMoleculeTypeOptions(moleculeConfigName),
         });
       }
+      if (moleculeConfigName === 'carbonDioxide') {
+        this.moleculeList.push({
+          gameObject: null,
+          uuid: uuidv4(),
+          type: moleculeConfigName,
+          position: [50, 15],
+          size: moleculeConfig.size,
+          controllable: moleculeConfig.controllable,
+          color: moleculeConfig.color,
+          rotation: 0,
+          options: this.getMoleculeTypeOptions(moleculeConfigName),
+        });
+      }
       this.moleculeList.push(...moleculeList);
     }
   }
@@ -701,6 +931,13 @@ export default class heat extends Vue {
     graphics.lineStyle(2, 0xffffff, 1);
     graphics.moveTo(0, 0);
     graphics.lineTo(this.width, 0);
+  }
+
+  onDrawRect(graphics: PIXI.Graphics): void {
+    graphics.clear();
+    graphics.beginFill(0x000000, 0.7);
+    graphics.drawRect(0, 0, this.width, this.height);
+    graphics.endFill();
   }
 }
 </script>
@@ -822,7 +1059,7 @@ export default class heat extends Vue {
 
 .overlay-container {
   position: absolute;
-  background-color: #ffffff55;
+  background-color: #ffffff99;
   top: 0;
   width: 100%;
   height: 100%;
@@ -834,6 +1071,27 @@ export default class heat extends Vue {
   div {
     margin: auto;
     text-align: center;
+  }
+}
+
+.overlay-info {
+  position: absolute;
+  background-color: #ffffff99;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  --footer-height: 7rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-bold);
+  white-space: pre-wrap;
+
+  div {
+    margin: auto;
+    text-align: center;
+    padding: 1rem;
   }
 }
 </style>

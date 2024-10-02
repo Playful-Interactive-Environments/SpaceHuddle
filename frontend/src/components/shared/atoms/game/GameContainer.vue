@@ -257,6 +257,7 @@ import * as matterUtil from '@/utils/matter';
 import { getPolygonCenter } from '@/utils/polygon';
 import { delay, until } from '@/utils/wait';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
+import * as TWEEDLE from 'tweedle.js';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -933,6 +934,7 @@ export default class GameContainer extends Vue {
       const pixi = this.$refs.pixi as typeof Application;
       if (pixi) {
         this.app = pixi.app;
+        pixi.app.ticker.add(() => TWEEDLE.Group.shared.update());
         pixi.app.transparent = this.transparent;
         this.$emit('initRenderer', pixi.app.renderer);
       }

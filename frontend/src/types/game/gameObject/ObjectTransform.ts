@@ -179,8 +179,10 @@ export class ObjectTransform {
 
   //#region events
   syncPosition(): void {
-    this.pixiObject.x = this.displayX;
-    this.pixiObject.y = this.displayY;
+    if (this.pixiObject.transform) {
+      this.pixiObject.x = this.displayX;
+      this.pixiObject.y = this.displayY;
+    }
   }
 
   updatePosition(position: [number, number]): void {

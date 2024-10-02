@@ -38,10 +38,15 @@
       "unknown": "unknown",
       "heatGame": {
         "move": "push out of the way",
-        "hit": "Greenhouse gas was hit by heat radiation.",
+        "dialogTitle": "The greenhouse gas was hit by the heat radiation.",
+        "hit": "The greenhouse gas was hit by the heat radiation and absorbs the heat radiation for a short time.",
+        "heat": "The absorbed heat radiation is emitted again in a random direction, partly back to the earth, which heats it up even more.",
         "hitCount": "hit count",
         "temperature": "temperature",
-        "goal": "goal"
+        "goal": "goal",
+        "intro": "Push the greenhouse gases out of the way to let the heat radiation escape. Or let the greenhouse gases interact with the heat radiation and see how the different gases influence the temperature.",
+        "intro1": "Push the greenhouse gases out of the way to let the heat radiation escape.",
+        "intro2": "Or let the greenhouse gases interact with the heat radiation and see how the different gases influence the temperature."
       }
     },
     "placeables": {
