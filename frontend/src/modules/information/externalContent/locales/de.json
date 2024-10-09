@@ -1,0 +1,11 @@
+{
+  "description": {
+    "title": "Externe Inhalte",
+    "description": "Zeige externe Inhalte"
+  },
+  "moderatorConfig": {
+    "link": "Link zu externen Inhalten",
+    "pdf": "Lade eine PDF hoch (überschreibt link)",
+    "invalid": "Ungültiger Link oder Dateientyp."
+  }
+}
