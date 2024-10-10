@@ -17,7 +17,7 @@
       :label="$t('module.information.externalContent.moderatorConfig.pdf')"
     >
       <label for="file-upload" class="custom-file-upload">
-        <i class="fa fa-cloud-upload"></i> Custom Upload
+        Custom Upload
       </label>
       <input
         id="file-upload"
@@ -38,8 +38,6 @@
         {{ $t('module.information.externalContent.moderatorConfig.invalid') }}
       </p>
     </el-form-item>
-
-    
   </div>
 </template>
 

@@ -71,20 +71,22 @@ export default class PublicScreen extends Vue {
   }
 
   get isValidSourceLink(): boolean {
-    const urlPattern = new RegExp(
-      '^(https?:\\/\\/)' +
-        '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
-        'localhost|' +
-        '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
-        '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
-        '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
-        '(\\?[;&a-z0-9%_.~+=-]*)?' +
-        '(\\#[-a-z0-9_]*)?$',
-      'i'
-    );
+    const base64Pattern =
+      /^(data:application\/pdf;base64,[A-Za-z0-9+/]+={0,2})$/;
 
     return (
-      urlPattern.test(this.sourceLink) || this.sourceLink.startsWith('blob:')
+      base64Pattern.test(this.sourceLink) ||
+      new RegExp(
+        '^(https?:\\/\\/)' +
+          '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
+          'localhost|' +
+          '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
+          '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
+          '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
+          '(\\?[;&a-z0-9%_.~+=-]*)?' +
+          '(\\#[-a-z0-9_]*)?$',
+        'i'
+      ).test(this.sourceLink)
     );
   }
 }
