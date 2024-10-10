@@ -1,14 +1,25 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <section class="layout__columns">
-      <IdeaCard
-        v-for="(idea, index) in ideas"
-        :idea="idea"
-        :key="index"
-        :is-editable="false"
-        :show-state="false"
-      />
-    </section>
+    <div class="iframe-container" v-if="isValidSourceLink && participantView">
+      <iframe
+        id="iframe"
+        title="ExternalSource"
+        width="100%"
+        height="100%"
+        :src="sourceLink"
+      >
+      </iframe>
+    </div>
+    <p v-else-if="sourceLink && participantView">
+      {{ $t('module.information.externalContent.moderatorConfig.invalid') }}
+    </p>
+    <p v-else>
+      {{
+        $t(
+          'module.information.externalContent.participant.participantViewFalse'
+        )
+      }}
+    </p>
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -24,6 +35,8 @@ import * as ideaService from '@/services/idea-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as cashService from '@/services/cash-service';
+import { Task } from '@/types/api/Task';
+import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
@@ -39,6 +52,11 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   ideas: Idea[] = [];
+
+  task!: Task;
+
+  sourceLink = '';
+  participantView = false;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -72,6 +90,10 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+    if (module) {
+      this.sourceLink = module.parameter.sourceLink;
+      this.participantView = module.parameter.participantView;
+    }
   }
 
   updateIdeas(ideas: Idea[]): void {
@@ -86,7 +108,42 @@ export default class Participant extends Vue {
   unmounted(): void {
     this.deregisterAll();
   }
+
+  get isValidSourceLink(): boolean {
+    const base64Pattern =
+      /^(data:application\/pdf;base64,[A-Za-z0-9+/]+={0,2})$/;
+
+    return (
+      base64Pattern.test(this.sourceLink) ||
+      new RegExp(
+        '^(https?:\\/\\/)' +
+          '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
+          'localhost|' +
+          '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
+          '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
+          '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
+          '(\\?[;&a-z0-9%_.~+=-]*)?' +
+          '(\\#[-a-z0-9_]*)?$',
+        'i'
+      ).test(this.sourceLink)
+    );
+  }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.iframe-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>

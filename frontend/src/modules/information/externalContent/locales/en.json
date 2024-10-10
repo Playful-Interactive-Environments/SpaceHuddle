@@ -1,11 +1,16 @@
 {
   "description": {
-    "title": "External Source",
+    "title": "Frame",
     "description": "show external sources"
   },
   "moderatorConfig": {
     "link": "link to external source",
     "pdf": "upload pdf to display (will overwrite link)",
-    "invalid": "Invalid URL or unsupported file type."
+    "invalid": "Invalid URL or unsupported file type.",
+    "participantView": "Participants can see content on their devices",
+    "preview": "Preview: "
+  },
+  "participant": {
+    "participantViewFalse": "Participant view was blocked by the moderator."
   }
 }

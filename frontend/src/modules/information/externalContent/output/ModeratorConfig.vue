@@ -1,6 +1,13 @@
 <template>
   <div>
     <el-form-item
+      :label="
+        $t('module.information.externalContent.moderatorConfig.participantView')
+      "
+    >
+      <el-switch v-model="modelValue.participantView" />
+    </el-form-item>
+    <el-form-item
       :label="$t('module.information.externalContent.moderatorConfig.link')"
     >
       <el-input type="text" v-model="modelValue.sourceLink" clearable />
@@ -9,7 +16,11 @@
     <el-form-item
       :label="$t('module.information.externalContent.moderatorConfig.pdf')"
     >
+      <label for="file-upload" class="custom-file-upload">
+        <i class="fa fa-cloud-upload"></i> Custom Upload
+      </label>
       <input
+        id="file-upload"
         type="file"
         ref="fileInput"
         @change="onFileChange"
@@ -17,12 +28,18 @@
       />
     </el-form-item>
 
-    <div class="iframe-container" v-if="isValidSourceLink">
-      <iframe :src="modelValue.sourceLink" width="100%" height="500"></iframe>
-    </div>
-    <p v-else-if="modelValue.sourceLink">
-      {{ $t('module.information.externalContent.moderatorConfig.invalid') }}
-    </p>
+    <el-form-item
+      :label="$t('module.information.externalContent.moderatorConfig.preview')"
+    >
+      <div class="iframe-container" v-if="isValidSourceLink">
+        <iframe :src="modelValue.sourceLink" width="100%" height="500"></iframe>
+      </div>
+      <p v-else-if="modelValue.sourceLink">
+        {{ $t('module.information.externalContent.moderatorConfig.invalid') }}
+      </p>
+    </el-form-item>
+
+    
   </div>
 </template>
 
@@ -55,30 +72,33 @@ export default class ModeratorConfig extends Vue {
       if (!('sourceLink' in this.modelValue)) {
         this.modelValue.sourceLink = '';
       }
+      if (!('participantView' in this.modelValue)) {
+        this.modelValue.participantView = false;
+      }
     }
   }
 
-  // Computed property to check if the source link is valid
   get isValidSourceLink(): boolean {
-    const urlPattern = new RegExp(
-      '^(https?:\\/\\/)' +
-        '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
-        'localhost|' +
-        '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
-        '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
-        '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
-        '(\\?[;&a-z0-9%_.~+=-]*)?' +
-        '(\\#[-a-z0-9_]*)?$',
-      'i'
-    );
+    const base64Pattern =
+      /^(data:application\/pdf;base64,[A-Za-z0-9+/]+={0,2})$/;
 
     return (
-      urlPattern.test(this.modelValue.sourceLink) ||
-      this.modelValue.sourceLink.startsWith('blob:')
+      base64Pattern.test(this.modelValue.sourceLink) ||
+      new RegExp(
+        '^(https?:\\/\\/)' +
+          '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
+          'localhost|' +
+          '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
+          '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
+          '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
+          '(\\?[;&a-z0-9%_.~+=-]*)?' +
+          '(\\#[-a-z0-9_]*)?$',
+        'i'
+      ).test(this.modelValue.sourceLink)
     );
   }
 
-  onFileChange(event: Event): void {
+  async onFileChange(event: Event): void {
     const input = this.$refs.fileInput as HTMLInputElement;
 
     // Ensure the input and files array exists
@@ -87,17 +107,38 @@ export default class ModeratorConfig extends Vue {
 
       // Check if the uploaded file is a PDF
       if (file.type !== 'application/pdf') {
-        console.error('Uploaded file is not a PDF');
         this.modelValue.sourceLink = ''; // Clear the sourceLink if the file type is incorrect
         return;
       }
 
       // Update sourceLink with the file URL so it can be displayed in the iframe
-      this.modelValue.sourceLink = URL.createObjectURL(file);
-    } else {
-      console.log(input);
-      console.error('File input or files are undefined');
+      const blobUrl = URL.createObjectURL(file);
+      let base64URL = blobUrl;
+      await this.convertBlobUrlToBase64(blobUrl)
+        .then((base64) => {
+          base64URL = base64;
+        })
+        .catch((error) => {
+          base64URL = null;
+        });
+      this.modelValue.sourceLink = base64URL;
     }
+  }
+
+  async convertBlobUrlToBase64(blobUrl) {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        resolve(reader.result);
+      };
+      reader.onerror = function () {
+        reject(new Error('Error reading Blob as Base64'));
+      };
+      reader.readAsDataURL(blob);
+    });
   }
 }
 </script>
@@ -148,5 +189,17 @@ p {
   .visIcon {
     color: white;
   }
+}
+
+input[type='file'] {
+  display: none;
+}
+.custom-file-upload {
+  border: var(--el-border-color);
+  background-color: var(--el-color-white);
+  border-radius: var(--border-radius-small);
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
 }
 </style>
