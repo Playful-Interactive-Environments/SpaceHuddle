@@ -30,13 +30,9 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Idea } from '@/types/api/Idea';
-import * as ideaService from '@/services/idea-service';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as cashService from '@/services/cash-service';
 import { Task } from '@/types/api/Task';
-import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
@@ -51,30 +47,9 @@ export default class Participant extends Vue {
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
-  ideas: Idea[] = [];
-
   task!: Task;
-
   sourceLink = '';
   participantView = false;
-
-  get moduleName(): string {
-    if (this.module) return this.module.name;
-    return '';
-  }
-
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    this.deregisterAll();
-    ideaService.registerGetIdeasForTask(
-      this.taskId,
-      IdeaSortOrder.ORDER,
-      null,
-      this.updateIdeas,
-      EndpointAuthorisationType.PARTICIPANT,
-      10
-    );
-  }
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
@@ -96,12 +71,7 @@ export default class Participant extends Vue {
     }
   }
 
-  updateIdeas(ideas: Idea[]): void {
-    this.ideas = ideas;
-  }
-
   deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateModule);
   }
 

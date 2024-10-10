@@ -17,7 +17,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { Idea } from '@/types/api/Idea';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import draggable from 'vuedraggable';
@@ -38,16 +37,7 @@ import * as taskService from '@/services/task-service';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
-  ideas: Idea[] = [];
-  addIdea: any = {
-    keywords: '',
-    description: '',
-    link: null,
-    image: null, // the datebase64 url of created image
-  };
-  showSettings = false;
   task!: Task;
-
   sourceLink = '';
 
   deregisterAll(): void {

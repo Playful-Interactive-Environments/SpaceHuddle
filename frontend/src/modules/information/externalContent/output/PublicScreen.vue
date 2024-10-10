@@ -18,7 +18,6 @@
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { Prop, Watch } from 'vue-property-decorator';
-import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import { Task } from '@/types/api/Task';
@@ -35,11 +34,7 @@ export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  ideas: Idea[] = [];
-  contentHeight = 100;
-
   task!: Task;
-
   sourceLink = '';
 
   get portrait(): boolean {

@@ -96,7 +96,7 @@ export default class ModeratorConfig extends Vue {
     );
   }
 
-  async onFileChange(event: Event): void {
+  async onFileChange(): void {
     const input = this.$refs.fileInput as HTMLInputElement;
 
     // Ensure the input and files array exists
@@ -116,7 +116,7 @@ export default class ModeratorConfig extends Vue {
         .then((base64) => {
           base64URL = base64;
         })
-        .catch((error) => {
+        .catch(() => {
           base64URL = null;
         });
       this.modelValue.sourceLink = base64URL;
