@@ -671,7 +671,7 @@ export default class IdeaCard extends Vue {
 
 .collapse {
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 .idea-count {

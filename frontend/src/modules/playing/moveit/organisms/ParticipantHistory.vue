@@ -228,7 +228,7 @@ import {
   normalizedTrackingData,
   persons,
 } from '@/modules/playing/moveit/utils/trackingData';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import * as themeColors from '@/utils/themeColors';

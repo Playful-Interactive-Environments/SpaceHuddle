@@ -323,7 +323,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { ParticleState } from '@/modules/playing/moveit/organisms/CleanUpParticles.vue';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
 import { TrackingManager } from '@/types/tracking/TrackingManager';

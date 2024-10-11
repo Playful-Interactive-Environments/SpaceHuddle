@@ -224,7 +224,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Line } from 'vue-chartjs';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
 import GameObject, {
   IGameObjectSource,

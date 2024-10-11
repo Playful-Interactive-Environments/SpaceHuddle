@@ -411,7 +411,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Bar, Doughnut } from 'vue-chartjs';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
 import { Prop } from 'vue-property-decorator';

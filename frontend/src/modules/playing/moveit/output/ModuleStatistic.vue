@@ -98,7 +98,7 @@ import {
   getCalculationForType,
   CalculationType,
 } from '@/utils/statistic';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
 import {
   NavigationType,

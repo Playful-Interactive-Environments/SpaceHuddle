@@ -2,7 +2,7 @@ import * as constants from '@/modules/playing/moveit/utils/consts';
 import { CalculationType, mapArrayToConstantSize } from '@/utils/statistic';
 import { ChartData } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
 import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export interface TrackingData {

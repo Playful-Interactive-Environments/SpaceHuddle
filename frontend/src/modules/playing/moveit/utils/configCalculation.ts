@@ -1,4 +1,4 @@
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import { ChartData } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';

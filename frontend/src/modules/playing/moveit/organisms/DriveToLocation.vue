@@ -402,7 +402,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Joystick from 'vue-joystick-component';
 import { Line } from 'vue-chartjs';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as osrmUtils from '@/modules/playing/moveit/utils/osrm';
 import {
   MglEvent,

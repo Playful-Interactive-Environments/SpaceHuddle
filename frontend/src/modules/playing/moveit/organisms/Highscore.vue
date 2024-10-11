@@ -141,7 +141,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { VoteParameterResult } from '@/types/api/Vote';
 import * as cashService from '@/services/cash-service';
 import * as votingService from '@/services/voting-service';
-import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
+import gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface HighscoreData {

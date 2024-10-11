@@ -171,7 +171,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import { ElMessage } from 'element-plus';
-import * as escalationConfig from '@/modules/playing/findit/data/escalation.json';
+import escalationConfig from '@/modules/playing/findit/data/escalation.json';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';

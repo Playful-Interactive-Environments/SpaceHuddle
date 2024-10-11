@@ -1,9 +1,9 @@
 import { MglDefaults } from 'vue-maplibre-gl';
-import * as mapStyleBasic from '@/assets/map-style/basic.json';
-import * as mapStyleDark from '@/assets/map-style/dark.json';
-import * as mapStyleLight from '@/assets/map-style/light.json';
-import * as mapStyleTerrain from '@/assets/map-style/terrain.json';
-import * as mapStyleStreets from '@/assets/map-style/streets.json';
+import mapStyleBasic from '@/assets/map-style/basic.json';
+import mapStyleDark from '@/assets/map-style/dark.json';
+import mapStyleLight from '@/assets/map-style/light.json';
+import mapStyleTerrain from '@/assets/map-style/terrain.json';
+import mapStyleStreets from '@/assets/map-style/streets.json';
 import * as env from '@/utils/env';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/

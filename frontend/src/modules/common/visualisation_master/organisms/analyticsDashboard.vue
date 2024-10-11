@@ -103,7 +103,10 @@
             $t(
               'module.common.visualisation_master.visModules.analytics.module.join'
             )
-          }} <span style="font-size: 14pt">&nbsp;play.ecopolis.at/join/{{ session.connectionKey }}</span>
+          }}
+          <span style="font-size: 14pt">
+            play.ecopolis.at/join/{{ session.connectionKey }}
+          </span>
           <br />
           <font-awesome-icon :icon="['fas', 'arrow-right']" />
         </h1>
