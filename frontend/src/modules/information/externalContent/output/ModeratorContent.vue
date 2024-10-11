@@ -64,14 +64,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
   }
 
-  @Watch('showSettings', { immediate: true })
-  onShowSettingsChanged(): void {
-    if (this.showSettings) {
-      this.addIdea.order = this.ideas.length;
-      this.addIdea.parameter = [];
-    }
-  }
-
   get isValidSourceLink(): boolean {
     const base64Pattern =
       /^(data:application\/pdf;base64,[A-Za-z0-9+/]+={0,2})$/;

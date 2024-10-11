@@ -96,7 +96,7 @@ export default class ModeratorConfig extends Vue {
     );
   }
 
-  async onFileChange(): void {
+  async onFileChange(): Promise<void> {
     const input = this.$refs.fileInput as HTMLInputElement;
 
     // Ensure the input and files array exists
@@ -111,7 +111,7 @@ export default class ModeratorConfig extends Vue {
 
       // Update sourceLink with the file URL so it can be displayed in the iframe
       const blobUrl = URL.createObjectURL(file);
-      let base64URL = blobUrl;
+      let base64URL: string | unknown | null = blobUrl;
       await this.convertBlobUrlToBase64(blobUrl)
         .then((base64) => {
           base64URL = base64;

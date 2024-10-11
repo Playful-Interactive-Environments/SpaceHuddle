@@ -37,10 +37,6 @@ export default class PublicScreen extends Vue {
   task!: Task;
   sourceLink = '';
 
-  get portrait(): boolean {
-    return this.contentHeight > 200;
-  }
-
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
   }
