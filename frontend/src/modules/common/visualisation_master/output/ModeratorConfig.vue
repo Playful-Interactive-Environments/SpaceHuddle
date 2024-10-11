@@ -52,6 +52,8 @@ import moduleConfig from '@/modules/common/visualisation_master/data/moduleConfi
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
 
+const hiddenSubmoduleList = JSON.parse(process.env.VUE_APP_HIDDEN_SUBMODULES);
+
 @Options({
   components: { ModuleCard, IdeaCard },
   emits: ['update'],
@@ -102,8 +104,10 @@ export default class ModeratorConfig extends Vue {
   }
 
   getVisModulesForTaskType() {
-    return Object.values(this.moduleConfig.visModules).filter((module) =>
-      module.type.includes(this.taskType)
+    return Object.values(this.moduleConfig.visModules).filter(
+      (module) =>
+        module.type.includes(this.taskType) &&
+        !hiddenSubmoduleList.includes(`visualisation:${module.id}`)
     );
   }
 }
