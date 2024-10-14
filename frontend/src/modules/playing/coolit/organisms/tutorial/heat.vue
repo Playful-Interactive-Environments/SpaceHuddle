@@ -10,7 +10,7 @@
       :border-category="CollisionGroups.BORDER"
       :show-bounds="false"
       background-color="#a0d4d9"
-      background-texture="/assets/games/coolit/tutorial/sky.png"
+      background-texture="/assets/games/coolit/tutorial/sky02.png"
       :background-position="BackgroundPosition.Cover"
       :background-movement="
         !showInfo && !isHit && !isDone
@@ -904,43 +904,68 @@ export default class heat extends Vue {
 
   initMolecules(): void {
     if (this.moleculeList.length > 0) return;
-    for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
-      const moleculeConfig = gameConfig.molecules[moleculeConfigName];
-      const moleculeCount = 2;
-      const moleculeList: MoleculeData[] = [];
-      for (let i = 0; i < moleculeCount; i++) {
+    const moleculeCount = 4;
+    const moleculeList: MoleculeData[] = [];
+    const particleCountControllable =
+      moleculeCount *
+        Object.keys(gameConfig.molecules).filter(
+          (item) => gameConfig.molecules[item].controllable
+        ).length +
+      1;
+    const particleCountUncontrollable =
+      moleculeCount *
+      Object.keys(gameConfig.molecules).filter(
+        (item) => !gameConfig.molecules[item].controllable
+      ).length;
+    const particleUniqueSpaceControllable = 100 / particleCountControllable;
+    const particleUniqueSpaceUncontrollable = 100 / particleCountUncontrollable;
+    let countControllable = 0;
+    let countUncontrollable = 0;
+    for (let i = 0; i < moleculeCount; i++) {
+      for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
+        const moleculeConfig = gameConfig.molecules[moleculeConfigName];
+        const particleUniqueSpace = moleculeConfig.controllable
+          ? particleUniqueSpaceControllable
+          : particleUniqueSpaceUncontrollable;
+        const count = moleculeConfig.controllable
+          ? countControllable
+          : countUncontrollable;
         let x = Math.random() * 100;
         if (x > 30 && x < 70) {
           if (x < 50) x = Math.random() * 30;
           else x = 100 - Math.random() * 30;
         }
+        const y =
+          Math.random() * particleUniqueSpace + count * particleUniqueSpace;
+        if (moleculeConfig.controllable) countControllable++;
+        else countUncontrollable++;
         moleculeList.push({
           gameObject: null,
           uuid: uuidv4(),
           type: moleculeConfigName,
-          position: [x, Math.random() * 100],
+          position: [x, y],
           size: moleculeConfig.size,
           controllable: moleculeConfig.controllable,
           color: moleculeConfig.color,
           rotation: 0,
           options: this.getMoleculeTypeOptions(moleculeConfigName),
         });
+        if (moleculeConfigName === 'carbonDioxide' && i === 0) {
+          this.moleculeList.push({
+            gameObject: null,
+            uuid: uuidv4(),
+            type: moleculeConfigName,
+            position: [50, 15],
+            size: moleculeConfig.size,
+            controllable: moleculeConfig.controllable,
+            color: moleculeConfig.color,
+            rotation: 0,
+            options: this.getMoleculeTypeOptions(moleculeConfigName),
+          });
+        }
       }
-      if (moleculeConfigName === 'carbonDioxide') {
-        this.moleculeList.push({
-          gameObject: null,
-          uuid: uuidv4(),
-          type: moleculeConfigName,
-          position: [50, 15],
-          size: moleculeConfig.size,
-          controllable: moleculeConfig.controllable,
-          color: moleculeConfig.color,
-          rotation: 0,
-          options: this.getMoleculeTypeOptions(moleculeConfigName),
-        });
-      }
-      this.moleculeList.push(...moleculeList);
     }
+    this.moleculeList.push(...moleculeList);
   }
 
   onDrawLine(graphics: PIXI.Graphics): void {
