@@ -1,10 +1,11 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
     <module-info
-      v-if="gameState === GameState.Info && module"
+      v-if="module"
       translation-path="module.playing.moveit.participant.tutorial"
       image-directory="/assets/games/moveit/tutorial"
       :module-info-entry-data-list="tutorialList"
+      :active="gameState === GameState.Info"
       @infoRead="gameState = GameState.Game"
       :info-type="`move-it-${gameStep}`"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"

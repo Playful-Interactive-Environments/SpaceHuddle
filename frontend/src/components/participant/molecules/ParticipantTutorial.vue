@@ -1,5 +1,5 @@
 <template>
-  <div class="infoArea">
+  <div v-if="active" class="infoArea">
     <slot name="prefix" />
     <el-carousel
       ref="carousel"
@@ -35,7 +35,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as tutorialService from '@/services/tutorial-service';
 import * as cashService from '@/services/cash-service';
@@ -45,7 +45,12 @@ import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 @Options({
   components: { SpriteCanvas },
-  emits: ['infoRead', 'sizeChanged', 'activeTabIndexChanged'],
+  emits: [
+    'infoRead',
+    'sizeChanged',
+    'activeTabIndexChanged',
+    'tutorialNotShown',
+  ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ParticipantTutorial extends Vue {
@@ -53,6 +58,7 @@ export default class ParticipantTutorial extends Vue {
   readonly moduleInfoEntryDataList!: string[];
   @Prop({ default: 'moduleInfo' }) readonly infoType!: string;
   @Prop({ default: true }) readonly showTutorialOnlyOnce!: boolean;
+  @Prop({ default: true }) readonly active!: boolean;
   tutorialSteps: Tutorial[] = [];
   activeTabIndex = 0;
   gameHeight = 0;
@@ -100,6 +106,14 @@ export default class ParticipantTutorial extends Vue {
     unregisterDomElement(this.domKey);
   }
 
+  @Watch('active', { immediate: true })
+  onActiveChanged(): void {
+    if (this.active && this.initTutorialDone && this.tutorialSteps.length > 0) {
+      this.initTutorialDone = false;
+      this.updateTutorial(this.tutorialSteps);
+    }
+  }
+
   initTutorialDone = false;
   updateTutorial(steps: Tutorial[]): void {
     this.tutorialSteps = steps;
@@ -108,6 +122,7 @@ export default class ParticipantTutorial extends Vue {
       this.$emit('activeTabIndexChanged', this.activeTabIndex);
     }
     if (this.openModuleInfoEntryDataList.length === 0) {
+      this.$emit('tutorialNotShown');
       this.$emit('infoRead');
     }
     this.initTutorialDone = true;

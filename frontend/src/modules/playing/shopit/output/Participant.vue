@@ -1,10 +1,11 @@
 <template>
   <div ref="gameContainer" class="gameSpace">
     <module-info
-      v-if="gameState === GameState.Info && module"
+      v-if="module"
       translation-path="module.playing.shopit.participant.tutorial"
       image-directory="/assets/games/shopit/tutorial"
       :module-info-entry-data-list="tutorialList"
+      :active="gameState === GameState.Info"
       @infoRead="
         gameState = GameState.Game;
         gameStep = GameStep.Tut;

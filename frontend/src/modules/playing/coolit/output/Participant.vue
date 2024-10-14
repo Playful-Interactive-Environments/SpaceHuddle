@@ -1,14 +1,18 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
     <module-info
-      v-if="gameState === GameState.Info && module"
+      v-if="module"
       translation-path="module.playing.coolit.participant.tutorial"
       image-directory="/assets/games/coolit/tutorial"
       :module-info-entry-data-list="tutorialList"
+      :active="gameState === GameState.Info"
       @infoRead="
         gameState =
-          gameStep === GameStep.Play ? GameState.Tutorial : GameState.Game
+          gameStep === GameStep.Play && !tutorialNotShown
+            ? GameState.Tutorial
+            : GameState.Game
       "
+      @tutorialNotShown="() => (tutorialNotShown = true)"
       :info-type="`cool-it-${gameStep}`"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
@@ -25,13 +29,6 @@
       v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"
       @done="gameState = GameState.Game"
     />
-    <!--<TutorialGameMolecule
-      v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"
-      :tracking-manager="trackingManager"
-      :task-id="taskId"
-      :module="module"
-      @done="gameState = GameState.Game"
-    />-->
     <play-level
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
       :task-id="taskId"
@@ -105,6 +102,7 @@ export default class Participant extends Vue {
   activeLevel: Idea | null = null;
   temperatureRise = 0;
   levelDone = false;
+  tutorialNotShown = false;
 
   gameStep = GameStep.Select;
   GameStep = GameStep;
@@ -136,6 +134,13 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+  }
+
+  @Watch('gameState', { immediate: true })
+  onGameStateChanged(): void {
+    if (this.gameState === GameState.Info) {
+      this.tutorialNotShown = false;
+    }
   }
 
   @Watch('moduleId', { immediate: true })

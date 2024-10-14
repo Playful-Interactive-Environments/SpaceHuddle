@@ -1,11 +1,12 @@
 <template>
   <div ref="gameContainer" class="gameSpace">
     <module-info
-      v-if="gameState === GameState.Info && module"
+      v-if="module"
       translation-path="module.playing.findit.participant.tutorial"
       image-directory="/assets/games/findit/tutorial"
       :module-info-entry-data-list="tutorialList"
       :info-type="`find-it-${gameStep}`"
+      :active="gameState === GameState.Info"
       @infoRead="gameState = GameState.Game"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />

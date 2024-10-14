@@ -5,7 +5,9 @@
     "
     :info-type="infoType"
     :show-tutorial-only-once="showTutorialOnlyOnce"
+    :active="active"
     @infoRead="() => $emit('infoRead')"
+    @tutorialNotShown="() => $emit('tutorialNotShown')"
     @sizeChanged="sizeChanged"
     @activeTabIndexChanged="(index) => (activeTabIndex = index)"
   >
@@ -57,7 +59,7 @@ export interface ModuleInfoEntryData {
 
 @Options({
   components: { ParticipantTutorial, SpriteCanvas },
-  emits: ['infoRead'],
+  emits: ['infoRead', 'tutorialNotShown'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleInfo extends Vue {
@@ -68,6 +70,7 @@ export default class ModuleInfo extends Vue {
   @Prop({ default: 'jpg' }) readonly fileExtension!: string;
   @Prop({ default: 'moduleInfo' }) readonly infoType!: string;
   @Prop({ default: true }) readonly showTutorialOnlyOnce!: boolean;
+  @Prop({ default: true }) readonly active!: boolean;
   gameWidth = 0;
   gameHeight = 0;
   activeTabIndex = 0;
