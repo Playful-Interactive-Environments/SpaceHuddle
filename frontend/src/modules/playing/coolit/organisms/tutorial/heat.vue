@@ -58,11 +58,11 @@
             shape="rect"
             :object-space="ObjectSpace.Absolute"
             :posX="0"
-            :posY="outsideY"
+            :posY="outsideY + height"
             :is-static="true"
             :affectedByForce="false"
-            :objectAnchor="[0, 0]"
-            :fix-size="[width, height]"
+            :objectAnchor="[0, 1]"
+            :fix-size="[width, 20]"
             :options="{
               name: 'border',
               frictionAir: 0,
@@ -72,7 +72,11 @@
           >
           </GameObject>
           <GameObject
-            v-if="weatherStylesheets && !(showInfo && activeMoleculeUuid)"
+            v-if="
+              weatherStylesheets &&
+              rayParticleSize &&
+              !(showInfo && activeMoleculeUuid)
+            "
             shape="rect"
             :object-space="ObjectSpace.Absolute"
             :posX="width / 2"
@@ -457,7 +461,6 @@ export default class heat extends Vue {
   renderer!: PIXI.Renderer;
   width = 0;
   height = 0;
-  rayParticleSize = 10;
   CollisionGroups = Object.freeze({
     MOUSE: 1 << 0,
     OBSTACLE: 1 << 1,
@@ -535,6 +538,10 @@ export default class heat extends Vue {
     return this.width / 700;
   }
 
+  get rayParticleSize(): number {
+    return this.width / 50;
+  }
+
   get moleculeSize(): number {
     return this.textScaleFactor * 270;
   }
@@ -588,10 +595,13 @@ export default class heat extends Vue {
       });
     this.initMolecules();
 
-    setTimeout(() => {
-      this.infoStartTime = Date.now();
-      this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
-    }, 1000);
+    this.infoStartTime = Date.now();
+    this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
+  }
+
+  @Watch('width', { immediate: true })
+  onWidthChanged(): void {
+    this.rayDisplayPoints = [...this.calculateInitRayPoints(1, 0)];
   }
 
   @Watch('infoStartTime', { immediate: true })
@@ -703,10 +713,11 @@ export default class heat extends Vue {
       }
     }
 
+    const scale = this.rayParticleSize / 25;
     return this.rayPath[animationStep % this.animationSteps].map((item) => {
       return {
-        x: item.x / intensity,
-        y: item.y / intensity,
+        x: (item.x * scale) / intensity,
+        y: (item.y * scale) / intensity,
       };
     });
   }
@@ -898,11 +909,16 @@ export default class heat extends Vue {
       const moleculeCount = 2;
       const moleculeList: MoleculeData[] = [];
       for (let i = 0; i < moleculeCount; i++) {
+        let x = Math.random() * 100;
+        if (x > 30 && x < 70) {
+          if (x < 50) x = Math.random() * 30;
+          else x = 100 - Math.random() * 30;
+        }
         moleculeList.push({
           gameObject: null,
           uuid: uuidv4(),
           type: moleculeConfigName,
-          position: [Math.random() * 100, Math.random() * 100],
+          position: [x, Math.random() * 100],
           size: moleculeConfig.size,
           controllable: moleculeConfig.controllable,
           color: moleculeConfig.color,

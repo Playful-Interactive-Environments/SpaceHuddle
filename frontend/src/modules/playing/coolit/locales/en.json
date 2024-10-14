@@ -43,7 +43,7 @@
         "heat": "The absorbed heat radiation is emitted again in a random direction, partly back to the earth, which heats it up even more.",
         "hitCount": "hit count",
         "temperature": "temperature",
-        "goal": "goal",
+        "goal": "space",
         "intro": "Push the greenhouse gases out of the way to let the heat radiation escape. Or let the greenhouse gases interact with the heat radiation and see how the different gases influence the temperature.",
         "intro1": "Push the greenhouse gases out of the way to let the heat radiation escape.",
         "intro2": "Or let the greenhouse gases interact with the heat radiation and see how the different gases influence the temperature."
@@ -59,6 +59,7 @@
       "contra": "contra",
       "rationAtmosphere": "contribution to the earth's atmosphere",
       "rationGreenhouse": "Proportion of the greenhouse effect",
+      "impactGreenhouse": "Contribution to the greenhouse effect",
       "riseFactor": "increase since the beginning of industrialization",
       "globalWarmingFactor": "Global Warming Potential",
       "lifespan": "Lifetime in the atmosphere",
