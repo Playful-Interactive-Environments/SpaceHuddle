@@ -8,7 +8,8 @@
     "pdf": "upload pdf to display (will overwrite link)",
     "invalid": "Invalid URL or unsupported file type.",
     "participantView": "Participants can see content on their devices",
-    "preview": "Preview: "
+    "preview": "Preview: ",
+    "upload": "Upload"
   },
   "participant": {
     "participantViewFalse": "Participant view was blocked by the moderator."

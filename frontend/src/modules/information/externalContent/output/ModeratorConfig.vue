@@ -17,7 +17,7 @@
       :label="$t('module.information.externalContent.moderatorConfig.pdf')"
     >
       <label for="file-upload" class="custom-file-upload">
-        Custom Upload
+        {{ $t('module.information.externalContent.moderatorConfig.upload') }}
       </label>
       <input
         id="file-upload"
