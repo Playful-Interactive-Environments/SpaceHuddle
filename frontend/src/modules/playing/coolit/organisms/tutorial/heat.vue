@@ -367,13 +367,13 @@
     </div>
     <div v-else-if="showInfo" class="overlay-info">
       <div>
-        <div>
+        <!--<div>
           {{
             $t(
               `module.playing.coolit.participant.tutorial.heatGame.${infoTextKey}`
             )
           }}
-        </div>
+        </div>-->
         <div v-if="infoTextKey === InfoTextKey.heat">
           <el-slider
             class="thermometer"
@@ -518,7 +518,7 @@ export default class heat extends Vue {
     -1
   );
   tweenHit = new TWEEDLE.Tween(this.hitAnimation);
-  infoTextKey: InfoTextKey = InfoTextKey.intro1;
+  infoTextKey: InfoTextKey = InfoTextKey.none;
 
   InfoTextKey = InfoTextKey;
 
@@ -606,7 +606,7 @@ export default class heat extends Vue {
 
   @Watch('infoStartTime', { immediate: true })
   onInfoChanged(): void {
-    if (this.infoStartTime > 0) {
+    if (this.infoStartTime > 0 && this.infoTextKey !== InfoTextKey.none) {
       this.showInfo = true;
       setTimeout(() => {
         switch (this.infoTextKey) {
@@ -799,7 +799,9 @@ export default class heat extends Vue {
   }
 
   updateLoop(): void {
-    this.showInfo = this.infoStartTime > Date.now() - this.infoTime;
+    this.showInfo =
+      this.infoTextKey !== InfoTextKey.none &&
+      this.infoStartTime > Date.now() - this.infoTime;
     if (!this.showInfo && !this.isHit && !this.isDone) {
       this.animationStep++;
       const points = this.calculateInitRayPoints(1, this.animationStep);
@@ -1117,7 +1119,7 @@ export default class heat extends Vue {
 
 .overlay-info {
   position: absolute;
-  background-color: #ffffff99;
+  //background-color: #ffffff99;
   top: 0;
   width: 100%;
   height: 100%;
