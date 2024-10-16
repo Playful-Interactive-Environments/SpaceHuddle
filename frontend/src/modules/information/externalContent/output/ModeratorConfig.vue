@@ -10,7 +10,13 @@
     <el-form-item
       :label="$t('module.information.externalContent.moderatorConfig.link')"
     >
-      <el-input type="text" v-model="modelValue.sourceLink" clearable maxlength="3000" @blur="cleanEmbedCode"/>
+      <el-input
+        type="text"
+        v-model="modelValue.sourceLink"
+        clearable
+        maxlength="3000"
+        @blur="cleanEmbedCode"
+      />
     </el-form-item>
 
     <el-form-item
