@@ -10,7 +10,7 @@
     <el-form-item
       :label="$t('module.information.externalContent.moderatorConfig.link')"
     >
-      <el-input type="text" v-model="modelValue.sourceLink" clearable />
+      <el-input type="text" v-model="modelValue.sourceLink" clearable maxlength="3000" @blur="cleanEmbedCode"/>
     </el-form-item>
 
     <el-form-item
@@ -137,6 +137,16 @@ export default class ModeratorConfig extends Vue {
       };
       reader.readAsDataURL(blob);
     });
+  }
+
+  cleanEmbedCode(): void {
+    const embedCode = this.modelValue.sourceLink;
+    const urlMatch = embedCode.match(/src=["']([^"']+)["']/);
+    if (urlMatch && urlMatch[1]) {
+      this.modelValue.sourceLink = urlMatch[1];
+    } else {
+      this.modelValue.sourceLink = embedCode;
+    }
   }
 }
 </script>
