@@ -1,13 +1,18 @@
 <template>
   <div class="iframe-container" v-if="isValidSourceLink">
+    <transition name="fade">
+      <el-button @click="toggleFullscreen" class="fullscreenButton">
+        <font-awesome-icon :icon="['fas', 'expand']" />
+      </el-button>
+    </transition>
     <iframe
       id="iframe"
+      ref="iframe"
       title="ExternalSource"
       width="100%"
       height="100%"
       :src="sourceLink"
-    >
-    </iframe>
+    ></iframe>
   </div>
   <p v-else-if="sourceLink">
     {{ $t('module.information.externalContent.moderatorConfig.invalid') }}
@@ -16,45 +21,40 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { Prop, Watch } from 'vue-property-decorator';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from '@/services/cash-service';
-import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
+import { Task } from '@/types/api/Task';
+import { Module } from '@/types/api/Module';
 
 @Options({
-  components: {
-    IdeaCard,
-  },
+  emits: ['update'],
 })
-
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
-  @Prop({ default: EndpointAuthorisationType.MODERATOR })
-  authHeaderTyp!: EndpointAuthorisationType;
   task!: Task;
   sourceLink = '';
 
-  deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateTask);
+  mounted() {
+    // Register task settings when component is mounted
+    this.reloadTaskSettings();
   }
 
-  unmounted(): void {
-    this.deregisterAll();
+  toggleFullscreen(): void {
+    const iframeElement = this.$refs.iframe as HTMLElement;
+    if (iframeElement.requestFullscreen) {
+      iframeElement.requestFullscreen();
+    }
   }
 
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
-    this.deregisterAll();
     taskService.registerGetTaskById(this.taskId, this.updateTask);
   }
 
   updateTask(task: Task): void {
     this.task = task;
     const module = this.task.modules.find(
-      (module) => module.parameter.sourceLink
+      (module: Module) => module.parameter.sourceLink
     );
     if (module) {
       this.sourceLink = module.parameter.sourceLink;
@@ -97,5 +97,11 @@ iframe {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+.fullscreenButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
 }
 </style>
