@@ -8,7 +8,9 @@
       :active="gameState === GameState.Info"
       @infoRead="gameState = GameState.Game"
       :info-type="`move-it-${gameStep}`"
-      :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
+      :showTutorialOnlyOnce="
+        module.parameter.showTutorialOnlyOnce && !reloadTutorial
+      "
     />
     <select-challenge
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
@@ -50,7 +52,12 @@
     <el-button
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       class="tutorialButton"
-      @click="gameState = GameState.Info"
+      @click="
+        () => {
+          gameState = GameState.Info;
+          reloadTutorial = true;
+        }
+      "
       ><font-awesome-icon :icon="['fas', 'lightbulb']"
     /></el-button>
   </div>
@@ -165,6 +172,7 @@ export default class Participant extends Vue {
   movingType: MovingType = MovingType.free;
   levelDone = false;
   myHighScoreList: Vote[] = [];
+  reloadTutorial = false;
 
   trackingData: TrackingData[] = [];
   gameStep = GameStep.Select;
@@ -349,6 +357,13 @@ export default class Participant extends Vue {
 
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
+  }
+
+  @Watch('gameState', { immediate: true })
+  onGameStateChanged(): void {
+    if (this.gameState !== GameState.Info) {
+      this.reloadTutorial = false;
+    }
   }
 
   @Watch('taskId', { immediate: true })

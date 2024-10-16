@@ -46,7 +46,8 @@
         "goal": "space",
         "intro": "Push the greenhouse gases out of the way to let the heat radiation escape. Or let the greenhouse gases interact with the heat radiation and see how the different gases influence the temperature.",
         "intro1": "Push the greenhouse gases out of the way to let the heat radiation escape.",
-        "intro2": "Or let the greenhouse gases interact with the heat radiation and see how the different gases influence the temperature."
+        "intro2": "Or let the greenhouse gases interact with the heat radiation and see how the different gases influence the temperature.",
+        "start": "start game"
       }
     },
     "placeables": {

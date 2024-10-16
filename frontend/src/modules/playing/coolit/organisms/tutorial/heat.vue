@@ -337,21 +337,21 @@
     </DrawerBottomOverlay>
     <div v-if="isDone" class="overlay-container">
       <div>
-        <div>
+        <h2>
           {{
             $t('module.playing.coolit.participant.tutorial.heatGame.hitCount')
           }}
-        </div>
+        </h2>
         <div>
           {{ hitCount }}
         </div>
-        <div>
+        <h2>
           {{
             $t(
               'module.playing.coolit.participant.tutorial.heatGame.temperature'
             )
           }}
-        </div>
+        </h2>
         <div>
           {{ Math.round(temperature) }}°C
           <el-slider
@@ -362,6 +362,13 @@
             height="200px"
             :max="40"
           />
+        </div>
+        <div>
+          <el-button @click="$emit('done')">
+            {{
+              $t('module.playing.coolit.participant.tutorial.heatGame.start')
+            }}
+          </el-button>
         </div>
       </div>
     </div>
@@ -382,6 +389,8 @@
             vertical
             height="200px"
             :max="40"
+            :format-value-text="(value) => Math.round(value)"
+            :format-tooltip="(value) => Math.round(value)"
           />
         </div>
         <div v-if="infoTextKey === InfoTextKey.heat">
@@ -1114,6 +1123,13 @@ export default class heat extends Vue {
   div {
     margin: auto;
     text-align: center;
+  }
+
+  h2 {
+    margin: auto;
+    text-align: center;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-large);
   }
 }
 

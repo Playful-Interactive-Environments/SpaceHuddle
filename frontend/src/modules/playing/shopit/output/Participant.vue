@@ -11,7 +11,9 @@
         gameStep = GameStep.Tut;
       "
       :info-type="`shop-it-${gameStep}`"
-      :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
+      :showTutorialOnlyOnce="
+        module.parameter.showTutorialOnlyOnce && !reloadTutorial
+      "
     />
     <TutorialGame
       v-if="gameStep === GameStep.Tut && gameState === GameState.Game"
@@ -59,7 +61,12 @@
     <el-button
       v-if="gameStep === GameStep.Join && gameState === GameState.Game"
       class="tutorialButton"
-      @click="gameState = GameState.Info"
+      @click="
+        () => {
+          gameState = GameState.Info;
+          reloadTutorial = true;
+        }
+      "
       ><font-awesome-icon :icon="['fas', 'lightbulb']"
     /></el-button>
   </div>
@@ -142,6 +149,7 @@ export default class Participant extends Vue {
   hostID = 0;
   player = 0;
   checkedAvailability = false;
+  reloadTutorial = false;
 
   trackingManager!: TrackingManager;
   inputTaskId = '';
@@ -198,6 +206,13 @@ export default class Participant extends Vue {
   get moduleName(): string {
     if (this.module) return this.module.name;
     return '';
+  }
+
+  @Watch('gameState', { immediate: true })
+  onGameStateChanged(): void {
+    if (this.gameState !== GameState.Info) {
+      this.reloadTutorial = false;
+    }
   }
 
   @Watch('moduleId', { immediate: true })

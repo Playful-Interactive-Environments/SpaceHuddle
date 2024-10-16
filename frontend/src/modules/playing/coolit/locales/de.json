@@ -46,7 +46,8 @@
         "goal": "Weltall",
         "intro": "Schiebe die Treibhausgas aus dem Weg um die Wärmstrahlung entweichen zu lassen. \n\nOder lass die Treibhausgase mit der Wärmestrahlung interagieren und schau, wie die verschiedenen Gase die Temperatur beeinflussen.",
         "intro1": "Schiebe die Treibhausgas aus dem Weg um die Wärmstrahlung entweichen zu lassen.",
-        "intro2": "Oder lass die Treibhausgase mit der Wärmestrahlung interagieren und schau, wie die verschiedenen Gase die Temperatur beeinflussen."
+        "intro2": "Oder lass die Treibhausgase mit der Wärmestrahlung interagieren und schau, wie die verschiedenen Gase die Temperatur beeinflussen.",
+        "start": "Spiel starten"
       }
     },
     "placeables": {

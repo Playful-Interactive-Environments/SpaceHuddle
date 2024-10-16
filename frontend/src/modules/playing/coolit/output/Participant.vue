@@ -6,15 +6,12 @@
       image-directory="/assets/games/coolit/tutorial"
       :module-info-entry-data-list="tutorialList"
       :active="gameState === GameState.Info"
-      @infoRead="
-        gameState =
-          gameStep === GameStep.Play && !tutorialNotShown
-            ? GameState.Tutorial
-            : GameState.Game
-      "
+      @infoRead="infoRead"
       @tutorialNotShown="() => (tutorialNotShown = true)"
       :info-type="`cool-it-${gameStep}`"
-      :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
+      :showTutorialOnlyOnce="
+        module.parameter.showTutorialOnlyOnce && !reloadTutorial
+      "
     />
     <select-level
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
@@ -27,7 +24,7 @@
     />
     <TutorialGameHeat
       v-if="gameStep === GameStep.Play && gameState === GameState.Tutorial"
-      @done="gameState = GameState.Game"
+      @done="infoRead"
     />
     <play-level
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
@@ -42,7 +39,12 @@
     <el-button
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       class="tutorialButton"
-      @click="gameState = GameState.Info"
+      @click="
+        () => {
+          gameState = GameState.Info;
+          reloadTutorial = true;
+        }
+      "
       ><font-awesome-icon :icon="['fas', 'lightbulb']"
     /></el-button>
   </div>
@@ -103,6 +105,7 @@ export default class Participant extends Vue {
   temperatureRise = 0;
   levelDone = false;
   tutorialNotShown = false;
+  reloadTutorial = false;
 
   gameStep = GameStep.Select;
   GameStep = GameStep;
@@ -141,6 +144,10 @@ export default class Participant extends Vue {
     if (this.gameState === GameState.Info) {
       this.tutorialNotShown = false;
     }
+
+    if (this.gameState === GameState.Game) {
+      this.reloadTutorial = false;
+    }
   }
 
   @Watch('moduleId', { immediate: true })
@@ -172,6 +179,29 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+  }
+
+  infoRead(): void {
+    const nextState = this.reloadTutorial ? GameState.Info : GameState.Game;
+    if (this.gameState === GameState.Info) {
+      this.gameState =
+        this.gameStep === GameStep.Play && !this.tutorialNotShown
+          ? GameState.Tutorial
+          : nextState;
+    } else {
+      this.gameState = nextState;
+    }
+
+    if (this.gameState === GameState.Info) {
+      switch (this.gameStep) {
+        case GameStep.Play:
+          this.gameStep = GameStep.Select;
+          this.gameState = GameState.Game;
+          break;
+        case GameStep.Select:
+          this.gameStep = GameStep.Play;
+      }
+    }
   }
 
   async startLevel(level: Idea, temperatureRise: number): Promise<void> {

@@ -8,7 +8,9 @@
       :info-type="`find-it-${gameStep}`"
       :active="gameState === GameState.Info"
       @infoRead="gameState = GameState.Game"
-      :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
+      :showTutorialOnlyOnce="
+        module.parameter.showTutorialOnlyOnce && !reloadTutorial
+      "
     />
     <SelectState
       v-if="
@@ -44,7 +46,12 @@
     <el-button
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       class="tutorialButton"
-      @click="gameState = GameState.Info"
+      @click="
+        () => {
+          gameState = GameState.Info;
+          reloadTutorial = true;
+        }
+      "
       ><font-awesome-icon :icon="['fas', 'lightbulb']"
     /></el-button>
   </div>
@@ -115,6 +122,7 @@ export default class Participant extends Vue {
   highScore: Vote | null = null;
   votes: Vote[] = [];
   levelDone = false;
+  reloadTutorial = false;
 
   // Flag which indicates if the window size has finished calculating.
   sizeCalculated = false;
@@ -178,6 +186,13 @@ export default class Participant extends Vue {
         gameStep: this.gameStep,
         levelId: level?.id,
       });
+    }
+  }
+
+  @Watch('gameState', { immediate: true })
+  onGameStateChanged(): void {
+    if (this.gameState !== GameState.Info) {
+      this.reloadTutorial = false;
     }
   }
 
