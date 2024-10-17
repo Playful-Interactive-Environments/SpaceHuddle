@@ -1,5 +1,5 @@
 <template>
-  <div v-if="active" class="infoArea">
+  <div :style="{ display: active ? 'block' : 'none' }" class="infoArea">
     <slot name="prefix" />
     <el-carousel
       ref="carousel"
@@ -77,24 +77,30 @@ export default class ParticipantTutorial extends Vue {
   }
 
   domKey = '';
+  createDomKey(): void {
+    if (!this.domKey && this.$el) {
+      this.domKey = registerDomElement(
+        this.$el,
+        (targetWidth, targetHeight) => {
+          this.$emit('sizeChanged', targetWidth, targetHeight);
+          this.gameHeight = targetHeight;
+        },
+        0,
+        false,
+        () => {
+          this.$emit('sizeChanged', 0, 0);
+          this.gameHeight = 0;
+        }
+      );
+    }
+  }
+
   mounted(): void {
     tutorialService.registerGetList(
       this.updateTutorial,
       EndpointAuthorisationType.PARTICIPANT
     );
-    this.domKey = registerDomElement(
-      this.$el,
-      (targetWidth, targetHeight) => {
-        this.$emit('sizeChanged', targetWidth, targetHeight);
-        this.gameHeight = targetHeight;
-      },
-      0,
-      false,
-      () => {
-        this.$emit('sizeChanged', 0, 0);
-        this.gameHeight = 0;
-      }
-    );
+    this.createDomKey();
   }
 
   deregisterAll(): void {

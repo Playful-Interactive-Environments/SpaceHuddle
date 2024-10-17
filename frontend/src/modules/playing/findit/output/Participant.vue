@@ -7,7 +7,7 @@
       :module-info-entry-data-list="tutorialList"
       :info-type="`find-it-${gameStep}`"
       :active="gameState === GameState.Info"
-      @infoRead="gameState = GameState.Game"
+      @infoRead="infoRead"
       :showTutorialOnlyOnce="
         module.parameter.showTutorialOnlyOnce && !reloadTutorial
       "
@@ -52,8 +52,10 @@
           reloadTutorial = true;
         }
       "
-      ><font-awesome-icon :icon="['fas', 'lightbulb']"
-    /></el-button>
+    >
+      <font-awesome-icon :icon="['fas', 'lightbulb']" />&nbsp;
+      {{ $t('module.playing.findit.participant.tutorial.menu') }}
+    </el-button>
   </div>
 </template>
 
@@ -166,6 +168,10 @@ export default class Participant extends Vue {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateHighScore);
     if (this.trackingManager) this.trackingManager.deregisterAll();
+  }
+
+  infoRead(): void {
+    this.gameState = GameState.Game;
   }
 
   levelSelected(levelType: string, level: Idea | null) {

@@ -1074,4 +1074,9 @@ export default class SelectChallenge extends Vue {
 .highscore {
   --footer-height: 4rem;
 }
+
+.level-right,
+.level-left {
+  flex-direction: row;
+}
 </style>

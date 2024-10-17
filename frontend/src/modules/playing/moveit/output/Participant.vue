@@ -6,7 +6,7 @@
       image-directory="/assets/games/moveit/tutorial"
       :module-info-entry-data-list="tutorialList"
       :active="gameState === GameState.Info"
-      @infoRead="gameState = GameState.Game"
+      @infoRead="infoRead"
       :info-type="`move-it-${gameStep}`"
       :showTutorialOnlyOnce="
         module.parameter.showTutorialOnlyOnce && !reloadTutorial
@@ -58,8 +58,10 @@
           reloadTutorial = true;
         }
       "
-      ><font-awesome-icon :icon="['fas', 'lightbulb']"
-    /></el-button>
+    >
+      <font-awesome-icon :icon="['fas', 'lightbulb']" />&nbsp;
+      {{ $t('module.playing.moveit.participant.tutorial.menu') }}
+    </el-button>
   </div>
 </template>
 
@@ -302,6 +304,27 @@ export default class Participant extends Vue {
   unmounted(): void {
     this.deregisterAll();
     unregisterDomElement(this.domKey);
+  }
+
+  infoRead(): void {
+    if (!this.reloadTutorial) this.gameState = GameState.Game;
+    else {
+      switch (this.gameStep) {
+        case GameStep.Select:
+          this.gameStep = GameStep.Drive;
+          break;
+        case GameStep.Drive:
+          this.gameStep = GameStep.CleanUp;
+          break;
+        case GameStep.CleanUp:
+          this.gameStep = GameStep.Result;
+          break;
+        case GameStep.Result:
+          this.gameStep = GameStep.Select;
+          this.gameState = GameState.Game;
+          break;
+      }
+    }
   }
 
   reset(): void {

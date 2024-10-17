@@ -6,10 +6,8 @@
       image-directory="/assets/games/shopit/tutorial"
       :module-info-entry-data-list="tutorialList"
       :active="gameState === GameState.Info"
-      @infoRead="
-        gameState = GameState.Game;
-        gameStep = GameStep.Tut;
-      "
+      @infoRead="infoRead"
+      @tutorialNotShown="() => (tutorialNotShown = true)"
       :info-type="`shop-it-${gameStep}`"
       :showTutorialOnlyOnce="
         module.parameter.showTutorialOnlyOnce && !reloadTutorial
@@ -67,8 +65,10 @@
           reloadTutorial = true;
         }
       "
-      ><font-awesome-icon :icon="['fas', 'lightbulb']"
-    /></el-button>
+    >
+      <font-awesome-icon :icon="['fas', 'lightbulb']" />&nbsp;
+      {{ $t('module.playing.shopit.participant.tutorial.menu') }}
+    </el-button>
   </div>
 </template>
 
@@ -134,6 +134,7 @@ export default class Participant extends Vue {
   highscore: Vote | null = null;
 
   sizeCalculated = false;
+  tutorialNotShown = false;
 
   gameStep = GameStep.Join;
   GameStep = GameStep;
@@ -203,6 +204,16 @@ export default class Participant extends Vue {
     );
   }
 
+  infoRead(): void {
+    if (this.gameStep === GameStep.Join) {
+      this.gameStep =
+        this.reloadTutorial || !this.tutorialNotShown
+          ? GameStep.Tut
+          : GameStep.Join;
+      this.gameState = GameState.Game;
+    }
+  }
+
   get moduleName(): string {
     if (this.module) return this.module.name;
     return '';
@@ -210,6 +221,10 @@ export default class Participant extends Vue {
 
   @Watch('gameState', { immediate: true })
   onGameStateChanged(): void {
+    if (this.gameState === GameState.Info) {
+      this.tutorialNotShown = false;
+    }
+
     if (this.gameState !== GameState.Info) {
       this.reloadTutorial = false;
     }

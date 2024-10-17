@@ -153,6 +153,7 @@
       "header": "highscore"
     },
     "tutorial": {
+      "menu": "tutorial",
       "select": "Traffic accounts for 30% of greenhouse emissions. Try to figure out what impact different types of vehicles have.",
       "statistics": "The statistic shows you how many greenhouse gases are produced per kWh of fuel.\nWhile this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
       "drive": "In addition to vehicle choice, driving behavior also plays a crucial role. The faster you drive, the more fuel you need.",

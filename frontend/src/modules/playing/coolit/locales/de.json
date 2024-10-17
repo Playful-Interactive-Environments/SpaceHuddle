@@ -22,6 +22,7 @@
     "confirm": "Weiter",
     "selectObstacle": "dieses Element verwenden",
     "tutorial": {
+      "menu": "Tutorial",
       "atmosphere": "Die Atmosphäre setzt sich aus unterschiedlichsten Gasen wie Sauerstoff, Stickstoff, Wasserdampf und vielen Anderen zusammen. Ohne sie wäre das Überleben auf der Erde nicht möglich. Erkundige dich vor dem spielen, welchen Einfluss die verschiedenen Gase haben. Das wird dir später helfen.",
       "light": "Licht kommt in allen Formen von der Sonne zu uns. Das sichtbare Licht kommt durch die Atmosphäre und trifft auf die Erde. Beobachte was mit dem sichtbaren (hier gelbes) Licht passiert, wenn es auf ein Objekt trifft.",
       "heat": "Deine Mission: der überschüssigen Wärmestrahlung Platz machen, dass sie wieder von der Erde entweichen kann. Schiebe dazu die Treibhausgase aus dem Weg. Woran liegt das eigentlich, dass die Erde wärmer wird?",

@@ -45,8 +45,10 @@
           reloadTutorial = true;
         }
       "
-      ><font-awesome-icon :icon="['fas', 'lightbulb']"
-    /></el-button>
+    >
+      <font-awesome-icon :icon="['fas', 'lightbulb']" />&nbsp;
+      {{ $t('module.playing.coolit.participant.tutorial.menu') }}
+    </el-button>
   </div>
 </template>
 
@@ -194,12 +196,13 @@ export default class Participant extends Vue {
 
     if (this.gameState === GameState.Info) {
       switch (this.gameStep) {
+        case GameStep.Select:
+          this.gameStep = GameStep.Play;
+          break;
         case GameStep.Play:
           this.gameStep = GameStep.Select;
           this.gameState = GameState.Game;
           break;
-        case GameStep.Select:
-          this.gameStep = GameStep.Play;
       }
     }
   }

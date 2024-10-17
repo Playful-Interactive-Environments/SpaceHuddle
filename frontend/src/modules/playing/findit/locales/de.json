@@ -30,6 +30,7 @@
     "winText": "Du hast es geschafft, die Umwelt vor den gefährlichen Objekten zu schützen!",
     "lost": "Nicht rechtzeitig!",
     "tutorial": {
+      "menu": "Tutorial",
       "placing": "Level bauen:\nKlicke auf einen beliebige Stelle in der Szene um eine Auswahl an Objekten zu bekommen. Wähle eines der Objekte aus um es an dem ausgewählten Ort zu platzieren.\nVerschiebe das Objekt durch drag and drop und Drehe, skaliere und lösche das ausgewählte Objekt durch klick auf die Buttons in der Symbolleiste.",
       "finding": "Suchen:\nDiese Szene ist nicht so harmlos wie sie scheint!\nAn manchen Orten verstecken sich gefährliche Objekte, die früher oder später eine Katastrophe verursachen könnten. Sammle diese Objekte mit einem Klick ein und verhindere eine große Katastrophe, bevor es zu spät ist!\nBenutze die Lupe, um hinter Bäume und andere Objekte zu schauen."
     },

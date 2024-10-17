@@ -153,6 +153,7 @@
       "header": "Highscore"
     },
     "tutorial": {
+      "menu": "Tutorial",
       "select": "Der Verkehr ist für 30% der Treibhausgasemissionen verantwortlich.\nVersuche herauszufinden, welche Auswirkungen verschiedene Fahrzeugtypen haben.",
       "statistics": "Das Diagramm oben zeigt, wie viele Treibhausgase in einer kWh Kraftstoff stecken.\nFür Treibstoffe wie Diesel und Benzin ist das konstant. Bei Elektroautos allerdings hängt es vom Strommix ab. Unter Strommix versteht man, aus welchen Quellen (z.B. Wasserkraft, Windenergie oder Erdgas) sich der Strom zusammensetzt.",
       "drive": "Neben der Wahl des Fahrzeugs spielt auch das Fahrverhalten eine entscheidende Rolle. Je schneller du fährst, desto mehr Kraftstoff benötigst du.",
