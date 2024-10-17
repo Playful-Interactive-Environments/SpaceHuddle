@@ -1,10 +1,8 @@
 <template>
   <div class="iframe-container" v-if="isValidSourceLink">
-    <transition name="fade">
-      <el-button @click="toggleFullscreen" class="fullscreenButton">
-        <font-awesome-icon :icon="['fas', 'expand']" />
-      </el-button>
-    </transition>
+    <el-button @click="toggleFullscreen" class="fullscreenButton">
+      <font-awesome-icon :icon="['fas', 'expand']" />
+    </el-button>
     <iframe
       id="iframe"
       ref="iframe"
