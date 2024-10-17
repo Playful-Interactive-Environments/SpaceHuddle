@@ -72,14 +72,10 @@
           >
           </GameObject>
           <GameObject
-            v-if="
-              weatherStylesheets &&
-              rayParticleSize &&
-              !(showInfo && activeMoleculeUuid)
-            "
+            v-if="weatherStylesheets && rayParticleSize"
             shape="rect"
             :object-space="ObjectSpace.Absolute"
-            :posX="width / 2"
+            :posX="!(showInfo && activeMoleculeUuid) ? width / 2 : -width / 2"
             :posY="height / 2"
             :angle="180"
             :scale="3"
@@ -169,6 +165,9 @@
                 molecule.gameObject &&
                 molecule.gameObject.transformation.inputPosition[0] < 65 &&
                 molecule.gameObject.transformation.inputPosition[0] > 35 &&
+                Math.round(
+                  (molecule.gameObject.transform.position.y / height) * 100
+                ) < 75 &&
                 !(showInfo && activeMoleculeUuid === molecule.gameObject?.uuid)
               "
               :anchor="[0.5, 3]"
@@ -508,7 +507,7 @@ export default class heat extends Vue {
   isDone = false;
   showInfo = false;
   infoStartTime = 0;
-  infoTime = 5000;
+  infoTime = 2000;
   moleculeImages: { [key: string]: string } = {};
   temperature = 20;
   hitCount = 0;
@@ -611,6 +610,12 @@ export default class heat extends Vue {
   @Watch('width', { immediate: true })
   onWidthChanged(): void {
     this.rayDisplayPoints = [...this.calculateInitRayPoints(1, 0)];
+  }
+
+  @Watch('showInfo', { immediate: true })
+  onShowInfoChanged(): void {
+    const selection = document.getSelection();
+    if (selection) selection.removeAllRanges();
   }
 
   @Watch('infoStartTime', { immediate: true })

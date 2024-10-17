@@ -107,6 +107,24 @@ export default class GameObject
     }
   }
 
+  get x(): number {
+    if (this.transform) return this.transform.position.x;
+    return this.transformation.position[0];
+  }
+
+  set x(value: number) {
+    this.transform.position.x = value;
+  }
+
+  get y(): number {
+    if (this.transform) return this.transform.position.y;
+    return this.transformation.position[1];
+  }
+
+  set y(value: number) {
+    this.transform.position.y = value;
+  }
+
   _angle = 0;
   get angle() {
     if (this.transform) return 360 - toDegrees(this.rotation);
