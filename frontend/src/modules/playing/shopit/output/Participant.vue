@@ -532,7 +532,8 @@ export default class Participant extends Vue {
         },
         rate && rate >= 2
           ? TaskParticipantIterationStatesType.WIN
-          : TaskParticipantIterationStatesType.LOOS
+          : TaskParticipantIterationStatesType.LOOS,
+        this.calcRate(win, pointsSpent)
       );
     }
     this.clearAndReset();
