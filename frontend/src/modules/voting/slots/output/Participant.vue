@@ -570,7 +570,7 @@ export default class Participant extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ParticipantModuleDefaultContainer {
   overflow: hidden;
   color: var(--color-gray);
@@ -1168,7 +1168,7 @@ span.emptyIdea {
   height: auto;
   text-align: left;
   white-space: normal;
-  word-break: break-all;
+  //word-break: break-all;
 
   left: 80%;
   right: 0;

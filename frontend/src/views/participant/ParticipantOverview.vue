@@ -745,6 +745,10 @@ table {
   border-radius: 0 0 1rem 1rem;
 }
 
+.default-theme.media::v-deep(h3) {
+  word-break: break-word;
+}
+
 .checkMark {
   padding: 0.5rem;
 }

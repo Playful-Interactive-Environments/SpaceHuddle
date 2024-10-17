@@ -1002,9 +1002,9 @@ export default class ProcessTimeline extends Vue {
   word-wrap: break-word;
   color: var(--color-foreground);
 
-  -ms-word-break: break-all;
+  //-ms-word-break: break-all;
   /* This is the dangerous one in WebKit, as it breaks things wherever */
-  word-break: break-all;
+  //word-break: break-all;
   /* Instead use this non-standard one: */
   word-break: break-word;
 
