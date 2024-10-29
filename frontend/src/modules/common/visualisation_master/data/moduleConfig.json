@@ -56,6 +56,13 @@
       "type": ["INFORMATION", "BRAINSTORMING", "CATEGORISATION", "SELECTION"],
       "allowTimeMod": false
     },
+    "analyticsDashboard": {
+      "id": "analyticsDashboard",
+      "image": "analyticsDashboard/path",
+      "icon": "layer-group",
+      "type": ["INFORMATION", "BRAINSTORMING", "CATEGORISATION", "SELECTION", "VOTING"],
+      "allowTimeMod": false
+    },
     "analytics": {
       "id": "analytics",
       "image": "analytics/path",

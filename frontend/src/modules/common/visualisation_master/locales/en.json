@@ -55,7 +55,7 @@
         "description": "Move ideas around and draw."
       }
     },
-    "analytics": {
+    "analyticsDashboard": {
       "description": {
         "title": "Dashboard",
         "description": "Get an overview over all games."
