@@ -380,50 +380,41 @@ export default class Analytics extends Vue {
   }
 
   CalculateAxes(): void {
-    const axes: any = [];
-    for (const step of this.steps) {
-      const moduleId: string = step.moduleId;
-      const name: string = step.module;
-      const axisValues: any = [];
-      for (const value of this.wantedValues) {
-        let range: any = [];
-        for (const subStep of step.steps) {
-          if (subStep && value in subStep) {
-            range.push(subStep[value]);
-          } else if (subStep.parameter && value in subStep.parameter) {
-            range.push(subStep.parameter[value]);
-          } else if (
-            subStep.parameter.gameplayResult &&
-            value in subStep.parameter.gameplayResult
-          ) {
-            range.push(subStep.parameter.gameplayResult[value]);
-          } else if (
-            subStep.parameter.drive &&
-            value in subStep.parameter.drive
-          ) {
-            range.push(subStep.parameter.drive[value]);
-          } else if (
-            subStep.parameter.game &&
-            value in subStep.parameter.game
-          ) {
-            range.push(subStep.parameter.game[value]);
-          }
-        }
-        range = [0, Math.ceil(range.sort()[range.length - 1])];
-        if (range[1]) {
-          axisValues.push({ id: value, range: range });
-        }
-      }
+    const axes = this.steps.map((step) => {
+      const moduleId = step.moduleId;
+      const name = step.module;
+      const axisValues = this.wantedValues
+        .map((value) => {
+          const range = step.steps.flatMap((subStep) => {
+            const sources = [
+              subStep,
+              subStep.parameter,
+              subStep.parameter?.gameplayResult,
+              subStep.parameter?.drive,
+              subStep.parameter?.game,
+            ];
+            for (const source of sources) {
+              if (source && value in source) return source[value];
+            }
+            return [];
+          });
+
+          const maxValue = range.length ? Math.ceil(Math.max(...range)) : null;
+          return maxValue ? { id: value, range: [0, maxValue] } : null;
+        })
+        .filter(Boolean);
+
       const active = axisValues.length > 0;
-      axes.push({
-        moduleId: moduleId,
-        name: name,
-        axisValues: axisValues,
-        categoryActive: axisValues.length > 0 ? axisValues[0].id : '',
-        active: active,
-        available: axisValues.length > 0,
-      });
-    }
+      return {
+        moduleId,
+        name,
+        axisValues,
+        categoryActive: active ? (axisValues[0] ? axisValues[0].id : '') : '',
+        active,
+        available: active,
+      };
+    });
+
     console.log(axes);
   }
 
