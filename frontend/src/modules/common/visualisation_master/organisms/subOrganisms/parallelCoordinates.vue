@@ -38,6 +38,13 @@
           :stroke="entry.participant.avatar.color"
         />
       </g>
+
+      <!-- Average Data Line -->
+      <path
+        class="dataLine averageDataLine"
+        :d="getAverageDataLinePath()"
+        fill="none"
+      />
     </svg>
 
     <!-- Dropdown Menus -->
@@ -202,6 +209,69 @@ export default class Analytics extends Vue {
       (subAxis) => subAxis && subAxis.id === axis.categoryActive
     );
   }
+
+  getAverageDataLine() {
+    const averages: number[] = [];
+
+    // Loop through each active axis
+    for (const axis of this.activeAxes) {
+      const values = this.chartData.map((entry) => {
+        const selectedAxis = entry.axes.find(
+          (a) => a.moduleId === axis.moduleId
+        );
+        if (selectedAxis) {
+          const axisValue = selectedAxis.axisValues.find(
+            (value) => value.id === axis.categoryActive
+          );
+          return axisValue ? axisValue.value : null;
+        }
+        return null;
+      });
+
+      // Calculate average while ignoring null values
+      const validValues = values.filter((value) => value !== null) as number[];
+      const average =
+        validValues.length > 0
+          ? validValues.reduce((a, b) => a + b) / validValues.length
+          : null;
+
+      // Only push the average if it's not null
+      if (average !== null) {
+        averages.push(average);
+      }
+    }
+
+    return averages;
+  }
+
+  getAverageDataLinePath() {
+    const averages = this.getAverageDataLine();
+
+    const pathParts = averages.map((average, index) => {
+      const x = this.axesSpacing * index;
+      const y =
+        average !== null
+          ? this.getYPosition(average, this.activeAxes[index])
+          : this.height / 2;
+
+      if (index === 0) {
+        return `M${x},${y}`;
+      }
+
+      const prevX = this.axesSpacing * (index - 1);
+      const prevY =
+        averages[index - 1] !== null
+          ? this.getYPosition(averages[index - 1], this.activeAxes[index - 1])
+          : this.height / 2;
+
+      const controlX1 = prevX + this.axesSpacing / 2;
+      const controlX2 = x - this.axesSpacing / 2;
+
+      return `C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`;
+    });
+
+    return pathParts.join(' ');
+  }
 }
 </script>
 
@@ -233,6 +303,13 @@ svg {
 .dataLineHover:hover + .dataLine {
   stroke-width: 3px;
   stroke: red;
+  opacity: 100%;
+}
+
+.averageDataLine {
+  pointer-events: none;
+  stroke-width: 5px;
+  stroke: var(--color-evaluating);
   opacity: 100%;
 }
 </style>
