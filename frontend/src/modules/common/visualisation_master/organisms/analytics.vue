@@ -1,34 +1,11 @@
 <template>
   <div id="analytics">
-    <el-dropdown
-      @command="activeParticipantChanged"
-      v-if="participants"
-      size="large"
-      split-button
-      type="primary"
-    >
-      <font-awesome-icon
-        v-if="activeParticipant"
-        :icon="activeParticipant.avatar.symbol"
-        :style="{ color: activeParticipant.avatar.color }"
-      ></font-awesome-icon>
-      <p v-else>/</p>
-      <template #dropdown>
-        <el-dropdown-item
-          v-for="participant in participants"
-          :key="participant.id"
-          :command="participant"
-          ><font-awesome-icon
-            :icon="participant.avatar.symbol"
-            :style="{ color: participant.avatar.color }"
-          ></font-awesome-icon
-        ></el-dropdown-item>
-      </template>
-    </el-dropdown>
     <el-button @click="getAllParticipantData">all participant data</el-button>
-    <parallel-coordinates />
-    <el-button @click="CalculateAxes">calculate Axes</el-button>
-    <el-button @click="CalculateDataEntries">calculate DataEntries</el-button>
+    <parallel-coordinates v-if="axes.length > 0 && dataEntries.length > 0" :axes="axes" :data-entries="dataEntries" />
+    <el-button @click="console.log(axes)">calculate Axes</el-button>
+    <el-button @click="console.log(dataEntries)"
+      >calculate DataEntries</el-button
+    >
   </div>
 </template>
 
@@ -132,7 +109,6 @@ export default class Analytics extends Vue {
   session: Session | null = null;
 
   componentLoadIndex = 0;
-  activeParticipant: ParticipantInfo | null = null;
 
   steps: {
     module: string;
@@ -140,17 +116,9 @@ export default class Analytics extends Vue {
     steps: TaskParticipantIterationStep[];
   }[] = [];
 
-  activeSteps: {
-    module: string;
-    steps: TaskParticipantIterationStep[];
-  }[] = [];
-
   participantCash?: cashService.SimplifiedCashEntry<ParticipantInfo[]>;
   participants: ParticipantInfo[] | null = null;
   taskListService?: cashService.SimplifiedCashEntry<Task[]>;
-
-  axes: Axis[] = [];
-  dataEntries: DataEntry[] = [];
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -162,9 +130,12 @@ export default class Analytics extends Vue {
     return null;
   }
 
-  activeParticipantChanged(selectedParticipant: ParticipantInfo): void {
-    this.activeParticipant = selectedParticipant;
-    this.activeParticipantStepsChanged(this.activeParticipant.id);
+  get axes(): Axis[] {
+    return this.CalculateAxes();
+  }
+
+  get dataEntries(): DataEntry[] {
+    return this.CalculateDataEntries();
   }
 
   deregisterAll(): void {
@@ -235,9 +206,6 @@ export default class Analytics extends Vue {
         30 * 60
       );
     }
-
-    this.axes = this.CalculateAxes();
-    this.dataEntries = this.CalculateDataEntries();
   }
 
   updateParticipants(participants: ParticipantInfo[]): void {
@@ -305,22 +273,6 @@ export default class Analytics extends Vue {
     }
   }
 
-  activeParticipantStepsChanged(participantID: string) {
-    const data: {
-      moduleId: string;
-      module: string;
-      steps: TaskParticipantIterationStep[];
-    }[] = [];
-    for (const stepEntry of this.steps) {
-      stepEntry.steps = stepEntry.steps.filter(
-        (step) => step.avatar.id === participantID
-      );
-      data.push(stepEntry);
-    }
-    this.activeSteps = data;
-    this.getBestIterationsParticipantSteps(participantID);
-  }
-
   getAllParticipantData() {
     const dataArray: {
       participant: ParticipantInfo;
@@ -338,7 +290,7 @@ export default class Analytics extends Vue {
         }
       }
     }
-    console.log(dataArray);
+
     return dataArray;
   }
 
@@ -376,38 +328,6 @@ export default class Analytics extends Vue {
     });
   }
 
-  //Chart prep
-  brainstormingParticipantChartDataEntryDings = [
-    {
-      participant: {
-        id: 'id',
-        browserKey: 'key',
-      },
-      axes: [
-        {
-          moduleId: 'moduleId',
-          axisValues: [
-            { id: 'stars', value: 3 },
-            { id: 'points', value: 100 },
-            { id: 'co2', value: 30 },
-            { id: 'water', value: 9110 },
-            { id: 'electricity', value: 3678 },
-            { id: 'money', value: 396 },
-            { id: 'lifetime', value: 375 },
-            { id: 'pointsSpent', value: 94 },
-          ],
-        },
-        {
-          moduleId: 'moduleId',
-          axisValues: [
-            { id: 'stars', value: 3 },
-            { id: 'points', value: 100 },
-          ],
-        },
-      ],
-    },
-  ];
-
   wantedValues = [
     'stars',
     'points',
@@ -421,12 +341,6 @@ export default class Analytics extends Vue {
     'lifetime',
     'pointsSpent',
   ];
-
-  @Watch('participantsDataSteps', { immediate: true })
-  participantsDataStepsChanged(): void {
-    this.CalculateAxes();
-    this.CalculateDataEntries();
-  }
 
   CalculateAxes(): Axis[] {
     return this.steps.map((step) => {
