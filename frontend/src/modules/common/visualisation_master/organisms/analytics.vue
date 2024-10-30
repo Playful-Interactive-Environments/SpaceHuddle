@@ -28,6 +28,7 @@
     <el-button @click="getAllParticipantData">all participant data</el-button>
     <parallel-coordinates />
     <el-button @click="CalculateAxes">calculate Axes</el-button>
+    <el-button @click="CalculateDataEntries">calculate DataEntries</el-button>
   </div>
 </template>
 
@@ -141,7 +142,6 @@ export default class Analytics extends Vue {
 
   activeParticipantChanged(selectedParticipant: ParticipantInfo): void {
     this.activeParticipant = selectedParticipant;
-    console.log(this.activeParticipant);
     this.activeParticipantStepsChanged(this.activeParticipant.id);
   }
 
@@ -242,7 +242,6 @@ export default class Analytics extends Vue {
         15
       );
     }
-    console.log(this.steps);
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -298,7 +297,6 @@ export default class Analytics extends Vue {
       data.push(stepEntry);
     }
     this.activeSteps = data;
-    console.log(this.activeSteps);
     this.getBestIterationsParticipantSteps(participantID);
   }
 
@@ -358,6 +356,36 @@ export default class Analytics extends Vue {
   }
 
   //Chart prep
+  brainstormingParticipantChartDataEntryDings = [
+    {
+      participant: {
+        id: 'id',
+        browserKey: 'key',
+      },
+      axes: [
+        {
+          moduleId: 'moduleId',
+          axisValues: [
+            { id: 'stars', value: 3 },
+            { id: 'points', value: 100 },
+            { id: 'co2', value: 30 },
+            { id: 'water', value: 9110 },
+            { id: 'electricity', value: 3678 },
+            { id: 'money', value: 396 },
+            { id: 'lifetime', value: 375 },
+            { id: 'pointsSpent', value: 94 },
+          ],
+        },
+        {
+          moduleId: 'moduleId',
+          axisValues: [
+            { id: 'stars', value: 3 },
+            { id: 'points', value: 100 },
+          ],
+        },
+      ],
+    },
+  ];
 
   wantedValues = [
     'stars',
@@ -379,8 +407,8 @@ export default class Analytics extends Vue {
     this.CalculateDataEntries();
   }
 
-  CalculateAxes(): void {
-    const axes = this.steps.map((step) => {
+  CalculateAxes() {
+    return this.steps.map((step) => {
       const moduleId = step.moduleId;
       const name = step.module;
       const axisValues = this.wantedValues
@@ -414,12 +442,43 @@ export default class Analytics extends Vue {
         available: active,
       };
     });
-
-    console.log(axes);
   }
 
-  CalculateDataEntries(): void {
-    console.log('dataEntries');
+  CalculateDataEntries() {
+    const participantData = this.getAllParticipantData();
+    return participantData.map(({ participant, data }) => {
+      const axes = this.CalculateAxes();
+      const formattedAxes = axes.map((axis) => {
+        const moduleData = data.find((d) => d.moduleId === axis.moduleId);
+        const axisValues = axis.axisValues.map((axisValue) => {
+          if (!axisValue) return { id: '', value: null };
+
+          const { id } = axisValue;
+          let value = null;
+
+          if (moduleData?.bestStep) {
+            const sources = [
+              moduleData.bestStep,
+              moduleData.bestStep.parameter,
+              moduleData.bestStep.parameter?.gameplayResult,
+              moduleData.bestStep.parameter?.drive,
+              moduleData.bestStep.parameter?.game,
+            ];
+
+            for (const source of sources) {
+              if (source && id in source) {
+                value = source[id];
+                break;
+              }
+            }
+          }
+
+          return { id, value };
+        });
+        return { moduleId: axis.moduleId, axisValues };
+      });
+      return { participant, axes: formattedAxes };
+    });
   }
 }
 </script>
