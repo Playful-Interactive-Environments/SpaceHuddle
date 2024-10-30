@@ -1,7 +1,7 @@
 <template>
   <div id="analytics">
     <el-button @click="getAllParticipantData">all participant data</el-button>
-    <parallel-coordinates v-if="axes.length > 0 && dataEntries.length > 0" :axes="axes" :data-entries="dataEntries" />
+    <parallel-coordinates v-if="axes.length > 0 && dataEntries.length > 0" :chart-axes="axes.filter((axis) => axis.available)" :participant-data="dataEntries" />
     <el-button @click="console.log(axes)">calculate Axes</el-button>
     <el-button @click="console.log(dataEntries)"
       >calculate DataEntries</el-button
@@ -63,13 +63,7 @@ interface AxisValue {
   value: number | null;
 }
 interface DataEntry {
-  participant: {
-    id: string;
-    browserKey: string;
-    state: string;
-    avatar?: Record<string, any>; // Assuming avatar is an object, you can replace `Record<string, any>` with a more specific type if known
-    parameter?: Record<string, any>; // Additional participant parameters, modify if structure is known
-  };
+  participant: ParticipantInfo;
   axes: {
     moduleId: string;
     axisValues: AxisValue[];
