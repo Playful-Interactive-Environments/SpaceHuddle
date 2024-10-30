@@ -67,17 +67,36 @@ import ParallelCoordinates from '@/modules/common/visualisation_master/organisms
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-interface AxisValue {
+interface subAxis {
   id: string;
-  range: [number, number];
+  range: number;
 }
 
-interface ModuleEntry {
+interface Axis {
   moduleId: string;
   name: string;
-  axisValues: AxisValue[];
+  axisValues: (subAxis | null)[];
   categoryActive: string;
   active: boolean;
+  available: boolean;
+}
+
+interface AxisValue {
+  id: string;
+  value: number | null;
+}
+interface DataEntry {
+  participant: {
+    id: string;
+    browserKey: string;
+    state: string;
+    avatar?: Record<string, any>; // Assuming avatar is an object, you can replace `Record<string, any>` with a more specific type if known
+    parameter?: Record<string, any>; // Additional participant parameters, modify if structure is known
+  };
+  axes: {
+    moduleId: string;
+    axisValues: AxisValue[];
+  }[];
 }
 
 @Options({
@@ -130,6 +149,9 @@ export default class Analytics extends Vue {
   participants: ParticipantInfo[] | null = null;
   taskListService?: cashService.SimplifiedCashEntry<Task[]>;
 
+  axes: Axis[] = [];
+  dataEntries: DataEntry[] = [];
+
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
     return null;
@@ -160,10 +182,6 @@ export default class Analytics extends Vue {
   unmounted(): void {
     this.deregisterAll();
     pixiUtil.cleanupToken(this.textureToken);
-  }
-
-  mounted(): void {
-    this.CalculateAxes();
   }
 
   getModuleName(task: Task): string[] {
@@ -217,6 +235,9 @@ export default class Analytics extends Vue {
         30 * 60
       );
     }
+
+    this.axes = this.CalculateAxes();
+    this.dataEntries = this.CalculateDataEntries();
   }
 
   updateParticipants(participants: ParticipantInfo[]): void {
@@ -407,7 +428,7 @@ export default class Analytics extends Vue {
     this.CalculateDataEntries();
   }
 
-  CalculateAxes() {
+  CalculateAxes(): Axis[] {
     return this.steps.map((step) => {
       const moduleId = step.moduleId;
       const name = step.module;
@@ -428,7 +449,7 @@ export default class Analytics extends Vue {
           });
 
           const maxValue = range.length ? Math.ceil(Math.max(...range)) : null;
-          return maxValue ? { id: value, range: [0, maxValue] } : null;
+          return maxValue ? { id: value, range: maxValue } : null;
         })
         .filter(Boolean);
 
@@ -444,7 +465,7 @@ export default class Analytics extends Vue {
     });
   }
 
-  CalculateDataEntries() {
+  CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     return participantData.map(({ participant, data }) => {
       const axes = this.CalculateAxes();
