@@ -12,20 +12,22 @@
         <line :y1="padding" :y2="height - padding" stroke="black" />
 
         <!-- Tick Marks and Labels for the active sub-axis -->
-        <!--        <g
-          v-for="(subAxis, subAxisIndex) in filteredAxisValues(axis)"
-          :key="subAxis.id"
-        >
+        <g v-for="labelIndex in labelCount+1" :key="labelIndex-1 + axis.moduleId">
           <line
-            :y1="getLabelPosition(subAxisIndex, axis)"
-            :y2="getLabelPosition(subAxisIndex, axis)"
+            :y1="getLabelPosition(labelIndex-1, axis)"
+            :y2="getLabelPosition(labelIndex-1, axis)"
             :x2="5"
             stroke="black"
           />
-          <text :y="getLabelPosition(subAxisIndex, axis)" x="10" font-size="10">
-            {{ subAxis.range }}
+          <text :y="getLabelPosition(labelIndex-1, axis)" x="10" font-size="10">
+            {{
+              (axis.axisValues.find((value) => value.id === axis.categoryActive)
+                .range /
+                labelCount) *
+              (labelIndex-1)
+            }}
           </text>
-        </g>-->
+        </g>
       </g>
 
       <!-- Data Lines as Curves -->
@@ -54,7 +56,7 @@
       :style="{
         position: 'absolute',
         left: `${axesSpacing * index}px`,
-        top: '10px', // Adjust this to position the dropdown as needed
+        bottom: '2rem', // Adjust this to position the dropdown as needed
       }"
     >
       <select @change="updateSubAxis(index, $event.target.value)">
@@ -116,6 +118,8 @@ export default class Analytics extends Vue {
   axes: Axis[] = [];
   chartData: DataEntry[] = [];
 
+  labelCount = 3;
+
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
     this.axes = this.chartAxes;
@@ -130,7 +134,7 @@ export default class Analytics extends Vue {
     return this.axes.map((axis) => {
       return {
         ...axis,
-        axisValues: axis.axisValues.filter((subAxis) => subAxis !== null), // Filter out any null subAxis
+        axisValues: axis.axisValues.filter((subAxis) => subAxis !== null),
       };
     });
   }
@@ -179,9 +183,14 @@ export default class Analytics extends Vue {
   }
 
   getLabelPosition(index: number, axis: Axis) {
+    const axisValue = axis.axisValues.find(
+      (value) => value.id === axis.categoryActive
+    );
+
+    console.log(index);
+
     return (
-      this.padding +
-      (index * (this.height - 2 * this.padding)) / (axis.axisValues.length - 1)
+        ((this.height - 2 * this.padding) /this.labelCount * index) + this.padding
     );
   }
 
