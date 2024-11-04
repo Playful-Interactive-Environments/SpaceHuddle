@@ -72,7 +72,7 @@
       <!-- Data Lines as Curves -->
       <g v-for="entry in chartData" :key="entry.participant.id">
         <g
-          v-for="pathPart in getDataLine1(entry)"
+          v-for="pathPart in getDataLine(entry)"
           :key="pathPart.path"
           class="dataLineHover"
           fill="none"
@@ -82,7 +82,7 @@
           <path v-if="pathPart" :d="pathPart.path" />
         </g>
         <g
-          v-for="pathPart in getDataLine1(entry)"
+          v-for="pathPart in getDataLine(entry)"
           :key="pathPart.path"
           class="dataLine"
           fill="none"
@@ -97,6 +97,9 @@
             class="dataLinePathSegment"
             :d="pathPart.path"
             :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
+            :style="{
+              opacity: pathPart.dashed ? '35%' : '60%',
+            }"
           />
         </g>
       </g>
@@ -104,15 +107,51 @@
 
     <!-- Dropdown Menus -->
     <div
+      class="axisControls"
       v-for="(axis, index) in activeAxes"
       :key="axis.moduleId"
       :style="{
         position: 'absolute',
-        left: `${axesSpacing * index}px`,
-        bottom: '2rem', // Adjust this to position the dropdown as needed
+        left: `${axesSpacing * index - axesSpacing / 2}px`,
+        top: '100%',
+        textAlign: 'center',
+        width: `${axesSpacing}px`,
       }"
     >
-      <select @change="updateSubAxis(index, $event.target.value)">
+      <div class="axisSelections">
+        <el-dropdown
+          v-if="axis.axisValues.length > 1"
+          v-on:command="updateSubAxis(index, $event)"
+          trigger="click"
+          placement="bottom"
+        >
+          <div class="el-dropdown-link">
+            <font-awesome-icon icon="cog" />
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="(subAxis, subAxisIndex) in axis.axisValues"
+                :key="subAxis ? subAxis.id : subAxisIndex"
+                :command="subAxis ? subAxis.id : null"
+              >
+                {{ subAxis ? subAxis.id : 'N/A' }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <font-awesome-icon
+          class="axisIcon"
+          :icon="getIconOfAxis(axis)"
+          :style="{
+            color: getColorOfAxis(axis),
+          }"
+        />
+      </div>
+      <p class="axisName">{{ axis.taskData.taskName }}</p>
+      <p class="subAxisName">{{ axis.categoryActive }}</p>
+
+      <!--      <select @change="updateSubAxis(index, $event.target.value)">
         <option
           v-for="(subAxis, subAxisIndex) in axis.axisValues"
           :key="subAxis ? subAxis.id : subAxisIndex"
@@ -120,12 +159,8 @@
         >
           {{ subAxis ? subAxis.id : 'N/A' }}
         </option>
-      </select>
+      </select>-->
     </div>
-
-    <el-button @click="this.axes[2].active = !this.axes[2].active">
-      Switch Axis
-    </el-button>
   </div>
 </template>
 
@@ -133,6 +168,8 @@
 import { ParticipantInfo } from '@/types/api/Participant';
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
+import TaskType from '@/types/enum/TaskType';
+import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 
 interface SubAxis {
   id: string;
@@ -141,7 +178,10 @@ interface SubAxis {
 
 interface Axis {
   moduleId: string;
-  name: string;
+  taskData: {
+    taskType: TaskType;
+    taskName: string;
+  };
   axisValues: (SubAxis | null)[];
   categoryActive: string;
   active: boolean;
@@ -164,7 +204,7 @@ interface DataEntry {
 export default class Analytics extends Vue {
   @Prop({ default: () => [] }) chartAxes!: Axis[];
   @Prop({ default: () => [] }) participantData!: DataEntry[];
-  width = 1200;
+
   height = 500;
   padding = 20;
 
@@ -185,20 +225,38 @@ export default class Analytics extends Vue {
     this.chartData = this.participantData;
   }
 
+  getIconOfAxis(axis: Axis): string | undefined {
+    if (axis.taskData.taskType) {
+      return getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
+    }
+  }
+
+  getColorOfAxis(axis: Axis): string | undefined {
+    if (axis.taskData.taskType) {
+      return getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
+    }
+  }
+
+  get width() {
+    return window.innerWidth - 100;
+  }
+
   get activeAxes() {
-    return this.axes.map((axis) => {
-      return {
-        ...axis,
-        axisValues: axis.axisValues.filter((subAxis) => subAxis !== null),
-      };
-    });
+    return this.axes
+      .filter((axis) => axis.active)
+      .map((axis) => {
+        return {
+          ...axis,
+          axisValues: axis.axisValues.filter((subAxis) => subAxis !== null),
+        };
+      });
   }
 
   get axesSpacing(): number {
     return this.width / this.activeAxes.length;
   }
 
-  getDataLine(entry: DataEntry) {
+  /*getDataLine(entry: DataEntry) {
     const values = entry.axes
       .filter((axis) => axis.axisValues.length > 0)
       .map((axis) => {
@@ -235,9 +293,11 @@ export default class Analytics extends Vue {
     });
 
     return pathParts.join(' ');
-  }
+  }*/
 
-  getDataLine1(entry: DataEntry): ({ path: string; dashed: boolean } | undefined)[] {
+  getDataLine(
+    entry: DataEntry
+  ): ({ path: string; dashed: boolean } | undefined)[] {
     const values = entry.axes
       .filter((axis) => axis.axisValues.length > 0)
       .map((axis) => {
@@ -385,10 +445,6 @@ export default class Analytics extends Vue {
 </script>
 
 <style lang="scss" scoped>
-svg {
-  border: 1px solid #ccc;
-}
-
 .dataLineHover {
   pointer-events: stroke;
   stroke-width: 15px;
@@ -404,7 +460,6 @@ svg {
   pointer-events: none;
   stroke-width: 1px;
   //stroke: var(--color-dark-contrast);
-  opacity: 60%;
   transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease,
     transform 1s ease;
 }
@@ -419,5 +474,24 @@ svg {
   stroke-width: 5px;
   stroke: var(--color-evaluating);
   opacity: 100%;
+}
+
+.axisControls {
+  .axisSelections {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .axisIcon {
+    font-size: var(--font-size-xlarge);
+  }
+  .axisName {
+    font-size: var(--font-size-default);
+    font-weight: var(--font-weight-bold);
+  }
+  .subAxisName {
+    font-size: var(--font-size-small);
+  }
 }
 </style>

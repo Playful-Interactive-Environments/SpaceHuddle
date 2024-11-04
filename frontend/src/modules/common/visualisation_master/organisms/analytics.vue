@@ -1,11 +1,13 @@
 <template>
-  <div id="analytics">
+  <div>
     <el-button @click="getAllParticipantData">all participant data</el-button>
-    <parallel-coordinates v-if="axes.length > 0 && dataEntries.length > 0" :chart-axes="axes.filter((axis) => axis.available)" :participant-data="dataEntries" />
     <el-button @click="console.log(axes)">calculate Axes</el-button>
     <el-button @click="console.log(dataEntries)"
-      >calculate DataEntries</el-button
+    >calculate DataEntries</el-button
     >
+  </div>
+  <div id="analytics">
+    <parallel-coordinates v-if="axes.length > 0 && dataEntries.length > 0" :chart-axes="axes.filter((axis) => axis.available)" :participant-data="dataEntries" />
   </div>
 </template>
 
@@ -41,6 +43,7 @@ import { Session } from '@/types/api/Session';
 import QrcodeVue from 'qrcode.vue';
 import { ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/modules/common/visualisation_master/organisms/subOrganisms/parallelCoordinates.vue';
+import {Module} from "@/types/api/Module";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -51,7 +54,10 @@ interface subAxis {
 
 interface Axis {
   moduleId: string;
-  name: string;
+  taskData: {
+    taskType: TaskType;
+    taskName: string;
+  };
   axisValues: (subAxis | null)[];
   categoryActive: string;
   active: boolean;
@@ -105,8 +111,11 @@ export default class Analytics extends Vue {
   componentLoadIndex = 0;
 
   steps: {
-    module: string;
     moduleId: string;
+    taskData: {
+      taskType: TaskType;
+      taskName: string;
+    };
     steps: TaskParticipantIterationStep[];
   }[] = [];
 
@@ -212,12 +221,13 @@ export default class Analytics extends Vue {
   @Watch('gameTasks', { immediate: true })
   onGameTasksChanged(): void {
     for (const task of this.gameTasks) {
+      console.log(task);
       taskParticipantService.registerGetIterationStepList(
         task.id,
         (steps: TaskParticipantIterationStep[]) => {
           this.updateIterationSteps(
             task.modules[0].id,
-            task.modules[0].name,
+            task,
             steps
           );
         },
@@ -247,13 +257,16 @@ export default class Analytics extends Vue {
 
   updateIterationSteps(
     moduleId: string,
-    moduleName: string,
+    task: Task,
     steps: TaskParticipantIterationStep[]
   ): void {
     const filteredSteps = steps.filter((step) => step.parameter.gameplayResult);
     const stepsEntry = {
       moduleId: moduleId,
-      module: moduleName,
+      taskData: {
+        taskType: task.taskType as TaskType,
+        taskName: task.name,
+      },
       steps: filteredSteps,
     };
     const index = this.steps.findIndex(
@@ -272,7 +285,10 @@ export default class Analytics extends Vue {
       participant: ParticipantInfo;
       data: {
         moduleId: string;
-        module: string;
+        taskData: {
+          taskType: TaskType;
+          taskName: string;
+        };
         bestStep: TaskParticipantIterationStep | null;
       }[];
     }[] = [];
@@ -290,7 +306,10 @@ export default class Analytics extends Vue {
 
   getBestIterationsParticipantSteps(participantID: string): {
     moduleId: string;
-    module: string;
+    taskData: {
+      taskType: TaskType;
+      taskName: string;
+    };
     bestStep: TaskParticipantIterationStep | null;
   }[] {
     return this.steps.map((stepEntry) => {
@@ -316,7 +335,7 @@ export default class Analytics extends Vue {
 
       return {
         moduleId: stepEntry.moduleId,
-        module: stepEntry.module,
+        taskData: stepEntry.taskData,
         bestStep,
       };
     });
@@ -339,7 +358,7 @@ export default class Analytics extends Vue {
   CalculateAxes(): Axis[] {
     return this.steps.map((step) => {
       const moduleId = step.moduleId;
-      const name = step.module;
+      const taskData = step.taskData;
       const axisValues = this.wantedValues
         .map((value) => {
           const range = step.steps.flatMap((subStep) => {
@@ -364,7 +383,7 @@ export default class Analytics extends Vue {
       const active = axisValues.length > 0;
       return {
         moduleId,
-        name,
+        taskData,
         axisValues,
         categoryActive: active ? (axisValues[0] ? axisValues[0].id : '') : '',
         active,
@@ -375,6 +394,7 @@ export default class Analytics extends Vue {
 
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
+    console.log(participantData);
     return participantData.map(({ participant, data }) => {
       const axes = this.CalculateAxes();
       const formattedAxes = axes.map((axis) => {
@@ -412,4 +432,12 @@ export default class Analytics extends Vue {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+#analytics {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+</style>
