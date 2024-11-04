@@ -91,19 +91,48 @@
               ? hoverStroke
               : 'var(--color-dark-contrast)'
           "
+          :style="{
+            strokeWidth: hoverStroke === entry.participant.avatar.color ? '3px' : '1px',
+          }"
         >
+          <circle
+            class="circle"
+            :r="hoverStroke === entry.participant.avatar.color ? '3px' : '0px'"
+            :cx="pathPart.x"
+            :cy="pathPart.y"
+            :fill="entry.participant.avatar.color"
+            :style="{
+              opacity:
+                hoverStroke === entry.participant.avatar.color ? '1' : '0',
+            }"
+          />
           <path
             v-if="pathPart"
             class="dataLinePathSegment"
             :d="pathPart.path"
             :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
             :style="{
-              opacity: pathPart.dashed ? '35%' : '60%',
+              opacity: pathPart.dashed ? '35%' : hoverStroke === entry.participant.avatar.color ? '1' : '35%',
             }"
           />
         </g>
       </g>
     </svg>
+
+    <div
+        class="axisControls"
+        v-for="(axis, index) in activeAxes"
+        :key="axis.moduleId + 1"
+        :style="{
+        position: 'absolute',
+        left: `${axesSpacing * index - axesSpacing / 2}px`,
+        bottom: '100%',
+        textAlign: 'right',
+        width: `${axesSpacing}px`,
+        paddingRight: `${axesSpacing/5}px`
+      }">
+      <p class="participantCount"><font-awesome-icon icon="user" /> {{getParticipationCount(axis) }}</p>
+    </div>
 
     <!-- Dropdown Menus -->
     <div
@@ -150,7 +179,6 @@
       </div>
       <p class="axisName">{{ axis.taskData.taskName }}</p>
       <p class="subAxisName">{{ axis.categoryActive }}</p>
-
       <!--      <select @change="updateSubAxis(index, $event.target.value)">
         <option
           v-for="(subAxis, subAxisIndex) in axis.axisValues"
@@ -170,6 +198,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+import {library, dom} from "@fortawesome/fontawesome-svg-core";
 
 interface SubAxis {
   id: string;
@@ -238,7 +267,7 @@ export default class Analytics extends Vue {
   }
 
   get width() {
-    return window.innerWidth - 100;
+    return window.innerWidth - 300;
   }
 
   get activeAxes() {
@@ -254,6 +283,18 @@ export default class Analytics extends Vue {
 
   get axesSpacing(): number {
     return this.width / this.activeAxes.length;
+  }
+
+  getParticipationCount(axis: Axis) {
+    const category = axis.categoryActive;
+    let counter = 0;
+    for (const partData of this.participantData) {
+      const partAxis = partData.axes.find((partAxis) => partAxis.moduleId === axis.moduleId);
+      if (partAxis) {
+        counter += partAxis.axisValues.filter((value) => value.id === category && value.value !== null).length;
+      }
+    }
+    return counter;
   }
 
   /*getDataLine(entry: DataEntry) {
@@ -297,7 +338,7 @@ export default class Analytics extends Vue {
 
   getDataLine(
     entry: DataEntry
-  ): ({ path: string; dashed: boolean } | undefined)[] {
+  ): ({ path: string; dashed: boolean; x: number; y: number } | undefined)[] {
     const values = entry.axes
       .filter((axis) => axis.axisValues.length > 0)
       .map((axis) => {
@@ -320,7 +361,7 @@ export default class Analytics extends Vue {
           value !== null ? this.getYPosition(value!, axis) : this.height / 2;
 
         if (index === 0) {
-          return { path: `M${x},${y}`, dashed: false };
+          return { path: `M${x},${y}`, dashed: false, x: x, y: y };
         }
 
         let iterator = index - 1;
@@ -341,6 +382,8 @@ export default class Analytics extends Vue {
         return {
           path: `M${prevX},${prevY} C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`,
           dashed: isDashed,
+          x: x,
+          y: y,
         };
       }
     });
@@ -355,28 +398,19 @@ export default class Analytics extends Vue {
   }
 
   getYPosition(value: number, axis: Axis) {
+    const activeSubAxis = axis.axisValues.find((subAxis) => subAxis.id === axis.categoryActive);
     return (
       this.padding +
-      (value /
-        Math.max(
-          ...axis.axisValues.map((subAxis) => (subAxis ? subAxis.range : 0))
-        )) *
+      (value / activeSubAxis.range) *
         (this.height - 2 * this.padding)
     );
   }
 
   updateSubAxis(index: number, subAxisId: string | null) {
-    console.log(`Axis ${index} selected sub-axis: ${subAxisId}`);
     if (subAxisId) {
       this.axes[index].categoryActive = subAxisId;
+      console.log(this.axes[index]);
     }
-  }
-
-  filteredAxisValues(axis: Axis) {
-    // Returns the filtered axis values based on the active category
-    return axis.axisValues.filter(
-      (subAxis) => subAxis && subAxis.id === axis.categoryActive
-    );
   }
 
   getAverageDataLine() {
@@ -445,6 +479,7 @@ export default class Analytics extends Vue {
 </script>
 
 <style lang="scss" scoped>
+
 .dataLineHover {
   pointer-events: stroke;
   stroke-width: 15px;
@@ -458,14 +493,15 @@ export default class Analytics extends Vue {
 
 .dataLine {
   pointer-events: none;
-  stroke-width: 1px;
-  //stroke: var(--color-dark-contrast);
   transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease,
     transform 1s ease;
 }
 
+.circle {
+  transition: 0.2s ease;
+}
+
 .dataLineHover:hover + .dataLine {
-  stroke-width: 3px;
   opacity: 100%;
 }
 
