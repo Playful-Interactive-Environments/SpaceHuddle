@@ -92,7 +92,8 @@
               : 'var(--color-dark-contrast)'
           "
           :style="{
-            strokeWidth: hoverStroke === entry.participant.avatar.color ? '3px' : '1px',
+            strokeWidth:
+              hoverStroke === entry.participant.avatar.color ? '3px' : '1px',
           }"
         >
           <circle
@@ -112,7 +113,11 @@
             :d="pathPart.path"
             :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
             :style="{
-              opacity: pathPart.dashed ? '35%' : hoverStroke === entry.participant.avatar.color ? '1' : '35%',
+              opacity: pathPart.dashed
+                ? '35%'
+                : hoverStroke === entry.participant.avatar.color
+                ? '1'
+                : '35%',
             }"
           />
         </g>
@@ -120,18 +125,21 @@
     </svg>
 
     <div
-        class="axisControls"
-        v-for="(axis, index) in activeAxes"
-        :key="axis.moduleId + 1"
-        :style="{
+      class="axisControls"
+      v-for="(axis, index) in activeAxes"
+      :key="axis.moduleId + 1"
+      :style="{
         position: 'absolute',
         left: `${axesSpacing * index - axesSpacing / 2}px`,
         bottom: '100%',
         textAlign: 'right',
         width: `${axesSpacing}px`,
-        paddingRight: `${axesSpacing/5}px`
-      }">
-      <p class="participantCount"><font-awesome-icon icon="user" /> {{getParticipationCount(axis) }}</p>
+        paddingRight: `${axesSpacing / 5}px`,
+      }"
+    >
+      <p class="participantCount">
+        <font-awesome-icon icon="user" /> {{ getParticipationCount(axis) }}
+      </p>
     </div>
 
     <!-- Dropdown Menus -->
@@ -198,7 +206,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
-import {library, dom} from "@fortawesome/fontawesome-svg-core";
+import { library, dom } from '@fortawesome/fontawesome-svg-core';
 
 interface SubAxis {
   id: string;
@@ -289,9 +297,13 @@ export default class Analytics extends Vue {
     const category = axis.categoryActive;
     let counter = 0;
     for (const partData of this.participantData) {
-      const partAxis = partData.axes.find((partAxis) => partAxis.moduleId === axis.moduleId);
+      const partAxis = partData.axes.find(
+        (partAxis) => partAxis.moduleId === axis.moduleId
+      );
       if (partAxis) {
-        counter += partAxis.axisValues.filter((value) => value.id === category && value.value !== null).length;
+        counter += partAxis.axisValues.filter(
+          (value) => value.id === category && value.value !== null
+        ).length;
       }
     }
     return counter;
@@ -357,8 +369,7 @@ export default class Analytics extends Vue {
         let isDashed = false;
         const axis = this.activeAxes[index];
         const x = this.axesSpacing * index;
-        const y =
-          value !== null ? this.getYPosition(value!, axis) : this.height / 2;
+        const y = this.getYPosition(value!, axis);
 
         if (index === 0) {
           return { path: `M${x},${y}`, dashed: false, x: x, y: y };
@@ -390,7 +401,7 @@ export default class Analytics extends Vue {
     return pathParts.filter((parts) => parts);
   }
 
-  getLabelPosition(index: number, axis: Axis) {
+  getLabelPosition(index: number) {
     return (
       ((this.height - 2 * this.padding) / this.labelCount) * index +
       this.padding
@@ -398,10 +409,12 @@ export default class Analytics extends Vue {
   }
 
   getYPosition(value: number, axis: Axis) {
-    const activeSubAxis = axis.axisValues.find((subAxis) => subAxis.id === axis.categoryActive);
+    const activeSubAxis = axis.axisValues.find(
+      (subAxis) => subAxis && subAxis.id === axis.categoryActive
+    );
     return (
       this.padding +
-      (value / activeSubAxis.range) *
+      (value / (activeSubAxis ? activeSubAxis?.range : 3)) *
         (this.height - 2 * this.padding)
     );
   }
@@ -479,7 +492,6 @@ export default class Analytics extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
 .dataLineHover {
   pointer-events: stroke;
   stroke-width: 15px;
