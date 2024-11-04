@@ -12,41 +12,94 @@
         <line :y1="padding" :y2="height - padding" stroke="black" />
 
         <!-- Tick Marks and Labels for the active sub-axis -->
-        <g v-for="labelIndex in labelCount+1" :key="labelIndex-1 + axis.moduleId">
+        <g
+          v-for="labelIndex in labelCount + 1"
+          :key="labelIndex - 1 + axis.moduleId"
+        >
           <line
-            :y1="getLabelPosition(labelIndex-1, axis)"
-            :y2="getLabelPosition(labelIndex-1, axis)"
+            :y1="getLabelPosition(labelIndex - 1, axis)"
+            :y2="getLabelPosition(labelIndex - 1, axis)"
             :x2="5"
             stroke="black"
           />
-          <text :y="getLabelPosition(labelIndex-1, axis)" x="10" font-size="10">
+          <text
+            :y="getLabelPosition(labelIndex - 1, axis)"
+            x="10"
+            font-size="10"
+          >
             {{
-              (axis.axisValues.find((value) => value.id === axis.categoryActive)
-                .range /
-                labelCount) *
-              (labelIndex-1)
+              Math.round(
+                ((axis.axisValues.find(
+                  (value) => value.id === axis.categoryActive
+                ).range /
+                  labelCount) *
+                  (labelIndex - 1) +
+                  Number.EPSILON) *
+                  100
+              ) / 100
             }}
           </text>
         </g>
       </g>
 
       <!-- Data Lines as Curves -->
-      <g v-for="entry in chartData" :key="entry.participant.id">
-        <path class="dataLineHover" :d="getDataLine(entry)" fill="none" />
+      <!--      <g v-for="entry in chartData" :key="entry.participant.id">
+        <path
+          class="dataLineHover"
+          :d="getDataLine(entry)"
+          fill="none"
+          @mouseenter="hoverStroke = entry.participant.avatar.color"
+          @mouseleave="hoverStroke = null"
+        />
         <path
           class="dataLine"
           :d="getDataLine(entry)"
           fill="none"
-          :stroke="entry.participant.avatar.color"
+          :stroke="
+            hoverStroke === entry.participant.avatar.color
+              ? hoverStroke
+              : 'var(&#45;&#45;color-dark-contrast)'
+          "
         />
-      </g>
-
+      </g>-->
       <!-- Average Data Line -->
       <path
         class="dataLine averageDataLine"
         :d="getAverageDataLinePath()"
         fill="none"
       />
+
+      <!-- Data Lines as Curves -->
+      <g v-for="entry in chartData" :key="entry.participant.id">
+        <g
+          v-for="pathPart in getDataLine1(entry)"
+          :key="pathPart.path"
+          class="dataLineHover"
+          fill="none"
+          @mouseenter="hoverStroke = entry.participant.avatar.color"
+          @mouseleave="hoverStroke = null"
+        >
+          <path v-if="pathPart" :d="pathPart.path" />
+        </g>
+        <g
+          v-for="pathPart in getDataLine1(entry)"
+          :key="pathPart.path"
+          class="dataLine"
+          fill="none"
+          :stroke="
+            hoverStroke === entry.participant.avatar.color
+              ? hoverStroke
+              : 'var(--color-dark-contrast)'
+          "
+        >
+          <path
+            v-if="pathPart"
+            class="dataLinePathSegment"
+            :d="pathPart.path"
+            :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
+          />
+        </g>
+      </g>
     </svg>
 
     <!-- Dropdown Menus -->
@@ -115,6 +168,8 @@ export default class Analytics extends Vue {
   height = 500;
   padding = 20;
 
+  hoverStroke: string | null = null;
+
   axes: Axis[] = [];
   chartData: DataEntry[] = [];
 
@@ -182,15 +237,60 @@ export default class Analytics extends Vue {
     return pathParts.join(' ');
   }
 
+  getDataLine1(entry: DataEntry): ({ path: string; dashed: boolean } | undefined)[] {
+    const values = entry.axes
+      .filter((axis) => axis.axisValues.length > 0)
+      .map((axis) => {
+        const selectedAxis = this.activeAxes.find(
+          (a) => a.moduleId === axis.moduleId
+        );
+        return selectedAxis
+          ? axis.axisValues.find(
+              (value) => value.id === selectedAxis.categoryActive
+            )?.value
+          : null;
+      });
+
+    const pathParts = values.map((value, index) => {
+      if (value != null) {
+        let isDashed = false;
+        const axis = this.activeAxes[index];
+        const x = this.axesSpacing * index;
+        const y =
+          value !== null ? this.getYPosition(value!, axis) : this.height / 2;
+
+        if (index === 0) {
+          return { path: `M${x},${y}`, dashed: false };
+        }
+
+        let iterator = index - 1;
+        while (values[iterator] === null && iterator > 0) {
+          iterator -= 1;
+          isDashed = true;
+        }
+
+        const prevX = this.axesSpacing * iterator;
+        const prevY =
+          values[iterator] !== null
+            ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
+            : this.height / 2;
+
+        const controlX1 = prevX + this.axesSpacing / 2;
+        const controlX2 = x - this.axesSpacing / 2;
+
+        return {
+          path: `M${prevX},${prevY} C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`,
+          dashed: isDashed,
+        };
+      }
+    });
+    return pathParts.filter((parts) => parts);
+  }
+
   getLabelPosition(index: number, axis: Axis) {
-    const axisValue = axis.axisValues.find(
-      (value) => value.id === axis.categoryActive
-    );
-
-    console.log(index);
-
     return (
-        ((this.height - 2 * this.padding) /this.labelCount * index) + this.padding
+      ((this.height - 2 * this.padding) / this.labelCount) * index +
+      this.padding
     );
   }
 
@@ -304,14 +404,13 @@ svg {
   pointer-events: none;
   stroke-width: 1px;
   //stroke: var(--color-dark-contrast);
-  opacity: 40%;
+  opacity: 60%;
   transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease,
     transform 1s ease;
 }
 
 .dataLineHover:hover + .dataLine {
   stroke-width: 3px;
-  stroke: red;
   opacity: 100%;
 }
 
