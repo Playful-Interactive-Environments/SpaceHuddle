@@ -17,16 +17,12 @@
           :key="labelIndex - 1 + axis.moduleId"
         >
           <line
-            :y1="getLabelPosition(labelIndex - 1, axis)"
-            :y2="getLabelPosition(labelIndex - 1, axis)"
+            :y1="getLabelPosition(labelIndex - 1)"
+            :y2="getLabelPosition(labelIndex - 1)"
             :x2="5"
             stroke="black"
           />
-          <text
-            :y="getLabelPosition(labelIndex - 1, axis)"
-            x="10"
-            font-size="10"
-          >
+          <text :y="getLabelPosition(labelIndex - 1)" x="10" font-size="10">
             {{
               Math.round(
                 ((axis.axisValues.find(
@@ -381,18 +377,24 @@ export default class Analytics extends Vue {
           isDashed = true;
         }
 
-        const prevX = this.axesSpacing * iterator;
+        const prevX =
+          values[iterator] !== null ? this.axesSpacing * iterator : x;
         const prevY =
           values[iterator] !== null
             ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
-            : this.height / 2;
+            : y;
 
-        const controlX1 = prevX + this.axesSpacing / 2;
-        const controlX2 = x - this.axesSpacing / 2;
+        let controlX1 = prevX + this.axesSpacing / 2;
+        let controlX2 = x - this.axesSpacing / 2;
+
+        if (x === prevX) {
+          controlX1 = prevX + this.axesSpacing / 4;
+          controlX2 = x - this.axesSpacing / 4;
+        }
 
         return {
           path: `M${prevX},${prevY} C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`,
-          dashed: isDashed,
+          dashed: x !== prevX ? isDashed : false,
           x: x,
           y: y,
         };
@@ -401,21 +403,24 @@ export default class Analytics extends Vue {
     return pathParts.filter((parts) => parts);
   }
 
-  getLabelPosition(index: number) {
-    return (
-      ((this.height - 2 * this.padding) / this.labelCount) * index +
-      this.padding
-    );
-  }
-
   getYPosition(value: number, axis: Axis) {
     const activeSubAxis = axis.axisValues.find(
       (subAxis) => subAxis && subAxis.id === axis.categoryActive
     );
+
+    const maxValue = activeSubAxis ? activeSubAxis.range : 3;
     return (
-      this.padding +
-      (value / (activeSubAxis ? activeSubAxis?.range : 3)) *
-        (this.height - 2 * this.padding)
+      this.height -
+      this.padding -
+      (value / maxValue) * (this.height - 2 * this.padding)
+    );
+  }
+
+  getLabelPosition(index: number) {
+    return (
+      this.height -
+      this.padding -
+      ((this.height - 2 * this.padding) / this.labelCount) * index
     );
   }
 
