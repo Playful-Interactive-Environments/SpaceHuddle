@@ -150,6 +150,10 @@
         textAlign: 'center',
         width: `${axesSpacing}px`,
       }"
+      draggable="true"
+      @dragstart="onDragStart(index)"
+      @dragover.prevent
+      @drop="onDrop(index)"
     >
       <div class="axisSelections">
         <el-dropdown
@@ -382,6 +386,8 @@ export default class Analytics extends Vue {
           : null;
       });
 
+    console.log(values);
+
     const pathParts = values.map((value, index) => {
       if (value != null) {
         let isDashed = false;
@@ -455,7 +461,7 @@ export default class Analytics extends Vue {
   updateAxis(index: number, axis: Axis) {
     this.axes[index] = structuredClone(axis);
     this.axes[index].active = true;
-    console.log(this.axes);
+    //TODO doesnt update datalines properly
   }
 
   getAverageDataLine() {
@@ -519,6 +525,29 @@ export default class Analytics extends Vue {
     });
 
     return pathParts.join(' ');
+  }
+
+  draggedIndex: number | null = null;
+
+  // Called when an axis control is picked up
+  onDragStart(index: number) {
+    this.draggedIndex = index;
+  }
+
+  // Called when an axis control is dropped
+  onDrop(dropIndex: number) {
+    if (this.draggedIndex === null || this.draggedIndex === dropIndex) return;
+
+    // Reorder the activeAxes array
+    const draggedAxis = this.activeAxes.splice(this.draggedIndex, 1)[0];
+    this.activeAxes.splice(dropIndex, 0, draggedAxis);
+
+    // Update the original axes array accordingly
+    const draggedOriginalAxis = this.axes.splice(this.draggedIndex, 1)[0];
+    this.axes.splice(dropIndex, 0, draggedOriginalAxis);
+
+    // Reset dragged index
+    this.draggedIndex = null;
   }
 }
 </script>

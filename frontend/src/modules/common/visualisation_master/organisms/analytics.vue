@@ -6,7 +6,7 @@
     >calculate DataEntries</el-button
     >
   </div>
-  <div id="analytics">
+  <div id="analytics" :style="{marginTop: '3rem'}">
     <parallel-coordinates v-if="axes.length > 0 && dataEntries.length > 0" :chart-axes="axes.filter((axis) => axis.available)" :participant-data="dataEntries" />
   </div>
 </template>
@@ -277,6 +277,7 @@ export default class Analytics extends Vue {
     } else {
       this.steps.push(stepsEntry);
     }
+    console.log(this.steps);
   }
 
   getAllParticipantData() {
