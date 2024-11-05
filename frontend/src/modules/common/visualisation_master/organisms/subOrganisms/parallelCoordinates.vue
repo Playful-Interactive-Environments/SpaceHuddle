@@ -173,13 +173,33 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <font-awesome-icon
-          class="axisIcon"
-          :icon="getIconOfAxis(axis)"
-          :style="{
-            color: getColorOfAxis(axis),
-          }"
-        />
+        <el-dropdown
+          v-if="availableAxes.length > 1"
+          v-on:command="updateAxis(index, $event)"
+          trigger="click"
+          placement="bottom"
+        >
+          <div class="el-dropdown-link">
+            <font-awesome-icon
+              class="axisIcon"
+              :icon="getIconOfAxis(axis)"
+              :style="{
+                color: getColorOfAxis(axis),
+              }"
+            />
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="(ax, axIndex) in availableAxes"
+                :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
+                :command="ax ? ax : null"
+              >
+                {{ ax ? ax.taskData.taskName : 'N/A' }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
       <p class="axisName">{{ axis.taskData.taskName }}</p>
       <p class="subAxisName">{{ axis.categoryActive }}</p>
@@ -202,7 +222,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
-import { library, dom } from '@fortawesome/fontawesome-svg-core';
 
 interface SubAxis {
   id: string;
@@ -243,14 +262,17 @@ export default class Analytics extends Vue {
 
   hoverStroke: string | null = null;
 
+  availableAxes: Axis[] = [];
   axes: Axis[] = [];
+
   chartData: DataEntry[] = [];
 
   labelCount = 3;
 
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
-    this.axes = this.chartAxes;
+    this.availableAxes = this.chartAxes;
+    this.axes = [...this.availableAxes];
   }
 
   @Watch('participantData', { immediate: true })
@@ -427,8 +449,13 @@ export default class Analytics extends Vue {
   updateSubAxis(index: number, subAxisId: string | null) {
     if (subAxisId) {
       this.axes[index].categoryActive = subAxisId;
-      console.log(this.axes[index]);
     }
+  }
+
+  updateAxis(index: number, axis: Axis) {
+    this.axes[index] = structuredClone(axis);
+    this.axes[index].active = true;
+    console.log(this.axes);
   }
 
   getAverageDataLine() {

@@ -221,7 +221,6 @@ export default class Analytics extends Vue {
   @Watch('gameTasks', { immediate: true })
   onGameTasksChanged(): void {
     for (const task of this.gameTasks) {
-      console.log(task);
       taskParticipantService.registerGetIterationStepList(
         task.id,
         (steps: TaskParticipantIterationStep[]) => {
@@ -394,7 +393,6 @@ export default class Analytics extends Vue {
 
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
-    console.log(participantData);
     return participantData.map(({ participant, data }) => {
       const axes = this.CalculateAxes();
       const formattedAxes = axes.map((axis) => {
