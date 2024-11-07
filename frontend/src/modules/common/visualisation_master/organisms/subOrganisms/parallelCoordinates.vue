@@ -38,32 +38,42 @@
         </g>
       </g>
 
-      <!-- Data Lines as Curves -->
-      <!--      <g v-for="entry in chartData" :key="entry.participant.id">
-        <path
-          class="dataLineHover"
-          :d="getDataLine(entry)"
-          fill="none"
-          @mouseenter="hoverStroke = entry.participant.avatar.color"
-          @mouseleave="hoverStroke = null"
-        />
-        <path
-          class="dataLine"
-          :d="getDataLine(entry)"
-          fill="none"
-          :stroke="
-            hoverStroke === entry.participant.avatar.color
-              ? hoverStroke
-              : 'var(&#45;&#45;color-dark-contrast)'
-          "
-        />
-      </g>-->
       <!-- Average Data Line -->
-      <path
-        class="dataLine averageDataLine"
-        :d="getAverageDataLinePath()"
-        fill="none"
-      />
+      <g
+        v-for="(pathPart, index) in getAverageDataLinePath()"
+        :key="pathPart.path"
+        :fill="'var(--color-evaluating)'"
+      >
+        <g :transform="`translate(${pathPart.x + 7}, ${pathPart.y + 5})`">
+          <path
+            :transform="`translate(0, 0) scale(0.025)`"
+            :d="getIconDefinition('angle-down').icon[4] as string"
+          />
+          <text font-size="12" :transform="`translate(10, 18)`">
+            {{
+                //TODO All Entries below average
+            }}
+          </text>
+        </g>
+
+        <g :transform="`translate(${pathPart.x + 7}, ${pathPart.y - 20})`">
+          <path
+            :transform="`scale(0.025)`"
+            :d="getIconDefinition('angle-up').icon[4] as string"
+          />
+          <text font-size="12" :transform="`translate(10, 0)`">
+            {{
+              //TODO All Entries below average
+            }}
+          </text>
+        </g>
+        <path
+          v-if="pathPart"
+          class="dataLine averageDataLine"
+          :d="pathPart.path"
+          fill="none"
+        />
+      </g>
 
       <!-- Data Lines as Curves -->
       <g v-for="entry in chartData" :key="entry.participant.id">
@@ -94,13 +104,26 @@
         >
           <circle
             class="circle"
-            :r="hoverStroke === entry.participant.avatar.color ? '3px' : '0px'"
+            :r="
+              hoverStroke === entry.participant.avatar.color ||
+              getDataLine(entry).length <= 1
+                ? '3px'
+                : '0px'
+            "
             :cx="pathPart.x"
             :cy="pathPart.y"
-            :fill="entry.participant.avatar.color"
+            :fill="
+              hoverStroke === entry.participant.avatar.color ||
+              getDataLine(entry).length > 1
+                ? hoverStroke
+                : 'var(--color-dark-contrast)'
+            "
             :style="{
               opacity:
-                hoverStroke === entry.participant.avatar.color ? '1' : '0',
+                hoverStroke === entry.participant.avatar.color ||
+                getDataLine(entry).length <= 1
+                  ? '1'
+                  : '0',
             }"
           />
           <path
@@ -195,7 +218,9 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="(ax, axIndex) in availableAxes.filter((avAxis) => !this.axes.includes(avAxis))"
+                v-for="(ax, axIndex) in availableAxes.filter(
+                  (avAxis) => !this.axes.includes(avAxis)
+                )"
                 :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
                 :command="ax ? ax : null"
               >
@@ -221,11 +246,20 @@
 </template>
 
 <script lang="ts">
-import {ParticipantInfo} from '@/types/api/Participant';
-import {Vue} from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+import { ParticipantInfo } from '@/types/api/Participant';
+import { Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
-import {getColorOfType, getIconOfType} from '@/types/enum/TaskCategory';
+import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+
+import {
+  findIconDefinition,
+  IconLookup,
+  IconName,
+  IconPrefix,
+} from '@fortawesome/fontawesome-svg-core';
+
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 interface SubAxis {
   id: string;
@@ -284,11 +318,19 @@ export default class Analytics extends Vue {
     this.chartData = this.participantData;
   }
 
+  getIconDefinition = (iconName: string, prefix = 'fas') => {
+    const lookup: IconLookup = {
+      prefix: prefix as IconPrefix,
+      iconName: iconName as IconName,
+    };
+    return findIconDefinition(lookup);
+  };
+
   reduceParticipantData(): DataEntry[] {
     const data = [...this.participantData];
     for (const entry of data) {
       entry.axes = entry.axes.filter((axis) =>
-          this.axes.some((chartAxis) => chartAxis.moduleId === axis.moduleId)
+        this.axes.some((chartAxis) => chartAxis.moduleId === axis.moduleId)
       );
     }
     return data;
@@ -307,7 +349,7 @@ export default class Analytics extends Vue {
   }
 
   get width() {
-    return window.innerWidth - 300;
+    return window.innerWidth - window.innerWidth / 10;
   }
 
   get activeAxes() {
@@ -404,7 +446,14 @@ export default class Analytics extends Vue {
         const y = this.getYPosition(value!, axis);
 
         if (index === 0) {
-          return { path: `M${x},${y}`, dashed: false, x: x, y: y };
+          return {
+            path: `M${x},${y} C${x - this.axesSpacing / 4},${y} ${
+              x + this.axesSpacing / 4
+            },${y} ${x},${y}`,
+            dashed: false,
+            x: x,
+            y: y,
+          };
         }
 
         let iterator = index - 1;
@@ -510,7 +559,11 @@ export default class Analytics extends Vue {
     return averages;
   }
 
-  getAverageDataLinePath() {
+  getAverageDataLinePath(): (
+    | { path: string; dashed: boolean; x: number; y: number }
+    | undefined
+  )[] {
+    let isDashed = false;
     const averages = this.getAverageDataLine();
 
     const pathParts = averages.map((average, index) => {
@@ -521,22 +574,41 @@ export default class Analytics extends Vue {
           : this.height / 2;
 
       if (index === 0) {
-        return `M${x},${y}`;
+        return { path: `M${x},${y}`, dashed: false, x: x, y: y };
       }
 
-      const prevX = this.axesSpacing * (index - 1);
+      let iterator = index - 1;
+      while (averages[iterator] === null && iterator > 0) {
+        iterator -= 1;
+        isDashed = true;
+      }
+
+      const prevX =
+        averages[iterator] !== null ? this.axesSpacing * iterator : x;
       const prevY =
-        averages[index - 1] !== null
-          ? this.getYPosition(averages[index - 1], this.activeAxes[index - 1])
-          : this.height / 2;
+        averages[iterator] !== null
+          ? this.getYPosition(averages[iterator]!, this.activeAxes[iterator])
+          : y;
 
-      const controlX1 = prevX + this.axesSpacing / 2;
-      const controlX2 = x - this.axesSpacing / 2;
+      let controlX1 = prevX + this.axesSpacing / 2;
+      let controlX2 = x - this.axesSpacing / 2;
 
-      return `C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`;
+      if (x === prevX) {
+        controlX1 = prevX + this.axesSpacing / 4;
+        controlX2 = x - this.axesSpacing / 4;
+      }
+
+      return {
+        path: `M${prevX},${prevY} C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`,
+        dashed: x !== prevX ? isDashed : false,
+        x: x,
+        y: y,
+      };
     });
 
-    return pathParts.join(' ');
+    console.log(pathParts);
+
+    return pathParts.filter((parts) => parts);
   }
 
   draggedIndex: number | null = null;
