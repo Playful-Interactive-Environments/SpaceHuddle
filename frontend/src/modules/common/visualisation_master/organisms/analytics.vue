@@ -3,11 +3,15 @@
     <el-button @click="getAllParticipantData">all participant data</el-button>
     <el-button @click="console.log(axes)">calculate Axes</el-button>
     <el-button @click="console.log(dataEntries)"
-    >calculate DataEntries</el-button
+      >calculate DataEntries</el-button
     >
   </div>
-  <div id="analytics" :style="{marginTop: '3rem'}">
-    <parallel-coordinates v-if="axes.length > 0 && dataEntries.length > 0" :chart-axes="axes.filter((axis) => axis.available)" :participant-data="dataEntries" />
+  <div id="analytics" :style="{ marginTop: '3rem' }">
+    <parallel-coordinates
+      v-if="axes.length > 0 && dataEntries.length > 0"
+      :chart-axes="axes.filter((axis) => axis.available)"
+      :participant-data="dataEntries"
+    />
   </div>
 </template>
 
@@ -43,7 +47,7 @@ import { Session } from '@/types/api/Session';
 import QrcodeVue from 'qrcode.vue';
 import { ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/modules/common/visualisation_master/organisms/subOrganisms/parallelCoordinates.vue';
-import {Module} from "@/types/api/Module";
+import { Module } from '@/types/api/Module';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -224,11 +228,7 @@ export default class Analytics extends Vue {
       taskParticipantService.registerGetIterationStepList(
         task.id,
         (steps: TaskParticipantIterationStep[]) => {
-          this.updateIterationSteps(
-            task.modules[0].id,
-            task,
-            steps
-          );
+          this.updateIterationSteps(task.modules[0].id, task, steps);
         },
         EndpointAuthorisationType.MODERATOR,
         15
@@ -345,6 +345,7 @@ export default class Analytics extends Vue {
     'stars',
     'points',
     'playtime',
+    'playTime',
     'maxSpeed',
     'averageSpeed',
     'co2',
@@ -387,7 +388,7 @@ export default class Analytics extends Vue {
         axisValues,
         categoryActive: active ? (axisValues[0] ? axisValues[0].id : '') : '',
         active,
-        available: active,
+        available: axisValues.length > 0,
       };
     });
   }
@@ -396,35 +397,37 @@ export default class Analytics extends Vue {
     const participantData = this.getAllParticipantData();
     return participantData.map(({ participant, data }) => {
       const axes = this.CalculateAxes();
-      const formattedAxes = axes.map((axis) => {
-        const moduleData = data.find((d) => d.moduleId === axis.moduleId);
-        const axisValues = axis.axisValues.map((axisValue) => {
-          if (!axisValue) return { id: '', value: null };
+      const formattedAxes = axes
+        .map((axis) => {
+          const moduleData = data.find((d) => d.moduleId === axis.moduleId);
+          const axisValues = axis.axisValues.map((axisValue) => {
+            if (!axisValue) return { id: '', value: null };
 
-          const { id } = axisValue;
-          let value = null;
+            const { id } = axisValue;
+            let value = null;
 
-          if (moduleData?.bestStep) {
-            const sources = [
-              moduleData.bestStep,
-              moduleData.bestStep.parameter,
-              moduleData.bestStep.parameter?.gameplayResult,
-              moduleData.bestStep.parameter?.drive,
-              moduleData.bestStep.parameter?.game,
-            ];
+            if (moduleData?.bestStep) {
+              const sources = [
+                moduleData.bestStep,
+                moduleData.bestStep.parameter,
+                moduleData.bestStep.parameter?.gameplayResult,
+                moduleData.bestStep.parameter?.drive,
+                moduleData.bestStep.parameter?.game,
+              ];
 
-            for (const source of sources) {
-              if (source && id in source) {
-                value = source[id];
-                break;
+              for (const source of sources) {
+                if (source && id in source) {
+                  value = source[id];
+                  break;
+                }
               }
             }
-          }
 
-          return { id, value };
-        });
-        return { moduleId: axis.moduleId, axisValues };
-      });
+            return { id, value };
+          });
+          return { moduleId: axis.moduleId, axisValues };
+        })
+        .filter((axis) => axis.axisValues.length > 0);
       return { participant, axes: formattedAxes };
     });
   }
@@ -437,6 +440,5 @@ export default class Analytics extends Vue {
   display: flex;
   align-items: center;
   justify-content: center;
-
 }
 </style>

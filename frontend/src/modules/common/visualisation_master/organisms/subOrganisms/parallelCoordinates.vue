@@ -195,7 +195,7 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="(ax, axIndex) in availableAxes"
+                v-for="(ax, axIndex) in availableAxes.filter((avAxis) => !this.axes.includes(avAxis))"
                 :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
                 :command="ax ? ax : null"
               >
@@ -221,11 +221,11 @@
 </template>
 
 <script lang="ts">
-import { ParticipantInfo } from '@/types/api/Participant';
-import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import {ParticipantInfo} from '@/types/api/Participant';
+import {Vue} from 'vue-class-component';
+import {Prop, Watch} from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
-import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+import {getColorOfType, getIconOfType} from '@/types/enum/TaskCategory';
 
 interface SubAxis {
   id: string;
@@ -282,6 +282,16 @@ export default class Analytics extends Vue {
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
     this.chartData = this.participantData;
+  }
+
+  reduceParticipantData(): DataEntry[] {
+    const data = [...this.participantData];
+    for (const entry of data) {
+      entry.axes = entry.axes.filter((axis) =>
+          this.axes.some((chartAxis) => chartAxis.moduleId === axis.moduleId)
+      );
+    }
+    return data;
   }
 
   getIconOfAxis(axis: Axis): string | undefined {
@@ -386,8 +396,6 @@ export default class Analytics extends Vue {
           : null;
       });
 
-    console.log(values);
-
     const pathParts = values.map((value, index) => {
       if (value != null) {
         let isDashed = false;
@@ -461,6 +469,10 @@ export default class Analytics extends Vue {
   updateAxis(index: number, axis: Axis) {
     this.axes[index] = structuredClone(axis);
     this.axes[index].active = true;
+
+    for (const entry of this.chartData) {
+      console.log(entry);
+    }
     //TODO doesnt update datalines properly
   }
 
@@ -545,6 +557,11 @@ export default class Analytics extends Vue {
     // Update the original axes array accordingly
     const draggedOriginalAxis = this.axes.splice(this.draggedIndex, 1)[0];
     this.axes.splice(dropIndex, 0, draggedOriginalAxis);
+
+    for (const entry of this.chartData) {
+      const draggedDataEntry = entry.axes.splice(this.draggedIndex, 1)[0];
+      entry.axes.splice(dropIndex, 0, draggedDataEntry);
+    }
 
     // Reset dragged index
     this.draggedIndex = null;
