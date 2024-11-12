@@ -44,7 +44,10 @@
         :key="pathPart.path"
         :fill="'var(--color-evaluating)'"
       >
-        <g v-if="getAboveBelow(pathPart.value, index, true) > 0" :transform="`translate(${pathPart.x + 7}, ${pathPart.y + 5})`">
+        <g
+          v-if="getAboveBelow(pathPart.value, index, true) > 0"
+          :transform="`translate(${pathPart.x + 7}, ${pathPart.y + 5})`"
+        >
           <path
             :transform="`translate(0, 0) scale(0.025)`"
             :d="getIconDefinition('angle-down').icon[4] as string"
@@ -54,7 +57,10 @@
           </text>
         </g>
 
-        <g v-if="getAboveBelow(pathPart.value, index, true) > 0" :transform="`translate(${pathPart.x + 7}, ${pathPart.y - 20})`">
+        <g
+          v-if="getAboveBelow(pathPart.value, index, true) > 0"
+          :transform="`translate(${pathPart.x + 7}, ${pathPart.y - 20})`"
+        >
           <path
             :transform="`scale(0.025)`"
             :d="getIconDefinition('angle-up').icon[4] as string"
@@ -164,10 +170,10 @@
       :key="axis.moduleId"
       :style="{
         position: 'absolute',
-        left: `${axesSpacing * index - axesSpacing / 2}px`,
+        left: `${axesSpacing * index - axesSpacing / 2 + axesSpacing / 6}px`,
         top: '100%',
         textAlign: 'center',
-        width: `${axesSpacing}px`,
+        width: `${axesSpacing / 1.5}px`,
       }"
       draggable="true"
       @dragstart="onDragStart(index)"
@@ -228,15 +234,46 @@
       </div>
       <p class="axisName">{{ axis.taskData.taskName }}</p>
       <p class="subAxisName">{{ axis.categoryActive }}</p>
-      <!--      <select @change="updateSubAxis(index, $event.target.value)">
-        <option
-          v-for="(subAxis, subAxisIndex) in axis.axisValues"
-          :key="subAxis ? subAxis.id : subAxisIndex"
-          :value="subAxis ? subAxis.id : null"
-        >
-          {{ subAxis ? subAxis.id : 'N/A' }}
-        </option>
-      </select>-->
+      <el-button @click="deactivateAxis(axis)">
+        <font-awesome-icon :icon="['fas', 'trash']" />
+      </el-button>
+    </div>
+
+    <div
+      class="axisPlusContainer"
+      v-for="index in activeAxes.length - 1"
+      :key="index - 1 + 'plus'"
+      :style="{
+        position: 'absolute',
+        left: `${axesSpacing * (index - 1) + axesSpacing / 4}px`,
+        top: '100%',
+        width: `${axesSpacing / 2}px`,
+      }"
+    >
+      <el-dropdown
+        class="axisPlus"
+        v-if="availableAxes.length > 1"
+        v-on:command="activateAxis($event, index)"
+        trigger="click"
+        placement="bottom"
+      >
+        <div class="el-dropdown-link">
+          <font-awesome-icon :icon="['fas', 'circle-plus']" />
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item
+              v-for="(ax, axIndex) in availableAxes.filter(
+                (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
+              )"
+              :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
+              :command="ax ? ax : null"
+            >
+              {{ ax ? ax.taskData.taskName : 'N/A' }}
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
   </div>
 </template>
@@ -387,45 +424,6 @@ export default class Analytics extends Vue {
     return counter;
   }
 
-  /*getDataLine(entry: DataEntry) {
-    const values = entry.axes
-      .filter((axis) => axis.axisValues.length > 0)
-      .map((axis) => {
-        const selectedAxis = this.activeAxes.find(
-          (a) => a.moduleId === axis.moduleId
-        );
-        return selectedAxis
-          ? axis.axisValues.find(
-              (value) => value.id === selectedAxis.categoryActive
-            )?.value
-          : null;
-      });
-
-    const pathParts = values.map((value, index) => {
-      const axis = this.activeAxes[index];
-      const x = this.axesSpacing * index;
-      const y =
-        value !== null ? this.getYPosition(value!, axis) : this.height / 2;
-
-      if (index === 0) {
-        return `M${x},${y}`;
-      }
-
-      const prevX = this.axesSpacing * (index - 1);
-      const prevY =
-        values[index - 1] !== null
-          ? this.getYPosition(values[index - 1]!, this.activeAxes[index - 1])
-          : this.height / 2;
-
-      const controlX1 = prevX + this.axesSpacing / 2;
-      const controlX2 = x - this.axesSpacing / 2;
-
-      return `C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`;
-    });
-
-    return pathParts.join(' ');
-  }*/
-
   getValuesForEntry(entry: DataEntry) {
     return entry.axes
       .filter((axis) => axis.axisValues.length > 0)
@@ -442,7 +440,18 @@ export default class Analytics extends Vue {
   }
 
   getDataLine(entry: DataEntry): (PathPart | undefined)[] {
-    const values = this.getValuesForEntry(entry);
+    // Align values only with activeAxes
+    const values = this.activeAxes.map((activeAxis) => {
+      const matchingAxis = entry.axes.find(
+          (axis) => axis.moduleId === activeAxis.moduleId
+      );
+      if (!matchingAxis) {
+        return null; // If no matching axis, return null
+      }
+      return matchingAxis.axisValues.find(
+          (value) => value.id === activeAxis.categoryActive
+      )?.value;
+    });
 
     const pathParts = values.map((value, index) => {
       if (value != null) {
@@ -454,7 +463,7 @@ export default class Analytics extends Vue {
         if (index === 0) {
           return {
             path: `M${x},${y} C${x - this.axesSpacing / 4},${y} ${
-              x + this.axesSpacing / 4
+                x + this.axesSpacing / 4
             },${y} ${x},${y}`,
             dashed: false,
             x: x,
@@ -470,11 +479,11 @@ export default class Analytics extends Vue {
         }
 
         const prevX =
-          values[iterator] !== null ? this.axesSpacing * iterator : x;
+            values[iterator] !== null ? this.axesSpacing * iterator : x;
         const prevY =
-          values[iterator] !== null
-            ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
-            : y;
+            values[iterator] !== null
+                ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
+                : y;
 
         let controlX1 = prevX + this.axesSpacing / 2;
         let controlX2 = x - this.axesSpacing / 2;
@@ -493,8 +502,10 @@ export default class Analytics extends Vue {
         };
       }
     });
+
     return pathParts.filter((parts) => parts);
   }
+
 
   getYPosition(value: number, axis: Axis) {
     const activeSubAxis = axis.axisValues.find(
@@ -518,16 +529,15 @@ export default class Analytics extends Vue {
   }
 
   updateSubAxis(index: number, subAxisId: string | null) {
-    if (subAxisId) {
-      this.axes[index].categoryActive = subAxisId;
+    const axis = this.axes.find((a) => a.moduleId === this.activeAxes[index].moduleId);
+    if (subAxisId && axis) {
+      axis.categoryActive = subAxisId;
     }
   }
 
   updateAxis(index: number, axis: Axis) {
     this.axes[index] = structuredClone(axis);
     this.axes[index].active = true;
-
-    //TODO doesnt update datalines properly
   }
 
   getAverageDataLine() {
@@ -619,6 +629,22 @@ export default class Analytics extends Vue {
     return pathParts.filter((parts) => parts);
   }
 
+  getAboveBelow(threshold: number, index: number, below = false) {
+    let count = 0;
+    for (const entry of this.chartData) {
+      const value = this.getValuesForEntry(entry)[index];
+      if (value !== undefined && value !== null) {
+        if (!below && value > threshold) {
+          count += 1;
+        }
+        if (below && value < threshold) {
+          count += 1;
+        }
+      }
+    }
+    return count;
+  }
+
   draggedIndex: number | null = null;
 
   // Called when an axis control is picked up
@@ -647,20 +673,37 @@ export default class Analytics extends Vue {
     this.draggedIndex = null;
   }
 
-  getAboveBelow(threshold: number, index: number, below = false) {
-    let count = 0;
-    for (const entry of this.chartData) {
-      const value = this.getValuesForEntry(entry)[index];
-      if (value !== undefined && value !== null) {
-        if (!below && value > threshold) {
-          count += 1;
-        }
-        if (below && value < threshold) {
-          count += 1;
-        }
-      }
+  deactivateAxis(axis: Axis) {
+    const axisIndex = this.axes.findIndex((a) => a.moduleId === axis.moduleId);
+    if (axisIndex !== -1) {
+      this.axes[axisIndex].active = false;
     }
-    return count;
+    console.log(this.axes);
+  }
+
+  activateAxis(axis: Axis, index: number) {
+    console.log(index);
+
+    const axisIndexToActivate = this.axes.findIndex(
+      (a) => a.moduleId === axis.moduleId
+    );
+
+    if (this.axes[axisIndexToActivate]) {
+      this.axes[axisIndexToActivate].active = true;
+    }
+
+    // Reorder the activeAxes array
+    const toActivateAxis = this.activeAxes.splice(axisIndexToActivate, 1)[0];
+    this.activeAxes.splice(index, 0, toActivateAxis);
+
+    // Update the original axes array accordingly
+    const toActivateOriginalAxis = this.axes.splice(axisIndexToActivate, 1)[0];
+    this.axes.splice(index, 0, toActivateOriginalAxis);
+
+    for (const entry of this.chartData) {
+      const toActivateDataEntry = entry.axes.splice(axisIndexToActivate, 1)[0];
+      entry.axes.splice(index, 0, toActivateDataEntry);
+    }
   }
 }
 </script>
@@ -715,5 +758,28 @@ export default class Analytics extends Vue {
   .subAxisName {
     font-size: var(--font-size-small);
   }
+}
+
+.axisPlusContainer {
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.5s ease;
+  height: calc(var(--font-size-xxxlarge) * 2);
+}
+
+.axisPlusContainer:hover {
+  opacity: 1;
+}
+
+.axisPlus {
+  font-size: var(--font-size-xxxlarge);
+  opacity: 0.5;
+  transition: opacity 0.5s ease;
+}
+
+.axisPlus:hover {
+  opacity: 1;
 }
 </style>
