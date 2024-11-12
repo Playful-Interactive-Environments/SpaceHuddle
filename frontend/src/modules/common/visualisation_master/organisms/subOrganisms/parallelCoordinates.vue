@@ -207,6 +207,10 @@
           v-on:command="updateAxis(index, $event)"
           trigger="click"
           placement="bottom"
+          :disabled="
+            availableAxes.filter((avAxis) => !this.axes.includes(avAxis))
+              .length < 1
+          "
         >
           <div class="el-dropdown-link">
             <font-awesome-icon
@@ -234,7 +238,7 @@
       </div>
       <p class="axisName">{{ axis.taskData.taskName }}</p>
       <p class="subAxisName">{{ axis.categoryActive }}</p>
-      <el-button @click="deactivateAxis(axis)">
+      <el-button @click="deactivateAxis(axis)" class="trashButton">
         <font-awesome-icon :icon="['fas', 'trash']" />
       </el-button>
     </div>
@@ -252,7 +256,12 @@
     >
       <el-dropdown
         class="axisPlus"
-        v-if="availableAxes.length > 1"
+        v-if="
+          availableAxes.length > 1 &&
+          availableAxes.filter(
+            (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
+          ).length >= 1
+        "
         v-on:command="activateAxis($event, index)"
         trigger="click"
         placement="bottom"
@@ -367,16 +376,6 @@ export default class Analytics extends Vue {
     return findIconDefinition(lookup);
   };
 
-  reduceParticipantData(): DataEntry[] {
-    const data = [...this.participantData];
-    for (const entry of data) {
-      entry.axes = entry.axes.filter((axis) =>
-        this.axes.some((chartAxis) => chartAxis.moduleId === axis.moduleId)
-      );
-    }
-    return data;
-  }
-
   getIconOfAxis(axis: Axis): string | undefined {
     if (axis.taskData.taskType) {
       return getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
@@ -443,13 +442,13 @@ export default class Analytics extends Vue {
     // Align values only with activeAxes
     const values = this.activeAxes.map((activeAxis) => {
       const matchingAxis = entry.axes.find(
-          (axis) => axis.moduleId === activeAxis.moduleId
+        (axis) => axis.moduleId === activeAxis.moduleId
       );
       if (!matchingAxis) {
         return null; // If no matching axis, return null
       }
       return matchingAxis.axisValues.find(
-          (value) => value.id === activeAxis.categoryActive
+        (value) => value.id === activeAxis.categoryActive
       )?.value;
     });
 
@@ -463,7 +462,7 @@ export default class Analytics extends Vue {
         if (index === 0) {
           return {
             path: `M${x},${y} C${x - this.axesSpacing / 4},${y} ${
-                x + this.axesSpacing / 4
+              x + this.axesSpacing / 4
             },${y} ${x},${y}`,
             dashed: false,
             x: x,
@@ -479,11 +478,11 @@ export default class Analytics extends Vue {
         }
 
         const prevX =
-            values[iterator] !== null ? this.axesSpacing * iterator : x;
+          values[iterator] !== null ? this.axesSpacing * iterator : x;
         const prevY =
-            values[iterator] !== null
-                ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
-                : y;
+          values[iterator] !== null
+            ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
+            : y;
 
         let controlX1 = prevX + this.axesSpacing / 2;
         let controlX2 = x - this.axesSpacing / 2;
@@ -505,7 +504,6 @@ export default class Analytics extends Vue {
 
     return pathParts.filter((parts) => parts);
   }
-
 
   getYPosition(value: number, axis: Axis) {
     const activeSubAxis = axis.axisValues.find(
@@ -529,7 +527,9 @@ export default class Analytics extends Vue {
   }
 
   updateSubAxis(index: number, subAxisId: string | null) {
-    const axis = this.axes.find((a) => a.moduleId === this.activeAxes[index].moduleId);
+    const axis = this.axes.find(
+      (a) => a.moduleId === this.activeAxes[index].moduleId
+    );
     if (subAxisId && axis) {
       axis.categoryActive = subAxisId;
     }
@@ -781,5 +781,12 @@ export default class Analytics extends Vue {
 
 .axisPlus:hover {
   opacity: 1;
+}
+
+.trashButton {
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-small);
 }
 </style>
