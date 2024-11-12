@@ -1,11 +1,4 @@
 <template>
-  <div>
-    <el-button @click="getAllParticipantData">all participant data</el-button>
-    <el-button @click="console.log(axes)">calculate Axes</el-button>
-    <el-button @click="console.log(dataEntries)"
-      >calculate DataEntries</el-button
-    >
-  </div>
   <div id="analytics" :style="{ marginTop: '3rem' }">
     <parallel-coordinates
       v-if="axes.length > 0 && dataEntries.length > 0"
@@ -375,8 +368,10 @@ export default class Analytics extends Vue {
             }
             return [];
           });
-
-          const maxValue = range.length ? Math.ceil(Math.max(...range)) : null;
+          let maxValue = range.length ? Math.ceil(Math.max(...range)) : null;
+          if (maxValue != null && value === 'stars') {
+            maxValue = 3;
+          }
           return maxValue ? { id: value, range: maxValue } : null;
         })
         .filter(Boolean);
