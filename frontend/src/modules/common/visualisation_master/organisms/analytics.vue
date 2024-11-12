@@ -231,7 +231,7 @@ export default class Analytics extends Vue {
           this.updateIterationSteps(task.modules[0].id, task, steps);
         },
         EndpointAuthorisationType.MODERATOR,
-        15
+        30
       );
     }
   }

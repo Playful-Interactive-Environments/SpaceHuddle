@@ -44,27 +44,23 @@
         :key="pathPart.path"
         :fill="'var(--color-evaluating)'"
       >
-        <g :transform="`translate(${pathPart.x + 7}, ${pathPart.y + 5})`">
+        <g v-if="getAboveBelow(pathPart.value, index, true) > 0" :transform="`translate(${pathPart.x + 7}, ${pathPart.y + 5})`">
           <path
             :transform="`translate(0, 0) scale(0.025)`"
             :d="getIconDefinition('angle-down').icon[4] as string"
           />
           <text font-size="12" :transform="`translate(10, 18)`">
-            {{
-                //TODO All Entries below average
-            }}
+            {{ getAboveBelow(pathPart.value, index, true) }}
           </text>
         </g>
 
-        <g :transform="`translate(${pathPart.x + 7}, ${pathPart.y - 20})`">
+        <g v-if="getAboveBelow(pathPart.value, index, true) > 0" :transform="`translate(${pathPart.x + 7}, ${pathPart.y - 20})`">
           <path
             :transform="`scale(0.025)`"
             :d="getIconDefinition('angle-up').icon[4] as string"
           />
           <text font-size="12" :transform="`translate(10, 0)`">
-            {{
-              //TODO All Entries below average
-            }}
+            {{ getAboveBelow(pathPart.value, index) }}
           </text>
         </g>
         <path
@@ -259,8 +255,6 @@ import {
   IconPrefix,
 } from '@fortawesome/fontawesome-svg-core';
 
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-
 interface SubAxis {
   id: string;
   range: number;
@@ -291,6 +285,14 @@ interface DataEntry {
   }[];
 }
 
+interface PathPart {
+  path: string;
+  dashed: boolean;
+  x: number;
+  y: number;
+  value: number;
+}
+
 export default class Analytics extends Vue {
   @Prop({ default: () => [] }) chartAxes!: Axis[];
   @Prop({ default: () => [] }) participantData!: DataEntry[];
@@ -302,6 +304,8 @@ export default class Analytics extends Vue {
 
   availableAxes: Axis[] = [];
   axes: Axis[] = [];
+
+  averageAxisValues: number[] = [];
 
   chartData: DataEntry[] = [];
 
@@ -422,10 +426,8 @@ export default class Analytics extends Vue {
     return pathParts.join(' ');
   }*/
 
-  getDataLine(
-    entry: DataEntry
-  ): ({ path: string; dashed: boolean; x: number; y: number } | undefined)[] {
-    const values = entry.axes
+  getValuesForEntry(entry: DataEntry) {
+    return entry.axes
       .filter((axis) => axis.axisValues.length > 0)
       .map((axis) => {
         const selectedAxis = this.activeAxes.find(
@@ -437,6 +439,10 @@ export default class Analytics extends Vue {
             )?.value
           : null;
       });
+  }
+
+  getDataLine(entry: DataEntry): (PathPart | undefined)[] {
+    const values = this.getValuesForEntry(entry);
 
     const pathParts = values.map((value, index) => {
       if (value != null) {
@@ -453,6 +459,7 @@ export default class Analytics extends Vue {
             dashed: false,
             x: x,
             y: y,
+            value: value,
           };
         }
 
@@ -482,6 +489,7 @@ export default class Analytics extends Vue {
           dashed: x !== prevX ? isDashed : false,
           x: x,
           y: y,
+          value: value,
         };
       }
     });
@@ -519,9 +527,6 @@ export default class Analytics extends Vue {
     this.axes[index] = structuredClone(axis);
     this.axes[index].active = true;
 
-    for (const entry of this.chartData) {
-      console.log(entry);
-    }
     //TODO doesnt update datalines properly
   }
 
@@ -556,13 +561,11 @@ export default class Analytics extends Vue {
       }
     }
 
+    this.averageAxisValues = averages;
     return averages;
   }
 
-  getAverageDataLinePath(): (
-    | { path: string; dashed: boolean; x: number; y: number }
-    | undefined
-  )[] {
+  getAverageDataLinePath(): (PathPart | undefined)[] {
     let isDashed = false;
     const averages = this.getAverageDataLine();
 
@@ -574,7 +577,13 @@ export default class Analytics extends Vue {
           : this.height / 2;
 
       if (index === 0) {
-        return { path: `M${x},${y}`, dashed: false, x: x, y: y };
+        return {
+          path: `M${x},${y}`,
+          dashed: false,
+          x: x,
+          y: y,
+          value: average,
+        };
       }
 
       let iterator = index - 1;
@@ -603,10 +612,9 @@ export default class Analytics extends Vue {
         dashed: x !== prevX ? isDashed : false,
         x: x,
         y: y,
+        value: average,
       };
     });
-
-    console.log(pathParts);
 
     return pathParts.filter((parts) => parts);
   }
@@ -637,6 +645,22 @@ export default class Analytics extends Vue {
 
     // Reset dragged index
     this.draggedIndex = null;
+  }
+
+  getAboveBelow(threshold: number, index: number, below = false) {
+    let count = 0;
+    for (const entry of this.chartData) {
+      const value = this.getValuesForEntry(entry)[index];
+      if (value !== undefined && value !== null) {
+        if (!below && value > threshold) {
+          count += 1;
+        }
+        if (below && value < threshold) {
+          count += 1;
+        }
+      }
+    }
+    return count;
   }
 }
 </script>
