@@ -4,7 +4,12 @@
     class="parallelCoordinatesContainer"
     style="position: relative"
   >
-    <div class="participationContainer" :style="{ marginLeft: `${-axesSpacing / 4}px` }">
+    <div
+      class="participationContainer"
+      :style="{
+        marginLeft: `${axesSpacing / 8}px`,
+      }"
+    >
       <div
         class="axisControls"
         v-for="axis in activeAxes"
@@ -20,7 +25,7 @@
       </div>
     </div>
 
-    <svg ref="svgElement" class="parallelSVG">
+    <svg ref="svgElement" class="parallelSVG" :style="{paddingLeft: `${axesSpacing/2}px`}">
       <!-- Axes -->
       <g
         class="axes"
@@ -184,7 +189,6 @@
     <div class="controls">
       <div
         class="axisControlsContainer"
-        :style="{ marginLeft: `${-axesSpacing / 2}px` }"
       >
         <div
           class="axisControls"
@@ -263,7 +267,7 @@
           </el-button>
         </div>
       </div>
-      <div class="axisControlsContainer axisPlusControlsContainer">
+      <div class="axisControlsContainer axisPlusControlsContainer" :style="{paddingLeft: `${axesSpacing/2}px`}">
         <div
           class="axisPlusContainer"
           v-for="index in activeAxes.length - 1"
@@ -271,7 +275,6 @@
           :style="{
             width: `${axesSpacing / 3}px`,
             margin: `0 ${axesSpacing / 3}px`,
-            border: '1px solid green',
           }"
         >
           <el-dropdown
@@ -764,7 +767,6 @@ export default class Analytics extends Vue {
   width: 100%;
   height: 100%;
   display: block;
-  padding-left: 2rem;
   .parallelSVG {
     width: 100%;
     height: 77%;
