@@ -44,7 +44,14 @@
         :key="pathPart.path"
         :fill="'var(--color-evaluating)'"
       >
+        <path
+          v-if="pathPart"
+          class="dataLine averageDataLine"
+          :d="pathPart.path"
+          fill="none"
+        />
         <g
+          class="aboveBelow"
           v-if="getAboveBelow(pathPart.value, index, true) > 0"
           :transform="`translate(${pathPart.x + 7}, ${pathPart.y + 5})`"
         >
@@ -58,7 +65,8 @@
         </g>
 
         <g
-          v-if="getAboveBelow(pathPart.value, index, true) > 0"
+          class="aboveBelow"
+          v-if="getAboveBelow(pathPart.value, index) > 0"
           :transform="`translate(${pathPart.x + 7}, ${pathPart.y - 20})`"
         >
           <path
@@ -69,12 +77,6 @@
             {{ getAboveBelow(pathPart.value, index) }}
           </text>
         </g>
-        <path
-          v-if="pathPart"
-          class="dataLine averageDataLine"
-          :d="pathPart.path"
-          fill="none"
-        />
       </g>
 
       <!-- Data Lines as Curves -->
@@ -631,14 +633,16 @@ export default class Analytics extends Vue {
 
   getAboveBelow(threshold: number, index: number, below = false) {
     let count = 0;
-    for (const entry of this.chartData) {
-      const value = this.getValuesForEntry(entry)[index];
-      if (value !== undefined && value !== null) {
-        if (!below && value > threshold) {
-          count += 1;
-        }
-        if (below && value < threshold) {
-          count += 1;
+    if (threshold !== undefined && threshold !== null) {
+      for (const entry of this.chartData) {
+        const value = this.getValuesForEntry(entry)[index];
+        if (value !== undefined && value !== null) {
+          if (!below && value > threshold) {
+            count += 1;
+          }
+          if (below && value < threshold) {
+            count += 1;
+          }
         }
       }
     }
@@ -657,8 +661,8 @@ export default class Analytics extends Vue {
     if (this.draggedIndex === null || this.draggedIndex === dropIndex) return;
 
     // Reorder the activeAxes array
-    const draggedAxis = this.activeAxes.splice(this.draggedIndex, 1)[0];
-    this.activeAxes.splice(dropIndex, 0, draggedAxis);
+    /*const draggedAxis = this.activeAxes.splice(this.draggedIndex, 1)[0];
+    this.activeAxes.splice(dropIndex, 0, draggedAxis);*/
 
     // Update the original axes array accordingly
     const draggedOriginalAxis = this.axes.splice(this.draggedIndex, 1)[0];
@@ -677,8 +681,10 @@ export default class Analytics extends Vue {
     const axisIndex = this.axes.findIndex((a) => a.moduleId === axis.moduleId);
     if (axisIndex !== -1) {
       this.axes[axisIndex].active = false;
+      this.axes.splice(axisIndex, 1);
     }
     console.log(this.axes);
+    console.log(this.availableAxes);
   }
 
   activateAxis(axis: Axis, index: number) {
@@ -688,17 +694,19 @@ export default class Analytics extends Vue {
       (a) => a.moduleId === axis.moduleId
     );
 
-    if (this.axes[axisIndexToActivate]) {
-      this.axes[axisIndexToActivate].active = true;
-    }
+    console.log(this.axes);
+    this.axes.splice(index, 0, axis);
+    this.axes[index].active = true;
+    console.log(this.axes);
+
 
     // Reorder the activeAxes array
-    const toActivateAxis = this.activeAxes.splice(axisIndexToActivate, 1)[0];
-    this.activeAxes.splice(index, 0, toActivateAxis);
+    /*const toActivateAxis = this.activeAxes.splice(axisIndexToActivate, 1)[0];
+    this.activeAxes.splice(index, 0, toActivateAxis);*/
 
     // Update the original axes array accordingly
-    const toActivateOriginalAxis = this.axes.splice(axisIndexToActivate, 1)[0];
-    this.axes.splice(index, 0, toActivateOriginalAxis);
+    /*const toActivateOriginalAxis = this.axes.splice(axisIndexToActivate, 1)[0];
+    this.axes.splice(index, 0, toActivateOriginalAxis);*/
 
     for (const entry of this.chartData) {
       const toActivateDataEntry = entry.axes.splice(axisIndexToActivate, 1)[0];
