@@ -1,6 +1,26 @@
 <template>
-  <div style="position: relative">
-    <svg :width="width" :height="height">
+  <div
+    ref="parentElement"
+    class="parallelCoordinatesContainer"
+    style="position: relative"
+  >
+    <div class="participationContainer" :style="{ marginLeft: `${-axesSpacing / 4}px` }">
+      <div
+        class="axisControls"
+        v-for="axis in activeAxes"
+        :key="axis.moduleId + 1"
+        :style="{
+          textAlign: 'center',
+          width: `${axesSpacing}px`,
+        }"
+      >
+        <p class="participantCount">
+          <font-awesome-icon icon="user" /> {{ getParticipationCount(axis) }}
+        </p>
+      </div>
+    </div>
+
+    <svg ref="svgElement" class="parallelSVG">
       <!-- Axes -->
       <g
         class="axes"
@@ -41,7 +61,7 @@
       <!-- Average Data Line -->
       <g
         v-for="(pathPart, index) in getAverageDataLinePath()"
-        :key="pathPart.path"
+        :key="pathPart?.path"
         :fill="'var(--color-evaluating)'"
       >
         <path
@@ -52,8 +72,8 @@
         />
         <g
           class="aboveBelow"
-          v-if="getAboveBelow(pathPart.value, index, true) > 0"
-          :transform="`translate(${pathPart.x + 7}, ${pathPart.y + 5})`"
+          v-if="getAboveBelow(pathPart?.value, index, true) > 0"
+          :transform="`translate(${pathPart?.x + 7}, ${pathPart?.y + 5})`"
         >
           <path
             :transform="`translate(0, 0) scale(0.025)`"
@@ -66,8 +86,8 @@
 
         <g
           class="aboveBelow"
-          v-if="getAboveBelow(pathPart.value, index) > 0"
-          :transform="`translate(${pathPart.x + 7}, ${pathPart.y - 20})`"
+          v-if="getAboveBelow(pathPart?.value, index) > 0"
+          :transform="`translate(${pathPart?.x + 7}, ${pathPart?.y - 20})`"
         >
           <path
             :transform="`scale(0.025)`"
@@ -83,7 +103,7 @@
       <g v-for="entry in chartData" :key="entry.participant.id">
         <g
           v-for="pathPart in getDataLine(entry)"
-          :key="pathPart.path"
+          :key="pathPart?.path"
           class="dataLineHover"
           fill="none"
           @mouseenter="hoverStroke = entry.participant.avatar.color"
@@ -92,8 +112,8 @@
           <path v-if="pathPart" :d="pathPart.path" />
         </g>
         <g
-          v-for="pathPart in getDataLine(entry)"
-          :key="pathPart.path"
+          v-for="(pathPart, index) in getDataLine(entry)"
+          :key="pathPart?.path"
           class="dataLine"
           fill="none"
           :stroke="
@@ -106,6 +126,19 @@
               hoverStroke === entry.participant.avatar.color ? '3px' : '1px',
           }"
         >
+          <path
+            class="participantDataLineIcon"
+            v-if="index === getDataLine(entry).length - 1"
+            :transform="`translate(${pathPart?.x + 20}, ${
+              pathPart?.y - 10
+            }), scale(0.04)`"
+            :d="getIconDefinition(entry.participant.avatar.symbol).icon[4] as string"
+            :fill="entry.participant.avatar.color"
+            :style="{
+              opacity:
+                hoverStroke === entry.participant.avatar.color ? '1' : '0',
+            }"
+          />
           <circle
             class="circle"
             :r="
@@ -114,8 +147,8 @@
                 ? '3px'
                 : '0px'
             "
-            :cx="pathPart.x"
-            :cy="pathPart.y"
+            :cx="pathPart?.x"
+            :cy="pathPart?.y"
             :fill="
               hoverStroke === entry.participant.avatar.color ||
               getDataLine(entry).length > 1
@@ -136,155 +169,142 @@
             :d="pathPart.path"
             :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
             :style="{
-              opacity: pathPart.dashed
-                ? '35%'
+              opacity: pathPart?.dashed
+                ? '20%'
                 : hoverStroke === entry.participant.avatar.color
                 ? '1'
-                : '35%',
+                : '45%',
             }"
           />
         </g>
       </g>
     </svg>
 
-    <div
-      class="axisControls"
-      v-for="(axis, index) in activeAxes"
-      :key="axis.moduleId + 1"
-      :style="{
-        position: 'absolute',
-        left: `${axesSpacing * index - axesSpacing / 2}px`,
-        bottom: '100%',
-        textAlign: 'right',
-        width: `${axesSpacing}px`,
-        paddingRight: `${axesSpacing / 5}px`,
-      }"
-    >
-      <p class="participantCount">
-        <font-awesome-icon icon="user" /> {{ getParticipationCount(axis) }}
-      </p>
-    </div>
-
     <!-- Dropdown Menus -->
-    <div
-      class="axisControls"
-      v-for="(axis, index) in activeAxes"
-      :key="axis.moduleId"
-      :style="{
-        position: 'absolute',
-        left: `${axesSpacing * index - axesSpacing / 2 + axesSpacing / 6}px`,
-        top: '100%',
-        textAlign: 'center',
-        width: `${axesSpacing / 1.5}px`,
-      }"
-      draggable="true"
-      @dragstart="onDragStart(index)"
-      @dragover.prevent
-      @drop="onDrop(index)"
-    >
-      <div class="axisSelections">
-        <el-dropdown
-          v-if="axis.axisValues.length > 1"
-          v-on:command="updateSubAxis(index, $event)"
-          trigger="click"
-          placement="bottom"
-        >
-          <div class="el-dropdown-link">
-            <font-awesome-icon icon="cog" />
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="(subAxis, subAxisIndex) in axis.axisValues"
-                :key="subAxis ? subAxis.id : subAxisIndex"
-                :command="subAxis ? subAxis.id : null"
-              >
-                {{ subAxis ? subAxis.id : 'N/A' }}
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <el-dropdown
-          v-if="availableAxes.length > 1"
-          v-on:command="updateAxis(index, $event)"
-          trigger="click"
-          placement="bottom"
-          :disabled="
-            availableAxes.filter((avAxis) => !this.axes.includes(avAxis))
-              .length < 1
-          "
-        >
-          <div class="el-dropdown-link">
-            <font-awesome-icon
-              class="axisIcon"
-              :icon="getIconOfAxis(axis)"
-              :style="{
-                color: getColorOfAxis(axis),
-              }"
-            />
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="(ax, axIndex) in availableAxes.filter(
-                  (avAxis) => !this.axes.includes(avAxis)
-                )"
-                :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
-                :command="ax ? ax : null"
-              >
-                {{ ax ? ax.taskData.taskName : 'N/A' }}
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-      <p class="axisName">{{ axis.taskData.taskName }}</p>
-      <p class="subAxisName">{{ axis.categoryActive }}</p>
-      <el-button @click="deactivateAxis(axis)" class="trashButton">
-        <font-awesome-icon :icon="['fas', 'trash']" />
-      </el-button>
-    </div>
-
-    <div
-      class="axisPlusContainer"
-      v-for="index in activeAxes.length - 1"
-      :key="index - 1 + 'plus'"
-      :style="{
-        position: 'absolute',
-        left: `${axesSpacing * (index - 1) + axesSpacing / 4}px`,
-        top: '100%',
-        width: `${axesSpacing / 2}px`,
-      }"
-    >
-      <el-dropdown
-        class="axisPlus"
-        v-if="
-          availableAxes.length > 1 &&
-          availableAxes.filter(
-            (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
-          ).length >= 1
-        "
-        v-on:command="activateAxis($event, index)"
-        trigger="click"
-        placement="bottom"
+    <div class="controls">
+      <div
+        class="axisControlsContainer"
+        :style="{ marginLeft: `${-axesSpacing / 2}px` }"
       >
-        <div class="el-dropdown-link">
-          <font-awesome-icon :icon="['fas', 'circle-plus']" />
-        </div>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item
-              v-for="(ax, axIndex) in availableAxes.filter(
-                (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
-              )"
-              :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
-              :command="ax ? ax : null"
+        <div
+          class="axisControls"
+          v-for="(axis, index) in activeAxes"
+          :key="axis.moduleId"
+          :style="{
+            textAlign: 'center',
+            width: `${axesSpacing / 1.5}px`,
+            margin: `0 ${axesSpacing / 6}px`,
+          }"
+          draggable="true"
+          @dragstart="onDragStart(index)"
+          @dragover.prevent
+          @drop="onDrop(index)"
+        >
+          <div class="axisSelections">
+            <el-dropdown
+              v-if="axis.axisValues.length > 1"
+              v-on:command="updateSubAxis(index, $event)"
+              trigger="click"
+              placement="bottom"
             >
-              {{ ax ? ax.taskData.taskName : 'N/A' }}
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+              <div class="el-dropdown-link">
+                <font-awesome-icon icon="cog" />
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="(subAxis, subAxisIndex) in axis.axisValues"
+                    :key="subAxis ? subAxis.id : subAxisIndex"
+                    :command="subAxis ? subAxis.id : null"
+                  >
+                    {{ subAxis ? subAxis.id : 'N/A' }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <el-dropdown
+              v-if="availableAxes.length > 1"
+              v-on:command="updateAxis(index, $event)"
+              trigger="click"
+              placement="bottom"
+              :disabled="
+                availableAxes.filter((avAxis) => !this.axes.includes(avAxis))
+                  .length < 1
+              "
+            >
+              <div class="el-dropdown-link">
+                <font-awesome-icon
+                  class="axisIcon"
+                  :icon="getIconOfAxis(axis)"
+                  :style="{
+                    color: getColorOfAxis(axis),
+                  }"
+                />
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="(ax, axIndex) in availableAxes.filter(
+                      (avAxis) => !this.axes.includes(avAxis)
+                    )"
+                    :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
+                    :command="ax ? ax : null"
+                  >
+                    {{ ax ? ax.taskData.taskName : 'N/A' }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+          <p class="axisName">{{ axis.taskData.taskName }}</p>
+          <p class="subAxisName">{{ axis.categoryActive }}</p>
+          <el-button @click="deactivateAxis(axis)" class="trashButton">
+            <font-awesome-icon :icon="['fas', 'trash']" />
+          </el-button>
+        </div>
+      </div>
+      <div class="axisControlsContainer axisPlusControlsContainer">
+        <div
+          class="axisPlusContainer"
+          v-for="index in activeAxes.length - 1"
+          :key="index - 1 + 'plus'"
+          :style="{
+            width: `${axesSpacing / 3}px`,
+            margin: `0 ${axesSpacing / 3}px`,
+            border: '1px solid green',
+          }"
+        >
+          <el-dropdown
+            class="axisPlus"
+            v-if="
+              availableAxes.length > 1 &&
+              availableAxes.filter(
+                (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
+              ).length >= 1
+            "
+            v-on:command="activateAxis($event, index)"
+            trigger="click"
+            placement="bottom"
+          >
+            <div class="el-dropdown-link">
+              <font-awesome-icon :icon="['fas', 'circle-plus']" />
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="(ax, axIndex) in availableAxes.filter(
+                    (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
+                  )"
+                  :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
+                  :command="ax ? ax : null"
+                >
+                  {{ ax ? ax.taskData.taskName : 'N/A' }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -345,9 +365,7 @@ export default class Analytics extends Vue {
   @Prop({ default: () => [] }) chartAxes!: Axis[];
   @Prop({ default: () => [] }) participantData!: DataEntry[];
 
-  height = 500;
   padding = 20;
-
   hoverStroke: string | null = null;
 
   availableAxes: Axis[] = [];
@@ -358,6 +376,49 @@ export default class Analytics extends Vue {
   chartData: DataEntry[] = [];
 
   labelCount = 3;
+
+  parentWidth = 0;
+  parentHeight = 0;
+  resizeObserver: ResizeObserver | null = null;
+
+  mounted() {
+    this.calculateParentDimensions();
+    this.resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === this.$refs.parentElement) {
+          this.calculateParentDimensions();
+        }
+      }
+    });
+
+    const parentElement = this.$refs.parentElement as HTMLElement;
+    if (parentElement) {
+      this.resizeObserver.observe(parentElement);
+    }
+  }
+
+  beforeDestroy() {
+    // Disconnect the observer to prevent memory leaks
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+  }
+
+  calculateParentDimensions() {
+    const parentElement = this.$refs.svgElement as HTMLElement;
+    if (parentElement) {
+      this.parentWidth = parentElement.clientWidth;
+      this.parentHeight = parentElement.clientHeight;
+    }
+  }
+
+  get width() {
+    return this.parentWidth || 800; // Default width
+  }
+
+  get height() {
+    return this.parentHeight || 500; // Default height
+  }
 
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
@@ -390,9 +451,9 @@ export default class Analytics extends Vue {
     }
   }
 
-  get width() {
+  /*get width() {
     return window.innerWidth - window.innerWidth / 10;
-  }
+  }*/
 
   get activeAxes() {
     return this.axes
@@ -426,23 +487,7 @@ export default class Analytics extends Vue {
   }
 
   getValuesForEntry(entry: DataEntry) {
-    return entry.axes
-      .filter((axis) => axis.axisValues.length > 0)
-      .map((axis) => {
-        const selectedAxis = this.activeAxes.find(
-          (a) => a.moduleId === axis.moduleId
-        );
-        return selectedAxis
-          ? axis.axisValues.find(
-              (value) => value.id === selectedAxis.categoryActive
-            )?.value
-          : null;
-      });
-  }
-
-  getDataLine(entry: DataEntry): (PathPart | undefined)[] {
-    // Align values only with activeAxes
-    const values = this.activeAxes.map((activeAxis) => {
+    return this.activeAxes.map((activeAxis) => {
       const matchingAxis = entry.axes.find(
         (axis) => axis.moduleId === activeAxis.moduleId
       );
@@ -453,13 +498,18 @@ export default class Analytics extends Vue {
         (value) => value.id === activeAxis.categoryActive
       )?.value;
     });
+  }
+
+  getDataLine(entry: DataEntry): (PathPart | undefined)[] {
+    // Align values only with activeAxes
+    const values = this.getValuesForEntry(entry);
 
     const pathParts = values.map((value, index) => {
       if (value != null) {
         let isDashed = false;
         const axis = this.activeAxes[index];
         const x = this.axesSpacing * index;
-        const y = this.getYPosition(value!, axis);
+        const y = this.getYPosition(value, axis);
 
         if (index === 0) {
           return {
@@ -631,7 +681,7 @@ export default class Analytics extends Vue {
     return pathParts.filter((parts) => parts);
   }
 
-  getAboveBelow(threshold: number, index: number, below = false) {
+  getAboveBelow(threshold: number | undefined, index: number, below = false) {
     let count = 0;
     if (threshold !== undefined && threshold !== null) {
       for (const entry of this.chartData) {
@@ -683,23 +733,15 @@ export default class Analytics extends Vue {
       this.axes[axisIndex].active = false;
       this.axes.splice(axisIndex, 1);
     }
-    console.log(this.axes);
-    console.log(this.availableAxes);
   }
 
   activateAxis(axis: Axis, index: number) {
-    console.log(index);
-
     const axisIndexToActivate = this.axes.findIndex(
       (a) => a.moduleId === axis.moduleId
     );
 
-    console.log(this.axes);
     this.axes.splice(index, 0, axis);
     this.axes[index].active = true;
-    console.log(this.axes);
-
-
     // Reorder the activeAxes array
     /*const toActivateAxis = this.activeAxes.splice(axisIndexToActivate, 1)[0];
     this.activeAxes.splice(index, 0, toActivateAxis);*/
@@ -717,6 +759,42 @@ export default class Analytics extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.parallelCoordinatesContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding-left: 2rem;
+  .parallelSVG {
+    width: 100%;
+    height: 77%;
+  }
+  .controls {
+    position: relative;
+    width: 100%;
+    height: 20%;
+  }
+  .axisControlsContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+  }
+  .axisPlusControlsContainer {
+    position: absolute;
+    top: 0;
+    pointer-events: none;
+    .axisPlusContainer {
+      z-index: 100;
+      pointer-events: all;
+    }
+  }
+  .participationContainer {
+    height: 3%;
+    width: 100%;
+    display: flex;
+  }
+}
+
 .dataLineHover {
   pointer-events: stroke;
   stroke-width: 15px;
@@ -749,6 +827,12 @@ export default class Analytics extends Vue {
   opacity: 100%;
 }
 
+.axisControlsContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
 .axisControls {
   .axisSelections {
     display: flex;
@@ -796,5 +880,13 @@ export default class Analytics extends Vue {
   padding: 0;
   margin: 0;
   font-size: var(--font-size-small);
+}
+
+.participantDataLineIcon {
+  transition: opacity 0.3s ease;
+}
+
+.aboveBelow {
+  font-weight: var(--font-weight-bold);
 }
 </style>

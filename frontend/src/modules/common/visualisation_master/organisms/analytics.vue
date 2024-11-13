@@ -119,6 +119,7 @@ export default class Analytics extends Vue {
   participantCash?: cashService.SimplifiedCashEntry<ParticipantInfo[]>;
   participants: ParticipantInfo[] | null = null;
   taskListService?: cashService.SimplifiedCashEntry<Task[]>;
+  sessionService?: cashService.SimplifiedCashEntry<Session>;
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -141,6 +142,8 @@ export default class Analytics extends Vue {
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTasks);
     cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updateParticipants);
+    cashService.deregisterAllGet(this.updateIterationSteps);
     this.deregisterSteps();
   }
 
@@ -199,7 +202,7 @@ export default class Analytics extends Vue {
 
     if (this.sessionId) {
       cashService.deregisterAllGet(this.updateSession);
-      sessionService.registerGetById(
+      this.sessionService = sessionService.registerGetById(
         this.sessionId,
         this.updateSession,
         this.authHeaderTyp,
@@ -217,6 +220,7 @@ export default class Analytics extends Vue {
 
   @Watch('gameTasks', { immediate: true })
   onGameTasksChanged(): void {
+    cashService.deregisterAllGet(this.updateIterationSteps);
     for (const task of this.gameTasks) {
       taskParticipantService.registerGetIterationStepList(
         task.id,
@@ -240,7 +244,7 @@ export default class Analytics extends Vue {
       .filter((task) => task.taskType !== 'PLAYING')
       .sort();
 
-    this.gameTasks = this.tasks;
+    this.gameTasks = this.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
   }
 
   updateSession(session: Session): void {
@@ -432,6 +436,7 @@ export default class Analytics extends Vue {
 <style lang="scss" scoped>
 #analytics {
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
