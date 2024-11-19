@@ -230,7 +230,7 @@
             </el-dropdown>
             <el-dropdown
               v-if="availableAxes.length > 1"
-              v-on:command="updateAxis(index, $event)"
+              v-on:command="activateAxis($event, index, true)"
               trigger="click"
               placement="bottom"
               :disabled="
@@ -251,7 +251,7 @@
                 <el-dropdown-menu>
                   <el-dropdown-item
                     v-for="(ax, axIndex) in availableAxes.filter(
-                      (avAxis) => !this.axes.includes(avAxis)
+                      (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
                     )"
                     :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
                     :command="ax ? ax : null"
@@ -519,11 +519,6 @@ export default class Analytics extends Vue {
     }
   }
 
-  updateAxis(index: number, axis: Axis) {
-    this.axes[index] = structuredClone(axis);
-    this.axes[index].active = true;
-  }
-
   getValuesForEntry(entry: DataEntry): (number | null)[] {
     return this.activeAxes.map((activeAxis) => {
       const matchingAxis = entry.axes.find(
@@ -551,7 +546,17 @@ export default class Analytics extends Vue {
         const isDashed = this.checkIfDashed(values, index);
 
         if (index === 0) {
-          return this.createPathPart(x, y, x, y, false, value);
+          const { controlX1, controlX2 } = this.calculateControlPoints(x, x);
+          return this.createPathPart(
+            x,
+            y,
+            x,
+            y,
+            false,
+            value,
+            controlX1,
+            controlX2
+          );
         }
 
         const { prevX, prevY } = this.getPreviousCoordinates(values, index, y);
@@ -739,18 +744,9 @@ export default class Analytics extends Vue {
     }
   }
 
-  activateAxis(axis: Axis, index: number) {
-    const axisIndexToActivate = this.axes.findIndex(
-      (a) => a.moduleId === axis.moduleId
-    );
-
-    this.axes.splice(index, 0, axis);
+  activateAxis(axis: Axis, index: number, replace = false) {
+    this.axes.splice(index, replace ? 1 : 0, axis);
     this.axes[index].active = true;
-
-    for (const entry of this.chartData) {
-      const toActivateDataEntry = entry.axes.splice(axisIndexToActivate, 1)[0];
-      entry.axes.splice(index, 0, toActivateDataEntry);
-    }
   }
 }
 </script>

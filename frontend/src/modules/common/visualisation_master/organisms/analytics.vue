@@ -30,11 +30,6 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import * as pixiUtil from '@/utils/pixi';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
 
-import coolItHighScore from '@/modules/playing/coolit/organisms/Highscore.vue';
-import moveItHighScore from '@/modules/playing/moveit/organisms/Highscore.vue';
-import shopItHighScore from '@/modules/playing/shopit/organisms/Highscore.vue';
-import findItHighScore from '@/modules/playing/findit/organisms/Highscore.vue';
-
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import { Session } from '@/types/api/Session';
 import QrcodeVue from 'qrcode.vue';
@@ -78,10 +73,6 @@ interface DataEntry {
     ParallelCoordinates,
     SpriteCanvas,
     IdeaCard,
-    coolItHighScore,
-    moveItHighScore,
-    shopItHighScore,
-    findItHighScore,
     Gallery,
     QrcodeVue,
     PublicScreenComponent: getEmptyComponent(),
@@ -274,7 +265,6 @@ export default class Analytics extends Vue {
     } else {
       this.steps.push(stepsEntry);
     }
-    console.log(this.steps);
   }
 
   getAllParticipantData() {
@@ -436,8 +426,9 @@ export default class Analytics extends Vue {
 <style lang="scss" scoped>
 #analytics {
   width: 100%;
-  height: 100%;
+  height: 50%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
