@@ -25,7 +25,11 @@
       </div>
     </div>
 
-    <svg ref="svgElement" class="parallelSVG" :style="{paddingLeft: `${axesSpacing/2}px`}">
+    <svg
+      ref="svgElement"
+      class="parallelSVG"
+      :style="{ paddingLeft: `${axesSpacing / 2}px` }"
+    >
       <!-- Axes -->
       <g
         class="axes"
@@ -187,9 +191,7 @@
 
     <!-- Dropdown Menus -->
     <div class="controls">
-      <div
-        class="axisControlsContainer"
-      >
+      <div class="axisControlsContainer">
         <div
           class="axisControls"
           v-for="(axis, index) in activeAxes"
@@ -211,7 +213,7 @@
               trigger="click"
               placement="bottom"
             >
-              <div class="el-dropdown-link">
+              <div class="el-dropdown-link cogButton">
                 <font-awesome-icon icon="cog" />
               </div>
               <template #dropdown>
@@ -259,15 +261,18 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
+            <el-button @click="deactivateAxis(axis)" class="trashButton">
+              <font-awesome-icon :icon="['fas', 'trash']" />
+            </el-button>
           </div>
-          <p class="axisName">{{ axis.taskData.taskName }}</p>
-          <p class="subAxisName">{{ axis.categoryActive }}</p>
-          <el-button @click="deactivateAxis(axis)" class="trashButton">
-            <font-awesome-icon :icon="['fas', 'trash']" />
-          </el-button>
+          <p class="axisName twoLineText">{{ axis.taskData.taskName }}</p>
+          <p class="subAxisName twoLineText">{{ axis.categoryActive }}</p>
         </div>
       </div>
-      <div class="axisControlsContainer axisPlusControlsContainer" :style="{paddingLeft: `${axesSpacing/2}px`}">
+      <div
+        class="axisControlsContainer axisPlusControlsContainer"
+        :style="{ paddingLeft: `${axesSpacing / 2}px` }"
+      >
         <div
           class="axisPlusContainer"
           v-for="index in activeAxes.length - 1"
@@ -401,7 +406,6 @@ export default class Analytics extends Vue {
   }
 
   beforeDestroy() {
-    // Disconnect the observer to prevent memory leaks
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
@@ -416,11 +420,11 @@ export default class Analytics extends Vue {
   }
 
   get width() {
-    return this.parentWidth || 800; // Default width
+    return this.parentWidth || 800;
   }
 
   get height() {
-    return this.parentHeight || 500; // Default height
+    return this.parentHeight || 500;
   }
 
   @Watch('chartAxes', { immediate: true })
@@ -454,10 +458,6 @@ export default class Analytics extends Vue {
     }
   }
 
-  /*get width() {
-    return window.innerWidth - window.innerWidth / 10;
-  }*/
-
   get activeAxes() {
     return this.axes
       .filter((axis) => axis.active)
@@ -487,77 +487,6 @@ export default class Analytics extends Vue {
       }
     }
     return counter;
-  }
-
-  getValuesForEntry(entry: DataEntry) {
-    return this.activeAxes.map((activeAxis) => {
-      const matchingAxis = entry.axes.find(
-        (axis) => axis.moduleId === activeAxis.moduleId
-      );
-      if (!matchingAxis) {
-        return null; // If no matching axis, return null
-      }
-      return matchingAxis.axisValues.find(
-        (value) => value.id === activeAxis.categoryActive
-      )?.value;
-    });
-  }
-
-  getDataLine(entry: DataEntry): (PathPart | undefined)[] {
-    // Align values only with activeAxes
-    const values = this.getValuesForEntry(entry);
-
-    const pathParts = values.map((value, index) => {
-      if (value != null) {
-        let isDashed = false;
-        const axis = this.activeAxes[index];
-        const x = this.axesSpacing * index;
-        const y = this.getYPosition(value, axis);
-
-        if (index === 0) {
-          return {
-            path: `M${x},${y} C${x - this.axesSpacing / 4},${y} ${
-              x + this.axesSpacing / 4
-            },${y} ${x},${y}`,
-            dashed: false,
-            x: x,
-            y: y,
-            value: value,
-          };
-        }
-
-        let iterator = index - 1;
-        while (values[iterator] === null && iterator > 0) {
-          iterator -= 1;
-          isDashed = true;
-        }
-
-        const prevX =
-          values[iterator] !== null ? this.axesSpacing * iterator : x;
-        const prevY =
-          values[iterator] !== null
-            ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
-            : y;
-
-        let controlX1 = prevX + this.axesSpacing / 2;
-        let controlX2 = x - this.axesSpacing / 2;
-
-        if (x === prevX) {
-          controlX1 = prevX + this.axesSpacing / 4;
-          controlX2 = x - this.axesSpacing / 4;
-        }
-
-        return {
-          path: `M${prevX},${prevY} C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`,
-          dashed: x !== prevX ? isDashed : false,
-          x: x,
-          y: y,
-          value: value,
-        };
-      }
-    });
-
-    return pathParts.filter((parts) => parts);
   }
 
   getYPosition(value: number, axis: Axis) {
@@ -595,129 +524,202 @@ export default class Analytics extends Vue {
     this.axes[index].active = true;
   }
 
-  getAverageDataLine() {
-    const averages: number[] = [];
+  getValuesForEntry(entry: DataEntry): (number | null)[] {
+    return this.activeAxes.map((activeAxis) => {
+      const matchingAxis = entry.axes.find(
+        (axis) => axis.moduleId === activeAxis.moduleId
+      );
+      const value = matchingAxis
+        ? matchingAxis.axisValues.find(
+            (value) => value.id === activeAxis.categoryActive
+          )?.value
+        : null;
+      return value == null ? null : value;
+    });
+  }
 
-    // Loop through each active axis
-    for (const axis of this.activeAxes) {
-      const values = this.chartData.map((entry) => {
-        const selectedAxis = entry.axes.find(
-          (a) => a.moduleId === axis.moduleId
-        );
-        if (selectedAxis) {
-          const axisValue = selectedAxis.axisValues.find(
-            (value) => value.id === axis.categoryActive
-          );
-          return axisValue ? axisValue.value : null;
+  getDataLine(entry: DataEntry): (PathPart | undefined)[] {
+    const values = this.getValuesForEntry(entry);
+
+    return values
+      .map((value, index) => {
+        if (value == null) return;
+
+        const axis = this.activeAxes[index];
+        const x = this.axesSpacing * index;
+        const y = this.getYPosition(value, axis);
+        const isDashed = this.checkIfDashed(values, index);
+
+        if (index === 0) {
+          return this.createPathPart(x, y, x, y, false, value);
         }
-        return null;
-      });
 
-      // Calculate average while ignoring null values
-      const validValues = values.filter((value) => value !== null) as number[];
-      const average =
-        validValues.length > 0
+        const { prevX, prevY } = this.getPreviousCoordinates(values, index, y);
+        const { controlX1, controlX2 } = this.calculateControlPoints(prevX, x);
+
+        return this.createPathPart(
+          prevX,
+          prevY,
+          x,
+          y,
+          isDashed,
+          value,
+          controlX1,
+          controlX2
+        );
+      })
+      .filter((part) => part);
+  }
+
+  getAverageDataLine(): number[] {
+    const averages: number[] = this.activeAxes
+      .map((axis) => {
+        const validValues = this.chartData
+          .map((entry) => {
+            const selectedAxis = entry.axes.find(
+              (a) => a.moduleId === axis.moduleId
+            );
+            return selectedAxis
+              ? selectedAxis.axisValues.find(
+                  (value) => value.id === axis.categoryActive
+                )?.value
+              : null;
+          })
+          .filter((value): value is number => value !== null);
+
+        return validValues.length > 0
           ? validValues.reduce((a, b) => a + b) / validValues.length
           : null;
-
-      // Only push the average if it's not null
-      if (average !== null) {
-        averages.push(average);
-      }
-    }
+      })
+      .filter((avg) => avg !== null) as number[];
 
     this.averageAxisValues = averages;
     return averages;
   }
 
   getAverageDataLinePath(): (PathPart | undefined)[] {
-    let isDashed = false;
     const averages = this.getAverageDataLine();
 
-    const pathParts = averages.map((average, index) => {
-      const x = this.axesSpacing * index;
-      const y =
-        average !== null
-          ? this.getYPosition(average, this.activeAxes[index])
-          : this.height / 2;
+    return averages
+      .map((average, index) => {
+        const x = this.axesSpacing * index;
+        const y =
+          average !== null
+            ? this.getYPosition(average, this.activeAxes[index])
+            : this.height / 2;
+        const isDashed = this.checkIfDashed(averages, index);
 
-      if (index === 0) {
-        return {
-          path: `M${x},${y}`,
-          dashed: false,
-          x: x,
-          y: y,
-          value: average,
-        };
-      }
+        if (index === 0) {
+          return this.createPathPart(x, y, x, y, false, average);
+        }
 
-      let iterator = index - 1;
-      while (averages[iterator] === null && iterator > 0) {
-        iterator -= 1;
-        isDashed = true;
-      }
+        const { prevX, prevY } = this.getPreviousCoordinates(
+          averages,
+          index,
+          y
+        );
+        const { controlX1, controlX2 } = this.calculateControlPoints(prevX, x);
 
-      const prevX =
-        averages[iterator] !== null ? this.axesSpacing * iterator : x;
-      const prevY =
-        averages[iterator] !== null
-          ? this.getYPosition(averages[iterator]!, this.activeAxes[iterator])
-          : y;
-
-      let controlX1 = prevX + this.axesSpacing / 2;
-      let controlX2 = x - this.axesSpacing / 2;
-
-      if (x === prevX) {
-        controlX1 = prevX + this.axesSpacing / 4;
-        controlX2 = x - this.axesSpacing / 4;
-      }
-
-      return {
-        path: `M${prevX},${prevY} C${controlX1},${prevY} ${controlX2},${y} ${x},${y}`,
-        dashed: x !== prevX ? isDashed : false,
-        x: x,
-        y: y,
-        value: average,
-      };
-    });
-
-    return pathParts.filter((parts) => parts);
+        return this.createPathPart(
+          prevX,
+          prevY,
+          x,
+          y,
+          isDashed,
+          average,
+          controlX1,
+          controlX2
+        );
+      })
+      .filter((part) => part);
   }
 
-  getAboveBelow(threshold: number | undefined, index: number, below = false) {
-    let count = 0;
-    if (threshold !== undefined && threshold !== null) {
-      for (const entry of this.chartData) {
-        const value = this.getValuesForEntry(entry)[index];
-        if (value !== undefined && value !== null) {
-          if (!below && value > threshold) {
-            count += 1;
-          }
-          if (below && value < threshold) {
-            count += 1;
-          }
-        }
-      }
+  getAboveBelow(
+    threshold: number | undefined,
+    index: number,
+    below = false
+  ): number {
+    if (threshold == null) return 0;
+
+    return this.chartData.reduce((count, entry) => {
+      const value = this.getValuesForEntry(entry)[index];
+      return value != null &&
+        ((below && value < threshold) || (!below && value > threshold))
+        ? count + 1
+        : count;
+    }, 0);
+  }
+
+  private checkIfDashed(values: (number | null)[], index: number): boolean {
+    let isDashed = false;
+    let iterator = index - 1;
+    while (values[iterator] === null && iterator > 0) {
+      iterator -= 1;
+      isDashed = true;
     }
-    return count;
+    return isDashed;
+  }
+
+  private getPreviousCoordinates(
+    values: (number | null)[],
+    index: number,
+    currentY: number
+  ): { prevX: number; prevY: number } {
+    let iterator = index - 1;
+    while (values[iterator] === null && iterator > 0) {
+      iterator -= 1;
+    }
+    const prevX =
+      values[iterator] !== null
+        ? this.axesSpacing * iterator
+        : this.axesSpacing * index;
+    const prevY =
+      values[iterator] !== null
+        ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
+        : currentY;
+    return { prevX, prevY };
+  }
+
+  private calculateControlPoints(
+    prevX: number,
+    currentX: number
+  ): { controlX1: number; controlX2: number } {
+    let controlX1 = prevX + this.axesSpacing / 2;
+    let controlX2 = currentX - this.axesSpacing / 2;
+
+    if (currentX === prevX) {
+      controlX1 = prevX + this.axesSpacing / 4;
+      controlX2 = currentX - this.axesSpacing / 4;
+    }
+
+    return { controlX1, controlX2 };
+  }
+
+  private createPathPart(
+    prevX: number,
+    prevY: number,
+    currentX: number,
+    currentY: number,
+    dashed: boolean,
+    value: number,
+    controlX1?: number,
+    controlX2?: number
+  ): PathPart {
+    const path =
+      controlX1 && controlX2
+        ? `M${prevX},${prevY} C${controlX1},${prevY} ${controlX2},${currentY} ${currentX},${currentY}`
+        : `M${currentX},${currentY}`;
+    return { path, dashed, x: currentX, y: currentY, value };
   }
 
   draggedIndex: number | null = null;
-
-  // Called when an axis control is picked up
   onDragStart(index: number) {
     this.draggedIndex = index;
   }
 
-  // Called when an axis control is dropped
   onDrop(dropIndex: number) {
     if (this.draggedIndex === null || this.draggedIndex === dropIndex) return;
 
-    // Reorder the activeAxes array
-    /*const draggedAxis = this.activeAxes.splice(this.draggedIndex, 1)[0];
-    this.activeAxes.splice(dropIndex, 0, draggedAxis);*/
-
-    // Update the original axes array accordingly
     const draggedOriginalAxis = this.axes.splice(this.draggedIndex, 1)[0];
     this.axes.splice(dropIndex, 0, draggedOriginalAxis);
 
@@ -726,7 +728,6 @@ export default class Analytics extends Vue {
       entry.axes.splice(dropIndex, 0, draggedDataEntry);
     }
 
-    // Reset dragged index
     this.draggedIndex = null;
   }
 
@@ -745,13 +746,6 @@ export default class Analytics extends Vue {
 
     this.axes.splice(index, 0, axis);
     this.axes[index].active = true;
-    // Reorder the activeAxes array
-    /*const toActivateAxis = this.activeAxes.splice(axisIndexToActivate, 1)[0];
-    this.activeAxes.splice(index, 0, toActivateAxis);*/
-
-    // Update the original axes array accordingly
-    /*const toActivateOriginalAxis = this.axes.splice(axisIndexToActivate, 1)[0];
-    this.axes.splice(index, 0, toActivateOriginalAxis);*/
 
     for (const entry of this.chartData) {
       const toActivateDataEntry = entry.axes.splice(axisIndexToActivate, 1)[0];
@@ -877,7 +871,8 @@ export default class Analytics extends Vue {
   opacity: 1;
 }
 
-.trashButton {
+.trashButton,
+.cogButton {
   background-color: transparent;
   padding: 0;
   margin: 0;
