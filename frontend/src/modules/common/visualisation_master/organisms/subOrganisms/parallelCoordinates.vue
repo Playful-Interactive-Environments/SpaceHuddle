@@ -609,7 +609,7 @@ export default class Analytics extends Vue {
       .map((average, index) => {
         const x = this.axesSpacing * index;
         const y =
-          average !== null
+          average != null
             ? this.getYPosition(average, this.activeAxes[index])
             : this.height / 2;
         const isDashed = this.checkIfDashed(averages, index);

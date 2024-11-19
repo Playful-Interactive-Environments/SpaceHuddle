@@ -5,6 +5,7 @@
       :chart-axes="axes.filter((axis) => axis.available)"
       :participant-data="dataEntries"
     />
+    <Tables v-if="dataEntries.length > 0" :participant-data="dataEntries" :tasks="gameTasks" />
   </div>
 </template>
 
@@ -36,6 +37,7 @@ import QrcodeVue from 'qrcode.vue';
 import { ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/modules/common/visualisation_master/organisms/subOrganisms/parallelCoordinates.vue';
 import { Module } from '@/types/api/Module';
+import Tables from "@/modules/common/visualisation_master/organisms/subOrganisms/Tables.vue";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -70,6 +72,7 @@ interface DataEntry {
 
 @Options({
   components: {
+    Tables,
     ParallelCoordinates,
     SpriteCanvas,
     IdeaCard,
@@ -429,7 +432,6 @@ export default class Analytics extends Vue {
   height: 50%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 3rem;
 }
 </style>
