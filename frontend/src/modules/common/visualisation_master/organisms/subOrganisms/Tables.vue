@@ -1,32 +1,46 @@
 <template>
-  <div>
+  <div class="highscoreContainer">
     <Highscore
+      class="highscore"
       v-if="tasks[0] && chartData.length > 0"
       :module-id="tasks[0].modules[0].id"
       :participant-data="chartData"
+      :selected-participant-id="selectedParticipantId"
+      @participant-selected="participantSelectionChanged"
     />
-
-    <el-dropdown
-      v-if="tasks.length > 1"
-      v-on:command="taskInfo($event)"
-      trigger="click"
-      placement="bottom"
-    >
-      <div class="el-dropdown-link">dropdown</div>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item
-            v-for="task in tasks"
-            :key="task.id"
-            :command="task"
-          >
-            {{ task.name }}
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-    <el-button @click="console.log(chartData)">chartData</el-button>
+    <Highscore
+      class="highscore"
+      v-if="tasks[0] && chartData.length > 0"
+      :module-id="tasks[0].modules[0].id"
+      :participant-data="chartData"
+      :selected-participant-id="selectedParticipantId"
+      @participant-selected="participantSelectionChanged"
+    />
+    <Highscore
+      class="highscore"
+      v-if="tasks[0] && chartData.length > 0"
+      :module-id="tasks[0].modules[0].id"
+      :participant-data="chartData"
+      :selected-participant-id="selectedParticipantId"
+      @participant-selected="participantSelectionChanged"
+    />
   </div>
+  <el-dropdown
+    v-if="tasks.length > 1"
+    v-on:command="taskInfo($event)"
+    trigger="click"
+    placement="bottom"
+  >
+    <div class="el-dropdown-link">dropdown</div>
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item v-for="task in tasks" :key="task.id" :command="task">
+          {{ task.name }}
+        </el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown>
+  <el-button @click="console.log(chartData)">chartData</el-button>
 </template>
 
 <script lang="ts">
@@ -68,6 +82,7 @@ export default class Tables extends Vue {
   sortColumn = 'normalisedTime';
   sortOrder = 1;
 
+  selectedParticipantId = '';
   chartData: DataEntry[] = [];
 
   @Watch('participantData', { immediate: true })
@@ -89,22 +104,22 @@ export default class Tables extends Vue {
   taskInfo(task: Task[]) {
     console.log(task);
   }
+
+  participantSelectionChanged(id: string) {
+    this.selectedParticipantId = id;
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-.highscore-table {
-  color: var(--color-playing);
-  width: 100%;
-
-  td {
-    width: 25%;
-  }
+.highscoreContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
-.text-button {
-  min-height: unset;
-  margin: unset;
-  padding: unset;
+.highscore {
+  width: 30%;
 }
 </style>

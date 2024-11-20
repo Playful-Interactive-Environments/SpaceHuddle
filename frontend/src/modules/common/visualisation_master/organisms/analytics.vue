@@ -1,11 +1,19 @@
 <template>
   <div id="analytics" :style="{ marginTop: '3rem' }">
-    <parallel-coordinates
-      v-if="axes.length > 0 && dataEntries.length > 0"
-      :chart-axes="axes.filter((axis) => axis.available)"
-      :participant-data="dataEntries"
-    />
-    <Tables v-if="dataEntries.length > 0" :participant-data="dataEntries" :tasks="gameTasks" />
+    <div class="AnalyticsParallelCoordinates">
+      <parallel-coordinates
+        v-if="axes.length > 0 && dataEntries.length > 0"
+        :chart-axes="axes.filter((axis) => axis.available)"
+        :participant-data="dataEntries"
+      />
+    </div>
+    <div class="AnalyticsTables">
+      <Tables
+        v-if="dataEntries.length > 0"
+        :participant-data="dataEntries"
+        :tasks="gameTasks"
+      />
+    </div>
   </div>
 </template>
 
@@ -37,7 +45,7 @@ import QrcodeVue from 'qrcode.vue';
 import { ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/modules/common/visualisation_master/organisms/subOrganisms/parallelCoordinates.vue';
 import { Module } from '@/types/api/Module';
-import Tables from "@/modules/common/visualisation_master/organisms/subOrganisms/Tables.vue";
+import Tables from '@/modules/common/visualisation_master/organisms/subOrganisms/Tables.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -429,9 +437,17 @@ export default class Analytics extends Vue {
 <style lang="scss" scoped>
 #analytics {
   width: 100%;
-  height: 50%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 3rem;
+  .AnalyticsParallelCoordinates {
+    height: 60%;
+    width: 100%;
+  }
+  .AnalyticsTables {
+    height: 40%;
+    width: 100%;
+  }
 }
 </style>

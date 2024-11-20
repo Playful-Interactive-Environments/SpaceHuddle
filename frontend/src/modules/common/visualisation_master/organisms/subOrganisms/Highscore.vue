@@ -4,16 +4,31 @@
       <th />
       <th />
       <th
-        v-for="entry in rowHeaders"
+        v-for="entry in chartData[0].axes[0].axisValues"
         :key="this.moduleId + entry.id"
         @click="setSortColumn(entry.id)"
+        :style="{ cursor: 'pointer' }"
       >
         {{ entry.id }}
+        <font-awesome-icon
+          :icon="['fas', 'angle-up']"
+          v-if="entry.id === sortColumn && sortOrder === -1"
+        />
+        <font-awesome-icon
+          :icon="['fas', 'angle-down']"
+          v-if="entry.id === sortColumn && sortOrder === 1"
+        />
       </th>
     </tr>
     <tr
       v-for="(entry, index) in chartData.slice(0, this.highScoreCount)"
       :key="entry.participant.id + index"
+      class="participantTableEntries"
+      @click="$emit('participantSelected', entry.participant.id)"
+      :class="{
+        participantSelected:
+          selectedParticipantId === entry.participant.id,
+      }"
     >
       <td>{{ index + 1 }}.</td>
       <td>
@@ -23,10 +38,11 @@
         ></font-awesome-icon>
       </td>
       <td
-        v-for="value in getAxisValues(index)"
+        v-for="value in chartData[index].axes[0].axisValues"
         :key="entry.participant.id + value.id"
+        class="valueTableEntry"
       >
-        <span v-if="value.id !== 'rate' || value.id !== 'stars'">{{
+        <span v-if="value.id !== 'rate' && value.id !== 'stars'">{{
           value.value
         }}</span
         ><span v-else
@@ -50,7 +66,6 @@
       </td>
     </tr>
   </table>
-  test
 </template>
 
 <script lang="ts">
@@ -77,12 +92,13 @@ interface DataEntry {
 
 @Options({
   components: { FontAwesomeIcon },
-  emits: ['selectionDone'],
+  emits: ['participantSelected'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Highscore extends Vue {
   @Prop() readonly moduleId!: string;
   @Prop() readonly participantData!: DataEntry[];
+  @Prop() readonly selectedParticipantId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   highScoreList: { value: number | any; avatar: Avatar }[] = [];
@@ -96,6 +112,7 @@ export default class Highscore extends Vue {
     if (this.sortColumn === column) this.sortOrder *= -1;
     else this.sortOrder = 1;
     this.sortColumn = column;
+    this.sortData();
   }
 
   @Watch('participantData', { immediate: true })
@@ -105,7 +122,6 @@ export default class Highscore extends Vue {
         const moduleAxis = entry.axes.filter(
           (a) => a.moduleId === this.moduleId
         )[0];
-        console.log(moduleAxis);
         if (moduleAxis) {
           for (const value of moduleAxis.axisValues) {
             if (value.value != null) {
@@ -113,20 +129,39 @@ export default class Highscore extends Vue {
             }
           }
         }
+        console.log(moduleAxis);
         return false;
       });
+      for (const entry of this.chartData) {
+        entry.axes = entry.axes.filter(
+          (axis) => axis.moduleId === this.moduleId
+        );
+      }
     }
-    console.log(this.chartData);
   }
 
-  get rowHeaders(): AxisValue[] {
-    return this.getAxisValues(0);
-  }
+  sortData(): DataEntry[] {
+    if (this.chartData.length >= 2) {
+      return this.chartData.sort((a, b) => {
+        const bVal = b.axes[0].axisValues.find(
+          (value) => value.id === this.sortColumn
+        );
+        const aVal = a.axes[0].axisValues.find(
+          (value) => value.id === this.sortColumn
+        );
 
-  getAxisValues(index: number): AxisValue[] {
-    return this.chartData[index].axes.filter(
-      (axis) => axis.moduleId === this.moduleId
-    )[0].axisValues;
+        if (
+          aVal != null &&
+          bVal != null &&
+          aVal.value != null &&
+          bVal.value != null
+        ) {
+          return (bVal.value - aVal.value) * this.sortOrder;
+        }
+        return -1;
+      });
+    }
+    return this.chartData;
   }
 }
 </script>
@@ -135,10 +170,27 @@ export default class Highscore extends Vue {
 .highscore-table {
   color: var(--color-playing);
   width: 100%;
-
-  td {
-    width: 25%;
+  height: 100%;
+  tr {
+    border-bottom: 1px solid var(--color-background-dark);
   }
+  td {
+    width: 20%;
+    text-align: left;
+    vertical-align: middle;
+  }
+}
+
+.participantTableEntries {
+  transition: background-color 0.15s ease;
+}
+
+.participantTableEntries:hover {
+  background-color: var(--color-background-dark);
+}
+
+.participantSelected {
+  background-color: var(--color-background-blue);
 }
 
 .text-button {
