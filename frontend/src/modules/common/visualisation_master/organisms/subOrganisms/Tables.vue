@@ -25,7 +25,7 @@
       @participant-selected="participantSelectionChanged"
     />
   </div>
-  <el-dropdown
+<!--  <el-dropdown
     v-if="tasks.length > 1"
     v-on:command="taskInfo($event)"
     trigger="click"
@@ -40,7 +40,7 @@
       </el-dropdown-menu>
     </template>
   </el-dropdown>
-  <el-button @click="console.log(chartData)">chartData</el-button>
+  <el-button @click="console.log(chartData)">chartData</el-button>-->
 </template>
 
 <script lang="ts">
@@ -99,10 +99,6 @@ export default class Tables extends Vue {
         return false;
       });
     }
-  }
-
-  taskInfo(task: Task[]) {
-    console.log(task);
   }
 
   participantSelectionChanged(id: string) {

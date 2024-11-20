@@ -117,7 +117,7 @@ export default class Highscore extends Vue {
 
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
-    if (this.participantData != null) {
+    if (this.participantData != null && this.participantData.length > 0) {
       this.chartData = this.participantData.filter((entry) => {
         const moduleAxis = entry.axes.filter(
           (a) => a.moduleId === this.moduleId
@@ -129,7 +129,6 @@ export default class Highscore extends Vue {
             }
           }
         }
-        console.log(moduleAxis);
         return false;
       });
       for (const entry of this.chartData) {
@@ -171,6 +170,9 @@ export default class Highscore extends Vue {
   color: var(--color-playing);
   width: 100%;
   height: 100%;
+  th {
+    padding-bottom: 0.3rem;
+  }
   tr {
     border-bottom: 1px solid var(--color-background-dark);
   }
