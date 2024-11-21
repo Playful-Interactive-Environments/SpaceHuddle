@@ -302,7 +302,7 @@ export default class ParticipantOverview extends Vue {
       task.taskType.toLowerCase(),
       task.modules[0].name
     );
-    if (configValue) return true;
+    if (configValue || task.parameter.displayFinished) return true;
     const state = this.getStateForTask(task.id);
     return !(state && state.state === TaskParticipantStatesType.FINISHED);
   }

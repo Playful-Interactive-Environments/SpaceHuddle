@@ -1,5 +1,9 @@
 <template>
-  <el-form-item></el-form-item>
+  <el-form-item
+    :label="$t('module.voting.settings.taskParameter.displayFinished')"
+  >
+    <el-switch v-model="modelValue.parameter.displayFinished" />
+  </el-form-item>
 </template>
 
 <script lang="ts">
@@ -39,8 +43,11 @@ export default class TaskParameter extends Vue {
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
-    if (this.modelValue.parameter) {
-      //todo: set default parameter
+    if (
+      this.modelValue.parameter &&
+      !this.modelValue.parameter.displayFinished
+    ) {
+      this.modelValue.parameter.displayFinished = false;
     }
   }
 

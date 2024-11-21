@@ -101,6 +101,7 @@
         :is-editable="false"
         :show-state="false"
         class="ideaCardOverlay"
+        :collapseIdeas="CollapseIdeas.expandAll"
       />
       <IdeaCard
         v-if="voteIdOverlay && !currentRateIdea"
@@ -108,8 +109,8 @@
         :idea="voteIdOverlay"
         :is-selectable="false"
         :is-editable="false"
-        :cutLongTexts="true"
         :show-state="false"
+        :collapseIdeas="CollapseIdeas.expandAll"
       />
     </el-dialog>
   </ParticipantModuleDefaultContainer>
@@ -136,6 +137,7 @@ import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipant
 import { delay } from '@/utils/wait';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
+import { CollapseIdeas } from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 @Options({
   components: {
@@ -160,6 +162,7 @@ export default class Participant extends Vue {
   starOpacity = 0;
   initIdeaNumber = 0;
   trackingManager!: TrackingManager;
+  CollapseIdeas = CollapseIdeas;
 
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
@@ -571,7 +574,7 @@ div#loadingScreen > span#loading::v-deep(.path) {
   }
 }
 
-.IdeaCard {
+/*.IdeaCard {
   width: 100%;
   background-color: var(--color-dark-contrast);
   border: 3px solid var(--color-dark-contrast-light);
@@ -601,20 +604,20 @@ div#loadingScreen > span#loading::v-deep(.path) {
 .IdeaCard::v-deep(.card__text) {
   padding: 1% 1% 1% 3%;
   height: 98%;
-  /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  // Hide scrollbar for IE, Edge and Firefox
+  -ms-overflow-style: none; // IE and Edge
+  scrollbar-width: none; // Firefox
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+// Hide scrollbar for Chrome, Safari and Opera
 .IdeaCard::v-deep(.card__text)::-webkit-scrollbar {
   display: none;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+// Hide scrollbar for Chrome, Safari and Opera
 .IdeaCard::-webkit-scrollbar {
   display: none;
-}
+}*/
 
 .el-rate.ratingStars {
   display: flex;

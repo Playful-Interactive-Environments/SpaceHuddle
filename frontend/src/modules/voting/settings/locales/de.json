@@ -1,5 +1,6 @@
 {
   "taskParameter": {
-    "selection": "Bewertung für Brainstorming- / Selektionsaufgaben"
+    "selection": "Bewertung für Brainstorming- / Selektionsaufgaben",
+    "displayFinished": "Rückwirkende Änderung der Stimmabgabe zulassen"
   }
 }

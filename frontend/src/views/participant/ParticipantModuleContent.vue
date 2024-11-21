@@ -71,7 +71,10 @@
     </participant-tutorial>
     <ParticipantFinishedModuleComponent
       v-else-if="
-        task && state && state.state === TaskParticipantStatesType.FINISHED
+        task &&
+        state &&
+        state.state === TaskParticipantStatesType.FINISHED &&
+        !task.parameter.displayFinished
       "
       :task-id="taskId"
       :module-id="moduleId"

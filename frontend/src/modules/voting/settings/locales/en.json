@@ -1,5 +1,6 @@
 {
   "taskParameter": {
-    "selection": "Voting for brainstorming / selection task"
+    "selection": "Voting for brainstorming / selection task",
+    "displayFinished": "Allow changing voting retrospectively"
   }
 }
