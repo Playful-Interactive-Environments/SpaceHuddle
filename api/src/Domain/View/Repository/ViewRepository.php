@@ -68,7 +68,14 @@ class ViewRepository implements RepositoryInterface
     public function getSessionList(
         string $sessionId
     ): array|null {
-        return $this->get(["topic.session_id" => $sessionId]);
+        $result = $this->get(["topic.session_id" => $sessionId]);
+
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
     }
 
     /**

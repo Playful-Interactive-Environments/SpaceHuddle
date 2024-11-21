@@ -141,12 +141,13 @@ class TaskRepository implements RepositoryInterface
 
         if ($authorisation->isParticipant() && !array_key_exists("task.id", $conditions)) {
             $finished = TaskParticipantStateType::FINISHED;
+            $voting = strtoupper(TaskType::VOTING);
             $query->leftJoin("task_participant_state", [
                 "task_participant_state.task_id = task.id",
                 "task_participant_state.participant_id" => $authorisation->id
             ])
                 ->innerJoin("module", ["module.task_id = task.id", "module.order = 0"])
-                ->andWhere(["(task_participant_state.state IS NULL OR task_participant_state.state != '$finished' OR module.module_name = 'personalityTest')"]);
+                ->andWhere(["(task_participant_state.state IS NULL OR task_participant_state.state != '$finished' OR module.module_name = 'personalityTest' OR task.task_type = '$voting')"]);
         }
 
         $result = $this->fetchAll($query);
