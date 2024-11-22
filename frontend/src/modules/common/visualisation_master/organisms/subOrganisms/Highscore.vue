@@ -43,7 +43,7 @@
         class="valueTableEntry"
       >
         <span v-if="value.id !== 'rate' && value.id !== 'stars'">{{
-          value.value
+          Math.round((value.value + Number.EPSILON) * 100) / 100
         }}</span
         ><span v-else
           ><el-rate
@@ -54,11 +54,11 @@
         /></span>
       </td>
     </tr>
-    <tr v-if="highScoreCount < highScoreList.length">
+    <tr v-if="highScoreCount < chartData.length">
       <td>
         <el-button
           link
-          @click="highScoreCount = highScoreList.length"
+          @click="highScoreCount = chartData.length"
           class="text-button"
         >
           ...
@@ -123,19 +123,31 @@ export default class Highscore extends Vue {
           (a) => a.moduleId === this.moduleId
         )[0];
         if (moduleAxis) {
+          let i = 0;
           for (const value of moduleAxis.axisValues) {
             if (value.value != null) {
-              return true;
+              i += 1;
             }
           }
+          return i > 0;
         }
-        return false;
       });
       for (const entry of this.chartData) {
         entry.axes = entry.axes.filter(
           (axis) => axis.moduleId === this.moduleId
         );
       }
+      this.chartData.forEach((entry) => {
+        entry.axes.forEach((axis) => {
+          axis.axisValues.sort((a, b) => {
+            const aIsLast = a.id === 'stars' || a.id === 'rate';
+            const bIsLast = b.id === 'stars' || b.id === 'rate';
+            if (aIsLast && !bIsLast) return 1;
+            if (!aIsLast && bIsLast) return -1;
+            return 0;
+          });
+        });
+      });
     }
   }
 
@@ -177,7 +189,7 @@ export default class Highscore extends Vue {
     border-bottom: 1px solid var(--color-background-dark);
   }
   td {
-    width: 20%;
+    width: auto;
     text-align: left;
     vertical-align: middle;
   }

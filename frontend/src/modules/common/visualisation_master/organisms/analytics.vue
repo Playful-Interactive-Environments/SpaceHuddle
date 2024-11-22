@@ -9,9 +9,9 @@
     </div>
     <div class="AnalyticsTables">
       <Tables
-        v-if="dataEntries.length > 0"
+        v-if="axes.length > 0 && dataEntries.length > 0"
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
-        :tasks="gameTasks"
+        :axes="JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))"
       />
     </div>
   </div>

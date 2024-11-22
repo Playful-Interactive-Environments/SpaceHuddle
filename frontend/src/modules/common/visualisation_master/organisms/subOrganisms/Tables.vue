@@ -1,31 +1,73 @@
 <template>
-  <div class="highscoreContainer">
-    <Highscore
+  <div class="highscoreContainer" v-if="axes && chartData.length > 0">
+    <div
+      class="highScoreSelectionContainer"
+      v-for="(axis, index) in axes.slice(0, tableCount)"
+      :key="'highscoreSelectionContainer' + axis.moduleId"
+      @click="console.log(this.tableArray)"
+    >
+      <el-dropdown
+        v-if="axes.length > 1"
+        v-on:command="tableArray.splice(index, 1, $event)"
+        trigger="click"
+        placement="bottom"
+      >
+        <div class="el-dropdown-link">
+          <font-awesome-icon
+            class="axisIcon"
+            :icon="getIconOfAxis(axis)"
+            :style="{
+              color: getColorOfAxis(axis),
+            }"
+          />
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item
+              v-for="(ax, axIndex) in axes"
+              :key="ax ? ax.moduleId + 'ax' : axIndex"
+              :command="ax ? ax : null"
+            >
+              {{ ax ? ax.taskData.taskName : 'N/A' }}
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <Highscore
+        class="highscore"
+        v-if="tableArray[index] && chartData.length > 0"
+        :module-id="tableArray[index].moduleId"
+        :participant-data="chartData"
+        :selected-participant-id="selectedParticipantId"
+        @participant-selected="participantSelectionChanged"
+      />
+      <Highscore
+        class="highscore"
+        v-else-if="axes[index] && chartData.length > 0"
+        :module-id="axes[index].moduleId"
+        :participant-data="chartData"
+        :selected-participant-id="selectedParticipantId"
+        @participant-selected="participantSelectionChanged"
+      />
+    </div>
+    <!--    <Highscore
       class="highscore"
-      v-if="tasks[0] && chartData.length > 0"
-      :module-id="tasks[0].modules[0].id"
+      v-if="axes[1] && chartData.length > 0"
+      :module-id="axes[1].moduleId"
       :participant-data="chartData"
       :selected-participant-id="selectedParticipantId"
       @participant-selected="participantSelectionChanged"
     />
     <Highscore
       class="highscore"
-      v-if="tasks[0] && chartData.length > 0"
-      :module-id="tasks[0].modules[0].id"
+      v-if="axes[2] && chartData.length > 0"
+      :module-id="axes[2].moduleId"
       :participant-data="chartData"
       :selected-participant-id="selectedParticipantId"
       @participant-selected="participantSelectionChanged"
-    />
-    <Highscore
-      class="highscore"
-      v-if="tasks[0] && chartData.length > 0"
-      :module-id="tasks[0].modules[0].id"
-      :participant-data="chartData"
-      :selected-participant-id="selectedParticipantId"
-      @participant-selected="participantSelectionChanged"
-    />
+    />-->
   </div>
-<!--  <el-dropdown
+  <!--  <el-dropdown
     v-if="tasks.length > 1"
     v-on:command="taskInfo($event)"
     trigger="click"
@@ -53,7 +95,25 @@ import Highscore from '@/modules/common/visualisation_master/organisms/subOrgani
 
 import { ParticipantInfo } from '@/types/api/Participant';
 import { Task } from '@/types/api/Task';
+import TaskType from '@/types/enum/TaskType';
+import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 
+interface subAxis {
+  id: string;
+  range: number;
+}
+
+interface Axis {
+  moduleId: string;
+  taskData: {
+    taskType: TaskType;
+    taskName: string;
+  };
+  axisValues: (subAxis | null)[];
+  categoryActive: string;
+  active: boolean;
+  available: boolean;
+}
 interface AxisValue {
   id: string;
   value: number | null;
@@ -73,7 +133,7 @@ interface DataEntry {
 })
 export default class Tables extends Vue {
   @Prop() readonly taskId!: string;
-  @Prop() readonly tasks!: Task[];
+  @Prop() readonly axes!: Axis[];
   @Prop() readonly participantData!: DataEntry[];
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -84,6 +144,9 @@ export default class Tables extends Vue {
 
   selectedParticipantId = '';
   chartData: DataEntry[] = [];
+
+  tableCount = 2;
+  tableArray: (Axis | null)[] = [null, null];
 
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
@@ -104,6 +167,18 @@ export default class Tables extends Vue {
   participantSelectionChanged(id: string) {
     this.selectedParticipantId = id;
   }
+
+  getIconOfAxis(axis: Axis): string | undefined {
+    if (axis.taskData.taskType) {
+      return getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
+    }
+  }
+
+  getColorOfAxis(axis: Axis): string | undefined {
+    if (axis.taskData.taskType) {
+      return getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
+    }
+  }
 }
 </script>
 
@@ -111,11 +186,23 @@ export default class Tables extends Vue {
 .highscoreContainer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: 3rem;
+  width: 100%;
+  height: 100%;
 }
 
-.highscore {
-  width: 30%;
+.highScoreSelectionContainer {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  overflow-x: hidden;
+}
+
+.highScoreSelectionContainer::-webkit-scrollbar {
+  display: none;
 }
 </style>
