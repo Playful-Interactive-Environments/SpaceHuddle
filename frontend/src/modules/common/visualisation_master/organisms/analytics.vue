@@ -124,7 +124,6 @@ export default class Analytics extends Vue {
   sessionService?: cashService.SimplifiedCashEntry<Session>;
 
   axes: Axis[] = [];
-  dataEntries: DataEntry[] = [];
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -136,11 +135,7 @@ export default class Analytics extends Vue {
     return null;
   }
 
-  get axes1(): Axis[] {
-    return this.CalculateAxes();
-  }
-
-  get dataEntries1(): DataEntry[] {
+  get dataEntries(): DataEntry[] {
     return this.CalculateDataEntries();
   }
 
@@ -280,7 +275,6 @@ export default class Analytics extends Vue {
       this.steps.push(stepsEntry);
     }
     this.axes = this.CalculateAxes();
-    this.dataEntries = this.CalculateDataEntries();
   }
 
   getAllParticipantData() {
