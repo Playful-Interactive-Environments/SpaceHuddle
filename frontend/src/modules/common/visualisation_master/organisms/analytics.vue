@@ -10,7 +10,7 @@
     <div class="AnalyticsTables">
       <Tables
         v-if="dataEntries.length > 0"
-        :participant-data="dataEntries"
+        :participant-data="JSON.parse(JSON.stringify(dataEntries))"
         :tasks="gameTasks"
       />
     </div>
@@ -123,6 +123,9 @@ export default class Analytics extends Vue {
   taskListService?: cashService.SimplifiedCashEntry<Task[]>;
   sessionService?: cashService.SimplifiedCashEntry<Session>;
 
+  axes: Axis[] = [];
+  dataEntries: DataEntry[] = [];
+
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
     return null;
@@ -133,11 +136,11 @@ export default class Analytics extends Vue {
     return null;
   }
 
-  get axes(): Axis[] {
+  get axes1(): Axis[] {
     return this.CalculateAxes();
   }
 
-  get dataEntries(): DataEntry[] {
+  get dataEntries1(): DataEntry[] {
     return this.CalculateDataEntries();
   }
 
@@ -276,6 +279,8 @@ export default class Analytics extends Vue {
     } else {
       this.steps.push(stepsEntry);
     }
+    this.axes = this.CalculateAxes();
+    this.dataEntries = this.CalculateDataEntries();
   }
 
   getAllParticipantData() {
@@ -395,8 +400,8 @@ export default class Analytics extends Vue {
 
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
+    const axes = this.CalculateAxes();
     return participantData.map(({ participant, data }) => {
-      const axes = this.CalculateAxes();
       const formattedAxes = axes
         .map((axis) => {
           const moduleData = data.find((d) => d.moduleId === axis.moduleId);
