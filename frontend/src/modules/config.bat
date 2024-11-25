@@ -53,6 +53,16 @@ for /d %%d in (*.*) do (
             if exist settings\TaskParameter.vue (
                 echo            "parameter": "TaskParameter",  >> .\..\config.json
             )
+            if exist settings\locales (
+                cd settings\locales
+                set locales=
+                for /f "delims=" %%G in ('dir *.json /b') do (
+                    set language=%%~G
+                    set locales=!locales!!language:~0,2!,
+                )
+                cd ..\..
+                echo            "locales": "!locales!",  >> .\..\config.json
+            )
             echo            "path": "!task!/settings"  >> .\..\config.json
             echo        }  >> .\..\config.json
         )

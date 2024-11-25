@@ -69,6 +69,7 @@
        },  
        "settings": {  
            "parameter": "TaskParameter",  
+           "locales": "de,en,",  
            "path": "categorisation/settings"  
        }  
    },  
@@ -261,6 +262,7 @@
        },  
        "settings": {  
            "parameter": "TaskParameter",  
+           "locales": "de,en,",  
            "path": "selection/settings"  
        }  
    },  
@@ -298,6 +300,7 @@
        },  
        "settings": {  
            "parameter": "TaskParameter",  
+           "locales": "de,en,",  
            "path": "voting/settings"  
        }  
    }  
