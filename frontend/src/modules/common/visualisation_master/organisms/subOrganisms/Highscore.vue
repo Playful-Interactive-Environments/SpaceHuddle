@@ -42,15 +42,18 @@
         class="valueTableEntry"
       >
         <span v-if="value.id !== 'rate' && value.id !== 'stars'">{{
-          Math.round((value.value + Number.EPSILON) * 100) / 100
+          value.value != null
+            ? Math.round((value.value + Number.EPSILON) * 100) / 100
+            : '---'
         }}</span
         ><span v-else
           ><el-rate
+          v-if="value.value != null"
             v-model="value.value"
             size="large"
             :max="3"
             :disabled="true"
-        /></span>
+        /><p v-else>---</p></span>
       </td>
     </tr>
     <tr v-if="highScoreCount < chartData.length">

@@ -45,7 +45,7 @@
         class="highscore"
         v-if="tableArray[index] && chartData.length > 0"
         :module-id="tableArray[index].moduleId"
-        :participant-data="chartData"
+        :participant-data="JSON.parse(JSON.stringify(chartData))"
         :selected-participant-id="selectedParticipantId"
         @participant-selected="participantSelectionChanged"
       />
@@ -53,7 +53,7 @@
         class="highscore"
         v-else-if="axes[0] && chartData.length > 0"
         :module-id="axes[0].moduleId"
-        :participant-data="chartData"
+        :participant-data="JSON.parse(JSON.stringify(chartData))"
         :selected-participant-id="selectedParticipantId"
         @participant-selected="participantSelectionChanged"
       />

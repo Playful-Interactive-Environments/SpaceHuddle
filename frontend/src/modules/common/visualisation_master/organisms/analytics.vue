@@ -438,12 +438,12 @@ export default class Analytics extends Vue {
 <style lang="scss" scoped>
 #analytics {
   width: 100%;
-  height: 100%;
+  height: 95%;
   display: flex;
   flex-direction: column;
   gap: 3rem;
   .AnalyticsParallelCoordinates {
-    height: 60%;
+    height: calc(60% - 3rem);
     width: 100%;
   }
   .AnalyticsTables {
