@@ -252,6 +252,17 @@ export default class Analytics extends Vue {
         30
       );
     }
+
+    for (const task of this.brainstormingTasks) {
+      taskParticipantService.registerGetList(
+        task.id,
+        (steps: TaskParticipantIterationStep[]) => {
+          this.updateIterationSteps(task.modules[0].id, task, steps);
+        },
+        EndpointAuthorisationType.MODERATOR,
+        30
+      );
+    }
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -262,7 +273,10 @@ export default class Analytics extends Vue {
       .filter((task) => task.taskType === 'PLAYING')
       .sort();
     this.otherTasks = this.tasks
-      .filter((task) => task.taskType !== 'PLAYING')
+      .filter(
+        (task) =>
+          task.taskType !== 'PLAYING' && task.taskType !== 'BRAINSTORMING'
+      )
       .sort();
     this.votingTasks = this.tasks
       .filter((task) => task.taskType === 'VOTING')
@@ -376,6 +390,7 @@ export default class Analytics extends Vue {
     'money',
     'lifetime',
     'pointsSpent',
+    'count',
   ];
 
   CalculateAxes(): Axis[] {
@@ -420,7 +435,6 @@ export default class Analytics extends Vue {
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
-    console.log(this.steps);
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {
