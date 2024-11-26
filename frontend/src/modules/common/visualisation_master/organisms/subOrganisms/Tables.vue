@@ -23,8 +23,8 @@
             <p class="oneLineText highscoreModuleName">
               {{
                 tableArray[index]
-                    ? tableArray[index]?.taskData.taskName
-                    : axes[0].taskData.taskName
+                  ? tableArray[index]?.taskData.taskName
+                  : axes[0].taskData.taskName
               }}
             </p>
           </div>
@@ -187,6 +187,15 @@ export default class Tables extends Vue {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+  border-radius: var(--border-radius-xs);
+  border: 2px solid transparent;
+  padding: 0.2rem 0.4rem;
+  transition: border 0.3s ease;
+  cursor: pointer;
+}
+
+.el-dropdown-link:hover {
+  border: 2px solid var(--color-background-darker);
 }
 
 .highscoreModuleName {

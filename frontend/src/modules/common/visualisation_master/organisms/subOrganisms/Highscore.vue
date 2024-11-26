@@ -1,6 +1,5 @@
 <template>
   <table class="highscore-table" v-if="chartData.length > 0">
-    <p v-if="chartData[0].axes[0].axisValues === undefined">test</p>
     <tr>
       <th />
       <th />
@@ -27,8 +26,7 @@
       class="participantTableEntries"
       @click="$emit('participantSelected', entry.participant.id)"
       :class="{
-        participantSelected:
-          selectedParticipantId === entry.participant.id,
+        participantSelected: selectedParticipantId === entry.participant.id,
       }"
     >
       <td>{{ index + 1 }}.</td>
@@ -183,7 +181,7 @@ export default class Highscore extends Vue {
 .highscore-table {
   color: var(--color-playing);
   width: 100%;
-  height: 100%;
+  height: auto;
   th {
     padding-bottom: 0.3rem;
   }

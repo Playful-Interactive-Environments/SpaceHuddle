@@ -3,15 +3,17 @@
     <div class="AnalyticsParallelCoordinates">
       <parallel-coordinates
         v-if="axes.length > 0 && dataEntries.length > 0"
-        :chart-axes="axes.filter((axis) => axis.available)"
-        :participant-data="dataEntries"
+        :chart-axes="JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))"
+        :participant-data="JSON.parse(JSON.stringify(dataEntries))"
       />
     </div>
     <div class="AnalyticsTables">
       <Tables
         v-if="axes.length > 0 && dataEntries.length > 0"
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
-        :axes="JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))"
+        :axes="
+          JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
+        "
       />
     </div>
   </div>
