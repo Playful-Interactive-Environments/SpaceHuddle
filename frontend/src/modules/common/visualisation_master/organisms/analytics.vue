@@ -3,11 +3,13 @@
     <div class="AnalyticsParallelCoordinates">
       <parallel-coordinates
         v-if="axes.length > 0 && dataEntries.length > 0"
-        :chart-axes="JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))"
+        :chart-axes="
+          JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
+        "
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
       />
     </div>
-    <hr />
+
     <div class="AnalyticsTables">
       <Tables
         v-if="axes.length > 0 && dataEntries.length > 0"
@@ -38,6 +40,8 @@ import * as taskService from '@/services/task-service';
 import * as sessionService from '@/services/session-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import * as cashService from '@/services/cash-service';
+import * as votingService from '@/services/voting-service';
+import * as ideaService from '@/services/idea-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import * as pixiUtil from '@/utils/pixi';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
@@ -49,6 +53,7 @@ import { ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/modules/common/visualisation_master/organisms/subOrganisms/parallelCoordinates.vue';
 import { Module } from '@/types/api/Module';
 import Tables from '@/modules/common/visualisation_master/organisms/subOrganisms/Tables.vue';
+import { Vote, VoteResult } from '@/types/api/Vote';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -97,7 +102,6 @@ export default class Analytics extends Vue {
   @Prop() readonly task!: Task;
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: null }) readonly taskParameter!: any;
-  @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: false }) readonly paused!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -108,6 +112,10 @@ export default class Analytics extends Vue {
   tasks: Task[] = [];
   gameTasks: Task[] = [];
   otherTasks: Task[] = [];
+  votingTasks: Task[] = [];
+  brainstormingTasks: Task[] = [];
+  ideas: Idea[] = [];
+
   session: Session | null = null;
 
   componentLoadIndex = 0;
@@ -234,6 +242,16 @@ export default class Analytics extends Vue {
         30
       );
     }
+    for (const task of this.otherTasks) {
+      taskParticipantService.registerGetIterationList(
+        task.id,
+        (steps: TaskParticipantIterationStep[]) => {
+          this.updateIterationSteps(task.modules[0].id, task, steps);
+        },
+        EndpointAuthorisationType.MODERATOR,
+        30
+      );
+    }
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -246,8 +264,12 @@ export default class Analytics extends Vue {
     this.otherTasks = this.tasks
       .filter((task) => task.taskType !== 'PLAYING')
       .sort();
-
-    this.gameTasks = this.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
+    this.votingTasks = this.tasks
+      .filter((task) => task.taskType === 'VOTING')
+      .sort();
+    this.brainstormingTasks = this.tasks
+      .filter((task) => task.taskType === 'BRAINSTORMING')
+      .sort();
   }
 
   updateSession(session: Session): void {
@@ -398,6 +420,7 @@ export default class Analytics extends Vue {
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
+    console.log(this.steps);
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {
@@ -443,7 +466,7 @@ export default class Analytics extends Vue {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 3rem;
   hr {
     margin: 1.5rem 0 0.5rem 0;
     width: 70%;
