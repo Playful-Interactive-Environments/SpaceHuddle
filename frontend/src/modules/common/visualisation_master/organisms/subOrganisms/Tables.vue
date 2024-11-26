@@ -4,35 +4,43 @@
       class="highScoreSelectionContainer"
       v-for="(axis, index) in axes.slice(0, tableCount)"
       :key="'highscoreSelectionContainer' + axis.moduleId"
-      @click="console.log(this.tableArray)"
     >
-      <el-dropdown
-        v-if="axes.length > 1"
-        v-on:command="tableArray.splice(index, 1, $event)"
-        trigger="click"
-        placement="bottom"
-      >
-        <div class="el-dropdown-link">
-          <font-awesome-icon
-            class="axisIcon"
-            :icon="getIconOfAxis(axis)"
-            :style="{
-              color: getColorOfAxis(axis),
-            }"
-          />
-        </div>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item
-              v-for="(ax, axIndex) in axes"
-              :key="ax ? ax.moduleId + 'ax' : axIndex"
-              :command="ax ? ax : null"
-            >
-              {{ ax ? ax.taskData.taskName : 'N/A' }}
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      <div class="highscoreModuleSelection">
+        <el-dropdown
+          v-if="axes.length > 1"
+          v-on:command="tableArray.splice(index, 1, $event)"
+          trigger="click"
+          placement="bottom"
+        >
+          <div class="el-dropdown-link">
+            <font-awesome-icon
+              class="highscoreModuleIcon"
+              :icon="getIconOfAxis(tableArray[index] || axis)"
+              :style="{
+                color: getColorOfAxis(tableArray[index] || axis),
+              }"
+            />
+            <p class="oneLineText highscoreModuleName">
+              {{
+                tableArray[index]
+                    ? tableArray[index]?.taskData.taskName
+                    : axes[0].taskData.taskName
+              }}
+            </p>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="(ax, axIndex) in axes"
+                :key="ax ? ax.moduleId + 'ax' : axIndex"
+                :command="ax ? ax : null"
+              >
+                {{ ax ? ax.taskData.taskName : 'N/A' }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
       <Highscore
         class="highscore"
         v-if="tableArray[index] && chartData.length > 0"
@@ -43,46 +51,14 @@
       />
       <Highscore
         class="highscore"
-        v-else-if="axes[index] && chartData.length > 0"
-        :module-id="axes[index].moduleId"
+        v-else-if="axes[0] && chartData.length > 0"
+        :module-id="axes[0].moduleId"
         :participant-data="chartData"
         :selected-participant-id="selectedParticipantId"
         @participant-selected="participantSelectionChanged"
       />
     </div>
-    <!--    <Highscore
-      class="highscore"
-      v-if="axes[1] && chartData.length > 0"
-      :module-id="axes[1].moduleId"
-      :participant-data="chartData"
-      :selected-participant-id="selectedParticipantId"
-      @participant-selected="participantSelectionChanged"
-    />
-    <Highscore
-      class="highscore"
-      v-if="axes[2] && chartData.length > 0"
-      :module-id="axes[2].moduleId"
-      :participant-data="chartData"
-      :selected-participant-id="selectedParticipantId"
-      @participant-selected="participantSelectionChanged"
-    />-->
   </div>
-  <!--  <el-dropdown
-    v-if="tasks.length > 1"
-    v-on:command="taskInfo($event)"
-    trigger="click"
-    placement="bottom"
-  >
-    <div class="el-dropdown-link">dropdown</div>
-    <template #dropdown>
-      <el-dropdown-menu>
-        <el-dropdown-item v-for="task in tasks" :key="task.id" :command="task">
-          {{ task.name }}
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
-  <el-button @click="console.log(chartData)">chartData</el-button>-->
 </template>
 
 <script lang="ts">
@@ -204,5 +180,21 @@ export default class Tables extends Vue {
 
 .highScoreSelectionContainer::-webkit-scrollbar {
   display: none;
+}
+
+.el-dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.highscoreModuleName {
+  font-size: var(--font-size-default);
+  font-weight: var(--font-weight-bold);
+}
+
+.highscoreModuleIcon {
+  font-size: var(--font-size-xlarge);
 }
 </style>

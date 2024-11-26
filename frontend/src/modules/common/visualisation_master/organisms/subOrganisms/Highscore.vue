@@ -1,5 +1,6 @@
 <template>
-  <table class="highscore-table">
+  <table class="highscore-table" v-if="chartData.length > 0">
+    <p v-if="chartData[0].axes[0].axisValues === undefined">test</p>
     <tr>
       <th />
       <th />
@@ -66,6 +67,7 @@
       </td>
     </tr>
   </table>
+  <p v-else>No valid data for this task</p>
 </template>
 
 <script lang="ts">
@@ -116,6 +118,7 @@ export default class Highscore extends Vue {
   }
 
   @Watch('participantData', { immediate: true })
+  @Watch('moduleId', { immediate: true })
   onChartDataChanged(): void {
     if (this.participantData != null && this.participantData.length > 0) {
       this.chartData = this.participantData.filter((entry) => {
@@ -123,13 +126,12 @@ export default class Highscore extends Vue {
           (a) => a.moduleId === this.moduleId
         )[0];
         if (moduleAxis) {
-          let i = 0;
           for (const value of moduleAxis.axisValues) {
             if (value.value != null) {
-              i += 1;
+              return true;
             }
           }
-          return i > 0;
+          return false;
         }
       });
       for (const entry of this.chartData) {
