@@ -48,23 +48,19 @@
         }}</span
         ><span v-else
           ><el-rate
-          v-if="value.value != null"
+            v-if="value.value != null"
             v-model="value.value"
             size="large"
             :max="3"
             :disabled="true"
-        /><p v-else>---</p></span>
+          />
+          <p v-else>---</p></span
+        >
       </td>
     </tr>
-    <tr v-if="highScoreCount < chartData.length">
+    <tr v-if="highScoreCount < chartData.length" @click="highScoreCount = chartData.length">
       <td>
-        <el-button
-          link
-          @click="highScoreCount = chartData.length"
-          class="text-button"
-        >
-          ...
-        </el-button>
+        <el-button link class="text-button valueTableEntry"> ... </el-button>
       </td>
     </tr>
   </table>
@@ -76,10 +72,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Avatar, ParticipantInfo } from '@/types/api/Participant';
-import * as votingService from '@/services/voting-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from '@/services/cash-service';
-import { VoteParameterResult } from '@/types/api/Vote';
 
 interface AxisValue {
   id: string;
@@ -104,7 +97,6 @@ export default class Highscore extends Vue {
   @Prop() readonly selectedParticipantId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  highScoreList: { value: number | any; avatar: Avatar }[] = [];
   sortColumn = 'rate';
   sortOrder = 1;
   highScoreCount = 5;
@@ -152,6 +144,7 @@ export default class Highscore extends Vue {
         });
       });
     }
+    this.sortData();
   }
 
   sortData(): DataEntry[] {
@@ -164,15 +157,22 @@ export default class Highscore extends Vue {
           (value) => value.id === this.sortColumn
         );
 
-        if (
-          aVal != null &&
-          bVal != null &&
-          aVal.value != null &&
-          bVal.value != null
-        ) {
-          return (bVal.value - aVal.value) * this.sortOrder;
+        const aValue = aVal?.value;
+        const bValue = bVal?.value;
+
+        if (aValue === null || aValue === undefined) {
+          return this.sortOrder === 1 ? 1 : -1;
         }
-        return -1;
+        if (bValue === null || bValue === undefined) {
+          return this.sortOrder === 1 ? -1 : 1;
+        }
+        const primaryComparison = (bValue - aValue) * this.sortOrder;
+        if (primaryComparison === 0) {
+          const idComparison = a.participant.id.localeCompare(b.participant.id);
+          return idComparison;
+        }
+
+        return primaryComparison;
       });
     }
     return this.chartData;

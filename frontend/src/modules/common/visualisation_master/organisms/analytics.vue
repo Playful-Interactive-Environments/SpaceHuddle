@@ -7,6 +7,7 @@
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
       />
     </div>
+    <hr />
     <div class="AnalyticsTables">
       <Tables
         v-if="axes.length > 0 && dataEntries.length > 0"
@@ -441,7 +442,14 @@ export default class Analytics extends Vue {
   height: 95%;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  align-items: center;
+  gap: 1rem;
+  hr {
+    margin: 1.5rem 0 0.5rem 0;
+    width: 70%;
+    background-color: var(--color-background-dark);
+    border-radius: var(--border-radius);
+  }
   .AnalyticsParallelCoordinates {
     height: calc(60% - 3rem);
     width: 100%;

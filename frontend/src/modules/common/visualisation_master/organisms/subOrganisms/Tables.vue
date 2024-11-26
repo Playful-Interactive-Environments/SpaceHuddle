@@ -189,7 +189,7 @@ export default class Tables extends Vue {
   margin-bottom: 0.5rem;
   border-radius: var(--border-radius-xs);
   border: 2px solid transparent;
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem 0.6rem;
   transition: border 0.3s ease;
   cursor: pointer;
 }
