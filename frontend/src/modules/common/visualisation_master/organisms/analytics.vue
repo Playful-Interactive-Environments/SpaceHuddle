@@ -41,7 +41,6 @@ import * as sessionService from '@/services/session-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import * as cashService from '@/services/cash-service';
 import * as votingService from '@/services/voting-service';
-import * as ideaService from '@/services/idea-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import * as pixiUtil from '@/utils/pixi';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
@@ -51,9 +50,9 @@ import { Session } from '@/types/api/Session';
 import QrcodeVue from 'qrcode.vue';
 import { ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/modules/common/visualisation_master/organisms/subOrganisms/parallelCoordinates.vue';
-import { Module } from '@/types/api/Module';
 import Tables from '@/modules/common/visualisation_master/organisms/subOrganisms/Tables.vue';
-import { Vote, VoteResult } from '@/types/api/Vote';
+import { VoteResult } from '@/types/api/Vote';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -114,7 +113,9 @@ export default class Analytics extends Vue {
   otherTasks: Task[] = [];
   votingTasks: Task[] = [];
   brainstormingTasks: Task[] = [];
+
   ideas: Idea[] = [];
+  votes: VoteResult[] = [];
 
   session: Session | null = null;
 
@@ -147,7 +148,9 @@ export default class Analytics extends Vue {
   }
 
   get dataEntries(): DataEntry[] {
-    return this.CalculateDataEntries();
+    const data = this.CalculateDataEntries();
+    //console.log(data);
+    return data;
   }
 
   deregisterAll(): void {
@@ -254,10 +257,21 @@ export default class Analytics extends Vue {
     }
 
     for (const task of this.brainstormingTasks) {
-      taskParticipantService.registerGetList(
+      taskParticipantService.registerGetIterationStepFinalList(
         task.id,
         (steps: TaskParticipantIterationStep[]) => {
           this.updateIterationSteps(task.modules[0].id, task, steps);
+        },
+        EndpointAuthorisationType.MODERATOR,
+        30
+      );
+    }
+
+    for (const task of this.votingTasks) {
+      votingService.registerGetResult(
+        task.id,
+        (votes: VoteResult[]) => {
+          this.updateVotes(task.modules[0].id, task, votes);
         },
         EndpointAuthorisationType.MODERATOR,
         30
@@ -288,6 +302,67 @@ export default class Analytics extends Vue {
 
   updateSession(session: Session): void {
     this.session = session;
+  }
+
+  updateVotes(id: string, task: Task, votes: VoteResult[]): void {
+    this.votes = votes;
+    const newSteps = this.processVotes();
+    newSteps && this.updateIterationSteps(id, task, newSteps);
+  }
+
+  processVotes(): TaskParticipantIterationStep[] {
+    const brainstormingSteps = this.steps.filter(
+      (step) => String(step.taskData.taskType) === 'BRAINSTORMING'
+    );
+
+    const newSteps = this.votes.flatMap((vote) =>
+      brainstormingSteps
+        .map((step) =>
+          step.steps.find((entry) => entry.ideaId === vote.idea.id)
+        )
+        .filter(Boolean)
+        .map((idea) => ({
+          id: vote.idea.id + 'voteThing',
+          iteration: 0,
+          step: 0,
+          ideaId: null,
+          state: TaskParticipantIterationStepStatesType.NEUTRAL,
+          parameter: {
+            countParticipant: vote.countParticipant,
+            ratingSum: vote.ratingSum,
+            averageRating: vote.ratingSum / vote.countParticipant,
+            gameplayResult: {},
+            bestIdea: [vote],
+            bestIdeaAverageRating: vote.ratingSum / vote.countParticipant,
+          },
+          avatar: idea!.avatar,
+        }))
+    );
+
+    return newSteps.reduce((acc, current) => {
+      const existing = acc.find((step) => step.avatar.id === current.avatar.id);
+      if (existing) {
+        existing.id += current.id;
+        existing.parameter.countParticipant +=
+          current.parameter.countParticipant;
+        existing.parameter.ratingSum += current.parameter.ratingSum;
+        existing.parameter.averageRating =
+          existing.parameter.ratingSum / existing.parameter.countParticipant;
+        existing.parameter.bestIdea = [
+          ...existing.parameter.bestIdea,
+          ...current.parameter.bestIdea,
+        ].sort(
+          (a, b) =>
+            b.ratingSum / b.countParticipant - a.ratingSum / a.countParticipant
+        );
+        existing.parameter.bestIdeaAverageRating =
+          existing.parameter.bestIdea[0].ratingSum /
+          existing.parameter.bestIdea[0].countParticipant;
+      } else {
+        acc.push(current);
+      }
+      return acc;
+    }, [] as TaskParticipantIterationStep[]);
   }
 
   updateIterationSteps(
@@ -391,6 +466,10 @@ export default class Analytics extends Vue {
     'lifetime',
     'pointsSpent',
     'count',
+    'step',
+    'ratingSum',
+    'averageRating',
+    'bestIdeaAverageRating',
   ];
 
   CalculateAxes(): Axis[] {
@@ -435,6 +514,7 @@ export default class Analytics extends Vue {
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
+    console.log(this.steps);
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {

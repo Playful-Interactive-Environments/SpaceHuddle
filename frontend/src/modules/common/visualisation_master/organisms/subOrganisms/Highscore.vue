@@ -39,9 +39,9 @@
       <td
         v-for="value in chartData[index].axes[0].axisValues"
         :key="entry.participant.id + value.id"
-        class="valueTableEntry"
+        class="valueTableEntry el-rate--large"
       >
-        <span v-if="value.id !== 'rate' && value.id !== 'stars'">{{
+        <span v-if="value.id !== 'rate' && value.id !== 'stars'" >{{
           value.value != null
             ? Math.round((value.value + Number.EPSILON) * 100) / 100
             : '---'
