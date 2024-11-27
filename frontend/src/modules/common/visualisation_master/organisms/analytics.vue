@@ -245,6 +245,9 @@ export default class Analytics extends Vue {
         30
       );
     }
+  }
+  @Watch('otherTasks', { immediate: true })
+  onOtherTasksChanged(): void {
     for (const task of this.otherTasks) {
       taskParticipantService.registerGetIterationList(
         task.id,
@@ -255,7 +258,9 @@ export default class Analytics extends Vue {
         30
       );
     }
-
+  }
+  @Watch('brainstormingTasks', { immediate: true })
+  onBrainstormingTasksChanged(): void {
     for (const task of this.brainstormingTasks) {
       taskParticipantService.registerGetIterationStepFinalList(
         task.id,
@@ -266,7 +271,11 @@ export default class Analytics extends Vue {
         30
       );
     }
-
+    this.onVotingTasksChanged();
+  }
+  @Watch('votingTasks', { immediate: true })
+  onVotingTasksChanged(): void {
+    cashService.deregisterAllGet(this.updateVotes);
     for (const task of this.votingTasks) {
       votingService.registerGetResult(
         task.id,
@@ -289,7 +298,7 @@ export default class Analytics extends Vue {
     this.otherTasks = this.tasks
       .filter(
         (task) =>
-          task.taskType !== 'PLAYING' && task.taskType !== 'BRAINSTORMING'
+          task.taskType !== 'PLAYING' && task.taskType !== 'BRAINSTORMING' && task.taskType !== 'VOTING'
       )
       .sort();
     this.votingTasks = this.tasks
