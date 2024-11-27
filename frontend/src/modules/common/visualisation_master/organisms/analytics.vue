@@ -7,6 +7,7 @@
           JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
         "
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
+        :steps="JSON.parse(JSON.stringify(steps))"
       />
     </div>
 
@@ -28,10 +29,6 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import {
-  defaultFilterData,
-  FilterData,
-} from '@/components/moderator/molecules/IdeaFilterBase.vue';
 import { Task } from '@/types/api/Task';
 import { getAsyncModule, getEmptyComponent } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
@@ -41,6 +38,7 @@ import * as sessionService from '@/services/session-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import * as cashService from '@/services/cash-service';
 import * as votingService from '@/services/voting-service';
+import * as ideaService from '@/services/idea-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import * as pixiUtil from '@/utils/pixi';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
@@ -104,7 +102,6 @@ export default class Analytics extends Vue {
   @Prop({ default: false }) readonly paused!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  filter: FilterData = { ...defaultFilterData };
 
   textureToken = pixiUtil.createLoadingToken();
 
@@ -148,9 +145,7 @@ export default class Analytics extends Vue {
   }
 
   get dataEntries(): DataEntry[] {
-    const data = this.CalculateDataEntries();
-    //console.log(data);
-    return data;
+    return this.CalculateDataEntries();
   }
 
   deregisterAll(): void {
@@ -295,17 +290,19 @@ export default class Analytics extends Vue {
     this.gameTasks = this.tasks
       .filter((task) => task.taskType === 'PLAYING')
       .sort();
-    this.otherTasks = this.tasks
-      .filter(
-        (task) =>
-          task.taskType !== 'PLAYING' && task.taskType !== 'BRAINSTORMING' && task.taskType !== 'VOTING'
-      )
-      .sort();
     this.votingTasks = this.tasks
       .filter((task) => task.taskType === 'VOTING')
       .sort();
     this.brainstormingTasks = this.tasks
       .filter((task) => task.taskType === 'BRAINSTORMING')
+      .sort();
+    this.otherTasks = this.tasks
+      .filter(
+        (task) =>
+          task.taskType !== 'PLAYING' &&
+          task.taskType !== 'BRAINSTORMING' &&
+          task.taskType !== 'VOTING'
+      )
       .sort();
   }
 
@@ -341,7 +338,7 @@ export default class Analytics extends Vue {
             ratingSum: vote.ratingSum,
             averageRating: vote.ratingSum / vote.countParticipant,
             gameplayResult: {},
-            bestIdea: [vote],
+            ideas: [vote],
             bestIdeaAverageRating: vote.ratingSum / vote.countParticipant,
           },
           avatar: idea!.avatar,
@@ -357,16 +354,16 @@ export default class Analytics extends Vue {
         existing.parameter.ratingSum += current.parameter.ratingSum;
         existing.parameter.averageRating =
           existing.parameter.ratingSum / existing.parameter.countParticipant;
-        existing.parameter.bestIdea = [
-          ...existing.parameter.bestIdea,
-          ...current.parameter.bestIdea,
+        existing.parameter.ideas = [
+          ...existing.parameter.ideas,
+          ...current.parameter.ideas,
         ].sort(
           (a, b) =>
             b.ratingSum / b.countParticipant - a.ratingSum / a.countParticipant
         );
         existing.parameter.bestIdeaAverageRating =
-          existing.parameter.bestIdea[0].ratingSum /
-          existing.parameter.bestIdea[0].countParticipant;
+          existing.parameter.ideas[0].ratingSum /
+          existing.parameter.ideas[0].countParticipant;
       } else {
         acc.push(current);
       }

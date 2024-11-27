@@ -8,3 +8,10 @@ api/.idea/
 .well-known/
 /.htaccess
 api/public/export
+api/config/env.example.php
+api/composer.lock
+frontend/.env
+frontend/package-lock.json
+frontend/package-lock.json
+frontend/package.json
+frontend/.env

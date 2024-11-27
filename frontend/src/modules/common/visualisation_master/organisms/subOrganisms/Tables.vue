@@ -44,7 +44,7 @@
       <Highscore
         class="highscore"
         v-if="tableArray[index] && chartData.length > 0"
-        :module-id="tableArray[index].moduleId"
+        :module-id="tableArray[index]!.moduleId"
         :participant-data="JSON.parse(JSON.stringify(chartData))"
         :selected-participant-id="selectedParticipantId"
         @participant-selected="participantSelectionChanged"
@@ -113,9 +113,7 @@ export default class Tables extends Vue {
   @Prop() readonly participantData!: DataEntry[];
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  openHighScoreLevels: string[] = [];
   ideas: Idea[] = [];
-  sortColumn = 'normalisedTime';
   sortOrder = 1;
 
   selectedParticipantId = '';

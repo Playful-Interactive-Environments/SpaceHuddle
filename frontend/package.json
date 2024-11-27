@@ -28,6 +28,7 @@
     "chartjs-plugin-annotation": "^3.0.1",
     "colorjs.io": "^0.4.5",
     "core-js": "^3.33.3",
+    "d3": "^7.9.0",
     "delta-e": "^0.0.8",
     "element-plus": "^2.4.2",
     "html2pdf.js": "^0.10.1",
@@ -67,6 +68,7 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
