@@ -4,21 +4,65 @@
     class="parallelCoordinatesContainer"
     style="position: relative"
   >
-    <div
-      class="participationContainer"
-      :style="{
-        marginLeft: `${axesSpacing / 8}px`,
-      }"
-    >
+    <div class="participationContainer">
       <div
-        class="axisControls"
+        class="axisControls axisControlsFlex"
         v-for="axis in activeAxes"
         :key="axis.moduleId + 1"
         :style="{
           textAlign: 'center',
           width: `${axesSpacing}px`,
+          gap: `${axesSpacing / 4}px`,
+          paddingLeft: `${axesSpacing / 3}px`,
         }"
       >
+        <p class="listButton">
+          <el-dropdown
+            trigger="click"
+            placement="bottom"
+            v-if="isIdeaTask(axis)"
+            :max-height="height"
+            :hide-on-click="false"
+          >
+            <div class="el-dropdown-link">
+              <font-awesome-icon icon="list" />
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="entry of getIdeasForList(axis)"
+                  :key="entry.avatar.id + axis.moduleId"
+                  :divided="true"
+                  :disabled="true"
+                  :style="{
+                    cursor: 'default',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                  }"
+                >
+                  <div class="dropDownParticipantIconContainer">
+                    <font-awesome-icon
+                      :icon="entry.avatar.symbol"
+                      :style="{ color: entry.avatar.color }"
+                    ></font-awesome-icon>
+                  </div>
+                  <div class="dropDownIdeaContainer">
+                    <IdeaCard
+                      v-for="idea of entry.ideas"
+                      :key="idea.id + entry.avatar.id + axis.moduleId"
+                      class="IdeaCard"
+                      :idea="idea"
+                      :is-selectable="false"
+                      :is-editable="false"
+                      :cutLongTexts="true"
+                      :portrait="false"
+                    />
+                  </div>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </p>
         <p class="participantCount">
           <font-awesome-icon icon="user" /> {{ getParticipationCount(axis) }}
         </p>
@@ -318,8 +362,8 @@
 </template>
 
 <script lang="ts">
-import { ParticipantInfo } from '@/types/api/Participant';
-import { Vue } from 'vue-class-component';
+import { Avatar, ParticipantInfo } from '@/types/api/Participant';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
@@ -330,6 +374,14 @@ import {
   IconName,
   IconPrefix,
 } from '@fortawesome/fontawesome-svg-core';
+import { Idea } from '@/types/api/Idea';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import Tables from '@/modules/common/visualisation_master/organisms/subOrganisms/Tables.vue';
+import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
+import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
+import QrcodeVue from 'qrcode.vue';
+import { getEmptyComponent } from '@/modules';
 
 interface SubAxis {
   id: string;
@@ -369,9 +421,22 @@ interface PathPart {
   value: number;
 }
 
-export default class Analytics extends Vue {
+@Options({
+  components: {
+    IdeaCard,
+  },
+})
+export default class ParallelCoordinates extends Vue {
   @Prop({ default: () => [] }) chartAxes!: Axis[];
   @Prop({ default: () => [] }) participantData!: DataEntry[];
+  @Prop({ default: () => [] }) steps!: {
+    moduleId: string;
+    taskData: {
+      taskType: TaskType;
+      taskName: string;
+    };
+    steps: TaskParticipantIterationStep[];
+  }[];
 
   padding = 20;
   hoverStroke: string | null = null;
@@ -425,6 +490,13 @@ export default class Analytics extends Vue {
 
   get height() {
     return this.parentHeight || 500;
+  }
+
+  isIdeaTask(axis: Axis) {
+    return (
+      (axis.taskData.taskType as string) === 'BRAINSTORMING' ||
+      (axis.taskData.taskType as string) === 'VOTING'
+    );
   }
 
   @Watch('chartAxes', { immediate: true })
@@ -748,6 +820,41 @@ export default class Analytics extends Vue {
     this.axes.splice(index, replace ? 1 : 0, axis);
     this.axes[index].active = true;
   }
+
+  getIdeasForList(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
+    const steps = this.steps.find((step) => step.moduleId === axis.moduleId);
+    let returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
+    if (steps) {
+      if ((steps.taskData.taskType as string) === 'VOTING') {
+        returnArray = returnArray.concat(this.getVoteIdeasForList(steps.steps));
+      }
+      /*if ((steps.taskData.taskType as string) === 'BRAINSTORMING') {
+        returnArray = returnArray.concat(
+          this.getBrainstormingIdeasForList(steps.steps)
+        );
+      }*/
+    }
+    return returnArray;
+  }
+
+  getVoteIdeasForList(
+    steps: TaskParticipantIterationStep[]
+  ): { avatar: Avatar; ideas: Idea[] }[] {
+    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
+    for (const step of steps) {
+      const ideas = step.parameter.ideas.map((i) => i.idea);
+      returnArray.push({ avatar: step.avatar, ideas: ideas });
+    }
+    return returnArray;
+  }
+
+  getBrainstormingIdeasForList(
+    steps: TaskParticipantIterationStep[]
+  ): { avatar: Avatar; ideas: Idea[] }[] {
+    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
+    console.log(steps);
+    return returnArray;
+  }
 }
 </script>
 
@@ -844,6 +951,13 @@ export default class Analytics extends Vue {
   }
 }
 
+.axisControlsFlex {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 .axisPlusContainer {
   opacity: 0;
   display: flex;
@@ -881,5 +995,14 @@ export default class Analytics extends Vue {
 
 .aboveBelow {
   font-weight: var(--font-weight-bold);
+}
+
+.dropDownIdeaContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  .IdeaCard {
+    width: 100%;
+  }
 }
 </style>
