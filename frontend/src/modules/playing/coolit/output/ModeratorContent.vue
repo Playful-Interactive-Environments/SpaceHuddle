@@ -1,5 +1,6 @@
 <template>
   <div class="module-content">
+    <div class="coolit-options">
     <IdeaFilter
       :taskId="taskId"
       :use-state-filter="false"
@@ -254,6 +255,10 @@
         </el-select>
       </el-form-item>
     </IdeaSettings>
+    </div>
+    <div class="Highscore">
+      <Highscore :task-id="taskId" />
+    </div>
   </div>
 </template>
 
@@ -294,6 +299,7 @@ import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import * as placeable from '@/types/game/Placeable';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import Highscore from "@/modules/playing/coolit/organisms/Highscore.vue";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const emptyParameter = {
@@ -304,6 +310,7 @@ const emptyParameter = {
 
 @Options({
   components: {
+    Highscore,
     ToolTip,
     IdeaMap,
     FontAwesomeIcon,
@@ -621,8 +628,16 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: stretch;
   padding-bottom: 1rem;
+  .coolit-options {
+    min-height: 70%;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: 1rem;
+  }
+
 }
 
 @media only screen and (min-width: 950px) {

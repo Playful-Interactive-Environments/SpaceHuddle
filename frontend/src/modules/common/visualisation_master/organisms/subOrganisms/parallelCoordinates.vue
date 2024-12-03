@@ -66,7 +66,7 @@
                         :is-selectable="false"
                         :is-editable="false"
                         :cutLongTexts="true"
-                        :portrait="false"
+                        :portrait="!(idea.link || idea.image)"
                       />
                     </div>
                   </div>
@@ -519,7 +519,6 @@ export default class ParallelCoordinates extends Vue {
 
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
-    console.log("update Axes");
     for (const axis of this.availableAxes) {
       const chartAxis = this.chartAxes.find(
         (ax) => ax.moduleId === axis.moduleId

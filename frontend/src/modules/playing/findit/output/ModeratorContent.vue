@@ -1,5 +1,6 @@
 <template>
   <div class="module-content">
+    <div class="findit-options">
     <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
     <el-container class="content-container">
       <el-aside v-if="selectedLevel">
@@ -247,6 +248,10 @@
         </el-select>
       </el-form-item>
     </IdeaSettings>
+    </div>
+    <div class="Highscore">
+      <Highscore :task-id="taskId" />
+    </div>
   </div>
 </template>
 
@@ -284,6 +289,7 @@ import { Task } from '@/types/api/Task';
 import { Module } from '@/types/api/Module';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import Highscore from "@/modules/playing/findit/organisms/Highscore.vue";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const emptyParameter = {
@@ -294,6 +300,7 @@ const emptyParameter = {
 
 @Options({
   components: {
+    Highscore,
     ToolTip,
     FontAwesomeIcon,
     PlayState,
@@ -592,8 +599,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: stretch;
-  padding-bottom: 1rem;
+  .findit-options {
+    min-height: 70%;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: 1rem;
+  }
 }
 
 .el-tabs::v-deep(.el-tabs__content) {
