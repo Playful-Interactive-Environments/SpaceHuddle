@@ -509,17 +509,23 @@ export default class ParallelCoordinates extends Vue {
 
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
-    for (const axis of this.availableAxes) {
-      const chartAxis = this.chartAxes.find(
+    for (let axis of this.availableAxes) {
+      const chartAxisIndex = this.chartAxes.findIndex(
         (ax) => ax.moduleId === axis.moduleId
       );
-      if (chartAxis) {
-        chartAxis.active = axis.active;
-        chartAxis.available = axis.available;
+      if (chartAxisIndex > -1) {
+        this.chartAxes[chartAxisIndex].active = axis.active;
+        this.chartAxes[chartAxisIndex].available = axis.available;
+
+        axis = this.chartAxes[chartAxisIndex];
+        this.chartAxes.splice(chartAxisIndex, 1);
+        console.log(axis.taskData.taskName);
       }
     }
 
-    this.availableAxes = this.chartAxes;
+    console.log('-----');
+
+    this.availableAxes = this.availableAxes.concat(this.chartAxes);
     this.axes = [...this.availableAxes].filter(
       (axis) => axis.active && axis.available
     );
@@ -811,8 +817,14 @@ export default class ParallelCoordinates extends Vue {
   onDrop(dropIndex: number) {
     if (this.draggedIndex === null || this.draggedIndex === dropIndex) return;
 
+    const DraggedAvailableAxisIndex = this.availableAxes.findIndex((axis) => axis.moduleId === this.axes[this.draggedIndex!].moduleId);
+    const DropAvailableAxisIndex = this.availableAxes.findIndex((axis) => axis.moduleId === this.axes[dropIndex].moduleId);
+
     const draggedOriginalAxis = this.axes.splice(this.draggedIndex, 1)[0];
     this.axes.splice(dropIndex, 0, draggedOriginalAxis);
+
+    const draggedAvailableAxis = this.availableAxes.splice(DraggedAvailableAxisIndex, 1)[0];
+    this.availableAxes.splice(DropAvailableAxisIndex, 0, draggedAvailableAxis);
 
     for (const entry of this.chartData) {
       const draggedDataEntry = entry.axes.splice(this.draggedIndex, 1)[0];
