@@ -539,6 +539,12 @@ export default class Analytics extends Vue {
               subStep.parameter?.game,
             ];
             for (const source of sources) {
+              if (
+                (taskData.taskType as string) === 'BRAINSTORMING' &&
+                value === 'stars'
+              ) {
+                return [];
+              }
               if (source && value in source) return source[value];
             }
             return [];

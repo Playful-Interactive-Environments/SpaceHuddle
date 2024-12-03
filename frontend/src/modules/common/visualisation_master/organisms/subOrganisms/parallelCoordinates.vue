@@ -519,11 +519,8 @@ export default class ParallelCoordinates extends Vue {
 
         axis = this.chartAxes[chartAxisIndex];
         this.chartAxes.splice(chartAxisIndex, 1);
-        console.log(axis.taskData.taskName);
       }
     }
-
-    console.log('-----');
 
     this.availableAxes = this.availableAxes.concat(this.chartAxes);
     this.axes = [...this.availableAxes].filter(
@@ -817,13 +814,20 @@ export default class ParallelCoordinates extends Vue {
   onDrop(dropIndex: number) {
     if (this.draggedIndex === null || this.draggedIndex === dropIndex) return;
 
-    const DraggedAvailableAxisIndex = this.availableAxes.findIndex((axis) => axis.moduleId === this.axes[this.draggedIndex!].moduleId);
-    const DropAvailableAxisIndex = this.availableAxes.findIndex((axis) => axis.moduleId === this.axes[dropIndex].moduleId);
+    const DraggedAvailableAxisIndex = this.availableAxes.findIndex(
+      (axis) => axis.moduleId === this.axes[this.draggedIndex!].moduleId
+    );
+    const DropAvailableAxisIndex = this.availableAxes.findIndex(
+      (axis) => axis.moduleId === this.axes[dropIndex].moduleId
+    );
 
     const draggedOriginalAxis = this.axes.splice(this.draggedIndex, 1)[0];
     this.axes.splice(dropIndex, 0, draggedOriginalAxis);
 
-    const draggedAvailableAxis = this.availableAxes.splice(DraggedAvailableAxisIndex, 1)[0];
+    const draggedAvailableAxis = this.availableAxes.splice(
+      DraggedAvailableAxisIndex,
+      1
+    )[0];
     this.availableAxes.splice(DropAvailableAxisIndex, 0, draggedAvailableAxis);
 
     for (const entry of this.chartData) {
