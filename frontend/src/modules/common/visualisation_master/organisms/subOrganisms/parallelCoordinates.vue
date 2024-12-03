@@ -30,7 +30,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
-                  v-for="entry of getIdeasForList(axis)"
+                  v-for="entry of getCachedIdeas(axis)"
                   :key="entry.avatar.id + axis.moduleId"
                   :divided="true"
                   :disabled="true"
@@ -386,6 +386,7 @@ import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
 import QrcodeVue from 'qrcode.vue';
 import { getEmptyComponent } from '@/modules';
+import { reactive } from 'vue';
 
 interface SubAxis {
   id: string;
@@ -458,6 +459,8 @@ export default class ParallelCoordinates extends Vue {
   parentHeight = 0;
   resizeObserver: ResizeObserver | null = null;
 
+  cachedIdeas: Record<string, { avatar: Avatar; ideas: Idea[] }[]> = reactive({});
+
   mounted() {
     this.calculateParentDimensions();
     this.resizeObserver = new ResizeObserver((entries) => {
@@ -472,6 +475,7 @@ export default class ParallelCoordinates extends Vue {
     if (parentElement) {
       this.resizeObserver.observe(parentElement);
     }
+    this.cacheAllIdeas();
   }
 
   beforeDestroy() {
@@ -825,18 +829,32 @@ export default class ParallelCoordinates extends Vue {
     this.axes[index].active = true;
   }
 
-  getIdeasForList(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
-    const steps = this.steps.find((step) => step.moduleId === axis.moduleId);
-    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
-    if (steps) {
-      if (steps.taskData.taskType as string === 'VOTING') {
-        return this.getVoteIdeasForList(steps.steps);
-      }
-      if (steps.taskData.taskType as string === 'BRAINSTORMING') {
-        return this.getBrainstormingIdeasForList(steps.steps);
-      }
+  private cacheAllIdeas() {
+    for (const axis of this.activeAxes) {
+      this.cachedIdeas[axis.moduleId] = this.computeIdeasForAxis(axis);
     }
-    return returnArray;
+  }
+
+  getCachedIdeas(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
+    return this.cachedIdeas[axis.moduleId] || [];
+  }
+
+  @Watch('steps', { immediate: true, deep: true })
+  onStepsChanged() {
+    this.cacheAllIdeas();
+  }
+
+  computeIdeasForAxis(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
+    const steps = this.steps.find((step) => step.moduleId === axis.moduleId);
+    if (!steps) return [];
+
+    if (steps.taskData.taskType as string === 'VOTING') {
+      return this.getVoteIdeasForList(steps.steps);
+    }
+    if (steps.taskData.taskType as string === 'BRAINSTORMING') {
+      return this.getBrainstormingIdeasForList(steps.steps);
+    }
+    return [];
   }
 
   getBrainstormingIdeasForList(
