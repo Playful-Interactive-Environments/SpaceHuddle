@@ -50,7 +50,15 @@
                     ></font-awesome-icon>
                   </div>
                   <div class="dropDownIdeaContainer">
-                    <div class="ideaCardContainer" v-for="(idea, index) of entry.ideas" :key="entry.avatar.id + axis.moduleId + (idea ? idea.id : index)">
+                    <div
+                      class="ideaCardContainer"
+                      v-for="(idea, index) of entry.ideas"
+                      :key="
+                        entry.avatar.id +
+                        axis.moduleId +
+                        (idea ? idea.id : index)
+                      "
+                    >
                       <IdeaCard
                         v-if="idea"
                         class="IdeaCard"
@@ -459,7 +467,9 @@ export default class ParallelCoordinates extends Vue {
   parentHeight = 0;
   resizeObserver: ResizeObserver | null = null;
 
-  cachedIdeas: Record<string, { avatar: Avatar; ideas: Idea[] }[]> = reactive({});
+  cachedIdeas: Record<string, { avatar: Avatar; ideas: Idea[] }[]> = reactive(
+    {}
+  );
 
   mounted() {
     this.calculateParentDimensions();
@@ -509,8 +519,19 @@ export default class ParallelCoordinates extends Vue {
 
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
+    console.log("update Axes");
+    for (const axis of this.availableAxes) {
+      const chartAxis = this.chartAxes.find(
+        (ax) => ax.moduleId === axis.moduleId
+      );
+      if (chartAxis) {
+        chartAxis.active = axis.active;
+        chartAxis.available = axis.available;
+      }
+    }
+
     this.availableAxes = this.chartAxes;
-    this.axes = [...this.availableAxes];
+    this.axes = [...this.availableAxes].filter((axis) => axis.active && axis.available);
   }
 
   @Watch('participantData', { immediate: true })
@@ -848,10 +869,10 @@ export default class ParallelCoordinates extends Vue {
     const steps = this.steps.find((step) => step.moduleId === axis.moduleId);
     if (!steps) return [];
 
-    if (steps.taskData.taskType as string === 'VOTING') {
+    if ((steps.taskData.taskType as string) === 'VOTING') {
       return this.getVoteIdeasForList(steps.steps);
     }
-    if (steps.taskData.taskType as string === 'BRAINSTORMING') {
+    if ((steps.taskData.taskType as string) === 'BRAINSTORMING') {
       return this.getBrainstormingIdeasForList(steps.steps);
     }
     return [];
