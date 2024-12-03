@@ -9,7 +9,12 @@
         class="axisControls axisControlsFlex"
         v-for="axis in activeAxes"
         :key="axis.moduleId"
-        :style="axisControlsStyle"
+        :style="{
+          textAlign: 'center',
+          width: `${axesSpacing}px`,
+          gap: `${axesSpacing / 4}px`,
+          paddingLeft: `${axesSpacing / 3}px`,
+        }"
       >
         <p class="listButton">
           <el-dropdown
@@ -29,7 +34,11 @@
                   :key="entry.avatar.id + axis.moduleId"
                   :divided="true"
                   :disabled="true"
-                  :style="dropdownItemStyle"
+                  :style="{
+                    cursor: 'default',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                  }"
                 >
                   <div
                     class="dropDownParticipantIconContainer"
@@ -250,7 +259,11 @@
           class="axisControls"
           v-for="(axis, index) in activeAxes"
           :key="axis.moduleId"
-          :style="axisControlsStyle"
+          :style="{
+            textAlign: 'center',
+            width: `${axesSpacing / 1.5}px`,
+            margin: `0 ${axesSpacing / 6}px`,
+          }"
           draggable="true"
           @dragstart="onDragStart(index)"
           @dragover.prevent
@@ -327,7 +340,10 @@
           class="axisPlusContainer"
           v-for="index in activeAxes.length - 1"
           :key="index - 1 + 'plus'"
-          :style="axisPlusContainerStyle"
+          :style="{
+            width: `${axesSpacing / 3}px`,
+            margin: `0 ${axesSpacing / 3}px`,
+          }"
         >
           <el-dropdown
             class="axisPlus"
@@ -899,30 +915,6 @@ export default class ParallelCoordinates extends Vue {
       returnArray.push({ avatar: step.avatar, ideas: ideas });
     }
     return returnArray;
-  }
-
-  get axisControlsStyle() {
-    return {
-      textAlign: 'center',
-      width: `${this.axesSpacing}px`,
-      gap: `${this.axesSpacing / 4}px`,
-      paddingLeft: `${this.axesSpacing / 3}px`,
-    };
-  }
-
-  get dropdownItemStyle() {
-    return {
-      cursor: 'default',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    };
-  }
-
-  get axisPlusContainerStyle() {
-    return {
-      width: `${this.axesSpacing / 3}px`,
-      margin: `0 ${this.axesSpacing / 3}px`,
-    };
   }
 }
 </script>
