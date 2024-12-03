@@ -8,13 +8,8 @@
       <div
         class="axisControls axisControlsFlex"
         v-for="axis in activeAxes"
-        :key="axis.moduleId + 1"
-        :style="{
-          textAlign: 'center',
-          width: `${axesSpacing}px`,
-          gap: `${axesSpacing / 4}px`,
-          paddingLeft: `${axesSpacing / 3}px`,
-        }"
+        :key="axis.moduleId"
+        :style="axisControlsStyle"
       >
         <p class="listButton">
           <el-dropdown
@@ -34,11 +29,7 @@
                   :key="entry.avatar.id + axis.moduleId"
                   :divided="true"
                   :disabled="true"
-                  :style="{
-                    cursor: 'default',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                  }"
+                  :style="dropdownItemStyle"
                 >
                   <div
                     class="dropDownParticipantIconContainer"
@@ -125,7 +116,7 @@
 
       <!-- Average Data Line -->
       <g
-        v-for="(pathPart, index) in getAverageDataLinePath()"
+        v-for="(pathPart, index) in averageDataLinePath"
         :key="pathPart?.path"
         :fill="'var(--color-evaluating)'"
       >
@@ -166,82 +157,89 @@
 
       <!-- Data Lines as Curves -->
       <g v-for="entry in chartData" :key="entry.participant.id">
-        <g
-          v-for="pathPart in getDataLine(entry)"
-          :key="pathPart?.path"
-          class="dataLineHover"
-          fill="none"
-          @mouseenter="hoverStroke = entry.participant.avatar.color"
-          @mouseleave="hoverStroke = null"
-        >
-          <path v-if="pathPart" :d="pathPart.path" />
-        </g>
-        <g
-          v-for="(pathPart, index) in getDataLine(entry)"
-          :key="pathPart?.path"
-          class="dataLine"
-          fill="none"
-          :stroke="
-            hoverStroke === entry.participant.avatar.color
-              ? hoverStroke
-              : 'var(--color-dark-contrast)'
-          "
-          :style="{
-            strokeWidth:
-              hoverStroke === entry.participant.avatar.color ? '3px' : '1px',
-          }"
-        >
-          <path
-            class="participantDataLineIcon"
-            v-if="index === getDataLine(entry).length - 1"
-            :transform="`translate(${pathPart?.x + 20}, ${
-              pathPart?.y - 10
-            }), scale(0.04)`"
-            :d="getIconDefinition(entry.participant.avatar.symbol).icon[4] as string"
-            :fill="entry.participant.avatar.color"
-            :style="{
-              opacity:
-                hoverStroke === entry.participant.avatar.color ? '1' : '0',
-            }"
-          />
-          <circle
-            class="circle"
-            :r="
-              hoverStroke === entry.participant.avatar.color ||
-              getDataLine(entry).length <= 1
-                ? '3px'
-                : '0px'
-            "
-            :cx="pathPart?.x"
-            :cy="pathPart?.y"
-            :fill="
-              hoverStroke === entry.participant.avatar.color ||
-              getDataLine(entry).length > 1
-                ? hoverStroke
-                : 'var(--color-dark-contrast)'
-            "
-            :style="{
-              opacity:
-                hoverStroke === entry.participant.avatar.color ||
-                getDataLine(entry).length <= 1
-                  ? '1'
-                  : '0',
-            }"
-          />
-          <path
-            v-if="pathPart"
-            class="dataLinePathSegment"
-            :d="pathPart.path"
-            :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
-            :style="{
-              opacity: pathPart?.dashed
-                ? '20%'
-                : hoverStroke === entry.participant.avatar.color
-                ? '1'
-                : '45%',
-            }"
-          />
-        </g>
+        <VariableSVGWrapper>
+          <template v-slot="{ dataLine = getDataLine(entry) }">
+            <text>{{ dataLine.length }}</text>
+            <g
+              v-for="pathPart in dataLine"
+              :key="pathPart?.path"
+              class="dataLineHover"
+              fill="none"
+              @mouseenter="hoverStroke = entry.participant.avatar.color"
+              @mouseleave="hoverStroke = null"
+            >
+              <path v-if="pathPart" :d="pathPart.path" />
+            </g>
+            <g
+              v-for="(pathPart, index) in dataLine"
+              :key="pathPart?.path"
+              class="dataLine"
+              fill="none"
+              :stroke="
+                hoverStroke === entry.participant.avatar.color
+                  ? hoverStroke
+                  : 'var(--color-dark-contrast)'
+              "
+              :style="{
+                strokeWidth:
+                  hoverStroke === entry.participant.avatar.color
+                    ? '3px'
+                    : '1px',
+              }"
+            >
+              <path
+                class="participantDataLineIcon"
+                v-if="index === dataLine.length - 1"
+                :transform="`translate(${pathPart?.x + 20}, ${
+                  pathPart?.y - 10
+                }), scale(0.04)`"
+                :d="getIconDefinition(entry.participant.avatar.symbol).icon[4] as string"
+                :fill="entry.participant.avatar.color"
+                :style="{
+                  opacity:
+                    hoverStroke === entry.participant.avatar.color ? '1' : '0',
+                }"
+              />
+              <circle
+                class="circle"
+                :r="
+                  hoverStroke === entry.participant.avatar.color ||
+                  dataLine.length <= 1
+                    ? '3px'
+                    : '0px'
+                "
+                :cx="pathPart?.x"
+                :cy="pathPart?.y"
+                :fill="
+                  hoverStroke === entry.participant.avatar.color ||
+                  dataLine.length > 1
+                    ? hoverStroke
+                    : 'var(--color-dark-contrast)'
+                "
+                :style="{
+                  opacity:
+                    hoverStroke === entry.participant.avatar.color ||
+                    dataLine.length <= 1
+                      ? '1'
+                      : '0',
+                }"
+              />
+              <path
+                v-if="pathPart"
+                class="dataLinePathSegment"
+                :d="pathPart.path"
+                :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
+                :style="{
+                  opacity: pathPart?.dashed
+                    ? '20%'
+                    : hoverStroke === entry.participant.avatar.color
+                    ? '1'
+                    : '45%',
+                }"
+              />
+            </g>
+          </template>
+        </VariableSVGWrapper>
       </g>
     </svg>
 
@@ -252,11 +250,7 @@
           class="axisControls"
           v-for="(axis, index) in activeAxes"
           :key="axis.moduleId"
-          :style="{
-            textAlign: 'center',
-            width: `${axesSpacing / 1.5}px`,
-            margin: `0 ${axesSpacing / 6}px`,
-          }"
+          :style="axisControlsStyle"
           draggable="true"
           @dragstart="onDragStart(index)"
           @dragover.prevent
@@ -333,10 +327,7 @@
           class="axisPlusContainer"
           v-for="index in activeAxes.length - 1"
           :key="index - 1 + 'plus'"
-          :style="{
-            width: `${axesSpacing / 3}px`,
-            margin: `0 ${axesSpacing / 3}px`,
-          }"
+          :style="axisPlusContainerStyle"
         >
           <el-dropdown
             class="axisPlus"
@@ -379,7 +370,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
-
 import {
   findIconDefinition,
   IconLookup,
@@ -389,12 +379,9 @@ import {
 import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import Tables from '@/modules/common/visualisation_master/organisms/subOrganisms/Tables.vue';
-import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
-import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
-import QrcodeVue from 'qrcode.vue';
-import { getEmptyComponent } from '@/modules';
+import { debounce } from 'lodash';
 import { reactive } from 'vue';
+import VariableSVGWrapper from '@/modules/common/visualisation_master/organisms/subOrganisms/VariableSVGWrapper.vue';
 
 interface SubAxis {
   id: string;
@@ -436,6 +423,7 @@ interface PathPart {
 
 @Options({
   components: {
+    VariableSVGWrapper,
     IdeaCard,
   },
 })
@@ -473,13 +461,15 @@ export default class ParallelCoordinates extends Vue {
 
   mounted() {
     this.calculateParentDimensions();
-    this.resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target === this.$refs.parentElement) {
-          this.calculateParentDimensions();
+    this.resizeObserver = new ResizeObserver(
+      debounce((entries) => {
+        for (const entry of entries) {
+          if (entry.target === this.$refs.parentElement) {
+            this.calculateParentDimensions();
+          }
         }
-      }
-    });
+      }, 100)
+    );
 
     const parentElement = this.$refs.parentElement as HTMLElement;
     if (parentElement) {
@@ -530,7 +520,9 @@ export default class ParallelCoordinates extends Vue {
     }
 
     this.availableAxes = this.chartAxes;
-    this.axes = [...this.availableAxes].filter((axis) => axis.active && axis.available);
+    this.axes = [...this.availableAxes].filter(
+      (axis) => axis.active && axis.available
+    );
   }
 
   @Watch('participantData', { immediate: true })
@@ -676,7 +668,7 @@ export default class ParallelCoordinates extends Vue {
       .filter((part) => part);
   }
 
-  getAverageDataLine(): number[] {
+  get averageDataLinePath() {
     const averages: number[] = this.activeAxes
       .map((axis) => {
         const validValues = this.chartData
@@ -699,12 +691,6 @@ export default class ParallelCoordinates extends Vue {
       .filter((avg) => avg !== null) as number[];
 
     this.averageAxisValues = averages;
-    return averages;
-  }
-
-  getAverageDataLinePath(): (PathPart | undefined)[] {
-    const averages = this.getAverageDataLine();
-
     return averages
       .map((average, index) => {
         const x = this.axesSpacing * index;
@@ -897,6 +883,30 @@ export default class ParallelCoordinates extends Vue {
       returnArray.push({ avatar: step.avatar, ideas: ideas });
     }
     return returnArray;
+  }
+
+  get axisControlsStyle() {
+    return {
+      textAlign: 'center',
+      width: `${this.axesSpacing}px`,
+      gap: `${this.axesSpacing / 4}px`,
+      paddingLeft: `${this.axesSpacing / 3}px`,
+    };
+  }
+
+  get dropdownItemStyle() {
+    return {
+      cursor: 'default',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+    };
+  }
+
+  get axisPlusContainerStyle() {
+    return {
+      width: `${this.axesSpacing / 3}px`,
+      margin: `0 ${this.axesSpacing / 3}px`,
+    };
   }
 }
 </script>
