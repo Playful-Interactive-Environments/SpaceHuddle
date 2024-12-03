@@ -256,11 +256,20 @@ export default class Analytics extends Vue {
   }
   @Watch('brainstormingTasks', { immediate: true })
   onBrainstormingTasksChanged(): void {
+    cashService.deregisterAllGet(this.updateIdeas);
     for (const task of this.brainstormingTasks) {
-      taskParticipantService.registerGetIterationStepFinalList(
+      ideaService.registerGetIdeasForTask(
+        task.id,
+        null,
+        null,
+        this.updateIdeas,
+        this.authHeaderTyp,
+        30 * 60
+      );
+      taskParticipantService.registerGetIterationStepList(
         task.id,
         (steps: TaskParticipantIterationStep[]) => {
-          this.updateIterationSteps(task.modules[0].id, task, steps);
+          this.updateBrainstormings(task.modules[0].id, task, steps);
         },
         EndpointAuthorisationType.MODERATOR,
         30
@@ -281,6 +290,10 @@ export default class Analytics extends Vue {
         30
       );
     }
+  }
+
+  updateIdeas(ideas: Idea[]): void {
+    this.ideas = this.ideas.concat(ideas);
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -308,6 +321,39 @@ export default class Analytics extends Vue {
 
   updateSession(session: Session): void {
     this.session = session;
+  }
+
+  updateBrainstormings(
+    id: string,
+    task: Task,
+    steps: TaskParticipantIterationStep[]
+  ): void {
+    for (const step of steps) {
+      step.parameter.ideas = [
+        this.ideas.find((idea) => idea.id === step.ideaId),
+      ];
+      step.parameter.ideaCount = 1;
+    }
+
+    steps = steps.reduce((acc, current) => {
+      const existing = acc.find((step) => step.avatar.id === current.avatar.id);
+      if (existing) {
+        existing.id += current.id;
+        existing.parameter.ideaCount += current.parameter.ideaCount;
+        existing.parameter.ideas = [
+          ...existing.parameter.ideas,
+          ...current.parameter.ideas,
+        ].sort(
+          (a, b) =>
+            b.ratingSum / b.countParticipant - a.ratingSum / a.countParticipant
+        );
+      } else {
+        acc.push(current);
+      }
+      return acc;
+    }, [] as TaskParticipantIterationStep[]);
+
+    this.updateIterationSteps(id, task, steps);
   }
 
   updateVotes(id: string, task: Task, votes: VoteResult[]): void {
@@ -472,7 +518,7 @@ export default class Analytics extends Vue {
     'lifetime',
     'pointsSpent',
     'count',
-    'step',
+    'ideaCount',
     'ratingSum',
     'averageRating',
     'bestIdeaAverageRating',
@@ -520,7 +566,6 @@ export default class Analytics extends Vue {
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
-    console.log(this.steps);
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {

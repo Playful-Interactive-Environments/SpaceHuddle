@@ -40,23 +40,27 @@
                     alignItems: 'flex-start',
                   }"
                 >
-                  <div class="dropDownParticipantIconContainer">
+                  <div
+                    class="dropDownParticipantIconContainer"
+                    v-if="entry.avatar"
+                  >
                     <font-awesome-icon
                       :icon="entry.avatar.symbol"
                       :style="{ color: entry.avatar.color }"
                     ></font-awesome-icon>
                   </div>
                   <div class="dropDownIdeaContainer">
-                    <IdeaCard
-                      v-for="idea of entry.ideas"
-                      :key="idea.id + entry.avatar.id + axis.moduleId"
-                      class="IdeaCard"
-                      :idea="idea"
-                      :is-selectable="false"
-                      :is-editable="false"
-                      :cutLongTexts="true"
-                      :portrait="false"
-                    />
+                    <div class="ideaCardContainer" v-for="(idea, index) of entry.ideas" :key="entry.avatar.id + axis.moduleId + (idea ? idea.id : index)">
+                      <IdeaCard
+                        v-if="idea"
+                        class="IdeaCard"
+                        :idea="idea"
+                        :is-selectable="false"
+                        :is-editable="false"
+                        :cutLongTexts="true"
+                        :portrait="false"
+                      />
+                    </div>
                   </div>
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -823,16 +827,25 @@ export default class ParallelCoordinates extends Vue {
 
   getIdeasForList(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
     const steps = this.steps.find((step) => step.moduleId === axis.moduleId);
-    let returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
+    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
     if (steps) {
-      if ((steps.taskData.taskType as string) === 'VOTING') {
-        returnArray = returnArray.concat(this.getVoteIdeasForList(steps.steps));
+      if (steps.taskData.taskType as string === 'VOTING') {
+        return this.getVoteIdeasForList(steps.steps);
       }
-      /*if ((steps.taskData.taskType as string) === 'BRAINSTORMING') {
-        returnArray = returnArray.concat(
-          this.getBrainstormingIdeasForList(steps.steps)
-        );
-      }*/
+      if (steps.taskData.taskType as string === 'BRAINSTORMING') {
+        return this.getBrainstormingIdeasForList(steps.steps);
+      }
+    }
+    return returnArray;
+  }
+
+  getBrainstormingIdeasForList(
+    steps: TaskParticipantIterationStep[]
+  ): { avatar: Avatar; ideas: Idea[] }[] {
+    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
+    for (const step of steps) {
+      const ideas = step.parameter.ideas;
+      returnArray.push({ avatar: step.avatar, ideas: ideas });
     }
     return returnArray;
   }
@@ -845,14 +858,6 @@ export default class ParallelCoordinates extends Vue {
       const ideas = step.parameter.ideas.map((i) => i.idea);
       returnArray.push({ avatar: step.avatar, ideas: ideas });
     }
-    return returnArray;
-  }
-
-  getBrainstormingIdeasForList(
-    steps: TaskParticipantIterationStep[]
-  ): { avatar: Avatar; ideas: Idea[] }[] {
-    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
-    console.log(steps);
     return returnArray;
   }
 }
@@ -1000,7 +1005,8 @@ export default class ParallelCoordinates extends Vue {
 .dropDownIdeaContainer {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  min-width: 10rem;
+  max-width: 30rem;
   .IdeaCard {
     width: 100%;
   }
