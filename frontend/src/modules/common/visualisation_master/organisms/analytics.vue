@@ -1,8 +1,9 @@
 <template>
   <div id="analytics" :style="{ marginTop: '3rem' }">
     <div class="AnalyticsParallelCoordinates">
+      <p v-if="loadingSteps">loading...</p>
       <parallel-coordinates
-        v-if="axes.length > 0 && dataEntries.length > 0"
+        v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
         :chart-axes="
           JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
         "
@@ -64,6 +65,8 @@ interface Axis {
   taskData: {
     taskType: TaskType;
     taskName: string;
+    moduleName: string;
+    initOrder: number;
   };
   axisValues: (subAxis | null)[];
   categoryActive: string;
@@ -123,6 +126,8 @@ export default class Analytics extends Vue {
     taskData: {
       taskType: TaskType;
       taskName: string;
+      moduleName: string;
+      initOrder: number;
     };
     steps: TaskParticipantIterationStep[];
   }[] = [];
@@ -133,6 +138,7 @@ export default class Analytics extends Vue {
   sessionService?: cashService.SimplifiedCashEntry<Session>;
 
   axes: Axis[] = [];
+  loadingSteps = true;
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -227,73 +233,6 @@ export default class Analytics extends Vue {
     }
   }
 
-  @Watch('gameTasks', { immediate: true })
-  onGameTasksChanged(): void {
-    cashService.deregisterAllGet(this.updateIterationSteps);
-    for (const task of this.gameTasks) {
-      taskParticipantService.registerGetIterationStepList(
-        task.id,
-        (steps: TaskParticipantIterationStep[]) => {
-          this.updateIterationSteps(task.modules[0].id, task, steps);
-        },
-        EndpointAuthorisationType.MODERATOR,
-        30
-      );
-    }
-  }
-  @Watch('otherTasks', { immediate: true })
-  onOtherTasksChanged(): void {
-    cashService.deregisterAllGet(this.updateIterationSteps);
-    for (const task of this.otherTasks) {
-      taskParticipantService.registerGetIterationList(
-        task.id,
-        (steps: TaskParticipantIterationStep[]) => {
-          this.updateIterationSteps(task.modules[0].id, task, steps);
-        },
-        EndpointAuthorisationType.MODERATOR,
-        30
-      );
-    }
-  }
-  @Watch('brainstormingTasks', { immediate: true })
-  onBrainstormingTasksChanged(): void {
-    cashService.deregisterAllGet(this.updateIdeas);
-    cashService.deregisterAllGet(this.updateBrainstormings);
-    for (const task of this.brainstormingTasks) {
-      ideaService.registerGetIdeasForTask(
-        task.id,
-        null,
-        null,
-        this.updateIdeas,
-        this.authHeaderTyp,
-        30 * 60
-      );
-      taskParticipantService.registerGetIterationStepList(
-        task.id,
-        (steps: TaskParticipantIterationStep[]) => {
-          this.updateBrainstormings(task.modules[0].id, task, steps);
-        },
-        EndpointAuthorisationType.MODERATOR,
-        30
-      );
-    }
-    this.onVotingTasksChanged();
-  }
-  @Watch('votingTasks', { immediate: true })
-  onVotingTasksChanged(): void {
-    cashService.deregisterAllGet(this.updateVotes);
-    for (const task of this.votingTasks) {
-      votingService.registerGetResult(
-        task.id,
-        (votes: VoteResult[]) => {
-          this.updateVotes(task.modules[0].id, task, votes);
-        },
-        EndpointAuthorisationType.MODERATOR,
-        30
-      );
-    }
-  }
-
   updateIdeas(ideas: Idea[]): void {
     this.ideas = this.ideas.concat(ideas);
   }
@@ -301,7 +240,7 @@ export default class Analytics extends Vue {
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTasks(tasks: Task[]): void {
     this.deregisterSteps();
-    this.tasks = tasks;
+    this.tasks = tasks.sort((a, b) => a.order - b.order);
     this.gameTasks = this.tasks
       .filter((task) => task.taskType === 'PLAYING')
       .sort();
@@ -319,6 +258,68 @@ export default class Analytics extends Vue {
           task.taskType !== 'VOTING'
       )
       .sort();
+
+    for (const task of this.brainstormingTasks) {
+      ideaService.registerGetIdeasForTask(
+        task.id,
+        null,
+        null,
+        this.updateIdeas,
+        this.authHeaderTyp,
+        30 * 60
+      );
+    }
+    this.calculateSteps(this.tasks);
+  }
+
+  calculateSteps(tasks: Task[]): void {
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateBrainstormings);
+    cashService.deregisterAllGet(this.updateIterationSteps);
+    for (const task of tasks) {
+      if ((task.taskType as string) === 'PLAYING') {
+        taskParticipantService.registerGetIterationStepList(
+          task.id,
+          (steps: TaskParticipantIterationStep[]) => {
+            this.updateIterationSteps(task.modules[0].id, task, steps);
+          },
+          EndpointAuthorisationType.MODERATOR,
+          30
+        );
+      } else if ((task.taskType as string) === 'VOTING') {
+        votingService.registerGetResult(
+          task.id,
+          (votes: VoteResult[]) => {
+            this.updateVotes(task.modules[0].id, task, votes);
+          },
+          EndpointAuthorisationType.MODERATOR,
+          30
+        );
+      } else if ((task.taskType as string) === 'BRAINSTORMING') {
+        taskParticipantService.registerGetIterationStepList(
+          task.id,
+          (steps: TaskParticipantIterationStep[]) => {
+            this.updateBrainstormings(task.modules[0].id, task, steps);
+          },
+          EndpointAuthorisationType.MODERATOR,
+          30
+        );
+      } else if (
+        task.taskType !== 'PLAYING' &&
+        task.taskType !== 'BRAINSTORMING' &&
+        task.taskType !== 'VOTING'
+      ) {
+        taskParticipantService.registerGetIterationList(
+          task.id,
+          (steps: TaskParticipantIterationStep[]) => {
+            this.updateIterationSteps(task.modules[0].id, task, steps);
+          },
+          EndpointAuthorisationType.MODERATOR,
+          30
+        );
+      }
+    }
   }
 
   updateSession(session: Session): void {
@@ -430,6 +431,8 @@ export default class Analytics extends Vue {
       taskData: {
         taskType: task.taskType as TaskType,
         taskName: task.name,
+        moduleName: task.modules[0].name,
+        initOrder: task.order,
       },
       steps: filteredSteps,
     };
@@ -442,6 +445,11 @@ export default class Analytics extends Vue {
     } else {
       this.steps.push(stepsEntry);
     }
+    if (this.steps.length === this.tasks.length) {
+      console.log(this.steps);
+      console.log(this.tasks);
+      this.loadingSteps = false;
+    }
     this.axes = this.CalculateAxes();
   }
 
@@ -453,6 +461,8 @@ export default class Analytics extends Vue {
         taskData: {
           taskType: TaskType;
           taskName: string;
+          moduleName: string;
+          initOrder: number;
         };
         bestStep: TaskParticipantIterationStep | null;
       }[];
@@ -474,6 +484,8 @@ export default class Analytics extends Vue {
     taskData: {
       taskType: TaskType;
       taskName: string;
+      moduleName: string;
+      initOrder: number;
     };
     bestStep: TaskParticipantIterationStep | null;
   }[] {

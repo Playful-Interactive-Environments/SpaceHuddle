@@ -415,6 +415,8 @@ interface Axis {
   taskData: {
     taskType: TaskType;
     taskName: string;
+    moduleName: string;
+    initOrder: number;
   };
   axisValues: (SubAxis | null)[];
   categoryActive: string;
@@ -531,20 +533,22 @@ export default class ParallelCoordinates extends Vue {
 
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
-    const updatedAxes = this.chartAxes.reduce((acc, chartAxis) => {
-      const matchingAxis = this.availableAxes.find(
-        (axis) => axis.moduleId === chartAxis.moduleId
-      );
+    const updatedAxes = this.chartAxes
+      .sort((a, b) => a.taskData.initOrder - b.taskData.initOrder)
+      .reduce((acc, chartAxis) => {
+        const matchingAxis = this.availableAxes.find(
+          (axis) => axis.moduleId === chartAxis.moduleId
+        );
 
-      if (matchingAxis) {
-        matchingAxis.active = chartAxis.active;
-        matchingAxis.available = chartAxis.available;
-      } else {
-        acc.push(chartAxis);
-      }
+        if (matchingAxis) {
+          matchingAxis.active = chartAxis.active;
+          matchingAxis.available = chartAxis.available;
+        } else {
+          acc.push(chartAxis);
+        }
 
-      return acc;
-    }, [] as typeof this.chartAxes);
+        return acc;
+      }, [] as typeof this.chartAxes);
 
     this.availableAxes = [...this.availableAxes, ...updatedAxes];
     this.axes = this.availableAxes.filter(
