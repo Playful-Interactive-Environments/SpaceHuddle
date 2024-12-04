@@ -70,7 +70,6 @@ import { Idea } from '@/types/api/Idea';
 import Highscore from '@/modules/common/visualisation_master/organisms/subOrganisms/Highscore.vue';
 
 import { ParticipantInfo } from '@/types/api/Participant';
-import { Task } from '@/types/api/Task';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 

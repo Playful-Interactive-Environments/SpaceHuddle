@@ -792,7 +792,7 @@ export default class ParallelCoordinates extends Vue {
         : this.axesSpacing * index;
     const prevY =
       values[iterator] !== null
-        ? this.getYPosition(values[iterator]!, this.activeAxes[iterator])
+        ? this.getYPosition(values[iterator] || 0, this.activeAxes[iterator])
         : currentY;
     return { prevX, prevY };
   }
@@ -860,7 +860,7 @@ export default class ParallelCoordinates extends Vue {
     ];
 
     this.chartData.forEach((entry) => {
-      const [draggedDataEntry] = entry.axes.splice(this.draggedIndex!, 1);
+      const [draggedDataEntry] = entry.axes.splice(this.draggedIndex || 0, 1);
       entry.axes.splice(dropIndex, 0, draggedDataEntry);
     });
 

@@ -389,7 +389,7 @@ export default class Analytics extends Vue {
             ideas: [vote],
             bestIdeaAverageRating: vote.ratingSum / vote.countParticipant,
           },
-          avatar: idea!.avatar,
+          avatar: idea ? idea.avatar : vote.avatarList[0],
         }))
     );
 
@@ -531,7 +531,6 @@ export default class Analytics extends Vue {
       const { moduleId, taskData } = step;
 
       const axisValues = this.wantedValues.reduce((acc, value) => {
-        // Skip 'stars' for BRAINSTORMING task type
         if (
           (taskData.taskType as string) === 'BRAINSTORMING' &&
           value === 'stars'
@@ -539,7 +538,6 @@ export default class Analytics extends Vue {
           return acc;
         }
 
-        // Find the maximum value across all relevant sources
         const maxValue = step.steps.reduce((max, subStep) => {
           const sources = [
             subStep,
@@ -556,7 +554,6 @@ export default class Analytics extends Vue {
           return max;
         }, 0);
 
-        // Add to axisValues if maxValue is valid
         if (maxValue) {
           acc.push({
             id: value,

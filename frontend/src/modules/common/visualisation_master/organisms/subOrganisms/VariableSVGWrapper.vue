@@ -8,11 +8,7 @@
 import { Options, Vue } from 'vue-class-component';
 
 @Options({})
-export default class VariableWrapper extends Vue {
-
-}
+export default class VariableWrapper extends Vue {}
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>
