@@ -41,7 +41,7 @@
         :key="entry.participant.id + value.id"
         class="valueTableEntry el-rate--large"
       >
-        <span v-if="value.id !== 'rate' && value.id !== 'stars'" >{{
+        <span v-if="value.id !== 'rate' && value.id !== 'stars'">{{
           value.value != null
             ? Math.round((value.value + Number.EPSILON) * 100) / 100
             : '---'
@@ -58,7 +58,10 @@
         >
       </td>
     </tr>
-    <tr v-if="highScoreCount < chartData.length" @click="highScoreCount = chartData.length">
+    <tr
+      v-if="highScoreCount < chartData.length"
+      @click="highScoreCount = chartData.length"
+    >
       <td>
         <el-button link class="text-button valueTableEntry"> ... </el-button>
       </td>
@@ -113,38 +116,30 @@ export default class Highscore extends Vue {
   @Watch('participantData', { immediate: true })
   @Watch('moduleId', { immediate: true })
   onChartDataChanged(): void {
-    if (this.participantData != null && this.participantData.length > 0) {
-      this.chartData = this.participantData.filter((entry) => {
-        const moduleAxis = entry.axes.filter(
-          (a) => a.moduleId === this.moduleId
-        )[0];
-        if (moduleAxis) {
-          for (const value of moduleAxis.axisValues) {
-            if (value.value != null) {
-              return true;
-            }
-          }
-          return false;
-        }
-      });
-      for (const entry of this.chartData) {
-        entry.axes = entry.axes.filter(
-          (axis) => axis.moduleId === this.moduleId
-        );
-      }
-      this.chartData.forEach((entry) => {
-        entry.axes.forEach((axis) => {
-          axis.axisValues.sort((a, b) => {
-            const aIsLast = a.id === 'stars' || a.id === 'rate';
-            const bIsLast = b.id === 'stars' || b.id === 'rate';
-            if (aIsLast && !bIsLast) return 1;
-            if (!aIsLast && bIsLast) return -1;
-            return 0;
-          });
-        });
-      });
+    if (this.participantData?.length) {
+      this.chartData = this.participantData
+        .filter((entry) => {
+          const moduleAxis = entry.axes.find(
+            (a) => a.moduleId === this.moduleId
+          );
+          return moduleAxis?.axisValues.some((value) => value.value != null);
+        })
+        .map((entry) => ({
+          ...entry,
+          axes: entry.axes
+            .filter((axis) => axis.moduleId === this.moduleId)
+            .map((axis) => ({
+              ...axis,
+              axisValues: axis.axisValues.sort((a, b) => {
+                const aIsLast = ['stars', 'rate'].includes(a.id);
+                const bIsLast = ['stars', 'rate'].includes(b.id);
+                return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
+              }),
+            })),
+        }));
+
+      this.sortData();
     }
-    this.sortData();
   }
 
   sortData(): DataEntry[] {

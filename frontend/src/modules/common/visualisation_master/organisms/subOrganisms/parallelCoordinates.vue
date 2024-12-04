@@ -101,25 +101,31 @@
           v-for="labelIndex in labelCount + 1"
           :key="labelIndex - 1 + axis.moduleId"
         >
-          <line
-            :y1="getLabelPosition(labelIndex - 1)"
-            :y2="getLabelPosition(labelIndex - 1)"
-            :x2="5"
-            stroke="black"
-          />
-          <text :y="getLabelPosition(labelIndex - 1)" x="10" font-size="10">
-            {{
-              Math.round(
-                ((axis.axisValues.find(
-                  (value) => value.id === axis.categoryActive
-                ).range /
-                  labelCount) *
-                  (labelIndex - 1) +
-                  Number.EPSILON) *
-                  100
-              ) / 100
-            }}
-          </text>
+          <VariableSVGWrapper>
+            <template
+              v-slot="{ labelPosition = getLabelPosition(labelIndex - 1) }"
+            >
+              <line
+                :y1="labelPosition"
+                :y2="labelPosition"
+                :x2="5"
+                stroke="black"
+              />
+              <text :y="labelPosition" x="10" font-size="10">
+                {{
+                  Math.round(
+                    ((axis.axisValues.find(
+                      (value) => value.id === axis.categoryActive
+                    ).range /
+                      labelCount) *
+                      (labelIndex - 1) +
+                      Number.EPSILON) *
+                      100
+                  ) / 100
+                }}
+              </text>
+            </template>
+          </VariableSVGWrapper>
         </g>
       </g>
 
@@ -584,10 +590,9 @@ export default class ParallelCoordinates extends Vue {
     return this.width / this.activeAxes.length;
   }
 
-  getParticipationCount(axis: Axis) {
+  getParticipationCount(axis: Axis): number {
     const category = axis.categoryActive;
-    let counter = 0;
-    for (const partData of this.participantData) {
+    return this.participantData.reduce((counter, partData) => {
       const partAxis = partData.axes.find(
         (partAxis) => partAxis.moduleId === axis.moduleId
       );
@@ -596,8 +601,8 @@ export default class ParallelCoordinates extends Vue {
           (value) => value.id === category && value.value !== null
         ).length;
       }
-    }
-    return counter;
+      return counter;
+    }, 0);
   }
 
   getYPosition(value: number, axis: Axis) {

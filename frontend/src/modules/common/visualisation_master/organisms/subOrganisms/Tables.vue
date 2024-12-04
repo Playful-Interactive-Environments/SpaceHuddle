@@ -125,16 +125,11 @@ export default class Tables extends Vue {
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
     if (this.participantData != null) {
-      this.chartData = this.participantData.filter((entry) => {
-        for (const axis of entry.axes) {
-          for (const value of axis.axisValues) {
-            if (value.value != null) {
-              return true;
-            }
-          }
-        }
-        return false;
-      });
+      this.chartData = this.participantData.filter((entry) =>
+        entry.axes.some((axis) =>
+          axis.axisValues.some((value) => value.value != null)
+        )
+      );
     }
   }
 

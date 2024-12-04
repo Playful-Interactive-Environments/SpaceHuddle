@@ -243,6 +243,7 @@ export default class Analytics extends Vue {
   }
   @Watch('otherTasks', { immediate: true })
   onOtherTasksChanged(): void {
+    cashService.deregisterAllGet(this.updateIterationSteps);
     for (const task of this.otherTasks) {
       taskParticipantService.registerGetIterationList(
         task.id,
@@ -257,6 +258,7 @@ export default class Analytics extends Vue {
   @Watch('brainstormingTasks', { immediate: true })
   onBrainstormingTasksChanged(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateBrainstormings);
     for (const task of this.brainstormingTasks) {
       ideaService.registerGetIdeasForTask(
         task.id,
@@ -526,48 +528,55 @@ export default class Analytics extends Vue {
 
   CalculateAxes(): Axis[] {
     return this.steps.map((step) => {
-      const moduleId = step.moduleId;
-      const taskData = step.taskData;
-      const axisValues = this.wantedValues
-        .map((value) => {
-          const range = step.steps.flatMap((subStep) => {
-            const sources = [
-              subStep,
-              subStep.parameter,
-              subStep.parameter?.gameplayResult,
-              subStep.parameter?.drive,
-              subStep.parameter?.game,
-            ];
-            for (const source of sources) {
-              if (
-                (taskData.taskType as string) === 'BRAINSTORMING' &&
-                value === 'stars'
-              ) {
-                return [];
-              }
-              if (source && value in source) return source[value];
+      const { moduleId, taskData } = step;
+
+      const axisValues = this.wantedValues.reduce((acc, value) => {
+        // Skip 'stars' for BRAINSTORMING task type
+        if ((taskData.taskType as string) === 'BRAINSTORMING' && value === 'stars') {
+          return acc;
+        }
+
+        // Find the maximum value across all relevant sources
+        const maxValue = step.steps.reduce((max, subStep) => {
+          const sources = [
+            subStep,
+            subStep.parameter,
+            subStep.parameter?.gameplayResult,
+            subStep.parameter?.drive,
+            subStep.parameter?.game,
+          ];
+          for (const source of sources) {
+            if (source && value in source) {
+              return Math.max(max, source[value]);
             }
-            return [];
-          });
-          let maxValue = range.length ? Math.ceil(Math.max(...range)) : null;
-          if (maxValue != null && value === 'stars') {
-            maxValue = 3;
           }
-          return maxValue ? { id: value, range: maxValue } : null;
-        })
-        .filter(Boolean);
+          return max;
+        }, 0);
+
+        // Add to axisValues if maxValue is valid
+        if (maxValue) {
+          acc.push({
+            id: value,
+            range: value === 'stars' ? 3 : Math.ceil(maxValue),
+          });
+        }
+
+        return acc;
+      }, [] as { id: string; range: number }[]);
 
       const active = axisValues.length > 0;
+
       return {
         moduleId,
         taskData,
         axisValues,
-        categoryActive: active ? (axisValues[0] ? axisValues[0].id : '') : '',
+        categoryActive: active ? axisValues[0]?.id || '' : '',
         active,
-        available: axisValues.length > 0,
+        available: active,
       };
     });
   }
+
 
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
