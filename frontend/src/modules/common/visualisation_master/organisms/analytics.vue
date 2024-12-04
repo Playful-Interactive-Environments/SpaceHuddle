@@ -532,7 +532,10 @@ export default class Analytics extends Vue {
 
       const axisValues = this.wantedValues.reduce((acc, value) => {
         // Skip 'stars' for BRAINSTORMING task type
-        if ((taskData.taskType as string) === 'BRAINSTORMING' && value === 'stars') {
+        if (
+          (taskData.taskType as string) === 'BRAINSTORMING' &&
+          value === 'stars'
+        ) {
           return acc;
         }
 
@@ -576,7 +579,6 @@ export default class Analytics extends Vue {
       };
     });
   }
-
 
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();

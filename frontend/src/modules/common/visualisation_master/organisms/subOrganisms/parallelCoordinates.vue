@@ -531,21 +531,23 @@ export default class ParallelCoordinates extends Vue {
 
   @Watch('chartAxes', { immediate: true })
   onAxesChanged(): void {
-    for (let axis of this.availableAxes) {
-      const chartAxisIndex = this.chartAxes.findIndex(
-        (ax) => ax.moduleId === axis.moduleId
+    const updatedAxes = this.chartAxes.reduce((acc, chartAxis) => {
+      const matchingAxis = this.availableAxes.find(
+        (axis) => axis.moduleId === chartAxis.moduleId
       );
-      if (chartAxisIndex > -1) {
-        this.chartAxes[chartAxisIndex].active = axis.active;
-        this.chartAxes[chartAxisIndex].available = axis.available;
 
-        axis = this.chartAxes[chartAxisIndex];
-        this.chartAxes.splice(chartAxisIndex, 1);
+      if (matchingAxis) {
+        matchingAxis.active = chartAxis.active;
+        matchingAxis.available = chartAxis.available;
+      } else {
+        acc.push(chartAxis);
       }
-    }
 
-    this.availableAxes = this.availableAxes.concat(this.chartAxes);
-    this.axes = [...this.availableAxes].filter(
+      return acc;
+    }, [] as typeof this.chartAxes);
+
+    this.availableAxes = [...this.availableAxes, ...updatedAxes];
+    this.axes = this.availableAxes.filter(
       (axis) => axis.active && axis.available
     );
   }
@@ -832,29 +834,35 @@ export default class ParallelCoordinates extends Vue {
     this.draggedIndex = index;
   }
 
-  onDrop(dropIndex: number) {
+  onDrop(dropIndex: number): void {
     if (this.draggedIndex === null || this.draggedIndex === dropIndex) return;
 
-    const DraggedAvailableAxisIndex = this.availableAxes.findIndex(
-      (axis) => axis.moduleId === this.axes[this.draggedIndex!].moduleId
+    const draggedAxis = this.axes[this.draggedIndex];
+    const dropAxis = this.axes[dropIndex];
+
+    [this.axes[this.draggedIndex], this.axes[dropIndex]] = [
+      dropAxis,
+      draggedAxis,
+    ];
+
+    const draggedAvailableIndex = this.availableAxes.findIndex(
+      (axis) => axis.moduleId === draggedAxis.moduleId
     );
-    const DropAvailableAxisIndex = this.availableAxes.findIndex(
-      (axis) => axis.moduleId === this.axes[dropIndex].moduleId
+    const dropAvailableIndex = this.availableAxes.findIndex(
+      (axis) => axis.moduleId === dropAxis.moduleId
     );
+    [
+      this.availableAxes[draggedAvailableIndex],
+      this.availableAxes[dropAvailableIndex],
+    ] = [
+      this.availableAxes[dropAvailableIndex],
+      this.availableAxes[draggedAvailableIndex],
+    ];
 
-    const draggedOriginalAxis = this.axes.splice(this.draggedIndex, 1)[0];
-    this.axes.splice(dropIndex, 0, draggedOriginalAxis);
-
-    const draggedAvailableAxis = this.availableAxes.splice(
-      DraggedAvailableAxisIndex,
-      1
-    )[0];
-    this.availableAxes.splice(DropAvailableAxisIndex, 0, draggedAvailableAxis);
-
-    for (const entry of this.chartData) {
-      const draggedDataEntry = entry.axes.splice(this.draggedIndex, 1)[0];
+    this.chartData.forEach((entry) => {
+      const [draggedDataEntry] = entry.axes.splice(this.draggedIndex!, 1);
       entry.axes.splice(dropIndex, 0, draggedDataEntry);
-    }
+    });
 
     this.draggedIndex = null;
   }
@@ -891,35 +899,30 @@ export default class ParallelCoordinates extends Vue {
     const steps = this.steps.find((step) => step.moduleId === axis.moduleId);
     if (!steps) return [];
 
-    if ((steps.taskData.taskType as string) === 'VOTING') {
-      return this.getVoteIdeasForList(steps.steps);
-    }
-    if ((steps.taskData.taskType as string) === 'BRAINSTORMING') {
-      return this.getBrainstormingIdeasForList(steps.steps);
-    }
-    return [];
+    const { taskType } = steps.taskData;
+    return (taskType as string) === 'VOTING'
+      ? this.getVoteIdeasForList(steps.steps)
+      : (taskType as string) === 'BRAINSTORMING'
+      ? this.getBrainstormingIdeasForList(steps.steps)
+      : [];
   }
 
   getBrainstormingIdeasForList(
     steps: TaskParticipantIterationStep[]
   ): { avatar: Avatar; ideas: Idea[] }[] {
-    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
-    for (const step of steps) {
-      const ideas = step.parameter.ideas;
-      returnArray.push({ avatar: step.avatar, ideas: ideas });
-    }
-    return returnArray;
+    return steps.map((step) => ({
+      avatar: step.avatar,
+      ideas: step.parameter.ideas,
+    }));
   }
 
   getVoteIdeasForList(
     steps: TaskParticipantIterationStep[]
   ): { avatar: Avatar; ideas: Idea[] }[] {
-    const returnArray: { avatar: Avatar; ideas: Idea[] }[] = [];
-    for (const step of steps) {
-      const ideas = step.parameter.ideas.map((i) => i.idea);
-      returnArray.push({ avatar: step.avatar, ideas: ideas });
-    }
-    return returnArray;
+    return steps.map((step) => ({
+      avatar: step.avatar,
+      ideas: step.parameter.ideas.map((i) => i.idea),
+    }));
   }
 }
 </script>

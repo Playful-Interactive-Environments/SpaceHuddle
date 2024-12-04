@@ -106,6 +106,7 @@ interface DataEntry {
   components: {
     Highscore,
   },
+  emits: ['participantSelected'],
 })
 export default class Tables extends Vue {
   @Prop() readonly taskId!: string;

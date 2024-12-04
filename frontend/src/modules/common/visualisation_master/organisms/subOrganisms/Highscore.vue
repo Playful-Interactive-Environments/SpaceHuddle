@@ -24,9 +24,9 @@
       v-for="(entry, index) in chartData.slice(0, this.highScoreCount)"
       :key="entry.participant.id + index"
       class="participantTableEntries"
-      @click="$emit('participantSelected', entry.participant.id)"
+      @click="participantSelectionChanged(entry.participant.id)"
       :class="{
-        participantSelected: selectedParticipantId === entry.participant.id,
+        participantSelected: participantId === entry.participant.id,
       }"
     >
       <td>{{ index + 1 }}.</td>
@@ -74,7 +74,7 @@
 import { Prop, Watch } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { Avatar, ParticipantInfo } from '@/types/api/Participant';
+import { ParticipantInfo } from '@/types/api/Participant';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 interface AxisValue {
@@ -103,6 +103,8 @@ export default class Highscore extends Vue {
   sortColumn = 'rate';
   sortOrder = 1;
   highScoreCount = 5;
+
+  participantId = '';
 
   chartData: DataEntry[] = [];
 
@@ -163,14 +165,23 @@ export default class Highscore extends Vue {
         }
         const primaryComparison = (bValue - aValue) * this.sortOrder;
         if (primaryComparison === 0) {
-          const idComparison = a.participant.id.localeCompare(b.participant.id);
-          return idComparison;
+          return a.participant.id.localeCompare(b.participant.id);
         }
 
         return primaryComparison;
       });
     }
     return this.chartData;
+  }
+
+  @Watch('selectedParticipantId', { immediate: true })
+  onSelectedParticipantIdChanged(): void {
+    this.participantId = this.selectedParticipantId;
+  }
+
+  participantSelectionChanged(id: string) {
+    this.participantId = this.participantId !== id ? id : '';
+    this.$emit('participantSelected', this.participantId);
   }
 }
 </script>
