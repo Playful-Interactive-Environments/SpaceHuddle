@@ -1,7 +1,6 @@
 <template>
   <div id="analytics" :style="{ marginTop: '3rem' }">
-    <div class="AnalyticsParallelCoordinates">
-      <p v-if="loadingSteps">loading...</p>
+    <div class="AnalyticsParallelCoordinates" v-loading="loadingSteps" :element-loading-background="'var(--color-background)'">
       <parallel-coordinates
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
         :chart-axes="
@@ -633,7 +632,6 @@ export default class Analytics extends Vue {
 <style lang="scss" scoped>
 #analytics {
   width: 100%;
-  height: 95%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -645,11 +643,11 @@ export default class Analytics extends Vue {
     border-radius: var(--border-radius);
   }
   .AnalyticsParallelCoordinates {
-    height: calc(60% - 3rem);
+    height: 50vh;
     width: 100%;
   }
   .AnalyticsTables {
-    height: 40%;
+    height: 40vh;
     width: 100%;
   }
 }

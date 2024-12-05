@@ -541,8 +541,8 @@ export default class ParallelCoordinates extends Vue {
         );
 
         if (matchingAxis) {
-          matchingAxis.active = chartAxis.active;
-          matchingAxis.available = chartAxis.available;
+          chartAxis.active = matchingAxis.active;
+          chartAxis.available = matchingAxis.available;
         } else {
           acc.push(chartAxis);
         }
