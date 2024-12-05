@@ -63,7 +63,16 @@
       @click="highScoreCount = chartData.length"
     >
       <td>
-        <el-button link class="text-button valueTableEntry"> ... </el-button>
+        <el-button link class="text-button valueTableEntry"
+          ><font-awesome-icon :icon="['fas', 'angle-down']"
+        /></el-button>
+      </td>
+    </tr>
+    <tr v-if="highScoreCount === chartData.length" @click="highScoreCount = 5">
+      <td>
+        <el-button link class="text-button valueTableEntry">
+          <font-awesome-icon :icon="['fas', 'angle-up']"
+        /></el-button>
       </td>
     </tr>
   </table>

@@ -156,14 +156,14 @@ export default class Tables extends Vue {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: 3rem;
   width: 100%;
   height: 100%;
 }
 
 .highScoreSelectionContainer {
-  width: 100%;
-  height: 100%;
+  width: calc(50% - 3rem);
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;

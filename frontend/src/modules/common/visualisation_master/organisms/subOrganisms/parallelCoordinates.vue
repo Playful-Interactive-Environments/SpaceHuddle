@@ -656,6 +656,7 @@ export default class ParallelCoordinates extends Vue {
   }
 
   getDataLine(entry: DataEntry): (PathPart | undefined)[] {
+    console.log("redraw");
     const values = this.getValuesForEntry(entry);
 
     return values

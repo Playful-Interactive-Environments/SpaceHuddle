@@ -11,9 +11,9 @@
       />
     </div>
 
-    <div class="AnalyticsTables">
+    <div class="AnalyticsTables" v-loading="loadingSteps" :element-loading-background="'var(--color-background)'">
       <Tables
-        v-if="axes.length > 0 && dataEntries.length > 0"
+        v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
         :axes="
           JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
