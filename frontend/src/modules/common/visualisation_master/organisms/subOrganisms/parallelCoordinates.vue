@@ -103,7 +103,7 @@
         >
           <VariableSVGWrapper>
             <template
-              v-slot="{ labelPosition = getLabelPosition(labelIndex - 1) }"
+              v-slot="{ labelPosition = this.getLabelPosition(labelIndex - 1) }"
             >
               <line
                 :y1="labelPosition"
@@ -173,15 +173,32 @@
       <!-- Data Lines as Curves -->
       <g v-for="entry in chartData" :key="entry.participant.id">
         <VariableSVGWrapper>
-          <template v-slot="{ dataLine = getDataLine(entry) }">
+          <template
+            v-slot="{
+              dataLine = this.getDataLine(entry),
+              participantColor = entry.participant.avatar.color,
+            }"
+          >
             <text>{{ dataLine.length }}</text>
             <g
               v-for="pathPart in dataLine"
               :key="pathPart?.path"
               class="dataLineHover"
               fill="none"
-              @mouseenter="hoverStroke = entry.participant.avatar.color"
-              @mouseleave="hoverStroke = null"
+              @mouseenter="
+                setHoverStroke(
+                  participantColor,
+                  entry.participant.id,
+                  participantColor
+                )
+              "
+              @mouseleave="
+                setHoverStroke(
+                  'var(--color-dark-contrast)',
+                  entry.participant.id,
+                  participantColor
+                )
+              "
             >
               <path v-if="pathPart" :d="pathPart.path" />
             </g>
@@ -189,17 +206,10 @@
               v-for="(pathPart, index) in dataLine"
               :key="pathPart?.path"
               class="dataLine"
+              :class="entry.participant.id"
               fill="none"
-              :stroke="
-                hoverStroke === entry.participant.avatar.color
-                  ? hoverStroke
-                  : 'var(--color-dark-contrast)'
-              "
               :style="{
-                strokeWidth:
-                  hoverStroke === entry.participant.avatar.color
-                    ? '3px'
-                    : '1px',
+                stroke: 'var(--color-dark-contrast)',
               }"
             >
               <path
@@ -211,45 +221,23 @@
                 :d="getIconDefinition(entry.participant.avatar.symbol).icon[4] as string"
                 :fill="entry.participant.avatar.color"
                 :style="{
-                  opacity:
-                    hoverStroke === entry.participant.avatar.color ? '1' : '0',
+                  opacity: 0,
                 }"
               />
               <circle
                 class="circle"
-                :r="
-                  hoverStroke === entry.participant.avatar.color ||
-                  dataLine.length <= 1
-                    ? '3px'
-                    : '0px'
-                "
                 :cx="pathPart?.x"
                 :cy="pathPart?.y"
-                :fill="
-                  hoverStroke === entry.participant.avatar.color ||
-                  dataLine.length > 1
-                    ? hoverStroke
-                    : 'var(--color-dark-contrast)'
-                "
-                :style="{
-                  opacity:
-                    hoverStroke === entry.participant.avatar.color ||
-                    dataLine.length <= 1
-                      ? '1'
-                      : '0',
-                }"
+                :r="0"
               />
               <path
                 v-if="pathPart"
                 class="dataLinePathSegment"
+                :class="{ dashed: pathPart.dashed }"
                 :d="pathPart.path"
                 :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
                 :style="{
-                  opacity: pathPart?.dashed
-                    ? '20%'
-                    : hoverStroke === entry.participant.avatar.color
-                    ? '1'
-                    : '45%',
+                  opacity: pathPart?.dashed ? '20%' : '45%',
                 }"
               />
             </g>
@@ -656,7 +644,6 @@ export default class ParallelCoordinates extends Vue {
   }
 
   getDataLine(entry: DataEntry): (PathPart | undefined)[] {
-    console.log("redraw");
     const values = this.getValuesForEntry(entry);
 
     return values
@@ -929,6 +916,50 @@ export default class ParallelCoordinates extends Vue {
       ideas: step.parameter.ideas.map((i) => i.idea),
     }));
   }
+
+  setHoverStroke(color: string, id: string, participantColor: string) {
+    const elements = Array.from(
+      document.getElementsByClassName(id) as HTMLCollectionOf<HTMLElement>
+    );
+
+    elements.forEach((element) => {
+      const children = Array.from(element.children) as HTMLElement[];
+      const circle = children.find((el) => el.classList.contains('circle'));
+      const pathSegment = children.find((el) =>
+        el.classList.contains('dataLinePathSegment')
+      );
+      const pathIcon = children.find((el) =>
+        el.classList.contains('participantDataLineIcon')
+      );
+
+      const isParticipantColor = participantColor === color;
+      const strokeWidth = isParticipantColor ? '3px' : '1px';
+      const circleRadius = isParticipantColor ? '3px' : '0px';
+      const iconOpacity = isParticipantColor ? '1' : '0';
+      const pathOpacity = isParticipantColor
+        ? !pathSegment?.classList.contains('dashed')
+          ? '1'
+          : '45%'
+        : !pathSegment?.classList.contains('dashed')
+        ? '45%'
+        : '20%';
+
+      Object.assign(element.style, { stroke: color, strokeWidth });
+
+      if (circle) {
+        circle.setAttribute('r', circleRadius);
+        circle.setAttribute('fill', color);
+      }
+
+      if (pathIcon) {
+        pathIcon.style.opacity = iconOpacity;
+      }
+
+      if (pathSegment) {
+        pathSegment.style.opacity = pathOpacity;
+      }
+    });
+  }
 }
 </script>
 
@@ -991,6 +1022,7 @@ export default class ParallelCoordinates extends Vue {
 
 .dataLineHover:hover + .dataLine {
   opacity: 100%;
+  stroke: var(--color-dark-contrast) !important;
 }
 
 .averageDataLine {

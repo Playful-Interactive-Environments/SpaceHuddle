@@ -445,8 +445,6 @@ export default class Analytics extends Vue {
       this.steps.push(stepsEntry);
     }
     if (this.steps.length === this.tasks.length) {
-      console.log(this.steps);
-      console.log(this.tasks);
       this.loadingSteps = false;
     }
     this.axes = this.CalculateAxes();
