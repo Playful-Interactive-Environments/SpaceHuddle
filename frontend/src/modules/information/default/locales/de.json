@@ -9,5 +9,11 @@
   },
   "publicScreen": {
     "noIdeas": "Kein Inhalt hinzugefügt."
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Punkte",
+      "stars": "Sterne"
+    }
   }
 }

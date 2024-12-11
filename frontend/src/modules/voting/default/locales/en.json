@@ -17,5 +17,12 @@
   "moderatorConfig": {
     "maxRate": "max rate",
     "maxRateExample": "3"
+  },
+  "analytics": {
+    "highscore": {
+      "ratingSum": "Rating Sum",
+      "averageRating": "Ø Rating",
+      "bestIdeaAverageRating": "Ø Rating of best idea"
+    }
   }
 }

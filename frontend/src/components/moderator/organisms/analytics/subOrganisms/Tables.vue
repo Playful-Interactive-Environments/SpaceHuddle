@@ -63,6 +63,7 @@
         :module-id="tableArray[index]!.moduleId"
         :participant-data="JSON.parse(JSON.stringify(chartData))"
         :selected-participant-id="selectedParticipantId"
+        :translation-path="getTranslationPath(tableArray[index])"
         @participant-selected="participantSelectionChanged"
       />
     </el-card>
@@ -81,7 +82,7 @@
         >
           <div class="el-dropdown-link">
             <p class="oneLineText highscoreModuleName">
-              select task
+              {{ $t('moderator.organism.analytics.tables.selectTask') }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
             </p>
           </div>
@@ -114,7 +115,7 @@ import { ParticipantInfo } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 
-interface subAxis {
+interface SubAxis {
   id: string;
   range: number;
 }
@@ -124,12 +125,15 @@ interface Axis {
   taskData: {
     taskType: TaskType;
     taskName: string;
+    moduleName: string;
+    initOrder: number;
   };
-  axisValues: (subAxis | null)[];
+  axisValues: (SubAxis | null)[];
   categoryActive: string;
   active: boolean;
   available: boolean;
 }
+
 interface AxisValue {
   id: string;
   value: number | null;
@@ -160,6 +164,8 @@ export default class Tables extends Vue {
   selectedParticipantId = '';
   chartData: DataEntry[] = [];
 
+  //TODO translation path generation -> give each Highscore module
+
   tableCount = 0;
   tableArray: (Axis | null)[] = [];
 
@@ -172,6 +178,15 @@ export default class Tables extends Vue {
         )
       );
     }
+  }
+
+  getTranslationPath(axis: Axis | null): string {
+    if (!axis) {
+      return '';
+    }
+    return `module.${axis.taskData.taskType.toLowerCase()}.${
+      axis.taskData.moduleName
+    }.analytics.highscore.`;
   }
 
   participantSelectionChanged(id: string) {

@@ -17,5 +17,12 @@
   "moderatorConfig": {
     "maxRate": "max. Bewertung",
     "maxRateExample": "3"
+  },
+  "analytics": {
+    "highscore": {
+      "ratingSum": "Summe Bewertungen",
+      "averageRating": "Ø Bewertungen",
+      "bestIdeaAverageRating": "Ø Berwertung der besten Idee"
+    }
   }
 }

@@ -23,5 +23,11 @@
     "alphabetical": "alphabetical order of ideas",
     "displayAll": "display all",
     "add": "add content"
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Points",
+      "ideaCount": "Idea Count"
+    }
   }
 }

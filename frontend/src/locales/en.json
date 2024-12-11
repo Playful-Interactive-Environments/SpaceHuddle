@@ -384,6 +384,12 @@
         "selectItem": "select this task",
         "on": "on",
         "off": "off"
+      },
+      "analytics": {
+        "tables": {
+          "selectTask": "select Task",
+          "table": "Table"
+        }
       }
     },
     "view": {

@@ -384,6 +384,12 @@
         "selectItem": "Selektiere diese Aufgabe",
         "on": "an",
         "off": "aus"
+      },
+      "analytics": {
+        "tables": {
+          "selectTask": "Aufgabe auswählen",
+          "table": "Tabelle"
+        }
       }
     },
     "view": {

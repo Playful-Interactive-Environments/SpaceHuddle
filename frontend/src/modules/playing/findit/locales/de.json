@@ -163,5 +163,11 @@
   "publicScreen": {
     "tutorial": "Tutorial",
     "highscore": "Highscore"
+  },
+  "analytics": {
+    "highscore": {
+      "stars": "Sterne",
+      "points": "Punkte"
+    }
   }
 }

@@ -10,5 +10,11 @@
   },
   "moderatorConfig": {
     "showAll": "show ideas of the other participants"
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Points",
+      "ideaCount": "Idea Count"
+    }
   }
 }

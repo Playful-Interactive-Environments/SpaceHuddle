@@ -9,5 +9,11 @@
   },
   "publicScreen": {
     "noIdeas": "No stimulus content added."
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Points",
+      "stars": "Stars"
+    }
   }
 }

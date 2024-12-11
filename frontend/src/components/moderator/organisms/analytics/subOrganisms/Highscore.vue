@@ -9,7 +9,7 @@
         @click="setSortColumn(entry.id)"
         :style="{ cursor: 'pointer' }"
       >
-        {{ entry.id }}
+        {{$t(translationPath + entry.id) }}
         <font-awesome-icon
           :icon="['fas', 'angle-up']"
           v-if="entry.id === sortColumn && sortOrder === -1"
@@ -107,11 +107,14 @@ export default class Highscore extends Vue {
   @Prop() readonly moduleId!: string;
   @Prop() readonly participantData!: DataEntry[];
   @Prop() readonly selectedParticipantId!: string;
+  @Prop({ default: () => '' }) translationPath!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   sortColumn = 'rate';
   sortOrder = 1;
   highScoreCount = 5;
+
+  //TODO translation path prop
 
   participantId = '';
 
@@ -151,6 +154,7 @@ export default class Highscore extends Vue {
 
       this.sortData();
     }
+    console.log(this.chartData);
   }
 
   sortData(): DataEntry[] {
@@ -204,6 +208,7 @@ export default class Highscore extends Vue {
     padding-bottom: 0.3rem;
   }
   tr {
+    text-align: left;
     border-bottom: 1px solid var(--color-background-dark);
   }
   td {

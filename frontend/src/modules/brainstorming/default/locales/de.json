@@ -23,5 +23,11 @@
     "alphabetical": "Alphabetische Ordnung der Ideen",
     "displayAll": "Alle Anzeigen",
     "add": "Eintrag hinzufügen"
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Punkte",
+      "ideaCount": "Ideen Anzahl"
+    }
   }
 }

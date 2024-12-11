@@ -57,5 +57,11 @@
       "survey": "survey",
       "talk": "talk"
     }
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Punkte",
+      "stars": "Sterne"
+    }
   }
 }

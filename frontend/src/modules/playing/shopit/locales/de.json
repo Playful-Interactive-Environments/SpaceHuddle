@@ -136,5 +136,18 @@
   "publicScreen": {
     "tutorial": "Tutorial",
     "highscore": "Highscore"
+  },
+  "analytics": {
+    "highscore": {
+      "header": "Highscore",
+      "co2": "CO²",
+      "pointsSpent": "ausgegebene Punkte",
+      "electricity": "Energie",
+      "lifetime": "Lebensdauer",
+      "water": "Wasser",
+      "money": "Geld",
+      "stars": "Sterne",
+      "points": "Punkte"
+    }
   }
 }

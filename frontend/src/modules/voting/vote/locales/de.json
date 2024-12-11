@@ -13,5 +13,12 @@
     "yes": "ja",
     "no": "nein",
     "back": "abschließen"
+  },
+  "analytics": {
+    "highscore": {
+      "ratingSum": "Summe Bewertungen",
+      "averageRating": "Ø Bewertungen",
+      "bestIdeaAverageRating": "Ø Berwertung der besten Idee"
+    }
   }
 }

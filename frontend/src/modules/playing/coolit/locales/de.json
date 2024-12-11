@@ -296,5 +296,12 @@
   "publicScreen": {
     "tutorial": "Tutorial",
     "highscore": "Highscore"
+  },
+  "analytics": {
+    "highscore": {
+      "playtime": "Spielzeit",
+      "stars": "Sterne",
+      "points": "Punkte"
+    }
   }
 }

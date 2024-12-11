@@ -25,5 +25,12 @@
   "moderatorConfig": {
     "slotCount": "Feld Anzahl",
     "slotCountExample": "3"
+  },
+  "analytics": {
+    "highscore": {
+      "ratingSum": "Summe Bewertungen",
+      "averageRating": "Ø Bewertungen",
+      "bestIdeaAverageRating": "Ø Berwertung der besten Idee"
+    }
   }
 }

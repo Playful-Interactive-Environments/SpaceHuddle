@@ -15,5 +15,12 @@
     "yes": "yes",
     "no": "no",
     "back": "finalize"
+  },
+  "analytics": {
+    "highscore": {
+      "ratingSum": "Rating Sum",
+      "averageRating": "Ø Rating",
+      "bestIdeaAverageRating": "Ø Rating of best idea"
+    }
   }
 }

@@ -276,5 +276,14 @@
   "publicScreen": {
     "tutorial": "tutorial",
     "highscore": "highscore"
+  },
+  "analytics": {
+    "highscore": {
+      "playTime": "Time Played",
+      "stars": "Stars",
+      "points": "Points",
+      "maxSpeed": "Max Speed",
+      "averageSpeed": "Ø Speed"
+    }
   }
 }
