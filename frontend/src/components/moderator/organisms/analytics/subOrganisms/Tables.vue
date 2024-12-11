@@ -108,7 +108,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
 
-import Highscore from '@/modules/common/visualisation_master/organisms/subOrganisms/Highscore.vue';
+import Highscore from '@/components/moderator/organisms/analytics/subOrganisms/Highscore.vue';
 
 import { ParticipantInfo } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';

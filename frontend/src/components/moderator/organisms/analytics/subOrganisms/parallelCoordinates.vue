@@ -179,7 +179,6 @@
               participantColor = entry.participant.avatar.color,
             }"
           >
-            <text>{{ dataLine.length }}</text>
             <g
               v-for="pathPart in dataLine"
               :key="pathPart?.path"
@@ -401,7 +400,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { debounce } from 'lodash';
 import { reactive } from 'vue';
-import VariableSVGWrapper from '@/modules/common/visualisation_master/organisms/subOrganisms/VariableSVGWrapper.vue';
+import VariableSVGWrapper from '@/components/moderator/organisms/analytics/subOrganisms/VariableSVGWrapper.vue';
 
 interface SubAxis {
   id: string;
