@@ -1,9 +1,14 @@
 <template>
   <div class="highscoreContainer" v-if="axes && chartData.length > 0">
-    <div
+    <el-card
       class="highScoreSelectionContainer"
-      v-for="(axis, index) in axes.slice(0, tableCount)"
+      v-for="(axis, index) in tableArray"
       :key="'highscoreSelectionContainer' + axis.moduleId"
+      shadow="never"
+      body-style="text-align: center"
+      :class="{
+        addOn__boarder: !(tableArray[index] && chartData.length > 0),
+      }"
     >
       <div class="highscoreModuleSelection">
         <el-dropdown
@@ -15,17 +20,71 @@
           <div class="el-dropdown-link">
             <font-awesome-icon
               class="highscoreModuleIcon"
+              v-if="tableArray[index] && chartData.length > 0"
               :icon="getIconOfAxis(tableArray[index] || axis)"
               :style="{
                 color: getColorOfAxis(tableArray[index] || axis),
               }"
             />
+            <p
+              class="oneLineText highscoreModuleName"
+              v-if="tableArray[index] && chartData.length > 0"
+            >
+              {{ tableArray[index]?.taskData.taskName }}
+              <font-awesome-icon :icon="['fas', 'angle-down']" />
+            </p>
+            <p class="oneLineText highscoreModuleName" v-else>
+              select task
+              <font-awesome-icon :icon="['fas', 'angle-down']" />
+            </p>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="(ax, axIndex) in axes"
+                :key="ax ? ax.moduleId + 'ax' : axIndex"
+                :command="ax ? ax : null"
+              >
+                {{ ax ? ax.taskData.taskName : 'N/A' }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <font-awesome-icon
+          :icon="['fas', 'trash']"
+          class="trashButton"
+          v-if="tableArray[index] && chartData.length > 0"
+          @click="removeFromTableArray(index)"
+        />
+      </div>
+      <Highscore
+        class="highscore"
+        v-if="tableArray[index] && chartData.length > 0"
+        :module-id="tableArray[index]!.moduleId"
+        :participant-data="JSON.parse(JSON.stringify(chartData))"
+        :selected-participant-id="selectedParticipantId"
+        @participant-selected="participantSelectionChanged"
+      />
+    </el-card>
+    <el-card
+      class="highScoreSelectionContainer addOn__boarder"
+      shadow="never"
+      body-style="text-align: center"
+    >
+      <p class="TableSelectionHeadline">
+        Table
+      </p>
+      <div class="highscoreModuleSelection">
+        <el-dropdown
+          v-if="axes.length > 1"
+          v-on:command="addToTableArray($event)"
+          trigger="click"
+          placement="bottom"
+        >
+          <div class="el-dropdown-link">
             <p class="oneLineText highscoreModuleName">
-              {{
-                tableArray[index]
-                  ? tableArray[index]?.taskData.taskName
-                  : axes[0].taskData.taskName
-              }}
+              select task
+              <font-awesome-icon :icon="['fas', 'angle-down']" />
             </p>
           </div>
           <template #dropdown>
@@ -41,23 +100,7 @@
           </template>
         </el-dropdown>
       </div>
-      <Highscore
-        class="highscore"
-        v-if="tableArray[index] && chartData.length > 0"
-        :module-id="tableArray[index]!.moduleId"
-        :participant-data="JSON.parse(JSON.stringify(chartData))"
-        :selected-participant-id="selectedParticipantId"
-        @participant-selected="participantSelectionChanged"
-      />
-      <Highscore
-        class="highscore"
-        v-else-if="axes[0] && chartData.length > 0"
-        :module-id="axes[0].moduleId"
-        :participant-data="JSON.parse(JSON.stringify(chartData))"
-        :selected-participant-id="selectedParticipantId"
-        @participant-selected="participantSelectionChanged"
-      />
-    </div>
+    </el-card>
   </div>
 </template>
 
@@ -119,8 +162,8 @@ export default class Tables extends Vue {
   selectedParticipantId = '';
   chartData: DataEntry[] = [];
 
-  tableCount = 2;
-  tableArray: (Axis | null)[] = [null, null];
+  tableCount = 0;
+  tableArray: (Axis | null)[] = [];
 
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
@@ -148,6 +191,16 @@ export default class Tables extends Vue {
       return getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
     }
   }
+
+  addToTableArray(axis: Axis): void {
+    this.tableArray.push(axis);
+    this.tableCount += 1;
+  }
+
+  removeFromTableArray(index: number): void {
+    this.tableArray.splice(index, 1);
+    this.tableCount -= 1;
+  }
 }
 </script>
 
@@ -155,11 +208,10 @@ export default class Tables extends Vue {
 .highscoreContainer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
   gap: 3rem;
   width: 100%;
-  height: 100%;
 }
 
 .highScoreSelectionContainer {
@@ -169,6 +221,10 @@ export default class Tables extends Vue {
   -ms-overflow-style: none;
 
   overflow-x: hidden;
+}
+
+.highscore {
+  margin-top: 1rem;
 }
 
 .highScoreSelectionContainer::-webkit-scrollbar {
@@ -191,6 +247,20 @@ export default class Tables extends Vue {
   border: 2px solid var(--color-background-darker);
 }
 
+.highscoreModuleSelection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .trashButton {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: var(--font-size-small);
+    cursor: pointer;
+  }
+}
+
 .highscoreModuleName {
   font-size: var(--font-size-default);
   font-weight: var(--font-weight-bold);
@@ -198,5 +268,25 @@ export default class Tables extends Vue {
 
 .highscoreModuleIcon {
   font-size: var(--font-size-xlarge);
+}
+
+.addOn {
+  &__boarder {
+    border: 2px dashed var(--color-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.el-card {
+  background-color: transparent;
+}
+
+.TableSelectionHeadline {
+  font-size: var(--font-size-xlarge);
+  font-weight: var(--font-weight-bold);
+
+  margin-bottom: 0.5rem;
 }
 </style>

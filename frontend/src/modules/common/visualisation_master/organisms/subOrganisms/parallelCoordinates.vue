@@ -1047,6 +1047,7 @@ export default class ParallelCoordinates extends Vue {
   }
   .axisIcon {
     font-size: var(--font-size-xlarge);
+    cursor: pointer;
   }
   .axisName {
     font-size: var(--font-size-default);
@@ -1093,6 +1094,7 @@ export default class ParallelCoordinates extends Vue {
   padding: 0;
   margin: 0;
   font-size: var(--font-size-small);
+  cursor: pointer;
 }
 
 .participantDataLineIcon {
