@@ -8,6 +8,7 @@
         "
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
         :steps="JSON.parse(JSON.stringify(steps))"
+        :selected-participant-id="selectedParticipantId"
       />
     </div>
 
@@ -18,6 +19,7 @@
         :axes="
           JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
         "
+        @participant-selected="participantSelectionChanged"
       />
     </div>
   </div>
@@ -139,6 +141,8 @@ export default class Analytics extends Vue {
   axes: Axis[] = [];
   loadingSteps = true;
 
+  selectedParticipantId = '';
+
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
     return null;
@@ -176,6 +180,11 @@ export default class Analytics extends Vue {
     if (task && task.modules && task.modules.length > 0)
       return task.modules.map((module) => module.name);
     return ['default'];
+  }
+
+  participantSelectionChanged(id: string) {
+    this.selectedParticipantId = id;
+    this.$emit('participantSelected', id);
   }
 
   @Watch('task', { immediate: true })

@@ -54,7 +54,7 @@
             :max="3"
             :disabled="true"
           />
-          <p v-else>---</p></span
+          <span v-else>---</span></span
         >
       </td>
     </tr>

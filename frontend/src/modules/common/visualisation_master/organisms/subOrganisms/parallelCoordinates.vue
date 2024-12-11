@@ -209,7 +209,12 @@
               :class="entry.participant.id"
               fill="none"
               :style="{
-                stroke: 'var(--color-dark-contrast)',
+                strokeWidth:
+                  selectedParticipantId === entry.participant.id ? '3px' : '',
+                stroke:
+                  selectedParticipantId === entry.participant.id
+                    ? participantColor
+                    : 'var(--color-dark-contrast)',
               }"
             >
               <path
@@ -221,7 +226,8 @@
                 :d="getIconDefinition(entry.participant.avatar.symbol).icon[4] as string"
                 :fill="entry.participant.avatar.color"
                 :style="{
-                  opacity: 0,
+                  opacity:
+                    selectedParticipantId === entry.participant.id ? 1 : 0,
                 }"
               />
               <circle
@@ -237,7 +243,11 @@
                 :d="pathPart.path"
                 :stroke-dasharray="pathPart.dashed ? '4,4' : '0'"
                 :style="{
-                  opacity: pathPart?.dashed ? '20%' : '45%',
+                  opacity: pathPart?.dashed
+                    ? '20%'
+                    : selectedParticipantId === entry.participant.id
+                    ? '1'
+                    : '45%',
                 }"
               />
             </g>
@@ -442,6 +452,7 @@ interface PathPart {
 export default class ParallelCoordinates extends Vue {
   @Prop({ default: () => [] }) chartAxes!: Axis[];
   @Prop({ default: () => [] }) participantData!: DataEntry[];
+  @Prop({ default: () => '' }) selectedParticipantId!: string;
   @Prop({ default: () => [] }) steps!: {
     moduleId: string;
     taskData: {
@@ -918,6 +929,9 @@ export default class ParallelCoordinates extends Vue {
   }
 
   setHoverStroke(color: string, id: string, participantColor: string) {
+    if (this.selectedParticipantId === id) {
+      return;
+    }
     const elements = Array.from(
       document.getElementsByClassName(id) as HTMLCollectionOf<HTMLElement>
     );

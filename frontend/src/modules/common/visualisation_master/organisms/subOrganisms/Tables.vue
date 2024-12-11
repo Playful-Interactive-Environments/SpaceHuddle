@@ -71,9 +71,7 @@
       shadow="never"
       body-style="text-align: center"
     >
-      <p class="TableSelectionHeadline">
-        Table
-      </p>
+      <p class="TableSelectionHeadline">Table</p>
       <div class="highscoreModuleSelection">
         <el-dropdown
           v-if="axes.length > 1"
@@ -178,6 +176,7 @@ export default class Tables extends Vue {
 
   participantSelectionChanged(id: string) {
     this.selectedParticipantId = id;
+    this.$emit('participantSelected', id);
   }
 
   getIconOfAxis(axis: Axis): string | undefined {
