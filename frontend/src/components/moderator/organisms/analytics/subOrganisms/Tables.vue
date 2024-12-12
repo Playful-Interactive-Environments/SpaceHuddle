@@ -111,12 +111,12 @@ import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
 
-import Highscore from '@/components/moderator/organisms/analytics/subOrganisms/Highscore.vue';
+import Highscore from '@/components/moderator/organisms/analytics/Highscore.vue';
 
 import { ParticipantInfo } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
-import { HighScoreEntry } from '@/components/moderator/organisms/analytics/subOrganisms/Highscore.vue';
+import { HighScoreEntry } from '@/components/moderator/organisms/analytics/Highscore.vue';
 
 interface SubAxis {
   id: string;

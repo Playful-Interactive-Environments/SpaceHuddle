@@ -7,19 +7,22 @@
         v-for="entry in chartData[0].values"
         :key="this.taskId + entry.id"
         @click="setSortColumn(entry.id)"
-        :style="{ cursor: 'pointer', width: `${93 / chartData[0].values.length}%` }"
+        :style="{
+          cursor: 'pointer',
+          width: `${93 / chartData[0].values.length}%`,
+        }"
       >
         <ToolTip :content="$t(translationPath + entry.id)" :show-after="500">
           <span class="twoLineText">
             {{ $t(translationPath + entry.id) }}
-          <font-awesome-icon
+            <font-awesome-icon
               :icon="['fas', 'angle-up']"
               v-if="entry.id === sortColumn && sortOrder === -1"
-          />
-          <font-awesome-icon
+            />
+            <font-awesome-icon
               :icon="['fas', 'angle-down']"
               v-if="entry.id === sortColumn && sortOrder === 1"
-          />
+            />
           </span>
         </ToolTip>
       </th>
@@ -97,7 +100,9 @@ import { Options, Vue } from 'vue-class-component';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ParticipantInfo } from '@/types/api/Participant';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import ToolTip from "@/components/shared/atoms/ToolTip.vue";
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 
 export interface HighScoreEntry {
   participant: ParticipantInfo;
@@ -105,13 +110,15 @@ export interface HighScoreEntry {
 }
 
 @Options({
-  components: {ToolTip, FontAwesomeIcon },
+  components: { ToolTip, FontAwesomeIcon },
   emits: ['participantSelected'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Highscore extends Vue {
   @Prop() readonly taskId!: string;
-  @Prop() readonly tableData!: HighScoreEntry[];
+  @Prop() readonly tableData!:
+    | HighScoreEntry[]
+    | TaskParticipantIterationStep[];
   @Prop({ default: () => '' }) readonly selectedParticipantId!: string;
   @Prop({ default: () => '' }) translationPath!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
@@ -136,9 +143,27 @@ export default class Highscore extends Vue {
   @Watch('taskId', { immediate: true })
   onChartDataChanged(): void {
     if (this.tableData?.length) {
-      this.chartData = this.tableData;
+      if (this.isHighScoreEntry(this.tableData[0])) {
+        this.chartData = this.tableData as HighScoreEntry[];
+      } else {
+        this.convertToHighScoreEntryArray(this.tableData as TaskParticipantIterationStep[]);
+        this.chartData = [];
+      }
       this.sortData();
     }
+  }
+
+  isHighScoreEntry(entry: any): boolean {
+    return (
+      entry.values[0].id !== undefined &&
+      entry.values[0].value !== undefined &&
+      entry.participant !== undefined
+    );
+  }
+
+  convertToHighScoreEntryArray(data: TaskParticipantIterationStep[]): HighScoreEntry[] {
+    console.log(data);
+    return [];
   }
 
   sortData(): HighScoreEntry[] {
