@@ -267,6 +267,12 @@ export default class Tables extends Vue {
   overflow-x: hidden;
 }
 
+@media(max-width: calc((700px * 2) + 12rem)) {
+  .highScoreSelectionContainer {
+    width: 100%;
+  }
+}
+
 .highscore {
   margin-top: 1rem;
 }
