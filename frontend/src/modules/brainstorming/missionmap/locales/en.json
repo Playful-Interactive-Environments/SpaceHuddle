@@ -177,5 +177,12 @@
       "9": "ideal development",
       "10": "ideal development"
     }
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Points",
+      "ideaCount": "Idea count",
+      "pointsSpent": "Points spent"
+    }
   }
 }

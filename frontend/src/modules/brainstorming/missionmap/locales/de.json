@@ -177,5 +177,12 @@
       "9": "ideale Entwicklung",
       "10": "ideale Entwicklung"
     }
+  },
+  "analytics": {
+    "highscore": {
+      "points": "Punkte",
+      "ideaCount": "Ideen Anzahl",
+      "pointsSpent": "ausgegebene Punkte"
+    }
   }
 }
