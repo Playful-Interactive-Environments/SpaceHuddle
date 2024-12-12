@@ -61,7 +61,7 @@
         class="highscore"
         v-if="tableArray[index] && chartData.length > 0"
         :module-id="tableArray[index]!.moduleId"
-        :participant-data="JSON.parse(JSON.stringify(chartData))"
+        :table-data="filterParticipantData(JSON.parse(JSON.stringify(chartData)), tableArray[index]!.moduleId)"
         :selected-participant-id="selectedParticipantId"
         :translation-path="getTranslationPath(tableArray[index])"
         @participant-selected="participantSelectionChanged"
@@ -72,7 +72,9 @@
       shadow="never"
       body-style="text-align: center"
     >
-      <p class="TableSelectionHeadline">{{ $t('moderator.organism.analytics.tables.table') }}</p>
+      <p class="TableSelectionHeadline">
+        {{ $t('moderator.organism.analytics.tables.table') }}
+      </p>
       <div class="highscoreModuleSelection">
         <el-dropdown
           v-if="axes.length > 1"
@@ -114,6 +116,7 @@ import Highscore from '@/components/moderator/organisms/analytics/subOrganisms/H
 import { ParticipantInfo } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+import { HighScoreEntry } from '@/components/moderator/organisms/analytics/subOrganisms/Highscore.vue';
 
 interface SubAxis {
   id: string;
@@ -163,9 +166,6 @@ export default class Tables extends Vue {
 
   selectedParticipantId = '';
   chartData: DataEntry[] = [];
-
-  //TODO translation path generation -> give each Highscore module
-
   tableCount = 0;
   tableArray: (Axis | null)[] = [];
 
@@ -214,6 +214,36 @@ export default class Tables extends Vue {
   removeFromTableArray(index: number): void {
     this.tableArray.splice(index, 1);
     this.tableCount -= 1;
+  }
+
+  filterParticipantData(participantData: DataEntry[], moduleId: string) {
+    const chartData = participantData
+      .filter((entry) => {
+        const moduleAxis = entry.axes.find((a) => a.moduleId === moduleId);
+        return moduleAxis?.axisValues.some((value) => value.value != null);
+      })
+      .map((entry) => ({
+        ...entry,
+        axes: entry.axes
+          .filter((axis) => axis.moduleId === moduleId)
+          .map((axis) => ({
+            ...axis,
+            axisValues: axis.axisValues.sort((a, b) => {
+              const aIsLast = ['stars', 'rate'].includes(a.id);
+              const bIsLast = ['stars', 'rate'].includes(b.id);
+              return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
+            }),
+          })),
+      }));
+    const returnArray: HighScoreEntry[] = [];
+    for (const entry of chartData) {
+      returnArray.push({
+        values: entry.axes[0].axisValues,
+        participant: entry.participant,
+      });
+    }
+    console.log(returnArray);
+    return returnArray;
   }
 }
 </script>

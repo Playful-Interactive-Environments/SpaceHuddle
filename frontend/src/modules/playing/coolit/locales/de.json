@@ -299,7 +299,7 @@
   },
   "analytics": {
     "highscore": {
-      "playtime": "Spielzeit",
+      "playTime": "Spielzeit",
       "stars": "Sterne",
       "points": "Punkte"
     }

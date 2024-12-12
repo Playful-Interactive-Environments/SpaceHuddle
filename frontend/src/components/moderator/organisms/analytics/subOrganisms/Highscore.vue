@@ -4,12 +4,12 @@
       <th />
       <th />
       <th
-        v-for="entry in chartData[0].axes[0].axisValues"
+        v-for="entry in chartData[0].values"
         :key="this.moduleId + entry.id"
         @click="setSortColumn(entry.id)"
         :style="{ cursor: 'pointer' }"
       >
-        {{$t(translationPath + entry.id) }}
+        {{ $t(translationPath + entry.id) }}
         <font-awesome-icon
           :icon="['fas', 'angle-up']"
           v-if="entry.id === sortColumn && sortOrder === -1"
@@ -37,7 +37,7 @@
         ></font-awesome-icon>
       </td>
       <td
-        v-for="value in chartData[index].axes[0].axisValues"
+        v-for="value in chartData[index].values"
         :key="entry.participant.id + value.id"
         class="valueTableEntry el-rate--large"
       >
@@ -86,16 +86,9 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ParticipantInfo } from '@/types/api/Participant';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
-interface AxisValue {
-  id: string;
-  value: number | null;
-}
-interface DataEntry {
+export interface HighScoreEntry {
   participant: ParticipantInfo;
-  axes: {
-    moduleId: string;
-    axisValues: AxisValue[];
-  }[];
+  values: { id: string; value: number | null }[];
 }
 
 @Options({
@@ -105,8 +98,8 @@ interface DataEntry {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Highscore extends Vue {
   @Prop() readonly moduleId!: string;
-  @Prop() readonly participantData!: DataEntry[];
-  @Prop() readonly selectedParticipantId!: string;
+  @Prop() readonly tableData!: HighScoreEntry[];
+  @Prop({ default: () => '' }) readonly selectedParticipantId!: string;
   @Prop({ default: () => '' }) translationPath!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -114,11 +107,9 @@ export default class Highscore extends Vue {
   sortOrder = 1;
   highScoreCount = 5;
 
-  //TODO translation path prop
-
   participantId = '';
 
-  chartData: DataEntry[] = [];
+  chartData: HighScoreEntry[] = [];
 
   setSortColumn(column: string): void {
     if (this.sortColumn === column) this.sortOrder *= -1;
@@ -130,42 +121,17 @@ export default class Highscore extends Vue {
   @Watch('participantData', { immediate: true })
   @Watch('moduleId', { immediate: true })
   onChartDataChanged(): void {
-    if (this.participantData?.length) {
-      this.chartData = this.participantData
-        .filter((entry) => {
-          const moduleAxis = entry.axes.find(
-            (a) => a.moduleId === this.moduleId
-          );
-          return moduleAxis?.axisValues.some((value) => value.value != null);
-        })
-        .map((entry) => ({
-          ...entry,
-          axes: entry.axes
-            .filter((axis) => axis.moduleId === this.moduleId)
-            .map((axis) => ({
-              ...axis,
-              axisValues: axis.axisValues.sort((a, b) => {
-                const aIsLast = ['stars', 'rate'].includes(a.id);
-                const bIsLast = ['stars', 'rate'].includes(b.id);
-                return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
-              }),
-            })),
-        }));
-
+    if (this.tableData?.length) {
+      this.chartData = this.tableData;
       this.sortData();
     }
-    console.log(this.chartData);
   }
 
-  sortData(): DataEntry[] {
+  sortData(): HighScoreEntry[] {
     if (this.chartData.length >= 2) {
       return this.chartData.sort((a, b) => {
-        const bVal = b.axes[0].axisValues.find(
-          (value) => value.id === this.sortColumn
-        );
-        const aVal = a.axes[0].axisValues.find(
-          (value) => value.id === this.sortColumn
-        );
+        const bVal = b.values.find((value) => value.id === this.sortColumn);
+        const aVal = a.values.find((value) => value.id === this.sortColumn);
 
         const aValue = aVal?.value;
         const bValue = bVal?.value;
