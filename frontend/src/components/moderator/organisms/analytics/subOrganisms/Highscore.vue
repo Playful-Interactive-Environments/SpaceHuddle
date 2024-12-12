@@ -41,11 +41,19 @@
         :key="entry.participant.id + value.id"
         class="valueTableEntry el-rate--large"
       >
-        <span v-if="value.id !== 'rate' && value.id !== 'stars'">{{
-          value.value != null
-            ? Math.round((value.value + Number.EPSILON) * 100) / 100
-            : '---'
-        }}</span
+        <span v-if="value.id !== 'rate' && value.id !== 'stars'"
+          >{{
+            value.value != null
+              ? Math.round((value.value + Number.EPSILON) * 100) / 100
+              : '---'
+          }}
+          {{
+            $t(translationPath + 'units.' + value.id).slice(
+              -value.id.length
+            ) !== value.id
+              ? $t(translationPath + 'units.' + value.id)
+              : ''
+          }}</span
         ><span v-else
           ><el-rate
             v-if="value.value != null"

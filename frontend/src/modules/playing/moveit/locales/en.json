@@ -283,7 +283,11 @@
       "stars": "Stars",
       "points": "Points",
       "maxSpeed": "Max Speed",
-      "averageSpeed": "Ø Speed"
+      "averageSpeed": "Ø Speed",
+      "units": {
+        "maxSpeed": "km/h",
+        "averageSpeed": "km/h"
+      }
     }
   }
 }

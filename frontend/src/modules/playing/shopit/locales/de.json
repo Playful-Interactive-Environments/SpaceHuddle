@@ -147,7 +147,14 @@
       "water": "Wasser",
       "money": "Geld",
       "stars": "Sterne",
-      "points": "Punkte"
+      "points": "Punkte",
+      "units": {
+        "co2": "kg",
+        "electricity": "kwh",
+        "lifetime": "Jahre",
+        "water": "l",
+        "money": "€"
+      }
     }
   }
 }
