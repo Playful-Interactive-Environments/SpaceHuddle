@@ -1,9 +1,16 @@
 <template>
-  <div id="analytics" :style="{ marginTop: '3rem' }">
+  <div
+    id="analytics"
+    :style="{ marginTop: '3rem' }"
+    v-loading="loadingSteps"
+    :element-loading-background="'var(--color-background)'"
+    :element-loading-text="$t('moderator.organism.analytics.loading')"
+  >
     <div
       class="AnalyticsParallelCoordinates"
-      v-loading="loadingSteps"
-      :element-loading-background="'var(--color-background)'"
+      :style="{
+        opacity: loadingSteps ? 0 : 1,
+      }"
     >
       <parallel-coordinates
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
@@ -18,8 +25,10 @@
 
     <div
       class="AnalyticsTables"
-      v-loading="loadingSteps"
       :element-loading-background="'var(--color-background)'"
+      :style="{
+        opacity: loadingSteps ? 0 : 1,
+      }"
     >
       <Tables
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
@@ -28,6 +37,9 @@
           JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
         "
         @participant-selected="participantSelectionChanged"
+        :style="{
+          opacity: loadingSteps ? 0 : 1,
+        }"
       />
     </div>
   </div>
@@ -638,8 +650,12 @@ export default class Analytics extends Vue {
     width: 100%;
   }
   .AnalyticsTables {
-    height: 40vh;
     width: 100%;
+  }
+
+  .AnalyticsTables,
+  .AnalyticsParallelCoordinates {
+    transition: opacity 3s ease;
   }
 }
 </style>

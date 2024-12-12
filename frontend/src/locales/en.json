@@ -386,6 +386,7 @@
         "off": "off"
       },
       "analytics": {
+        "loading": "Loading, please wait",
         "tables": {
           "selectTask": "select Task",
           "table": "Table"

@@ -386,6 +386,7 @@
         "off": "aus"
       },
       "analytics": {
+        "loading": "Wird geladen, bitte warten",
         "tables": {
           "selectTask": "Aufgabe auswählen",
           "table": "Tabelle"

@@ -1059,7 +1059,7 @@ export default class ParallelCoordinates extends Vue {
 }
 
 .axes {
-  transition: stroke 0.3s ease, stroke-width 0.3s ease, transform 0.6s ease;
+  transition: stroke 0.3s ease, stroke-width 0.3s ease;
 }
 
 .dataLine {
