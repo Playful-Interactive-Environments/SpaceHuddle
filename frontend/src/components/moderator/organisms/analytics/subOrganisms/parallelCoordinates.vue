@@ -16,7 +16,7 @@
           paddingLeft: `${axesSpacing / 3}px`,
         }"
       >
-        <p class="listButton">
+        <div class="listButton">
           <el-dropdown
             trigger="click"
             placement="bottom"
@@ -25,7 +25,7 @@
             :hide-on-click="false"
           >
             <div class="el-dropdown-link">
-              <font-awesome-icon icon="list" />
+              <font-awesome-icon icon="list" class="listIcon" />
             </div>
             <template #dropdown>
               <el-dropdown-menu>
@@ -38,6 +38,7 @@
                     cursor: 'default',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
+                    backgroundColor: selectedParticipantId === entry.avatar.id ? 'var(--color-background-blue)' : 'transparent',
                   }"
                 >
                   <div
@@ -74,7 +75,7 @@
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-        </p>
+        </div>
         <p class="participantCount">
           <font-awesome-icon icon="user" /> {{ getParticipationCount(axis) }}
         </p>
@@ -380,6 +381,11 @@
         </div>
       </div>
     </div>
+    <div class="legend">
+      <ToolTip v-for="legendItem in legend" class="legendItem" :key="legendItem.path" :content="$t(`moderator.organism.analytics.legend.${legendItem.name}`)" :show-after="200">
+        <el-image :src="legendItem.path" :alt="$t(`moderator.organism.analytics.legend.${legendItem.name}`)" :fit="'contain'" />
+      </ToolTip>
+    </div>
   </div>
 </template>
 
@@ -401,6 +407,8 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import { debounce } from 'lodash';
 import { reactive } from 'vue';
 import VariableSVGWrapper from '@/components/moderator/organisms/analytics/subOrganisms/VariableSVGWrapper.vue';
+import legend from '@/components/moderator/organisms/analytics/data/legend.json';
+import ToolTip from "@/components/shared/atoms/ToolTip.vue";
 
 interface SubAxis {
   id: string;
@@ -444,6 +452,7 @@ interface PathPart {
 
 @Options({
   components: {
+    ToolTip,
     VariableSVGWrapper,
     IdeaCard,
   },
@@ -463,6 +472,8 @@ export default class ParallelCoordinates extends Vue {
 
   padding = 20;
   hoverStroke: string | null = null;
+
+  legend = legend;
 
   availableAxes: Axis[] = [];
   axes: Axis[] = [];
@@ -1119,6 +1130,10 @@ export default class ParallelCoordinates extends Vue {
   cursor: pointer;
 }
 
+.listIcon {
+  cursor: pointer;
+}
+
 .participantDataLineIcon {
   transition: opacity 0.3s ease;
 }
@@ -1135,5 +1150,19 @@ export default class ParallelCoordinates extends Vue {
   .IdeaCard {
     width: 100%;
   }
+}
+
+.legend {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  height: 1.9rem;
+  width: fit-content;
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--color-background-dark);
+  border-radius: var(--border-radius-xs);
+  margin-left: auto;
+  margin-right: 0;
+  margin-top: 1rem;
 }
 </style>

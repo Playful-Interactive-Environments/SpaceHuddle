@@ -389,6 +389,15 @@
         "tables": {
           "selectTask": "select Task",
           "table": "Table"
+        },
+        "legend": {
+          "gearIcon": "Axis value settings",
+          "listIcon": "List of ideas",
+          "participantCount": "Participant count",
+          "overUnder": "Entries over/under average",
+          "lineSolid": "Participant data line",
+          "lineDashed": "Connection over missing entries",
+          "lineAvg": "Average line"
         }
       }
     },

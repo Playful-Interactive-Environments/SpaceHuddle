@@ -1,0 +1,30 @@
+{
+  "lineSolid": {
+    "path": "/assets/analytics/legend/lineSolid.svg",
+    "name": "lineSolid"
+  },
+  "lineDashed": {
+    "path": "/assets/analytics/legend/lineDashed.svg",
+    "name": "lineDashed"
+  },
+  "lineAvg": {
+    "path": "/assets/analytics/legend/lineAvg.svg",
+    "name": "lineAvg"
+  },
+  "gearIcon": {
+    "path": "/assets/analytics/legend/gearIcon.svg",
+    "name": "gearIcon"
+  },
+  "listIcon": {
+    "path": "/assets/analytics/legend/listIcon.svg",
+    "name": "listIcon"
+  },
+  "participantCount": {
+    "path": "/assets/analytics/legend/participantCount.svg",
+    "name": "participantCount"
+  },
+  "overUnder": {
+    "path": "/assets/analytics/legend/overUnder.svg",
+    "name": "overUnder"
+  }
+}

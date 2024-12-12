@@ -389,6 +389,15 @@
         "tables": {
           "selectTask": "Aufgabe auswählen",
           "table": "Tabelle"
+        },
+        "legend": {
+          "gearIcon": "Achsenwert einstellen",
+          "listIcon": "Liste der Ideen",
+          "participantCount": "Anzahl Teilnehmer",
+          "overUnder": "Anzahl über/unter dem Durchschnitt",
+          "lineSolid": "Teilnehmer Datenlinie",
+          "lineDashed": "Verbindung über unvollständige Einträge",
+          "lineAvg": "Durchschnittslinie"
         }
       }
     },

@@ -68,11 +68,11 @@
       />
     </el-card>
     <el-card
-      class="highScoreSelectionContainer addOn__boarder"
+      class="highScoreSelectionContainer addOn__boarder is-align-self-center"
       shadow="never"
       body-style="text-align: center"
     >
-      <p class="TableSelectionHeadline">Table</p>
+      <p class="TableSelectionHeadline">{{ $t('moderator.organism.analytics.tables.table') }}</p>
       <div class="highscoreModuleSelection">
         <el-dropdown
           v-if="axes.length > 1"
@@ -222,7 +222,7 @@ export default class Tables extends Vue {
 .highscoreContainer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 3rem;
   width: 100%;
