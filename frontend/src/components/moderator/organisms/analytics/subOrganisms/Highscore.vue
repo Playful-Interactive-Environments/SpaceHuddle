@@ -5,7 +5,7 @@
       <th />
       <th
         v-for="entry in chartData[0].values"
-        :key="this.moduleId + entry.id"
+        :key="this.taskId + entry.id"
         @click="setSortColumn(entry.id)"
         :style="{ cursor: 'pointer' }"
       >
@@ -97,13 +97,14 @@ export interface HighScoreEntry {
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Highscore extends Vue {
-  @Prop() readonly moduleId!: string;
+  @Prop() readonly taskId!: string;
   @Prop() readonly tableData!: HighScoreEntry[];
   @Prop({ default: () => '' }) readonly selectedParticipantId!: string;
   @Prop({ default: () => '' }) translationPath!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  sortColumn = 'rate';
+
+  sortColumn = 'stars';
   sortOrder = 1;
   highScoreCount = 5;
 
@@ -119,7 +120,7 @@ export default class Highscore extends Vue {
   }
 
   @Watch('participantData', { immediate: true })
-  @Watch('moduleId', { immediate: true })
+  @Watch('taskId', { immediate: true })
   onChartDataChanged(): void {
     if (this.tableData?.length) {
       this.chartData = this.tableData;

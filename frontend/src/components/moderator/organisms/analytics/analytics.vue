@@ -69,7 +69,7 @@ interface subAxis {
 }
 
 interface Axis {
-  moduleId: string;
+  taskId: string;
   taskData: {
     taskType: TaskType;
     taskName: string;
@@ -89,7 +89,7 @@ interface AxisValue {
 interface DataEntry {
   participant: ParticipantInfo;
   axes: {
-    moduleId: string;
+    taskId: string;
     axisValues: AxisValue[];
   }[];
 }
@@ -128,7 +128,7 @@ export default class Analytics extends Vue {
   session: Session | null = null;
 
   steps: {
-    moduleId: string;
+    taskId: string;
     taskData: {
       taskType: TaskType;
       taskName: string;
@@ -274,7 +274,7 @@ export default class Analytics extends Vue {
         taskParticipantService.registerGetIterationStepList(
           task.id,
           (steps: TaskParticipantIterationStep[]) => {
-            this.updateIterationSteps(task.modules[0].id, task, steps);
+            this.updateIterationSteps(task.id, task, steps);
           },
           EndpointAuthorisationType.MODERATOR,
           30
@@ -283,7 +283,7 @@ export default class Analytics extends Vue {
         votingService.registerGetResult(
           task.id,
           (votes: VoteResult[]) => {
-            this.updateVotes(task.modules[0].id, task, votes);
+            this.updateVotes(task.id, task, votes);
           },
           EndpointAuthorisationType.MODERATOR,
           30
@@ -292,7 +292,7 @@ export default class Analytics extends Vue {
         taskParticipantService.registerGetIterationStepList(
           task.id,
           (steps: TaskParticipantIterationStep[]) => {
-            this.updateBrainstormings(task.modules[0].id, task, steps);
+            this.updateBrainstormings(task.id, task, steps);
           },
           EndpointAuthorisationType.MODERATOR,
           30
@@ -305,7 +305,7 @@ export default class Analytics extends Vue {
         taskParticipantService.registerGetIterationList(
           task.id,
           (steps: TaskParticipantIterationStep[]) => {
-            this.updateIterationSteps(task.modules[0].id, task, steps);
+            this.updateIterationSteps(task.id, task, steps);
           },
           EndpointAuthorisationType.MODERATOR,
           30
@@ -413,13 +413,13 @@ export default class Analytics extends Vue {
   }
 
   updateIterationSteps(
-    moduleId: string,
+    taskId: string,
     task: Task,
     steps: TaskParticipantIterationStep[]
   ): void {
     const filteredSteps = steps.filter((step) => step.parameter.gameplayResult);
     const stepsEntry = {
-      moduleId: moduleId,
+      taskId: taskId,
       taskData: {
         taskType: task.taskType as TaskType,
         taskName: task.name,
@@ -429,7 +429,7 @@ export default class Analytics extends Vue {
       steps: filteredSteps,
     };
     const index = this.steps.findIndex(
-      (step) => step.moduleId === stepsEntry.moduleId
+      (step) => step.taskId === stepsEntry.taskId
     );
 
     if (index > -1) {
@@ -447,7 +447,7 @@ export default class Analytics extends Vue {
     const dataArray: {
       participant: ParticipantInfo;
       data: {
-        moduleId: string;
+        taskId: string;
         taskData: {
           taskType: TaskType;
           taskName: string;
@@ -470,7 +470,7 @@ export default class Analytics extends Vue {
   }
 
   getBestIterationsParticipantSteps(participantID: string): {
-    moduleId: string;
+    taskId: string;
     taskData: {
       taskType: TaskType;
       taskName: string;
@@ -501,7 +501,7 @@ export default class Analytics extends Vue {
       }
 
       return {
-        moduleId: stepEntry.moduleId,
+        taskId: stepEntry.taskId,
         taskData: stepEntry.taskData,
         bestStep,
       };
@@ -530,7 +530,7 @@ export default class Analytics extends Vue {
 
   CalculateAxes(): Axis[] {
     return this.steps.map((step) => {
-      const { moduleId, taskData } = step;
+      const { taskId, taskData } = step;
 
       const axisValues = this.wantedValues.reduce((acc, value) => {
         if (
@@ -569,7 +569,7 @@ export default class Analytics extends Vue {
       const active = axisValues.length > 0;
 
       return {
-        moduleId,
+        taskId,
         taskData,
         axisValues,
         categoryActive: active ? axisValues[0]?.id || '' : '',
@@ -585,7 +585,7 @@ export default class Analytics extends Vue {
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {
-          const moduleData = data.find((d) => d.moduleId === axis.moduleId);
+          const moduleData = data.find((d) => d.taskId === axis.taskId);
           const axisValues = axis.axisValues.map((axisValue) => {
             if (!axisValue) return { id: '', value: null };
 
@@ -611,7 +611,7 @@ export default class Analytics extends Vue {
 
             return { id, value };
           });
-          return { moduleId: axis.moduleId, axisValues };
+          return { taskId: axis.taskId, axisValues };
         })
         .filter((axis) => axis.axisValues.length > 0);
       return { participant, axes: formattedAxes };

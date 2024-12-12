@@ -3,7 +3,7 @@
     <el-card
       class="highScoreSelectionContainer"
       v-for="(axis, index) in tableArray"
-      :key="'highscoreSelectionContainer' + axis.moduleId"
+      :key="'highscoreSelectionContainer' + axis.taskId"
       shadow="never"
       body-style="text-align: center"
       :class="{
@@ -42,7 +42,7 @@
             <el-dropdown-menu>
               <el-dropdown-item
                 v-for="(ax, axIndex) in axes"
-                :key="ax ? ax.moduleId + 'ax' : axIndex"
+                :key="ax ? ax.taskId + 'ax' : axIndex"
                 :command="ax ? ax : null"
               >
                 {{ ax ? ax.taskData.taskName : 'N/A' }}
@@ -60,8 +60,8 @@
       <Highscore
         class="highscore"
         v-if="tableArray[index] && chartData.length > 0"
-        :module-id="tableArray[index]!.moduleId"
-        :table-data="filterParticipantData(JSON.parse(JSON.stringify(chartData)), tableArray[index]!.moduleId)"
+        :module-id="tableArray[index]!.taskId"
+        :table-data="filterParticipantData(JSON.parse(JSON.stringify(chartData)), tableArray[index]!.taskId)"
         :selected-participant-id="selectedParticipantId"
         :translation-path="getTranslationPath(tableArray[index])"
         @participant-selected="participantSelectionChanged"
@@ -92,7 +92,7 @@
             <el-dropdown-menu>
               <el-dropdown-item
                 v-for="(ax, axIndex) in axes"
-                :key="ax ? ax.moduleId + 'ax' : axIndex"
+                :key="ax ? ax.taskId + 'ax' : axIndex"
                 :command="ax ? ax : null"
               >
                 {{ ax ? ax.taskData.taskName : 'N/A' }}
@@ -124,7 +124,7 @@ interface SubAxis {
 }
 
 interface Axis {
-  moduleId: string;
+  taskId: string;
   taskData: {
     taskType: TaskType;
     taskName: string;
@@ -144,7 +144,7 @@ interface AxisValue {
 interface DataEntry {
   participant: ParticipantInfo;
   axes: {
-    moduleId: string;
+    taskId: string;
     axisValues: AxisValue[];
   }[];
 }
@@ -216,16 +216,16 @@ export default class Tables extends Vue {
     this.tableCount -= 1;
   }
 
-  filterParticipantData(participantData: DataEntry[], moduleId: string) {
+  filterParticipantData(participantData: DataEntry[], taskId: string) {
     const chartData = participantData
       .filter((entry) => {
-        const moduleAxis = entry.axes.find((a) => a.moduleId === moduleId);
+        const moduleAxis = entry.axes.find((a) => a.taskId === taskId);
         return moduleAxis?.axisValues.some((value) => value.value != null);
       })
       .map((entry) => ({
         ...entry,
         axes: entry.axes
-          .filter((axis) => axis.moduleId === moduleId)
+          .filter((axis) => axis.taskId === taskId)
           .map((axis) => ({
             ...axis,
             axisValues: axis.axisValues.sort((a, b) => {
@@ -242,7 +242,6 @@ export default class Tables extends Vue {
         participant: entry.participant,
       });
     }
-    console.log(returnArray);
     return returnArray;
   }
 }

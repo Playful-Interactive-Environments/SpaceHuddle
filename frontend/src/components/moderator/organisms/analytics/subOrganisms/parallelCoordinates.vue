@@ -8,7 +8,7 @@
       <div
         class="axisControls axisControlsFlex"
         v-for="axis in activeAxes"
-        :key="axis.moduleId"
+        :key="axis.taskId"
         :style="{
           textAlign: 'center',
           width: `${axesSpacing}px`,
@@ -31,7 +31,7 @@
               <el-dropdown-menu>
                 <el-dropdown-item
                   v-for="entry of getCachedIdeas(axis)"
-                  :key="entry.avatar.id + axis.moduleId"
+                  :key="entry.avatar.id + axis.taskId"
                   :divided="true"
                   :disabled="true"
                   :style="{
@@ -59,7 +59,7 @@
                       v-for="(idea, index) of entry.ideas"
                       :key="
                         entry.avatar.id +
-                        axis.moduleId +
+                        axis.taskId +
                         (idea ? idea.id : index)
                       "
                     >
@@ -94,7 +94,7 @@
       <g
         class="axes"
         v-for="(axis, index) in activeAxes"
-        :key="axis.moduleId"
+        :key="axis.taskId"
         :transform="`translate(${axesSpacing * index}, 0)`"
       >
         <!-- Axis Line -->
@@ -103,7 +103,7 @@
         <!-- Tick Marks and Labels for the active sub-axis -->
         <g
           v-for="labelIndex in labelCount + 1"
-          :key="labelIndex - 1 + axis.moduleId"
+          :key="labelIndex - 1 + axis.taskId"
         >
           <VariableSVGWrapper>
             <template
@@ -265,7 +265,7 @@
         <div
           class="axisControls"
           v-for="(axis, index) in activeAxes"
-          :key="axis.moduleId"
+          :key="axis.taskId"
           :style="{
             textAlign: 'center',
             width: `${axesSpacing / 1.5}px`,
@@ -327,7 +327,7 @@
                     v-for="(ax, axIndex) in availableAxes.filter(
                       (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
                     )"
-                    :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
+                    :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
                     :command="ax ? ax : null"
                   >
                     {{ ax ? ax.taskData.taskName : 'N/A' }}
@@ -379,7 +379,7 @@
                   v-for="(ax, axIndex) in availableAxes.filter(
                     (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
                   )"
-                  :key="ax ? ax.moduleId + 'ax' : axIndex + 'ax'"
+                  :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
                   :command="ax ? ax : null"
                 >
                   {{ ax ? ax.taskData.taskName : 'N/A' }}
@@ -435,7 +435,7 @@ interface SubAxis {
 }
 
 interface Axis {
-  moduleId: string;
+  taskId: string;
   taskData: {
     taskType: TaskType;
     taskName: string;
@@ -456,7 +456,7 @@ interface AxisValue {
 interface DataEntry {
   participant: ParticipantInfo;
   axes: {
-    moduleId: string;
+    taskId: string;
     axisValues: AxisValue[];
   }[];
 }
@@ -481,7 +481,7 @@ export default class ParallelCoordinates extends Vue {
   @Prop({ default: () => [] }) participantData!: DataEntry[];
   @Prop({ default: () => '' }) selectedParticipantId!: string;
   @Prop({ default: () => [] }) steps!: {
-    moduleId: string;
+    taskId: string;
     taskData: {
       taskType: TaskType;
       taskName: string;
@@ -574,7 +574,7 @@ export default class ParallelCoordinates extends Vue {
       .sort((a, b) => a.taskData.initOrder - b.taskData.initOrder)
       .reduce((acc, chartAxis) => {
         const matchingAxis = this.availableAxes.find(
-          (axis) => axis.moduleId === chartAxis.moduleId
+          (axis) => axis.taskId === chartAxis.taskId
         );
 
         if (matchingAxis) {
@@ -637,7 +637,7 @@ export default class ParallelCoordinates extends Vue {
     const category = axis.categoryActive;
     return this.participantData.reduce((counter, partData) => {
       const partAxis = partData.axes.find(
-        (partAxis) => partAxis.moduleId === axis.moduleId
+        (partAxis) => partAxis.taskId === axis.taskId
       );
       if (partAxis) {
         counter += partAxis.axisValues.filter(
@@ -671,7 +671,7 @@ export default class ParallelCoordinates extends Vue {
 
   updateSubAxis(index: number, subAxisId: string | null) {
     const axis = this.axes.find(
-      (a) => a.moduleId === this.activeAxes[index].moduleId
+      (a) => a.taskId === this.activeAxes[index].taskId
     );
     if (subAxisId && axis) {
       axis.categoryActive = subAxisId;
@@ -681,7 +681,7 @@ export default class ParallelCoordinates extends Vue {
   getValuesForEntry(entry: DataEntry): (number | null)[] {
     return this.activeAxes.map((activeAxis) => {
       const matchingAxis = entry.axes.find(
-        (axis) => axis.moduleId === activeAxis.moduleId
+        (axis) => axis.taskId === activeAxis.taskId
       );
       const value = matchingAxis
         ? matchingAxis.axisValues.find(
@@ -741,7 +741,7 @@ export default class ParallelCoordinates extends Vue {
         const validValues = this.chartData
           .map((entry) => {
             const selectedAxis = entry.axes.find(
-              (a) => a.moduleId === axis.moduleId
+              (a) => a.taskId === axis.taskId
             );
             return selectedAxis
               ? selectedAxis.axisValues.find(
@@ -887,10 +887,10 @@ export default class ParallelCoordinates extends Vue {
     ];
 
     const draggedAvailableIndex = this.availableAxes.findIndex(
-      (axis) => axis.moduleId === draggedAxis.moduleId
+      (axis) => axis.taskId === draggedAxis.taskId
     );
     const dropAvailableIndex = this.availableAxes.findIndex(
-      (axis) => axis.moduleId === dropAxis.moduleId
+      (axis) => axis.taskId === dropAxis.taskId
     );
     [
       this.availableAxes[draggedAvailableIndex],
@@ -909,7 +909,7 @@ export default class ParallelCoordinates extends Vue {
   }
 
   deactivateAxis(axis: Axis) {
-    const axisIndex = this.axes.findIndex((a) => a.moduleId === axis.moduleId);
+    const axisIndex = this.axes.findIndex((a) => a.taskId === axis.taskId);
     if (axisIndex !== -1) {
       this.axes[axisIndex].active = false;
       this.axes.splice(axisIndex, 1);
@@ -923,12 +923,12 @@ export default class ParallelCoordinates extends Vue {
 
   private cacheAllIdeas() {
     for (const axis of this.activeAxes) {
-      this.cachedIdeas[axis.moduleId] = this.computeIdeasForAxis(axis);
+      this.cachedIdeas[axis.taskId] = this.computeIdeasForAxis(axis);
     }
   }
 
   getCachedIdeas(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
-    return this.cachedIdeas[axis.moduleId] || [];
+    return this.cachedIdeas[axis.taskId] || [];
   }
 
   @Watch('steps', { immediate: true, deep: true })
@@ -937,7 +937,7 @@ export default class ParallelCoordinates extends Vue {
   }
 
   computeIdeasForAxis(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
-    const steps = this.steps.find((step) => step.moduleId === axis.moduleId);
+    const steps = this.steps.find((step) => step.taskId === axis.taskId);
     if (!steps) return [];
 
     const { taskType } = steps.taskData;
