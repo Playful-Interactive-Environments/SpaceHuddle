@@ -250,7 +250,7 @@ export default class Tables extends Vue {
 <style lang="scss" scoped>
 .highscoreContainer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 3rem;
@@ -258,7 +258,8 @@ export default class Tables extends Vue {
 }
 
 .highScoreSelectionContainer {
-  width: calc(50% - 3rem);
+  min-width: 700px;
+  width: calc(50% - 1.5rem);
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;

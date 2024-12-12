@@ -7,17 +7,21 @@
         v-for="entry in chartData[0].values"
         :key="this.taskId + entry.id"
         @click="setSortColumn(entry.id)"
-        :style="{ cursor: 'pointer' }"
+        :style="{ cursor: 'pointer', width: `${93 / chartData[0].values.length}%` }"
       >
-        {{ $t(translationPath + entry.id) }}
-        <font-awesome-icon
-          :icon="['fas', 'angle-up']"
-          v-if="entry.id === sortColumn && sortOrder === -1"
-        />
-        <font-awesome-icon
-          :icon="['fas', 'angle-down']"
-          v-if="entry.id === sortColumn && sortOrder === 1"
-        />
+        <ToolTip :content="$t(translationPath + entry.id)" :show-after="500">
+          <span class="twoLineText">
+            {{ $t(translationPath + entry.id) }}
+          <font-awesome-icon
+              :icon="['fas', 'angle-up']"
+              v-if="entry.id === sortColumn && sortOrder === -1"
+          />
+          <font-awesome-icon
+              :icon="['fas', 'angle-down']"
+              v-if="entry.id === sortColumn && sortOrder === 1"
+          />
+          </span>
+        </ToolTip>
       </th>
     </tr>
     <tr
@@ -93,6 +97,7 @@ import { Options, Vue } from 'vue-class-component';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ParticipantInfo } from '@/types/api/Participant';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import ToolTip from "@/components/shared/atoms/ToolTip.vue";
 
 export interface HighScoreEntry {
   participant: ParticipantInfo;
@@ -100,7 +105,7 @@ export interface HighScoreEntry {
 }
 
 @Options({
-  components: { FontAwesomeIcon },
+  components: {ToolTip, FontAwesomeIcon },
   emits: ['participantSelected'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
