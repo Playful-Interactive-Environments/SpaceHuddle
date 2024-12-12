@@ -38,7 +38,10 @@
                     cursor: 'default',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    backgroundColor: selectedParticipantId === entry.avatar.id ? 'var(--color-background-blue)' : 'transparent',
+                    backgroundColor:
+                      selectedParticipantId === entry.avatar.id
+                        ? 'var(--color-background-blue)'
+                        : 'transparent',
                   }"
                 >
                   <div
@@ -290,7 +293,11 @@
                     :key="subAxis ? subAxis.id : subAxisIndex"
                     :command="subAxis ? subAxis.id : null"
                   >
-                    {{ subAxis ? $t(getTranslationPath(axis) + subAxis.id) : 'N/A' }}
+                    {{
+                      subAxis
+                        ? $t(getTranslationPath(axis) + subAxis.id)
+                        : 'N/A'
+                    }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -333,7 +340,9 @@
             </el-button>
           </div>
           <p class="axisName twoLineText">{{ axis.taskData.taskName }}</p>
-          <p class="subAxisName twoLineText">{{ $t(getTranslationPath(axis) + axis.categoryActive) }}</p>
+          <p class="subAxisName twoLineText">
+            {{ $t(getTranslationPath(axis) + axis.categoryActive) }}
+          </p>
         </div>
       </div>
       <div
@@ -382,8 +391,18 @@
       </div>
     </div>
     <div class="legend">
-      <ToolTip v-for="legendItem in legend" class="legendItem" :key="legendItem.path" :content="$t(`moderator.organism.analytics.legend.${legendItem.name}`)" :show-after="200">
-        <el-image :src="legendItem.path" :alt="$t(`moderator.organism.analytics.legend.${legendItem.name}`)" :fit="'contain'" />
+      <ToolTip
+        v-for="legendItem in legend"
+        class="legendItem"
+        :key="legendItem.path"
+        :content="$t(`moderator.organism.analytics.legend.${legendItem.name}`)"
+        :show-after="200"
+      >
+        <el-image
+          :src="legendItem.path"
+          :alt="$t(`moderator.organism.analytics.legend.${legendItem.name}`)"
+          :fit="'contain'"
+        />
       </ToolTip>
     </div>
   </div>
@@ -408,7 +427,7 @@ import { debounce } from 'lodash';
 import { reactive } from 'vue';
 import VariableSVGWrapper from '@/components/moderator/organisms/analytics/subOrganisms/VariableSVGWrapper.vue';
 import legend from '@/components/moderator/organisms/analytics/data/legend.json';
-import ToolTip from "@/components/shared/atoms/ToolTip.vue";
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 interface SubAxis {
   id: string;
@@ -522,7 +541,7 @@ export default class ParallelCoordinates extends Vue {
       return '';
     }
     return `module.${axis.taskData.taskType.toLowerCase()}.${
-        axis.taskData.moduleName
+      axis.taskData.moduleName
     }.analytics.highscore.`;
   }
 
@@ -1072,6 +1091,7 @@ export default class ParallelCoordinates extends Vue {
   align-items: flex-start;
 }
 .axisControls {
+  cursor: grab;
   .axisSelections {
     display: flex;
     align-items: center;
@@ -1089,6 +1109,10 @@ export default class ParallelCoordinates extends Vue {
   .subAxisName {
     font-size: var(--font-size-small);
   }
+}
+
+.axisControls:active {
+  cursor: grabbing;
 }
 
 .axisControlsFlex {
@@ -1115,6 +1139,7 @@ export default class ParallelCoordinates extends Vue {
   font-size: var(--font-size-xxxlarge);
   opacity: 0.5;
   transition: opacity 0.5s ease;
+  cursor: pointer;
 }
 
 .axisPlus:hover {
@@ -1164,5 +1189,6 @@ export default class ParallelCoordinates extends Vue {
   margin-left: auto;
   margin-right: 0;
   margin-top: 1rem;
+  cursor: help;
 }
 </style>

@@ -220,6 +220,7 @@ export default class Highscore extends Vue {
 
 .participantTableEntries {
   transition: background-color 0.15s ease;
+  cursor: pointer;
 }
 
 .participantTableEntries:hover {

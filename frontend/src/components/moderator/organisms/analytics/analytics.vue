@@ -1,6 +1,10 @@
 <template>
   <div id="analytics" :style="{ marginTop: '3rem' }">
-    <div class="AnalyticsParallelCoordinates" v-loading="loadingSteps" :element-loading-background="'var(--color-background)'">
+    <div
+      class="AnalyticsParallelCoordinates"
+      v-loading="loadingSteps"
+      :element-loading-background="'var(--color-background)'"
+    >
       <parallel-coordinates
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
         :chart-axes="
@@ -12,7 +16,11 @@
       />
     </div>
 
-    <div class="AnalyticsTables" v-loading="loadingSteps" :element-loading-background="'var(--color-background)'">
+    <div
+      class="AnalyticsTables"
+      v-loading="loadingSteps"
+      :element-loading-background="'var(--color-background)'"
+    >
       <Tables
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
@@ -171,12 +179,6 @@ export default class Analytics extends Vue {
   unmounted(): void {
     this.deregisterAll();
     pixiUtil.cleanupToken(this.textureToken);
-  }
-
-  getModuleName(task: Task): string[] {
-    if (task && task.modules && task.modules.length > 0)
-      return task.modules.map((module) => module.name);
-    return ['default'];
   }
 
   participantSelectionChanged(id: string) {
