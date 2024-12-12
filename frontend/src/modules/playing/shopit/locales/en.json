@@ -149,6 +149,7 @@
       "money": "money",
       "stars": "Sterne",
       "points": "Punkte",
+      "cardsPlayed": "Cards played",
       "units": {
         "co2": "kg",
         "electricity": "kwh",
