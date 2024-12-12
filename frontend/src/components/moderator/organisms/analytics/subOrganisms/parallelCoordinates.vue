@@ -289,7 +289,7 @@
                     :key="subAxis ? subAxis.id : subAxisIndex"
                     :command="subAxis ? subAxis.id : null"
                   >
-                    {{ subAxis ? subAxis.id : 'N/A' }}
+                    {{ subAxis ? $t(getTranslationPath(axis) + subAxis.id) : 'N/A' }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -332,7 +332,7 @@
             </el-button>
           </div>
           <p class="axisName twoLineText">{{ axis.taskData.taskName }}</p>
-          <p class="subAxisName twoLineText">{{ axis.categoryActive }}</p>
+          <p class="subAxisName twoLineText">{{ $t(getTranslationPath(axis) + axis.categoryActive) }}</p>
         </div>
       </div>
       <div
@@ -504,6 +504,15 @@ export default class ParallelCoordinates extends Vue {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
+  }
+
+  getTranslationPath(axis: Axis | null): string {
+    if (!axis) {
+      return '';
+    }
+    return `module.${axis.taskData.taskType.toLowerCase()}.${
+        axis.taskData.moduleName
+    }.analytics.highscore.`;
   }
 
   calculateParentDimensions() {
