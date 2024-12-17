@@ -13,7 +13,7 @@
           textAlign: 'center',
           width: `${axesSpacing}px`,
           gap: `${axesSpacing / 4}px`,
-          paddingLeft: `${axesSpacing / 3}px`,
+          paddingLeft: `${axesSpacing / 3.5}px`,
         }"
       >
         <div class="listButton">
@@ -58,9 +58,7 @@
                       class="ideaCardContainer"
                       v-for="(idea, index) of entry.ideas"
                       :key="
-                        entry.avatar.id +
-                        axis.taskId +
-                        (idea ? idea.id : index)
+                        entry.avatar.id + axis.taskId + (idea ? idea.id : index)
                       "
                     >
                       <IdeaCard
@@ -88,51 +86,8 @@
     <svg
       ref="svgElement"
       class="parallelSVG"
-      :style="{ paddingLeft: `${axesSpacing / 2}px` }"
+      :style="{ paddingLeft: `${paddingLeft}px` }"
     >
-      <!-- Axes -->
-      <g
-        class="axes"
-        v-for="(axis, index) in activeAxes"
-        :key="axis.taskId"
-        :transform="`translate(${axesSpacing * index}, 0)`"
-      >
-        <!-- Axis Line -->
-        <line :y1="padding" :y2="height - padding" stroke="black" />
-
-        <!-- Tick Marks and Labels for the active sub-axis -->
-        <g
-          v-for="labelIndex in labelCount + 1"
-          :key="labelIndex - 1 + axis.taskId"
-        >
-          <VariableSVGWrapper>
-            <template
-              v-slot="{ labelPosition = this.getLabelPosition(labelIndex - 1) }"
-            >
-              <line
-                :y1="labelPosition"
-                :y2="labelPosition"
-                :x2="5"
-                stroke="black"
-              />
-              <text :y="labelPosition" x="10" font-size="10">
-                {{
-                  Math.round(
-                    ((axis.axisValues.find(
-                      (value) => value.id === axis.categoryActive
-                    ).range /
-                      labelCount) *
-                      (labelIndex - 1) +
-                      Number.EPSILON) *
-                      100
-                  ) / 100
-                }}
-              </text>
-            </template>
-          </VariableSVGWrapper>
-        </g>
-      </g>
-
       <!-- Average Data Line -->
       <g
         v-for="(pathPart, index) in averageDataLinePath"
@@ -223,7 +178,7 @@
               <path
                 class="participantDataLineIcon"
                 v-if="index === dataLine.length - 1"
-                :transform="`translate(${pathPart?.x + 20}, ${
+                :transform="`translate(${pathPart?.x + 5}, ${
                   pathPart?.y - 10
                 }), scale(0.04)`"
                 :d="getIconDefinition(entry.participant.avatar.symbol).icon[4] as string"
@@ -256,6 +211,81 @@
             </g>
           </template>
         </VariableSVGWrapper>
+      </g>
+      <!-- Axes -->
+      <g
+        class="axes"
+        v-for="(axis, index) in activeAxes"
+        :key="axis.taskId"
+        :transform="`translate(${axesSpacing * index + paddingLeft}, 0)`"
+      >
+        <!-- Axis Line -->
+        <line
+          :y1="padding"
+          :y2="height - padding"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+
+        <!-- Tick Marks and Labels for the active sub-axis -->
+        <g
+          v-for="labelIndex in this.getLabelCount(
+            axis.axisValues.find((ax) => ax?.id === axis.categoryActive)?.range
+          ) + 1"
+          :key="labelIndex - 1 + axis.taskId"
+        >
+          <VariableSVGWrapper>
+            <template
+              v-slot="{
+                labelPosition = this.getLabelPosition(
+                  labelIndex - 1,
+                  this.getLabelCount(
+                    axis.axisValues.find((ax) => ax?.id === axis.categoryActive)
+                      ?.range
+                  )
+                ),
+              }"
+            >
+              <line
+                :y1="labelPosition"
+                :y2="labelPosition"
+                :x1="-5"
+                :x2="5"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <text
+                :y="labelPosition - 6"
+                x="0"
+                font-size="10.5"
+                class="axisLabel"
+                text-anchor="middle"
+                :style="{
+                  stroke: 'var(--color-background)',
+                  strokeWidth: '5pt',
+                  paintOrder: 'stroke',
+                  textAlign: 'center',
+                }"
+              >
+                {{
+                  Math.round(
+                    ((axis.axisValues.find(
+                      (value) => value.id === axis.categoryActive
+                    ).range /
+                      this.getLabelCount(
+                        axis.axisValues.find(
+                          (ax) => ax?.id === axis.categoryActive
+                        )?.range
+                      )) *
+                      (labelIndex - 1) +
+                      Number.EPSILON) *
+                      100
+                  ) / 100
+                }}
+              </text>
+            </template>
+          </VariableSVGWrapper>
+        </g>
       </g>
     </svg>
 
@@ -561,6 +591,10 @@ export default class ParallelCoordinates extends Vue {
     return this.parentHeight || 500;
   }
 
+  get paddingLeft() {
+    return this.axesSpacing / 4;
+  }
+
   isIdeaTask(axis: Axis) {
     return (
       (axis.taskData.taskType as string) === 'BRAINSTORMING' ||
@@ -661,12 +695,27 @@ export default class ParallelCoordinates extends Vue {
     );
   }
 
-  getLabelPosition(index: number) {
+  getLabelPosition(index: number, labelCount: number) {
     return (
       this.height -
       this.padding -
-      ((this.height - 2 * this.padding) / this.labelCount) * index
+      ((this.height - 2 * this.padding) / labelCount) * index
     );
+  }
+
+  getLabelCount(range: number | undefined): number {
+    if (!range) {
+      return 3;
+    }
+    let i = 3;
+    while (i <= 5) {
+      if (range % i === 0) {
+        console.log(i);
+        return i;
+      }
+      i += 1;
+    }
+    return 3;
   }
 
   updateSubAxis(index: number, subAxisId: string | null) {
@@ -700,7 +749,7 @@ export default class ParallelCoordinates extends Vue {
         if (value == null) return;
 
         const axis = this.activeAxes[index];
-        const x = this.axesSpacing * index;
+        const x = this.axesSpacing * index + this.paddingLeft;
         const y = this.getYPosition(value, axis);
         const isDashed = this.checkIfDashed(values, index);
 
@@ -760,7 +809,7 @@ export default class ParallelCoordinates extends Vue {
     this.averageAxisValues = averages;
     return averages
       .map((average, index) => {
-        const x = this.axesSpacing * index;
+        const x = this.axesSpacing * index + this.paddingLeft;
         const y =
           average != null
             ? this.getYPosition(average, this.activeAxes[index])
@@ -829,8 +878,8 @@ export default class ParallelCoordinates extends Vue {
     }
     const prevX =
       values[iterator] !== null
-        ? this.axesSpacing * iterator
-        : this.axesSpacing * index;
+        ? this.axesSpacing * iterator + this.paddingLeft
+        : this.axesSpacing * index + this.paddingLeft;
     const prevY =
       values[iterator] !== null
         ? this.getYPosition(values[iterator] || 0, this.activeAxes[iterator])
@@ -1060,6 +1109,7 @@ export default class ParallelCoordinates extends Vue {
 
 .axes {
   transition: stroke 0.3s ease, stroke-width 0.3s ease;
+  stroke: var(--color-dark-contrast);
 }
 
 .dataLine {
