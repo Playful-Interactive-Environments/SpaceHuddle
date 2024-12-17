@@ -373,6 +373,15 @@
           <p class="subAxisName twoLineText">
             {{ $t(getTranslationPath(axis) + axis.categoryActive) }}
           </p>
+          <p class="subAxisUnit twoLineText">
+            {{
+              $t(
+                getTranslationPath(axis) + 'units.' + axis.categoryActive
+              ).slice(-axis.categoryActive.length) !== axis.categoryActive
+                ? $t(getTranslationPath(axis) + 'units.' + axis.categoryActive)
+                : ''
+            }}
+          </p>
         </div>
       </div>
       <div
@@ -703,17 +712,14 @@ export default class ParallelCoordinates extends Vue {
     );
   }
 
-  getLabelCount(range: number | undefined): number {
+  getLabelCount(range?: number): number {
     if (!range) {
       return 3;
     }
-    let i = 3;
-    while (i <= 5) {
+    for (let i = 3; i <= 5; i++) {
       if (range % i === 0) {
-        console.log(i);
         return i;
       }
-      i += 1;
     }
     return 3;
   }
@@ -1159,6 +1165,10 @@ export default class ParallelCoordinates extends Vue {
   .subAxisName {
     font-size: var(--font-size-small);
   }
+  .subAxisUnit {
+    font-size: var(--font-size-xsmall);
+    font-weight: var(--font-weight-bold);
+  }
 }
 
 .axisControls:active {
@@ -1236,6 +1246,8 @@ export default class ParallelCoordinates extends Vue {
   padding: 0.4rem 0.7rem;
   border: 2px solid var(--color-background-dark);
   border-radius: var(--border-radius-xs);
+  background-color: var(--color-background);
+  z-index: 100;
   margin-left: auto;
   margin-right: 0;
   margin-top: 1rem;

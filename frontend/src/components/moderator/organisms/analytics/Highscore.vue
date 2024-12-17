@@ -55,10 +55,12 @@
               : '---'
           }}
           {{
-            $t(translationPath + 'units.' + value.id).slice(
-              -value.id.length
-            ) !== value.id
-              ? $t(translationPath + 'units.' + value.id)
+            value.value != null
+              ? $t(translationPath + 'units.' + value.id).slice(
+                  -value.id.length
+                ) !== value.id
+                ? $t(translationPath + 'units.' + value.id)
+                : ''
               : ''
           }}</span
         ><span v-else
@@ -146,7 +148,9 @@ export default class Highscore extends Vue {
       if (this.isHighScoreEntry(this.tableData[0])) {
         this.chartData = this.tableData as HighScoreEntry[];
       } else {
-        this.convertToHighScoreEntryArray(this.tableData as TaskParticipantIterationStep[]);
+        this.convertToHighScoreEntryArray(
+          this.tableData as TaskParticipantIterationStep[]
+        );
         this.chartData = [];
       }
       this.sortData();
@@ -161,7 +165,9 @@ export default class Highscore extends Vue {
     );
   }
 
-  convertToHighScoreEntryArray(data: TaskParticipantIterationStep[]): HighScoreEntry[] {
+  convertToHighScoreEntryArray(
+    data: TaskParticipantIterationStep[]
+  ): HighScoreEntry[] {
     console.log(data);
     return [];
   }
