@@ -120,13 +120,8 @@ interface DataEntry {
 export default class Analytics extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly task!: Task;
-  @Prop({ default: 0 }) readonly timeModifier!: number;
-  @Prop({ default: null }) readonly taskParameter!: any;
-  @Prop({ default: false }) readonly paused!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-
-  textureToken = pixiUtil.createLoadingToken();
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
@@ -190,7 +185,6 @@ export default class Analytics extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
-    pixiUtil.cleanupToken(this.textureToken);
   }
 
   participantSelectionChanged(id: string) {

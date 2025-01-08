@@ -83,19 +83,19 @@
               ></font-awesome-icon>
             </ToolTip>
           </span>
-          <!--          </TutorialStep>-->
-          <!--          <el-dropdown>
-            <span class="el-dropdown-link">
-              <font-awesome-icon class="awesome-icon" icon="info-circle" />
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-on:click="reactivateTutorial">
-                  {{ $t('tutorial.reactivate') }}
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>-->
+<!--          <span v-on:click="showAnalytics = true" v-if="isModerator">
+            <ToolTip
+              :effect="'light'"
+              :text="
+                $t('moderator.organism.settings.participantSettings.header')
+              "
+            >
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="chart-column"
+              ></font-awesome-icon>
+            </ToolTip>
+          </span>-->
         </template>
         <template #headerContent>
           <span :class="{ expired: isExpired }">
@@ -166,6 +166,12 @@
         v-model:show-modal="showParticipants"
         :session-id="sessionId"
       />
+      <AnalyticsTopicView
+        v-if="isModerator"
+        v-model:show-modal="showAnalytics"
+        :session-id="sessionId"
+        class="analyticsTopicView"
+      />
     </template>
   </ModeratorNavigationLayout>
 </template>
@@ -202,9 +208,11 @@ import { SessionRole } from '@/types/api/SessionRole';
 import { reactivateTutorial } from '@/services/tutorial-service';
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import AnalyticsTopicView from '@/components/moderator/organisms/analytics/AnalyticsTopicView.vue';
 
 @Options({
   components: {
+    AnalyticsTopicView,
     ToolTip,
     ParticipantSettings,
     TutorialStep,
@@ -234,6 +242,7 @@ export default class ModeratorSessionDetails extends Vue {
   showSessionSettings = false;
   showRoles = false;
   showParticipants = false;
+  showAnalytics = false;
   formatDate = formatDate;
   editTopicId = '';
   publicScreenTopic = '';
@@ -487,5 +496,10 @@ export default class ModeratorSessionDetails extends Vue {
     color: white;
     opacity: 0.7;
   }
+}
+
+.analyticsTopicView {
+  width: 95%;
+  max-width: unset;
 }
 </style>
