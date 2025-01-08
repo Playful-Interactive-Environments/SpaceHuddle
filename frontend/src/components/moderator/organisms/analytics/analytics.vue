@@ -120,6 +120,8 @@ interface DataEntry {
 export default class Analytics extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly task!: Task;
+  @Prop() readonly receivedTasks!: Task[] | undefined;
+  @Prop() readonly sessionId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
 
@@ -160,9 +162,25 @@ export default class Analytics extends Vue {
     return null;
   }
 
-  get sessionId(): string | null {
-    if (this.task) return this.task.sessionId;
+  get getSessionId(): string | null {
+    if (this.sessionId) {
+      return this.sessionId;
+    } else if (this.task) {
+      return this.task.sessionId;
+    }
     return null;
+  }
+
+  resetData(): void {
+    this.axes = [];
+    this.steps = [];
+    this.tasks = [];
+    this.gameTasks = [];
+    this.otherTasks = [];
+    this.votingTasks = [];
+    this.brainstormingTasks = [];
+    this.ideas = [];
+    this.votes = [];
   }
 
   get dataEntries(): DataEntry[] {
@@ -183,6 +201,13 @@ export default class Analytics extends Vue {
     }
   }
 
+  @Watch('receivedTasks', {immediate: true})
+  onReceivedTasksChanged(): void {
+    if (this.receivedTasks != undefined) {
+      this.updateTasks(this.receivedTasks);
+    }
+  }
+
   unmounted(): void {
     this.deregisterAll();
   }
@@ -194,16 +219,16 @@ export default class Analytics extends Vue {
 
   @Watch('task', { immediate: true })
   async onTaskChanged(): Promise<void> {
-    if (this.sessionId) {
+    if (this.getSessionId) {
       this.participantCash = sessionService.registerGetParticipants(
-        this.sessionId,
+        this.getSessionId,
         this.updateParticipants,
         EndpointAuthorisationType.MODERATOR,
         60 * 60
       );
     }
 
-    if (this.topicId) {
+    if (this.topicId && this.receivedTasks == undefined) {
       cashService.deregisterAllGet(this.updateTasks);
       this.taskListService = taskService.registerGetTaskList(
         this.topicId,
@@ -211,12 +236,14 @@ export default class Analytics extends Vue {
         this.authHeaderTyp,
         30 * 60
       );
+    } else {
+      cashService.deregisterAllGet(this.updateTasks);
     }
 
-    if (this.sessionId) {
+    if (this.getSessionId) {
       cashService.deregisterAllGet(this.updateSession);
       this.sessionService = sessionService.registerGetById(
-        this.sessionId,
+        this.getSessionId,
         this.updateSession,
         this.authHeaderTyp,
         30 * 60
@@ -237,6 +264,7 @@ export default class Analytics extends Vue {
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTasks(tasks: Task[]): void {
+    this.resetData();
     this.deregisterSteps();
     this.tasks = tasks.sort((a, b) => a.order - b.order);
     this.gameTasks = this.tasks

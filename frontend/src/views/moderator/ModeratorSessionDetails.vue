@@ -83,7 +83,7 @@
               ></font-awesome-icon>
             </ToolTip>
           </span>
-<!--          <span v-on:click="showAnalytics = true" v-if="isModerator">
+          <span v-on:click="showAnalytics = true" v-if="isModerator">
             <ToolTip
               :effect="'light'"
               :text="
@@ -95,7 +95,7 @@
                 icon="chart-column"
               ></font-awesome-icon>
             </ToolTip>
-          </span>-->
+          </span>
         </template>
         <template #headerContent>
           <span :class="{ expired: isExpired }">
@@ -171,6 +171,10 @@
         v-model:show-modal="showAnalytics"
         :session-id="sessionId"
         class="analyticsTopicView"
+        :style="{
+          width: '95%',
+          maxWidth: '100%'
+        }"
       />
     </template>
   </ModeratorNavigationLayout>
@@ -500,6 +504,6 @@ export default class ModeratorSessionDetails extends Vue {
 
 .analyticsTopicView {
   width: 95%;
-  max-width: unset;
+  max-width: 100% !important;
 }
 </style>

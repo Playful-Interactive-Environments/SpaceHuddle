@@ -8,30 +8,45 @@
       <span class="el-dialog__title"> test </span>
     </template>
     <el-tree
+      class="tree"
       ref="tree"
       style="max-width: 600px"
       :data="treeData"
       :props="{
         children: 'tasks',
         label: (treeDataEntry) => treeDataEntry.name || treeDataEntry.title,
-        disabled: false,
+        disabled: (data) => data.participantCount === 0,
       }"
       show-checkbox
       @check-change="onCheckChange"
     >
       <template #default="{ data }">
-        <span>
-          <font-awesome-icon
-            v-if="data.taskType"
-            :icon="getIconOfType(data.taskType.toLowerCase())"
-            :style="{
-              color: getColorOfType(data.taskType.toLowerCase()),
-            }"
-          />
-          {{ data.name || data.title }}
+        <span
+          :style="{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '100%',
+            paddingRight: '1rem',
+          }"
+        >
+          <span>
+            <font-awesome-icon
+              v-if="data.taskType"
+              :icon="getIconOfType(data.taskType.toLowerCase())"
+              :style="{
+                color: getColorOfType(data.taskType.toLowerCase()),
+              }"
+            />
+            {{ data.name || data.title }}
+          </span>
+          <span v-if="data.participantCount >= 0">
+            {{ data.participantCount }}
+            <font-awesome-icon :icon="['fas', 'user']" />
+          </span>
         </span>
       </template>
     </el-tree>
+    <analytics :session-id="sessionId" :received-tasks="selectedTasks" />
   </el-dialog>
 </template>
 
@@ -58,10 +73,12 @@ import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import TaskType from '@/types/enum/TaskType';
+import Analytics from '@/components/moderator/organisms/analytics/analytics.vue';
 
 @Options({
   methods: { getColorOfType, getIconOfType },
   components: {
+    Analytics,
     FontAwesomeIcon,
     QrcodeVue,
     PDFConverter,
@@ -117,39 +134,57 @@ export default class AnalyticsTopicView extends Vue {
   }
 
   get treeData(): any {
+    const filterEmptyNodes = (node: any): boolean => {
+      return !node.tasks || node.tasks.length > 0;
+    };
+
+    const processNode = (node: any): any => {
+      if (node.tasks) {
+        node.tasks = node.tasks.map(processNode).filter(filterEmptyNodes);
+      }
+      return node;
+    };
+
     const returnData: any[] = [];
     for (const topic of this.topics) {
-      returnData.push({
+      const topicNode = {
         title: topic.title,
         tasks: [
           {
             title: 'brainstorming',
+            taskType: 'BRAINSTORMING',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'BRAINSTORMING'
             ),
           },
           {
             title: 'information',
+            taskType: 'INFORMATION',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'INFORMATION'
             ),
           },
           {
             title: 'playing',
+            taskType: 'PLAYING',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'PLAYING'
             ),
           },
           {
             title: 'voting',
+            taskType: 'VOTING',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'VOTING'
             ),
           },
         ],
-      });
+      };
+
+      // Process the topic node and its children
+      returnData.push(processNode(topicNode));
     }
-    return returnData;
+    return returnData.filter(filterEmptyNodes);
   }
 
   onCheckChange(): void {
@@ -159,8 +194,6 @@ export default class AnalyticsTopicView extends Vue {
 
     // Filter only tasks (leaf nodes)
     this.selectedTasks = checkedNodes.filter((node: any) => !node.tasks);
-
-    console.log('Selected Tasks:', this.selectedTasks);
   }
 
   get contrastColor(): string {
@@ -185,88 +218,16 @@ export default class AnalyticsTopicView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-form-item .el-form-item {
-  margin-bottom: 1rem;
-}
-
-.el-button.is-circle {
-  padding: 0.7rem;
-}
-
-.awesome-icon {
-  margin-left: 0.5em;
-}
-
-.el-table::v-deep(.cell) {
-  span {
-    margin-right: 0.5rem;
+.tree {
+  position: absolute;
+  z-index: 10000;
+  border-radius: var(--border-radius-small);
+  ::v-deep(.el-tree-node) {
+    border-radius: var(--border-radius-small);
+    padding: 0.2rem 0.4rem;
   }
-}
-
-.allow.el-form-item::v-deep(.el-form-item__content) {
-  .el-form-item__content {
-    display: flex;
-    justify-content: space-between;
-  }
-}
-
-.details {
-  margin: auto;
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  justify-content: space-evenly;
-
-  h1 {
-    font-size: 10rem;
-    font-weight: var(--font-weight-semibold);
-    line-height: 1.8;
-  }
-
-  .details-right {
-    margin-left: var(--side-padding);
-    font-size: 1.35rem;
-    font-family: monospace;
-    svg {
-      display: flex;
-    }
-  }
-
-  .details-left {
-    font-size: 1.35rem;
-    font-family: monospace;
-    margin: 2rem 0;
-    svg {
-      display: flex;
-    }
-  }
-}
-
-.pdf {
-  margin: 100px;
-
-  h2 {
-    font-size: 3rem;
-    font-weight: bold;
-    text-align: center;
-    padding-top: 1rem;
-  }
-
-  .center {
-    text-align: center;
-    padding-bottom: 1rem;
-  }
-
-  p {
-    font-size: 1rem;
-  }
-}
-
-.fullwidth {
-  display: flex;
-  .el-button {
-    flex-grow: 1;
-    margin-left: 0.5rem;
+  ::v-deep(.el-checkbox) {
+    transform: scale(0.5);
   }
 }
 </style>
