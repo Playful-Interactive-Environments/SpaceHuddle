@@ -14,7 +14,7 @@
       :data="treeData"
       :props="{
         children: 'tasks',
-        label: (treeDataEntry) => treeDataEntry.name || treeDataEntry.title,
+        label: (data) => data.name || data.title,
         disabled: (data) => data.participantCount === 0,
       }"
       show-checkbox
@@ -54,25 +54,19 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
-import * as sessionService from '@/services/session-service';
-import * as participantService from '@/services/participant-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Session } from '@/types/api/Session';
 import * as cashService from '@/services/cash-service';
 import { ParticipantInfo } from '@/types/api/Participant';
 import QrcodeVue from 'qrcode.vue';
 import * as themeColors from '@/utils/themeColors';
-import { copyToClipboard } from '@/utils/date';
 import PDFConverter from '@/components/shared/atoms/PDFConverter.vue';
-import { deleteConfirmDialog } from '@/services/api';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as topicService from '@/services/topic-service';
-import { registerGetTopicsList } from '@/services/topic-service';
 import { Topic } from '@/types/api/Topic';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
-import TaskType from '@/types/enum/TaskType';
 import Analytics from '@/components/moderator/organisms/analytics/analytics.vue';
 
 @Options({
@@ -184,7 +178,12 @@ export default class AnalyticsTopicView extends Vue {
       // Process the topic node and its children
       returnData.push(processNode(topicNode));
     }
-    return returnData.filter(filterEmptyNodes);
+    return [
+      {
+        title: 'Task Selection',
+        tasks: returnData.filter(filterEmptyNodes),
+      },
+    ];
   }
 
   onCheckChange(): void {
@@ -193,7 +192,10 @@ export default class AnalyticsTopicView extends Vue {
     const checkedNodes = treeRef.getCheckedNodes(true); // Get all checked nodes, including child nodes
 
     // Filter only tasks (leaf nodes)
-    this.selectedTasks = checkedNodes.filter((node: any) => !node.tasks);
+    this.selectedTasks = checkedNodes
+      .filter((node: any) => !node.tasks)
+      .sort((a, b) => a.order - b.order);
+    console.log(checkedNodes);
   }
 
   get contrastColor(): string {

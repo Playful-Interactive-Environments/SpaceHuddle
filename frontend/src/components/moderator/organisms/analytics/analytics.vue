@@ -268,22 +268,18 @@ export default class Analytics extends Vue {
     this.deregisterSteps();
     this.tasks = tasks.sort((a, b) => a.order - b.order);
     this.gameTasks = this.tasks
-      .filter((task) => task.taskType === 'PLAYING')
-      .sort();
+      .filter((task) => task.taskType === 'PLAYING');
     this.votingTasks = this.tasks
-      .filter((task) => task.taskType === 'VOTING')
-      .sort();
+      .filter((task) => task.taskType === 'VOTING');
     this.brainstormingTasks = this.tasks
-      .filter((task) => task.taskType === 'BRAINSTORMING')
-      .sort();
+      .filter((task) => task.taskType === 'BRAINSTORMING');
     this.otherTasks = this.tasks
       .filter(
         (task) =>
           task.taskType !== 'PLAYING' &&
           task.taskType !== 'BRAINSTORMING' &&
           task.taskType !== 'VOTING'
-      )
-      .sort();
+      );
 
     for (const task of this.brainstormingTasks) {
       ideaService.registerGetIdeasForTask(
