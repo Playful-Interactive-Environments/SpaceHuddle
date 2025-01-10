@@ -87,7 +87,7 @@
             <ToolTip
               :effect="'light'"
               :text="
-                $t('moderator.organism.settings.participantSettings.header')
+                $t('moderator.organism.settings.analytics.header')
               "
             >
               <font-awesome-icon

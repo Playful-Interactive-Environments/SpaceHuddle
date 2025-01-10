@@ -5,7 +5,7 @@
     width="calc(var(--app-width) * 0.8)"
   >
     <template #header>
-      <span class="el-dialog__title"> test </span>
+      <span class="el-dialog__title">{{ $t('moderator.organism.settings.analytics.header') }}</span>
     </template>
     <el-tree
       class="tree"
@@ -145,28 +145,28 @@ export default class AnalyticsTopicView extends Vue {
         title: topic.title,
         tasks: [
           {
-            title: 'brainstorming',
+            title: this.$t(`enum.taskType.brainstorming`),
             taskType: 'BRAINSTORMING',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'BRAINSTORMING'
             ),
           },
           {
-            title: 'information',
+            title: this.$t(`enum.taskType.information`),
             taskType: 'INFORMATION',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'INFORMATION'
             ),
           },
           {
-            title: 'playing',
+            title: this.$t(`enum.taskType.playing`),
             taskType: 'PLAYING',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'PLAYING'
             ),
           },
           {
-            title: 'voting',
+            title: this.$t(`enum.taskType.voting`),
             taskType: 'VOTING',
             tasks: topic.tasks?.filter(
               (task) => (task.taskType as string) === 'VOTING'
@@ -180,7 +180,7 @@ export default class AnalyticsTopicView extends Vue {
     }
     return [
       {
-        title: 'Task Selection',
+        title: this.$t('moderator.organism.analytics.taskSelection'),
         tasks: returnData.filter(filterEmptyNodes),
       },
     ];

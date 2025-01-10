@@ -197,6 +197,9 @@
         }
       },
       "settings": {
+        "analytics": {
+          "header": "Analytics"
+        },
         "sidebarSettings": {
           "download": "download"
         },
@@ -399,7 +402,8 @@
           "lineSolid": "Participant data line",
           "lineDashed": "Connection over missing entries",
           "lineAvg": "Average line"
-        }
+        },
+        "taskSelection": "Task selection"
       }
     },
     "view": {
@@ -611,12 +615,12 @@
   "enum": {
     "taskType": {
       "null": "",
-      "playing": "playing",
-      "information": "information",
-      "brainstorming": "brainstorming",
-      "selection": "selection",
-      "categorisation": "categorisation",
-      "voting": "voting"
+      "playing": "Playing",
+      "information": "Information",
+      "brainstorming": "Brainstorming",
+      "selection": "Selection",
+      "categorisation": "Categorisation",
+      "voting": "Voting"
     },
     "taskCategory": {
       "playing": "playing",

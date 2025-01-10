@@ -197,6 +197,9 @@
         }
       },
       "settings": {
+        "analytics": {
+          "header": "Analytics"
+        },
         "sidebarSettings": {
           "download": "herunterladen"
         },
@@ -399,7 +402,8 @@
           "lineSolid": "Teilnehmer Datenlinie",
           "lineDashed": "Verbindung über unvollständige Einträge",
           "lineAvg": "Durchschnittslinie"
-        }
+        },
+        "taskSelection": "Aufgabenauswahl"
       }
     },
     "view": {
