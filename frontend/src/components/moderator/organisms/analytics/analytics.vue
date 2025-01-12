@@ -42,6 +42,17 @@
         }"
       />
     </div>
+<!--    <div class="RadarChartContainer">
+    <radar-chart
+      :labels="['Strength', 'Speed', 'Stamina', 'Skill', 'Intelligence', 'Agility']"
+      :datasets="[
+    { data: [65, 59, 90, 81, 56, 55], color: 'rgba(54, 162, 235, 1)' },
+    { data: [28, 48, 40, 19, 96, 27], color: 'rgba(255, 99, 132, 1)' }
+  ]"
+      :size="300"
+      :levels="5"
+    />
+    </div>-->
   </div>
 </template>
 
@@ -72,6 +83,7 @@ import ParallelCoordinates from '@/components/moderator/organisms/analytics/subO
 import Tables from '@/components/moderator/organisms/analytics/subOrganisms/Tables.vue';
 import { VoteResult } from '@/types/api/Vote';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/radarChart.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -108,6 +120,7 @@ interface DataEntry {
 
 @Options({
   components: {
+    RadarChart,
     Tables,
     ParallelCoordinates,
     SpriteCanvas,
@@ -201,7 +214,7 @@ export default class Analytics extends Vue {
     }
   }
 
-  @Watch('receivedTasks', {immediate: true})
+  @Watch('receivedTasks', { immediate: true })
   onReceivedTasksChanged(): void {
     if (this.receivedTasks != undefined) {
       this.updateTasks(this.receivedTasks);
@@ -267,19 +280,17 @@ export default class Analytics extends Vue {
     this.resetData();
     this.deregisterSteps();
     this.tasks = tasks.sort((a, b) => a.order - b.order);
-    this.gameTasks = this.tasks
-      .filter((task) => task.taskType === 'PLAYING');
-    this.votingTasks = this.tasks
-      .filter((task) => task.taskType === 'VOTING');
-    this.brainstormingTasks = this.tasks
-      .filter((task) => task.taskType === 'BRAINSTORMING');
-    this.otherTasks = this.tasks
-      .filter(
-        (task) =>
-          task.taskType !== 'PLAYING' &&
-          task.taskType !== 'BRAINSTORMING' &&
-          task.taskType !== 'VOTING'
-      );
+    this.gameTasks = this.tasks.filter((task) => task.taskType === 'PLAYING');
+    this.votingTasks = this.tasks.filter((task) => task.taskType === 'VOTING');
+    this.brainstormingTasks = this.tasks.filter(
+      (task) => task.taskType === 'BRAINSTORMING'
+    );
+    this.otherTasks = this.tasks.filter(
+      (task) =>
+        task.taskType !== 'PLAYING' &&
+        task.taskType !== 'BRAINSTORMING' &&
+        task.taskType !== 'VOTING'
+    );
 
     for (const task of this.brainstormingTasks) {
       ideaService.registerGetIdeasForTask(
@@ -616,6 +627,7 @@ export default class Analytics extends Vue {
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
+    console.log(this.steps);
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {

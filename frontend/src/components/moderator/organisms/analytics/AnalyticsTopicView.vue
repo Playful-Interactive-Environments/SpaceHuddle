@@ -5,7 +5,11 @@
     width="calc(var(--app-width) * 0.8)"
   >
     <template #header>
-      <span class="el-dialog__title">{{ $t('moderator.organism.settings.analytics.header') }}</span>
+      <div :style="{ display: 'flex' }">
+        <span class="el-dialog__title">{{
+          $t('moderator.organism.settings.analytics.header')
+        }}</span>
+      </div>
     </template>
     <el-tree
       class="tree"
@@ -66,6 +70,7 @@ import * as topicService from '@/services/topic-service';
 import { Topic } from '@/types/api/Topic';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
+import * as sessionService from '@/services/session-service';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import Analytics from '@/components/moderator/organisms/analytics/analytics.vue';
 
@@ -88,7 +93,6 @@ export default class AnalyticsTopicView extends Vue {
   @Prop({ default: '' }) sessionId!: string;
 
   topics: Topic[] = [];
-  session: Session | null = null;
   participants: ParticipantInfo[] = [];
   viewDetailsForParticipant: ParticipantInfo | null = null;
 
@@ -195,7 +199,6 @@ export default class AnalyticsTopicView extends Vue {
     this.selectedTasks = checkedNodes
       .filter((node: any) => !node.tasks)
       .sort((a, b) => a.order - b.order);
-    console.log(checkedNodes);
   }
 
   get contrastColor(): string {
@@ -223,6 +226,9 @@ export default class AnalyticsTopicView extends Vue {
 .tree {
   position: absolute;
   z-index: 10000;
+  right: calc(var(--el-dialog-padding-primary) * 1.5);
+  top: var(--el-dialog-padding-primary);
+  width: 25rem;
   border-radius: var(--border-radius-small);
   ::v-deep(.el-tree-node) {
     border-radius: var(--border-radius-small);
