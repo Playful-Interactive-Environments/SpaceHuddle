@@ -16,10 +16,13 @@
       ref="tree"
       style="max-width: 600px"
       :data="treeData"
+      node-key="id"
+      :default-checked-keys="selectedKeys"
       :props="{
         children: 'tasks',
         label: (data) => data.name || data.title,
-        disabled: (data) => data.participantCount === 0,
+        //disabled: (data) => data.participantCount === 0,
+        disabled: false,
       }"
       show-checkbox
       @check-change="onCheckChange"
@@ -182,6 +185,7 @@ export default class AnalyticsTopicView extends Vue {
       // Process the topic node and its children
       returnData.push(processNode(topicNode));
     }
+    console.log(returnData.filter(filterEmptyNodes));
     return [
       {
         title: this.$t('moderator.organism.analytics.taskSelection'),
@@ -199,6 +203,10 @@ export default class AnalyticsTopicView extends Vue {
     this.selectedTasks = checkedNodes
       .filter((node: any) => !node.tasks)
       .sort((a, b) => a.order - b.order);
+  }
+
+  get selectedKeys(): string[] {
+    return this.selectedTasks.map((task) => task.id);
   }
 
   get contrastColor(): string {

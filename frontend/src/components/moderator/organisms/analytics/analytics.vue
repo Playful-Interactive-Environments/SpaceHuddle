@@ -143,6 +143,7 @@ export default class Analytics extends Vue {
   otherTasks: Task[] = [];
   votingTasks: Task[] = [];
   brainstormingTasks: Task[] = [];
+  typoTasks: Task[] = [];
 
   ideas: Idea[] = [];
   votes: VoteResult[] = [];
@@ -192,6 +193,7 @@ export default class Analytics extends Vue {
     this.otherTasks = [];
     this.votingTasks = [];
     this.brainstormingTasks = [];
+    this.typoTasks = [];
     this.ideas = [];
     this.votes = [];
   }
@@ -291,6 +293,8 @@ export default class Analytics extends Vue {
         task.taskType !== 'BRAINSTORMING' &&
         task.taskType !== 'VOTING'
     );
+    this.typoTasks = this.otherTasks.filter((task) => task.modules.find((module) => module.name === "personalityTest"));
+    this.otherTasks = this.otherTasks.filter((task) => task.modules.find((module) => module.name !== "personalityTest"));
 
     for (const task of this.brainstormingTasks) {
       ideaService.registerGetIdeasForTask(
@@ -627,7 +631,6 @@ export default class Analytics extends Vue {
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
-    console.log(this.steps);
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {

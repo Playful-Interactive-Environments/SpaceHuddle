@@ -551,9 +551,9 @@ export default class Participant extends Vue {
         this.calcRate(win, pointsSpent)
       );
     }
+    this.saveHighScore();
     this.clearAndReset();
     this.levelDone = true;
-    this.saveHighScore();
   }
 
   calcRate(win, pointsSpent): number | null {
