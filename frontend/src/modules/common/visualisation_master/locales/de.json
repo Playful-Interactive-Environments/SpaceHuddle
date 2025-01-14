@@ -55,6 +55,12 @@
         "description": "Bewege Ideen und zeichne."
       }
     },
+    "analytics": {
+      "description": {
+        "title": "Statistik",
+        "description": "Statistik aller Tasks."
+      }
+    },
     "analyticsDashboard": {
       "description": {
         "title": "Dashboard",

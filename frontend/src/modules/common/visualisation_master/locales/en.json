@@ -60,6 +60,12 @@
         "title": "Dashboard",
         "description": "Get an overview over all games."
       },
+      "analytics": {
+        "description": {
+          "title": "Analytics",
+          "description": "Analytics of all tasks."
+        }
+      },
       "module": {
         "billboard": "Problem Products",
         "highscore": "Highscore",
