@@ -42,17 +42,24 @@
         }"
       />
     </div>
-<!--    <div class="RadarChartContainer">
-    <radar-chart
-      :labels="['Strength', 'Speed', 'Stamina', 'Skill', 'Intelligence', 'Agility']"
-      :datasets="[
-    { data: [65, 59, 90, 81, 56, 55], color: 'rgba(54, 162, 235, 1)' },
-    { data: [28, 48, 40, 19, 96, 27], color: 'rgba(255, 99, 132, 1)' }
-  ]"
-      :size="300"
-      :levels="5"
-    />
-    </div>-->
+    <div class="RadarChartContainer">
+      <radar-chart
+        :labels="[
+          'Strength',
+          'Speed',
+          'Stamina',
+          'Skill',
+          'Intelligence',
+          'Agility',
+        ]"
+        :datasets="[
+          { data: [65, 59, 90, 81, 56, 55], color: 'rgba(54, 162, 235, 1)' },
+          { data: [28, 48, 40, 19, 96, 27], color: 'rgba(255, 99, 132, 1)' },
+        ]"
+        :size="300"
+        :levels="5"
+      />
+    </div>
   </div>
 </template>
 
@@ -84,6 +91,10 @@ import Tables from '@/components/moderator/organisms/analytics/subOrganisms/Tabl
 import { VoteResult } from '@/types/api/Vote';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/radarChart.vue';
+import * as themeColors from '@/utils/themeColors';
+import Color from 'colorjs.io';
+import { getResultTypeList } from '@/modules/information/personalityTest/types/ResultType';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -293,8 +304,12 @@ export default class Analytics extends Vue {
         task.taskType !== 'BRAINSTORMING' &&
         task.taskType !== 'VOTING'
     );
-    this.typoTasks = this.otherTasks.filter((task) => task.modules.find((module) => module.name === "personalityTest"));
-    this.otherTasks = this.otherTasks.filter((task) => task.modules.find((module) => module.name !== "personalityTest"));
+    this.typoTasks = this.otherTasks.filter((task) =>
+      task.modules.find((module) => module.name === 'personalityTest')
+    );
+    this.otherTasks = this.otherTasks.filter((task) =>
+      task.modules.find((module) => module.name !== 'personalityTest')
+    );
 
     for (const task of this.brainstormingTasks) {
       ideaService.registerGetIdeasForTask(
@@ -306,7 +321,12 @@ export default class Analytics extends Vue {
         30 * 60
       );
     }
-    this.calculateSteps(this.tasks);
+    this.calculateSteps(
+      this.gameTasks
+        .concat(this.votingTasks)
+        .concat(this.brainstormingTasks)
+        .concat(this.otherTasks)
+    );
   }
 
   calculateSteps(tasks: Task[]): void {
@@ -356,6 +376,16 @@ export default class Analytics extends Vue {
           30
         );
       }
+    }
+    for (const task of this.typoTasks) {
+      taskParticipantService.registerGetList(
+        task.id,
+        (result: TaskParticipantState[]) => {
+          this.updatePersonalityTests(result, task.modules[0].parameter.test);
+        },
+        EndpointAuthorisationType.MODERATOR,
+        120
+      );
     }
   }
 
@@ -482,10 +512,79 @@ export default class Analytics extends Vue {
     } else {
       this.steps.push(stepsEntry);
     }
-    if (this.steps.length === this.tasks.length) {
+    if (
+      this.steps.length ===
+      this.gameTasks
+        .concat(this.votingTasks)
+        .concat(this.brainstormingTasks)
+        .concat(this.otherTasks).length
+    ) {
       this.loadingSteps = false;
     }
     this.axes = this.CalculateAxes();
+  }
+
+  resultTypeCount: { [key: string]: number[] } = {};
+  resultTypeCombinedCount: { [key: string]: { [key: string]: number } } = {};
+  resultTypeCountHate: { [key: string]: number } = {};
+  updatePersonalityTests(
+    result: TaskParticipantState[],
+    testType: string
+  ): void {
+    console.log(result);
+  }
+  ResultTypeList(testType: string): string[] {
+    return getResultTypeList(testType);
+  }
+
+  resultData(testType: string): any {
+    const datasets: any[] = [];
+    const rateColors: string[] = [];
+    const color1 = new Color(themeColors.getGreenColor());
+    const color2 = new Color(themeColors.getRedColor());
+    const min = 0;
+    const max = 6;
+    for (let i = min; i <= max; i++) {
+      const color = color1.mix(color2, (1 / max) * i, {
+        space: 'lch',
+        outputSpace: 'srgb',
+      }) as any;
+      const hexColor = color.toString({ format: 'hex', collapse: false });
+      rateColors.push(hexColor);
+    }
+
+    for (let i = 0; i < this.ResultTypeList.length; i++) {
+      datasets.push({
+        label: i + 1,
+        data: Object.keys(this.resultTypeCount).map(
+          (item) => this.resultTypeCount[item][i]
+        ),
+        borderRadius: 5,
+        borderSkipped: false,
+        backgroundColor: rateColors[i],
+        color: themeColors.getContrastColor(),
+      });
+      datasets.push({
+        label: this.$t(
+          `module.information.personalityTest.${testType}.participant.exception`
+        ),
+        data: Object.keys(this.resultTypeCount).map(
+          (item) => this.resultTypeCountHate[item]
+        ),
+        borderRadius: 5,
+        borderSkipped: false,
+        backgroundColor: themeColors.getRedColor(),
+        color: themeColors.getContrastColor(),
+      });
+      return {
+        labels: Object.keys(this.resultTypeCount).map((item) =>
+          this.$t(
+            `module.information.personalityTest.${testType}.result.${item}.name`
+          )
+        ),
+        datasets: datasets,
+      };
+    }
   }
 
   getAllParticipantData() {
@@ -577,7 +676,6 @@ export default class Analytics extends Vue {
   CalculateAxes(): Axis[] {
     return this.steps.map((step) => {
       const { taskId, taskData } = step;
-
       const axisValues = this.wantedValues.reduce((acc, value) => {
         if (
           (taskData.taskType as string) === 'BRAINSTORMING' &&
@@ -631,6 +729,7 @@ export default class Analytics extends Vue {
   CalculateDataEntries(): DataEntry[] {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
+
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {
