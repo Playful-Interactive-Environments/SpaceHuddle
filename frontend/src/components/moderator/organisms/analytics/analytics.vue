@@ -51,6 +51,7 @@
         :size="300"
         :levels="5"
         :defaultColor="'var(--color-dark-contrast-light)'"
+        :selected-participant-id="selectedParticipantId"
       />
     </div>
   </div>
@@ -78,7 +79,7 @@ import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import { Session } from '@/types/api/Session';
 import QrcodeVue from 'qrcode.vue';
-import { ParticipantInfo } from '@/types/api/Participant';
+import {Avatar, ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/components/moderator/organisms/analytics/subOrganisms/parallelCoordinates.vue';
 import Tables from '@/components/moderator/organisms/analytics/subOrganisms/Tables.vue';
 import { VoteResult } from '@/types/api/Vote';
@@ -375,7 +376,7 @@ export default class Analytics extends Vue {
       taskParticipantService.registerGetList(
         task.id,
         (result: TaskParticipantState[]) => {
-          this.updatePersonalityTests(result, task.modules[0].parameter.test);
+          this.updatePersonalityTests(result);
         },
         EndpointAuthorisationType.MODERATOR,
         120
@@ -518,107 +519,23 @@ export default class Analytics extends Vue {
     this.axes = this.CalculateAxes();
   }
 
-  resultTypeCount: { [key: string]: number[] } = {};
-  resultTypeCombinedCount: { [key: string]: { [key: string]: number } } = {};
-  resultTypeCountHate: { [key: string]: number } = {};
-
   radarDataEntries: {
     labels: string[];
-    data: { data: unknown[]; color: string }[];
+    data: { data: number[]; avatar: Avatar; }[];
   }[] = [];
-  /*updatePersonalityTests(
-    result: TaskParticipantState[],
-    testType: string
-  ): void { //TODO
-    if (result) {
-      const radarData = result.map((entry) => {
-        if (entry.parameter.resultTypeValues) {
-          const labels = Object.keys(entry.parameter.resultTypeValues);
-          const data = Object.values(entry.parameter.resultTypeValues);
-
-          return {
-            labels,
-            data: { data, color: entry.avatar.color },
-          };
-        } else {
-          return null;
-        }
-      });
-      if (!radarData.includes(null)) {
-        this.radarDataEntries.push(radarData);
-      }
-      console.log(this.radarDataEntries);
-    }
-  }*/
 
   updatePersonalityTests(
-    result: TaskParticipantState[],
-    testType: string
+    result: TaskParticipantState[]
   ): void {
     if (result[0].parameter.resultTypeValues) {
       const radarData = {
         labels: Object.keys(result[0].parameter.resultTypeValues), // Assuming all entries have the same labels
         data: result.map((entry) => ({
-          data: Object.values(entry.parameter.resultTypeValues),
-          color: entry.avatar.color,
+          data: Object.values(entry.parameter.resultTypeValues) as number[],
+          avatar: entry.avatar,
         })),
       };
       this.radarDataEntries.push(radarData);
-    }
-    console.log(this.radarDataEntries);
-  }
-
-  ResultTypeList(testType: string): string[] {
-    return getResultTypeList(testType);
-  }
-
-  resultData(testType: string): any {
-    const datasets: any[] = [];
-    const rateColors: string[] = [];
-    const color1 = new Color(themeColors.getGreenColor());
-    const color2 = new Color(themeColors.getRedColor());
-    const min = 0;
-    const max = 6;
-    for (let i = min; i <= max; i++) {
-      const color = color1.mix(color2, (1 / max) * i, {
-        space: 'lch',
-        outputSpace: 'srgb',
-      }) as any;
-      const hexColor = color.toString({ format: 'hex', collapse: false });
-      rateColors.push(hexColor);
-    }
-
-    for (let i = 0; i < this.ResultTypeList.length; i++) {
-      datasets.push({
-        label: i + 1,
-        data: Object.keys(this.resultTypeCount).map(
-          (item) => this.resultTypeCount[item][i]
-        ),
-        borderRadius: 5,
-        borderSkipped: false,
-        backgroundColor: rateColors[i],
-        color: themeColors.getContrastColor(),
-      });
-      datasets.push({
-        label: this.$t(
-          `module.information.personalityTest.${testType}.participant.exception`
-        ),
-        data: Object.keys(this.resultTypeCount).map(
-          (item) => this.resultTypeCountHate[item]
-        ),
-        borderRadius: 5,
-        borderSkipped: false,
-        backgroundColor: themeColors.getRedColor(),
-        color: themeColors.getContrastColor(),
-      });
-      return {
-        labels: Object.keys(this.resultTypeCount).map((item) =>
-          this.$t(
-            `module.information.personalityTest.${testType}.result.${item}.name`
-          )
-        ),
-        datasets: datasets,
-      };
     }
   }
 
@@ -836,9 +753,11 @@ export default class Analytics extends Vue {
   .RadarChartContainer {
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
-    gap: 3rem;
+    gap: 20%;
+    overflow: hidden;
+    padding: 5rem;
   }
 }
 </style>

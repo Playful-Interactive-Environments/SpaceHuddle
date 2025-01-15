@@ -28,11 +28,12 @@
         v-for="(dataset, datasetIndex) in normalizedDatasets"
         :key="'dataset-' + datasetIndex"
         :points="getDataPoints(dataset.data)"
-        :fill="getColor(dataset.color)"
-        :fill-opacity="0.2"
-        :stroke="getColor(dataset.color)"
-        :stroke-opacity="0.6"
+        :fill="getColor(dataset)"
+        :fill-opacity="getOpacity(dataset)"
+        :stroke="getColor(dataset)"
+        :stroke-opacity="getOpacity(dataset) + 0.2"
         stroke-width="0.5"
+        class="radarPolygon"
       ></polygon>
 
       <!-- Draw the average dataset polygon -->
@@ -40,10 +41,23 @@
         v-if="averageDataset"
         :points="getDataPoints(averageDataset.data)"
         :fill="'var(--color-evaluating)'"
-        fill-opacity="0.4"
+        :fill-opacity="getOpacity(averageDataset) + 0.1"
         :stroke="'var(--color-evaluating)'"
-        stroke-width="0.5"
+        :stroke-width="getOpacity(averageDataset) + 0.2"
+        class="radarPolygon"
       ></polygon>
+
+      <!-- Draw the selected participant dataset polygon -->
+      <!--      <polygon
+        v-if="selectedParticipantId !== '' && selectedParticipantDataset"
+        :points="getDataPoints(selectedParticipantDataset.data)"
+        :fill="getColor(selectedParticipantDataset)"
+        :fill-opacity="0.6"
+        :stroke="getColor(selectedParticipantDataset)"
+        :stroke-opacity="1"
+        stroke-width="0.5"
+        class="radarPolygon radarPolygonSelected"
+      ></polygon>-->
     </svg>
 
     <!-- Draw the labels outside the SVG -->
@@ -61,20 +75,20 @@
 <script lang="ts">
 import { Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
+import { Avatar } from '@/types/api/Participant';
 
 export default class RadarChart extends Vue {
   // Props
   @Prop({ type: Array, required: true }) labels!: string[];
   @Prop({ type: Array, required: true }) datasets!: {
     data: number[];
-    color: string;
+    avatar: Avatar;
   }[];
   @Prop({ type: Number, default: 300 }) size!: number;
   @Prop({ type: Number, default: 5 }) levels!: number;
-
+  @Prop({ default: () => '' }) selectedParticipantId!: string;
   @Prop({ type: Number, default: 5 }) defaultColor!: string;
 
-  // Computed properties for normalization
   get minValue(): number {
     const min = Math.min(...this.datasets.flatMap((dataset) => dataset.data));
     return min < 0 ? min : 0;
@@ -91,8 +105,25 @@ export default class RadarChart extends Vue {
     }));
   }
 
-  getColor(color: string) {
+  getColor(dataset: { data: unknown[]; avatar: Avatar }): string {
+    if (this.selectedParticipantId === dataset.avatar.id) {
+      return dataset.avatar.color;
+    }
     return this.defaultColor;
+  }
+
+  getOpacity(dataset: { data: unknown[]; avatar: Avatar }): number {
+    if (dataset.avatar.id === this.selectedParticipantId) {
+      return 0.8;
+    } else if (
+      this.selectedParticipantId === '' ||
+      !this.datasets.find(
+        (dataset) => dataset.avatar.id === this.selectedParticipantId
+      )
+    ) {
+      return 0.25;
+    }
+    return 0.05;
   }
 
   // Normalize data to fit within the chart range
@@ -101,7 +132,7 @@ export default class RadarChart extends Vue {
     return data.map((value) => ((value - this.minValue) / range) * 100);
   }
 
-  get averageDataset() {
+  get averageDataset(): { data: number[]; avatar: Avatar } | null {
     if (this.datasets.length === 0) return null;
 
     const numDatasets = this.datasets.length;
@@ -116,8 +147,16 @@ export default class RadarChart extends Vue {
 
     return {
       data: this.normalizeData(averageData),
-      color: 'blue', // Change this to your desired color for the average
+      avatar: { id: 'null', color: 'var(--color-evaluating)', symbol: 'null' },
     };
+  }
+
+  get selectedParticipantDataset(): { data: number[]; avatar: Avatar } | null {
+    return (
+      this.normalizedDatasets.find(
+        (dataset) => dataset.avatar.id === this.selectedParticipantId
+      ) || null
+    );
   }
 
   // Compute the maximum radius of the chart
@@ -191,5 +230,22 @@ export default class RadarChart extends Vue {
   font-size: var(--font-size-xsmall);
   color: var(--color-dark-contrast);
   background-color: var(--color-background);
+}
+
+.radarPolygon {
+  transition: 0.5s ease;
+}
+
+.radarPolygonSelected {
+  animation: appear 0.5s ease forwards;
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 </style>
