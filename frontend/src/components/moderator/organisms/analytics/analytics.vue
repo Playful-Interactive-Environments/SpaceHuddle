@@ -44,20 +44,13 @@
     </div>
     <div class="RadarChartContainer">
       <radar-chart
-        :labels="[
-          'Strength',
-          'Speed',
-          'Stamina',
-          'Skill',
-          'Intelligence',
-          'Agility',
-        ]"
-        :datasets="[
-          { data: [65, 59, 90, 81, 56, 55], color: 'rgba(54, 162, 235, 1)' },
-          { data: [28, 48, 40, 19, 96, 27], color: 'rgba(255, 99, 132, 1)' },
-        ]"
+        v-for="(entry, index) of radarDataEntries"
+        :key="'radarChart' + index"
+        :labels="entry.labels"
+        :datasets="entry.data"
         :size="300"
         :levels="5"
+        :defaultColor="'var(--color-dark-contrast-light)'"
       />
     </div>
   </div>
@@ -205,6 +198,7 @@ export default class Analytics extends Vue {
     this.votingTasks = [];
     this.brainstormingTasks = [];
     this.typoTasks = [];
+    this.radarDataEntries = [];
     this.ideas = [];
     this.votes = [];
   }
@@ -527,12 +521,53 @@ export default class Analytics extends Vue {
   resultTypeCount: { [key: string]: number[] } = {};
   resultTypeCombinedCount: { [key: string]: { [key: string]: number } } = {};
   resultTypeCountHate: { [key: string]: number } = {};
+
+  radarDataEntries: {
+    labels: string[];
+    data: { data: unknown[]; color: string }[];
+  }[] = [];
+  /*updatePersonalityTests(
+    result: TaskParticipantState[],
+    testType: string
+  ): void { //TODO
+    if (result) {
+      const radarData = result.map((entry) => {
+        if (entry.parameter.resultTypeValues) {
+          const labels = Object.keys(entry.parameter.resultTypeValues);
+          const data = Object.values(entry.parameter.resultTypeValues);
+
+          return {
+            labels,
+            data: { data, color: entry.avatar.color },
+          };
+        } else {
+          return null;
+        }
+      });
+      if (!radarData.includes(null)) {
+        this.radarDataEntries.push(radarData);
+      }
+      console.log(this.radarDataEntries);
+    }
+  }*/
+
   updatePersonalityTests(
     result: TaskParticipantState[],
     testType: string
   ): void {
-    console.log(result);
+    if (result[0].parameter.resultTypeValues) {
+      const radarData = {
+        labels: Object.keys(result[0].parameter.resultTypeValues), // Assuming all entries have the same labels
+        data: result.map((entry) => ({
+          data: Object.values(entry.parameter.resultTypeValues),
+          color: entry.avatar.color,
+        })),
+      };
+      this.radarDataEntries.push(radarData);
+    }
+    console.log(this.radarDataEntries);
   }
+
   ResultTypeList(testType: string): string[] {
     return getResultTypeList(testType);
   }
@@ -796,6 +831,14 @@ export default class Analytics extends Vue {
   .AnalyticsTables,
   .AnalyticsParallelCoordinates {
     transition: opacity 3s ease;
+  }
+
+  .RadarChartContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
   }
 }
 </style>
