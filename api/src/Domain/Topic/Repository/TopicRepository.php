@@ -508,7 +508,6 @@ class TopicRepository implements RepositoryInterface
                     }
                     $rowNumber = 1;
                     if (is_array($detailRows) and sizeof($detailRows) > 0) {
-                        $cipherNumber = [];
                         foreach ($detailRows as $detailIndex => $detailItem) {
                             $rowNumber = $detailIndex + 2;
                             $detailReader = new ArrayReader($detailItem);
@@ -516,10 +515,7 @@ class TopicRepository implements RepositoryInterface
                                 $columnLetter = $alphas[$columnIndex];
                                 $detailValue = $detailReader->findString($columnName);
                                 if ($columnName === "participant_id" and $detailValue) {
-                                    if (!in_array($detailValue, $cipherNumber)) {
-                                        array_push($cipherNumber, $detailValue);
-                                    }
-                                    $detailValue = array_search($detailValue, $cipherNumber);
+                                    $detailValue = hash('crc32', $detailValue);
                                 }
                                 $hasImage = false;
                                 if (str_contains($columnName, "image") !== false) {
