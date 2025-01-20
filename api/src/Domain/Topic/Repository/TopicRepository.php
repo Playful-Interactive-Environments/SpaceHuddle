@@ -355,10 +355,16 @@ class TopicRepository implements RepositoryInterface
                                 '$.hasAnswer'
                                 )) = 'true',
                                 IFNULL(
+                                    IF(
+                                    JSON_UNQUOTE(JSON_EXTRACT(
+                                    category.parameter,
+                                    '$.questionType'
+                                    )) = 'order',
+                                    IF(vote.rating = idea.order, 'true', 'false'),
                                     JSON_UNQUOTE(JSON_EXTRACT(
                                         idea.parameter,
                                         '$.isCorrect'
-                                    )),
+                                    ))),
                                     IF(JSON_UNQUOTE(JSON_EXTRACT(
                                         category.parameter,
                                         '$.correctValue'
@@ -366,7 +372,7 @@ class TopicRepository implements RepositoryInterface
                                 ),
                                 ''
                             )", "CHAR"),
-                            "idea.participant_id",
+                            "IFNULL(idea.participant_id, vote.participant_id) AS participant_id",
                             "idea.state",
                             "idea.task_id",
                             "idea.timestamp",
@@ -379,17 +385,30 @@ class TopicRepository implements RepositoryInterface
                                 category.parameter,
                                 '$.questionType'
                             ))", "CHAR"),
-                            "correct_value" => $detailQuery->func()->cast("JSON_UNQUOTE(JSON_EXTRACT(
+                            "correct_value" => $detailQuery->func()->cast("IF(
+                                JSON_UNQUOTE(JSON_EXTRACT(
+                                category.parameter,
+                                '$.questionType'
+                                )) = 'order',
+                                idea.order,
+                                JSON_UNQUOTE(JSON_EXTRACT(
                                 category.parameter,
                                 '$.correctValue'
-                            ))", "CHAR"),
+                            )))", "CHAR"),
                             "is_quiz_question" => $detailQuery->func()->cast("JSON_UNQUOTE(JSON_EXTRACT(
                                 category.parameter,
                                 '$.hasAnswer'
                             ))", "CHAR"),
                             "category.id as question_id",
-                            "IFNULL(vote_result.count_rating, COUNT(idea.id)) as count",
-                            "vote_result.sum_detail_rating as sum"
+                            "value" => $detailQuery->func()->cast("
+                            IF(
+                                JSON_UNQUOTE(JSON_EXTRACT(
+                                category.parameter,
+                                '$.questionType'
+                                )) = 'order',
+                                vote.rating,
+                                idea.keywords
+                            )", "CHAR")
                         ])
                             ->join([
                                 "category" => [
@@ -401,12 +420,13 @@ class TopicRepository implements RepositoryInterface
                                     ]
                                 ]
                             ])
-                            ->leftJoin("vote_result", "vote_result.idea_id = idea.id")
+                            ->leftJoin("vote", "vote.idea_id = idea.id")
                             ->group([
                                 "category.order",
                                 "selection_view_idea.order",
                                 "idea.keywords",
-                                "idea.description"
+                                "idea.description",
+                                "IFNULL(idea.participant_id, vote.participant_id)"
                             ])
                             ->order([
                                 "category.order",
@@ -421,16 +441,15 @@ class TopicRepository implements RepositoryInterface
                             "question_image",
                             "question_link",
                             "question_type",
-                            "question_parameter",
                             "keywords",
                             "description",
                             "image",
                             "link",
-                            "parameter",
-                            "count",
                             "is_quiz_question",
                             "is_correct",
-                            "correct_value"
+                            "correct_value",
+                            "value",
+                            "participant_id"
                         ];
                     } else {
                         $detailQuery->select([
@@ -461,7 +480,11 @@ class TopicRepository implements RepositoryInterface
 
                     $alphas = range('A', 'Z');
                     foreach ($exportColumns as $columnIndex => $columnName) {
-                        $sheet->setCellValue("$alphas[$columnIndex]1", $columnName);
+                        if ($columnName === "participant_id") {
+                            $sheet->setCellValue("$alphas[$columnIndex]1", "participant");
+                        } else {
+                            $sheet->setCellValue("$alphas[$columnIndex]1", $columnName);
+                        }
                         $styleArray = [
                             'font' => [
                                 'bold' => true,
@@ -485,12 +508,19 @@ class TopicRepository implements RepositoryInterface
                     }
                     $rowNumber = 1;
                     if (is_array($detailRows) and sizeof($detailRows) > 0) {
+                        $cipherNumber = [];
                         foreach ($detailRows as $detailIndex => $detailItem) {
                             $rowNumber = $detailIndex + 2;
                             $detailReader = new ArrayReader($detailItem);
                             foreach ($exportColumns as $columnIndex => $columnName) {
                                 $columnLetter = $alphas[$columnIndex];
                                 $detailValue = $detailReader->findString($columnName);
+                                if ($columnName === "participant_id" and $detailValue) {
+                                    if (!in_array($detailValue, $cipherNumber)) {
+                                        array_push($cipherNumber, $detailValue);
+                                    }
+                                    $detailValue = array_search($detailValue, $cipherNumber);
+                                }
                                 $hasImage = false;
                                 if (str_contains($columnName, "image") !== false) {
                                     $imageId = $detailReader->findString($columnName . "_id");
