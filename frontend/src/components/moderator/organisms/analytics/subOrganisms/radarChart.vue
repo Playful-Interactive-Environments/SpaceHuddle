@@ -66,8 +66,17 @@
       :key="'label-' + index"
       class="radar-label twoLineText"
       :style="getLabelPosition(index)"
+      @click="getParticipantsOfPrimaryClass(index)"
     >
-      {{ label }}
+      <p>
+        {{
+          $t(`module.information.personalityTest.${test}.result.${label}.name`)
+        }}
+      </p>
+      <p>
+        {{ getParticipantsOfPrimaryClass(index).length }}
+        <font-awesome-icon icon="user" />
+      </p>
     </div>
   </div>
 </template>
@@ -80,6 +89,7 @@ import { Avatar } from '@/types/api/Participant';
 export default class RadarChart extends Vue {
   // Props
   @Prop({ type: Array, required: true }) labels!: string[];
+  @Prop({ default: () => '' }) test!: string;
   @Prop({ type: Array, required: true }) datasets!: {
     data: number[];
     avatar: Avatar;
@@ -213,6 +223,44 @@ export default class RadarChart extends Vue {
       width: `${this.size / 4}px`,
     };
   }
+
+  getParticipantsOfPrimaryClass(index: number): string[] {
+    const participantIds: string[] = [];
+
+    for (const entry of this.normalizedDatasets) {
+      if (entry.data[index] >= Math.max(...entry.data)) {
+        participantIds.push(entry.avatar.id);
+      }
+    }
+    console.log(participantIds);
+    return participantIds;
+  }
+
+  getPrimaryClass(data: number[]): string {
+    const maxValue = Math.max(...data);
+    const maxIndex = data.findIndex((entry) => entry === maxValue);
+    return this.labels[maxIndex];
+  }
+
+  getSecondaryClass(data: number[]): string {
+    if (data.length < 2) {
+      return '';
+    }
+
+    const maxIndex = data.indexOf(Math.max(...data));
+    const filteredData = data.map((val, idx) =>
+      idx === maxIndex ? -Infinity : val
+    );
+    const secondMaxIndex = filteredData.indexOf(Math.max(...filteredData));
+
+    return this.labels[secondMaxIndex];
+  }
+
+  getExceptionClass(data: number[]): string {
+    const minValue = Math.min(...data);
+    const minIndex = data.findIndex((entry) => entry === minValue);
+    return this.labels[minIndex];
+  }
 }
 </script>
 
@@ -225,7 +273,6 @@ export default class RadarChart extends Vue {
 }
 
 .radar-label {
-  pointer-events: none;
   text-align: center;
   font-size: var(--font-size-xsmall);
   color: var(--color-dark-contrast);

@@ -48,6 +48,7 @@
         :key="'radarChart' + index"
         :labels="entry.labels"
         :datasets="entry.data"
+        :test="entry.test"
         :size="300"
         :levels="5"
         :defaultColor="'var(--color-dark-contrast-light)'"
@@ -73,7 +74,6 @@ import * as cashService from '@/services/cash-service';
 import * as votingService from '@/services/voting-service';
 import * as ideaService from '@/services/idea-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import * as pixiUtil from '@/utils/pixi';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
 
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
@@ -85,9 +85,6 @@ import Tables from '@/components/moderator/organisms/analytics/subOrganisms/Tabl
 import { VoteResult } from '@/types/api/Vote';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/radarChart.vue';
-import * as themeColors from '@/utils/themeColors';
-import Color from 'colorjs.io';
-import { getResultTypeList } from '@/modules/information/personalityTest/types/ResultType';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -373,10 +370,11 @@ export default class Analytics extends Vue {
       }
     }
     for (const task of this.typoTasks) {
+      console.log(task);
       taskParticipantService.registerGetList(
         task.id,
         (result: TaskParticipantState[]) => {
-          this.updatePersonalityTests(result);
+          this.updatePersonalityTests(result, task.modules[0].parameter.test);
         },
         EndpointAuthorisationType.MODERATOR,
         120
@@ -520,15 +518,18 @@ export default class Analytics extends Vue {
   }
 
   radarDataEntries: {
+    test: string;
     labels: string[];
     data: { data: number[]; avatar: Avatar; }[];
   }[] = [];
 
   updatePersonalityTests(
-    result: TaskParticipantState[]
+    result: TaskParticipantState[],
+    test: string,
   ): void {
     if (result[0].parameter.resultTypeValues) {
       const radarData = {
+        test: test,
         labels: Object.keys(result[0].parameter.resultTypeValues), // Assuming all entries have the same labels
         data: result.map((entry) => ({
           data: Object.values(entry.parameter.resultTypeValues) as number[],
