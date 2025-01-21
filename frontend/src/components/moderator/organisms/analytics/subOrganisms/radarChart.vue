@@ -1,54 +1,68 @@
 <template>
-  <div class="radar-chart" :style="{ width: size + 'px', height: size + 'px' }">
-    <svg :width="size" :height="size" viewBox="0 0 100 100">
-      <!-- Draw the grid -->
-      <polygon
-        v-for="(level, index) in gridLevels"
-        :key="'grid-' + index"
-        :points="getPolygonPoints(level)"
-        fill="none"
-        stroke="#ccc"
-        stroke-width="0.2"
-      ></polygon>
+  <div class="radarChartContainer">
+    <p v-if="title !== ''" class="heading">
+      <font-awesome-icon
+        class="headingIcon"
+        :icon="getIconOfType(taskType)"
+        :style="{
+          color: getColorOfType(taskType),
+        }"
+      />
+      {{ title }}
+    </p>
+    <div
+      class="radar-chart"
+      :style="{ width: size + 'px', height: size + 'px' }"
+    >
+      <svg :width="size" :height="size" viewBox="0 0 100 100">
+        <!-- Draw the grid -->
+        <polygon
+          v-for="(level, index) in gridLevels"
+          :key="'grid-' + index"
+          :points="getPolygonPoints(level)"
+          fill="none"
+          stroke="#ccc"
+          stroke-width="0.2"
+        ></polygon>
 
-      <!-- Draw the axes -->
-      <line
-        v-for="(label, index) in labels"
-        :key="'axis-' + index"
-        x1="50"
-        y1="50"
-        :x2="getAxisEnd(index, maxRadius).x"
-        :y2="getAxisEnd(index, maxRadius).y"
-        stroke="#666"
-        stroke-width="0.2"
-      ></line>
+        <!-- Draw the axes -->
+        <line
+          v-for="(label, index) in labels"
+          :key="'axis-' + index"
+          x1="50"
+          y1="50"
+          :x2="getAxisEnd(index, maxRadius).x"
+          :y2="getAxisEnd(index, maxRadius).y"
+          stroke="#666"
+          stroke-width="0.2"
+        ></line>
 
-      <!-- Draw the data polygons -->
-      <polygon
-        v-for="(dataset, datasetIndex) in normalizedDatasets"
-        :key="'dataset-' + datasetIndex"
-        :points="getDataPoints(dataset.data)"
-        :fill="getColor(dataset)"
-        :fill-opacity="getOpacity(dataset)"
-        :stroke="getColor(dataset)"
-        :stroke-opacity="getOpacity(dataset) + 0.2"
-        stroke-width="0.5"
-        class="radarPolygon"
-      ></polygon>
+        <!-- Draw the data polygons -->
+        <polygon
+          v-for="(dataset, datasetIndex) in normalizedDatasets"
+          :key="'dataset-' + datasetIndex"
+          :points="getDataPoints(dataset.data)"
+          :fill="getColor(dataset)"
+          :fill-opacity="getOpacity(dataset)"
+          :stroke="getColor(dataset)"
+          :stroke-opacity="getOpacity(dataset) + 0.2"
+          stroke-width="0.5"
+          class="radarPolygon"
+        ></polygon>
 
-      <!-- Draw the average dataset polygon -->
-      <polygon
-        v-if="averageDataset"
-        :points="getDataPoints(averageDataset.data)"
-        :fill="'var(--color-evaluating)'"
-        :fill-opacity="getOpacity(averageDataset) + 0.1"
-        :stroke="'var(--color-evaluating)'"
-        :stroke-width="getOpacity(averageDataset) + 0.2"
-        class="radarPolygon"
-      ></polygon>
+        <!-- Draw the average dataset polygon -->
+        <polygon
+          v-if="averageDataset"
+          :points="getDataPoints(averageDataset.data)"
+          :fill="'var(--color-evaluating)'"
+          :fill-opacity="getOpacity(averageDataset) + 0.1"
+          :stroke="'var(--color-evaluating)'"
+          :stroke-width="getOpacity(averageDataset) + 0.2"
+          class="radarPolygon"
+        ></polygon>
 
-      <!-- Draw the selected participant dataset polygon -->
-      <!--      <polygon
+        <!-- Draw the selected participant dataset polygon -->
+        <!--      <polygon
         v-if="selectedParticipantId !== '' && selectedParticipantDataset"
         :points="getDataPoints(selectedParticipantDataset.data)"
         :fill="getColor(selectedParticipantDataset)"
@@ -58,38 +72,49 @@
         stroke-width="0.5"
         class="radarPolygon radarPolygonSelected"
       ></polygon>-->
-    </svg>
+      </svg>
 
-    <!-- Draw the labels outside the SVG -->
-    <div
-      v-for="(label, index) in labels"
-      :key="'label-' + index"
-      class="radar-label twoLineText"
-      :style="getLabelPosition(index)"
-      @click="getParticipantsOfPrimaryClass(index)"
-    >
-      <p>
-        {{
-          $t(`module.information.personalityTest.${test}.result.${label}.name`)
-        }}
-      </p>
-      <p>
-        {{ getParticipantsOfPrimaryClass(index).length }}
-        <font-awesome-icon icon="user" />
-      </p>
+      <div
+        v-for="(label, index) in labels"
+        :key="'label-' + index"
+        class="radar-label"
+        :style="getLabelPosition(index)"
+        @click="getParticipantsOfPrimaryClass(index)"
+      >
+        <p class="twoLineText">
+          {{
+            $t(
+              `module.information.personalityTest.${test}.result.${label}.name`
+            )
+          }}
+        </p>
+        <p>
+          {{ getParticipantsOfPrimaryClass(index).length }}
+          <font-awesome-icon icon="user" />
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Avatar } from '@/types/api/Participant';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+import TaskType from '@/types/enum/TaskType';
 
+@Options({
+  components: {
+    ToolTip,
+  },
+})
 export default class RadarChart extends Vue {
   // Props
   @Prop({ type: Array, required: true }) labels!: string[];
   @Prop({ default: () => '' }) test!: string;
+  @Prop({ default: () => '' }) title!: string;
   @Prop({ type: Array, required: true }) datasets!: {
     data: number[];
     avatar: Avatar;
@@ -98,6 +123,16 @@ export default class RadarChart extends Vue {
   @Prop({ type: Number, default: 5 }) levels!: number;
   @Prop({ default: () => '' }) selectedParticipantId!: string;
   @Prop({ type: Number, default: 5 }) defaultColor!: string;
+
+  taskType = TaskType.INFORMATION;
+
+  getColorOfType(taskType: TaskType) {
+    return getColorOfType(taskType);
+  }
+
+  getIconOfType(taskType: TaskType) {
+    return getIconOfType(taskType);
+  }
 
   get minValue(): number {
     const min = Math.min(...this.datasets.flatMap((dataset) => dataset.data));
@@ -136,7 +171,6 @@ export default class RadarChart extends Vue {
     return 0.05;
   }
 
-  // Normalize data to fit within the chart range
   normalizeData(data: number[]): number[] {
     const range = this.maxValue - this.minValue;
     return data.map((value) => ((value - this.minValue) / range) * 100);
@@ -169,17 +203,14 @@ export default class RadarChart extends Vue {
     );
   }
 
-  // Compute the maximum radius of the chart
   get maxRadius() {
-    return 50; // Chart radius is fixed at 50
+    return 50;
   }
 
-  // Generate grid levels
   get gridLevels() {
     return Array.from({ length: this.levels }, (_, i) => (i + 1) / this.levels);
   }
 
-  // Calculate points for grid levels
   getPolygonPoints(level: number): string {
     const radius = level * this.maxRadius;
     const points = this.labels.map((_, index) => {
@@ -189,7 +220,6 @@ export default class RadarChart extends Vue {
     return points.join(' ');
   }
 
-  // Calculate axis endpoints
   getAxisEnd(index: number, radius: number): { x: number; y: number } {
     const angle = (Math.PI * 2 * index) / this.labels.length - Math.PI / 2;
     return {
@@ -198,7 +228,6 @@ export default class RadarChart extends Vue {
     };
   }
 
-  // Calculate data points for a dataset
   getDataPoints(data: number[]): string {
     const points = data.map((value, index) => {
       const { x, y } = this.getAxisEnd(index, (value / 100) * this.maxRadius);
@@ -207,7 +236,6 @@ export default class RadarChart extends Vue {
     return points.join(' ');
   }
 
-  // Get label positions
   getLabelPosition(index: number): Record<string, string> {
     const radius = 60; // Slightly outside the chart
     const { x, y } = this.getAxisEnd(index, radius);
@@ -224,16 +252,15 @@ export default class RadarChart extends Vue {
     };
   }
 
-  getParticipantsOfPrimaryClass(index: number): string[] {
-    const participantIds: string[] = [];
+  getParticipantsOfPrimaryClass(index: number): Avatar[] {
+    const participants: Avatar[] = [];
 
     for (const entry of this.normalizedDatasets) {
       if (entry.data[index] >= Math.max(...entry.data)) {
-        participantIds.push(entry.avatar.id);
+        participants.push(entry.avatar);
       }
     }
-    console.log(participantIds);
-    return participantIds;
+    return participants;
   }
 
   getPrimaryClass(data: number[]): string {
@@ -265,11 +292,20 @@ export default class RadarChart extends Vue {
 </script>
 
 <style scoped>
+.radarChartContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .radar-chart {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 4rem;
 }
 
 .radar-label {
@@ -294,5 +330,10 @@ export default class RadarChart extends Vue {
   100% {
     opacity: 1;
   }
+}
+
+.headingIcon {
+  font-size: var(--font-size-xlarge);
+  cursor: pointer;
 }
 </style>

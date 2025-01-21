@@ -376,7 +376,7 @@
               <font-awesome-icon :icon="['fas', 'trash']" />
             </el-button>
           </div>
-          <p class="axisName twoLineText">{{ axis.taskData.taskName }}</p>
+          <p class="heading twoLineText">{{ axis.taskData.taskName }}</p>
           <p class="subAxisName twoLineText">
             {{ $t(getTranslationPath(axis) + axis.categoryActive) }}
           </p>
@@ -1171,9 +1171,8 @@ export default class ParallelCoordinates extends Vue {
     font-size: var(--font-size-xlarge);
     cursor: pointer;
   }
-  .axisName {
-    font-size: var(--font-size-default);
-    font-weight: var(--font-weight-bold);
+  .heading {
+    margin: 0;
   }
   .subAxisName {
     font-size: var(--font-size-small);

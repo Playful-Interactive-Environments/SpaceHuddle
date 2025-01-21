@@ -43,17 +43,18 @@
       />
     </div>
     <div class="RadarChartContainer">
-      <radar-chart
-        v-for="(entry, index) of radarDataEntries"
-        :key="'radarChart' + index"
-        :labels="entry.labels"
-        :datasets="entry.data"
-        :test="entry.test"
-        :size="300"
-        :levels="5"
-        :defaultColor="'var(--color-dark-contrast-light)'"
-        :selected-participant-id="selectedParticipantId"
-      />
+      <div v-for="(entry, index) of radarDataEntries" :key="'radarChart' + index">
+        <radar-chart
+          :labels="entry.labels"
+          :datasets="entry.data"
+          :test="entry.test"
+          :title="entry.title"
+          :size="300"
+          :levels="5"
+          :defaultColor="'var(--color-dark-contrast-light)'"
+          :selected-participant-id="selectedParticipantId"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -374,7 +375,7 @@ export default class Analytics extends Vue {
       taskParticipantService.registerGetList(
         task.id,
         (result: TaskParticipantState[]) => {
-          this.updatePersonalityTests(result, task.modules[0].parameter.test);
+          this.updatePersonalityTests(result, task.modules[0].parameter.test, task.name);
         },
         EndpointAuthorisationType.MODERATOR,
         120
@@ -526,9 +527,11 @@ export default class Analytics extends Vue {
   updatePersonalityTests(
     result: TaskParticipantState[],
     test: string,
+    title: string,
   ): void {
     if (result[0].parameter.resultTypeValues) {
       const radarData = {
+        title: title,
         test: test,
         labels: Object.keys(result[0].parameter.resultTypeValues), // Assuming all entries have the same labels
         data: result.map((entry) => ({
@@ -756,9 +759,8 @@ export default class Analytics extends Vue {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    gap: 20%;
+    gap: 2rem;
     overflow: hidden;
-    padding: 5rem;
   }
 }
 </style>
