@@ -360,7 +360,14 @@
                     :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
                     :command="ax ? ax : null"
                   >
-                    {{ ax ? ax.taskData.taskName : 'N/A' }}
+                    <font-awesome-icon
+                      class="axisIcon"
+                      :icon="getIconOfAxis(ax)"
+                      :style="{
+                        color: getColorOfAxis(ax),
+                      }"
+                    />
+                    &nbsp;{{ ax ? ax.taskData.taskName : 'N/A' }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -421,7 +428,14 @@
                   :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
                   :command="ax ? ax : null"
                 >
-                  {{ ax ? ax.taskData.taskName : 'N/A' }}
+                  <font-awesome-icon
+                    class="axisIcon"
+                    :icon="getIconOfAxis(ax)"
+                    :style="{
+                      color: getColorOfAxis(ax),
+                    }"
+                  />
+                  &nbsp;{{ ax ? ax.taskData.taskName : 'N/A' }}
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -1147,7 +1161,6 @@ export default class ParallelCoordinates extends Vue {
   align-items: flex-start;
 }
 .axisControls {
-  cursor: grab;
   .axisSelections {
     display: flex;
     align-items: center;
@@ -1171,8 +1184,13 @@ export default class ParallelCoordinates extends Vue {
   }
 }
 
-.axisControls:active {
-  cursor: grabbing;
+.axisControlsContainer {
+  .axisControls {
+    cursor: grab;
+  }
+  .axisControls:active {
+    cursor: grabbing;
+  }
 }
 
 .axisControlsFlex {
