@@ -33,7 +33,7 @@
       class="participantTableEntries"
       @click="participantSelectionChanged(entry.participant.id)"
       :class="{
-        participantSelected: participantId === entry.participant.id,
+        participantSelected: participantIds.includes(entry.participant.id),
       }"
     >
       <td>{{ index + 1 }}.</td>
@@ -121,7 +121,7 @@ export default class Highscore extends Vue {
   @Prop() readonly tableData!:
     | HighScoreEntry[]
     | TaskParticipantIterationStep[];
-  @Prop({ default: () => '' }) readonly selectedParticipantId!: string;
+  @Prop({ default: () => [] }) readonly selectedParticipantIds!: string[];
   @Prop({ default: () => '' }) translationPath!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -130,7 +130,7 @@ export default class Highscore extends Vue {
   sortOrder = 1;
   highScoreCount = 5;
 
-  participantId = '';
+  participantIds: string[] = [];
 
   chartData: HighScoreEntry[] = [];
 
@@ -198,14 +198,14 @@ export default class Highscore extends Vue {
     return this.chartData;
   }
 
-  @Watch('selectedParticipantId', { immediate: true })
-  onSelectedParticipantIdChanged(): void {
-    this.participantId = this.selectedParticipantId;
+  @Watch('selectedParticipantIds', { immediate: true })
+  onSelectedParticipantIdsChanged(): void {
+    this.participantIds = this.selectedParticipantIds;
   }
 
   participantSelectionChanged(id: string) {
-    this.participantId = this.participantId !== id ? id : '';
-    this.$emit('participantSelected', this.participantId);
+    this.participantIds = this.participantIds.includes(id) ? [] : [id];
+    this.$emit('participantSelected', this.participantIds);
   }
 }
 </script>

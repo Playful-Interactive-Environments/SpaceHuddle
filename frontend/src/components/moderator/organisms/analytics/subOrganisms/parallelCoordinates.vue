@@ -38,10 +38,11 @@
                     cursor: 'default',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    backgroundColor:
-                      selectedParticipantId === entry.avatar.id
-                        ? 'var(--color-background-blue)'
-                        : 'transparent',
+                    backgroundColor: selectedParticipantIds.includes(
+                      entry.avatar.id
+                    )
+                      ? 'var(--color-background-blue)'
+                      : 'transparent',
                   }"
                 >
                   <div
@@ -157,6 +158,7 @@
                   participantColor
                 )
               "
+              @click="participantSelectionChanged(entry.participant.id)"
             >
               <path v-if="pathPart" :d="pathPart.path" />
             </g>
@@ -167,12 +169,14 @@
               :class="entry.participant.id"
               fill="none"
               :style="{
-                strokeWidth:
-                  selectedParticipantId === entry.participant.id ? '3px' : '',
-                stroke:
-                  selectedParticipantId === entry.participant.id
-                    ? participantColor
-                    : 'var(--color-dark-contrast)',
+                strokeWidth: selectedParticipantIds.includes(
+                  entry.participant.id
+                )
+                  ? '3px'
+                  : '',
+                stroke: selectedParticipantIds.includes(entry.participant.id)
+                  ? participantColor
+                  : 'var(--color-dark-contrast)',
               }"
             >
               <path
@@ -184,8 +188,9 @@
                 :d="getIconDefinition(entry.participant.avatar.symbol).icon[4] as string"
                 :fill="entry.participant.avatar.color"
                 :style="{
-                  opacity:
-                    selectedParticipantId === entry.participant.id ? 1 : 0,
+                  opacity: selectedParticipantIds.includes(entry.participant.id)
+                    ? 1
+                    : 0,
                 }"
               />
               <circle
@@ -203,7 +208,7 @@
                 :style="{
                   opacity: pathPart?.dashed
                     ? '20%'
-                    : selectedParticipantId === entry.participant.id
+                    : selectedParticipantIds.includes(entry.participant.id)
                     ? '1'
                     : '45%',
                 }"
@@ -528,11 +533,12 @@ interface PathPart {
     VariableSVGWrapper,
     IdeaCard,
   },
+  emits: ['participantSelected'],
 })
 export default class ParallelCoordinates extends Vue {
   @Prop({ default: () => [] }) chartAxes!: Axis[];
   @Prop({ default: () => [] }) participantData!: DataEntry[];
-  @Prop({ default: () => '' }) selectedParticipantId!: string;
+  @Prop({ default: () => [] }) selectedParticipantIds!: string[];
   @Prop({ default: () => [] }) steps!: {
     taskId: string;
     taskData: {
@@ -587,6 +593,11 @@ export default class ParallelCoordinates extends Vue {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
+  }
+
+  participantSelectionChanged(id: string) {
+    const temp = this.selectedParticipantIds.includes(id) ? [] : [id];
+    this.$emit('participantSelected', temp);
   }
 
   getTranslationPath(axis: Axis | null): string {
@@ -1036,7 +1047,7 @@ export default class ParallelCoordinates extends Vue {
   }
 
   setHoverStroke(color: string, id: string, participantColor: string) {
-    if (this.selectedParticipantId === id) {
+    if (this.selectedParticipantIds.includes(id)) {
       return;
     }
     const elements = Array.from(

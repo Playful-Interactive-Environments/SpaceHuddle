@@ -62,7 +62,7 @@
         v-if="tableArray[index] && chartData.length > 0"
         :module-id="tableArray[index]!.taskId"
         :table-data="filterParticipantData(JSON.parse(JSON.stringify(chartData)), tableArray[index]!.taskId)"
-        :selected-participant-id="selectedParticipantId"
+        :selected-participant-ids="participantIds"
         :translation-path="getTranslationPath(tableArray[index])"
         @participant-selected="participantSelectionChanged"
       />
@@ -159,15 +159,17 @@ export default class Tables extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly axes!: Axis[];
   @Prop() readonly participantData!: DataEntry[];
+  @Prop({ default: () => [] }) selectedParticipantIds!: string[];
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
   sortOrder = 1;
 
-  selectedParticipantId = '';
   chartData: DataEntry[] = [];
   tableCount = 0;
   tableArray: (Axis | null)[] = [];
+
+  participantIds: string[] = [];
 
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
@@ -189,9 +191,14 @@ export default class Tables extends Vue {
     }.analytics.highscore.`;
   }
 
-  participantSelectionChanged(id: string) {
-    this.selectedParticipantId = id;
-    this.$emit('participantSelected', id);
+  @Watch('selectedParticipantIds', { immediate: true })
+  onSelectedParticipantIdsChanged(): void {
+    this.participantIds = this.selectedParticipantIds;
+  }
+
+  participantSelectionChanged(ids: string[]) {
+    this.participantIds = ids;
+    this.$emit('participantSelected', this.participantIds);
   }
 
   getIconOfAxis(axis: Axis): string | undefined {

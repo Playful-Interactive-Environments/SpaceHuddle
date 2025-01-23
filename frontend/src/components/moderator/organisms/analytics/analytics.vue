@@ -19,7 +19,8 @@
         "
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
         :steps="JSON.parse(JSON.stringify(steps))"
-        :selected-participant-id="selectedParticipantId"
+        :selected-participant-ids="selectedParticipantIds"
+        @participant-selected="participantSelectionChanged"
       />
     </div>
 
@@ -40,6 +41,7 @@
         :style="{
           opacity: loadingSteps ? 0 : 1,
         }"
+        :selected-participant-ids="selectedParticipantIds"
       />
     </div>
     <div class="RadarChartContainer">
@@ -52,7 +54,8 @@
           :size="300"
           :levels="5"
           :defaultColor="'var(--color-dark-contrast-light)'"
-          :selected-participant-id="selectedParticipantId"
+          :selected-participant-ids="selectedParticipantIds"
+          @participant-selected="participantSelectionChanged"
         />
       </div>
     </div>
@@ -172,7 +175,7 @@ export default class Analytics extends Vue {
   axes: Axis[] = [];
   loadingSteps = true;
 
-  selectedParticipantId = '';
+  selectedParticipantIds: string[] = [];
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -231,9 +234,9 @@ export default class Analytics extends Vue {
     this.deregisterAll();
   }
 
-  participantSelectionChanged(id: string) {
-    this.selectedParticipantId = id;
-    this.$emit('participantSelected', id);
+  participantSelectionChanged(ids: string[]) {
+    this.selectedParticipantIds = ids;
+    this.$emit('participantSelected', ids);
   }
 
   @Watch('task', { immediate: true })
@@ -519,6 +522,7 @@ export default class Analytics extends Vue {
   }
 
   radarDataEntries: {
+    title: string;
     test: string;
     labels: string[];
     data: { data: number[]; avatar: Avatar; }[];

@@ -74,7 +74,7 @@
       ></polygon>-->
       </svg>
 
-      <div
+      <!--      <div
         v-for="(label, index) in labels"
         :key="'label-' + index"
         class="radar-label"
@@ -92,7 +92,44 @@
           {{ getParticipantsOfPrimaryClass(index).length }}
           <font-awesome-icon icon="user" />
         </p>
-      </div>
+      </div>-->
+      <ToolTip
+        v-for="(label, index) in labels"
+        :key="'label-' + index"
+        :show-after="200"
+        :effect="'light'"
+        :disabled="getParticipantsOfPrimaryClass(index).length <= 0"
+      >
+        <template #content>
+          <font-awesome-icon
+            v-for="avatar of getParticipantsOfPrimaryClass(index)"
+            :key="avatar.id"
+            :icon="avatar.symbol"
+            :style="{
+              color: avatar.color,
+              fontSize: 'var(--font-size-large)',
+              margin: '0 0.2rem',
+            }"
+          ></font-awesome-icon>
+        </template>
+        <div :style="getLabelPosition(index)" class="radar-label" @click="
+          participantSelectionChanged(
+            getParticipantsOfPrimaryClass(index).map((avatar) => avatar.id)
+          )
+        ">
+          <p class="twoLineText">
+            {{
+              $t(
+                `module.information.personalityTest.${test}.result.${label}.name`
+              )
+            }}
+          </p>
+          <p>
+            {{ getParticipantsOfPrimaryClass(index).length }}
+            <font-awesome-icon icon="user" />
+          </p>
+        </div>
+      </ToolTip>
     </div>
   </div>
 </template>
@@ -109,6 +146,7 @@ import TaskType from '@/types/enum/TaskType';
   components: {
     ToolTip,
   },
+  emits: ['participantSelected'],
 })
 export default class RadarChart extends Vue {
   // Props
@@ -121,7 +159,7 @@ export default class RadarChart extends Vue {
   }[];
   @Prop({ type: Number, default: 300 }) size!: number;
   @Prop({ type: Number, default: 5 }) levels!: number;
-  @Prop({ default: () => '' }) selectedParticipantId!: string;
+  @Prop({ default: () => [] }) selectedParticipantIds!: string[];
   @Prop({ type: Number, default: 5 }) defaultColor!: string;
 
   taskType = TaskType.INFORMATION;
@@ -143,6 +181,16 @@ export default class RadarChart extends Vue {
     return Math.max(...this.datasets.flatMap((dataset) => dataset.data));
   }
 
+  participantSelectionChanged(ids: string[] | null) {
+    if (ids) {
+      if (JSON.stringify(this.selectedParticipantIds) === JSON.stringify(ids)) {
+        this.$emit('participantSelected', []);
+      } else {
+        this.$emit('participantSelected', ids);
+      }
+    }
+  }
+
   get normalizedDatasets() {
     return this.datasets.map((dataset) => ({
       ...dataset,
@@ -151,19 +199,19 @@ export default class RadarChart extends Vue {
   }
 
   getColor(dataset: { data: unknown[]; avatar: Avatar }): string {
-    if (this.selectedParticipantId === dataset.avatar.id) {
+    if (this.selectedParticipantIds.includes(dataset.avatar.id)) {
       return dataset.avatar.color;
     }
     return this.defaultColor;
   }
 
   getOpacity(dataset: { data: unknown[]; avatar: Avatar }): number {
-    if (dataset.avatar.id === this.selectedParticipantId) {
+    if (this.selectedParticipantIds.includes(dataset.avatar.id)) {
       return 0.8;
     } else if (
-      this.selectedParticipantId === '' ||
-      !this.datasets.find(
-        (dataset) => dataset.avatar.id === this.selectedParticipantId
+      this.selectedParticipantIds.length <= 0 ||
+      !this.datasets.find((dataset) =>
+        this.selectedParticipantIds.includes(dataset.avatar.id)
       )
     ) {
       return 0.25;
@@ -197,8 +245,8 @@ export default class RadarChart extends Vue {
 
   get selectedParticipantDataset(): { data: number[]; avatar: Avatar } | null {
     return (
-      this.normalizedDatasets.find(
-        (dataset) => dataset.avatar.id === this.selectedParticipantId
+      this.normalizedDatasets.find((dataset) =>
+        this.selectedParticipantIds.includes(dataset.avatar.id)
       ) || null
     );
   }
@@ -312,7 +360,12 @@ export default class RadarChart extends Vue {
   text-align: center;
   font-size: var(--font-size-xsmall);
   color: var(--color-dark-contrast);
-  background-color: var(--color-background);
+  font-weight: var(--font-weight-default);
+  transition: font-weight 0.5s ease;
+}
+
+.radar-label:hover {
+  font-weight: var(--font-weight-semibold);
 }
 
 .radarPolygon {
