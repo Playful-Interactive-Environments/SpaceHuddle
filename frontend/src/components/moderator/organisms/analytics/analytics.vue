@@ -19,7 +19,7 @@
         "
         :participant-data="JSON.parse(JSON.stringify(dataEntries))"
         :steps="JSON.parse(JSON.stringify(steps))"
-        :selected-participant-ids="selectedParticipantIds"
+        v-model:selectedParticipantIds="selectedParticipantIds"
         @participant-selected="participantSelectionChanged"
       />
     </div>
@@ -37,11 +37,10 @@
         :axes="
           JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
         "
-        @participant-selected="participantSelectionChanged"
+        v-model:selectedParticipantIds="selectedParticipantIds"
         :style="{
           opacity: loadingSteps ? 0 : 1,
         }"
-        :selected-participant-ids="selectedParticipantIds"
       />
     </div>
     <div class="RadarChartContainer">
@@ -54,7 +53,7 @@
           :size="300"
           :levels="5"
           :defaultColor="'var(--color-dark-contrast-light)'"
-          :selected-participant-ids="selectedParticipantIds"
+          v-model:selectedParticipantIds="selectedParticipantIds"
           @participant-selected="participantSelectionChanged"
         />
       </div>

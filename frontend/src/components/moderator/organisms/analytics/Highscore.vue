@@ -33,7 +33,9 @@
       class="participantTableEntries"
       @click="participantSelectionChanged(entry.participant.id)"
       :class="{
-        participantSelected: participantIds.includes(entry.participant.id),
+        participantSelected: selectedParticipantIds.includes(
+          entry.participant.id
+        ),
       }"
     >
       <td>{{ index + 1 }}.</td>
@@ -113,7 +115,7 @@ export interface HighScoreEntry {
 
 @Options({
   components: { ToolTip, FontAwesomeIcon },
-  emits: ['participantSelected'],
+  emits: ['update:selectedParticipantIds'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Highscore extends Vue {
@@ -121,7 +123,7 @@ export default class Highscore extends Vue {
   @Prop() readonly tableData!:
     | HighScoreEntry[]
     | TaskParticipantIterationStep[];
-  @Prop({ default: () => [] }) readonly selectedParticipantIds!: string[];
+  @Prop({ default: () => [] }) selectedParticipantIds!: string[];
   @Prop({ default: () => '' }) translationPath!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -198,14 +200,11 @@ export default class Highscore extends Vue {
     return this.chartData;
   }
 
-  @Watch('selectedParticipantIds', { immediate: true })
-  onSelectedParticipantIdsChanged(): void {
-    this.participantIds = this.selectedParticipantIds;
-  }
-
-  participantSelectionChanged(id: string) {
-    this.participantIds = this.participantIds.includes(id) ? [] : [id];
-    this.$emit('participantSelected', this.participantIds);
+  participantSelectionChanged(id: string): void {
+    const newValue = this.selectedParticipantIds.includes(id)
+      ? this.selectedParticipantIds.filter((i) => i !== id)
+      : [id];
+    this.$emit('update:selectedParticipantIds', newValue);
   }
 }
 </script>

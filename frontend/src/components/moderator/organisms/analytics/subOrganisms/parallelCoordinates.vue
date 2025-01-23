@@ -533,7 +533,7 @@ interface PathPart {
     VariableSVGWrapper,
     IdeaCard,
   },
-  emits: ['participantSelected'],
+  emits: ['update:selectedParticipantIds'],
 })
 export default class ParallelCoordinates extends Vue {
   @Prop({ default: () => [] }) chartAxes!: Axis[];
@@ -596,8 +596,8 @@ export default class ParallelCoordinates extends Vue {
   }
 
   participantSelectionChanged(id: string) {
-    const temp = this.selectedParticipantIds.includes(id) ? [] : [id];
-    this.$emit('participantSelected', temp);
+    const newValue = this.selectedParticipantIds.includes(id) ? this.selectedParticipantIds.filter((i) => i !== id) : [id];
+    this.$emit('update:selectedParticipantIds', newValue);
   }
 
   getTranslationPath(axis: Axis | null): string {

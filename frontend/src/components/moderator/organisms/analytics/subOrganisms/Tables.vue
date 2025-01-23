@@ -62,9 +62,9 @@
         v-if="tableArray[index] && chartData.length > 0"
         :module-id="tableArray[index]!.taskId"
         :table-data="filterParticipantData(JSON.parse(JSON.stringify(chartData)), tableArray[index]!.taskId)"
-        :selected-participant-ids="participantIds"
+        v-model:selectedParticipantIds="participantIds"
+        @update:selected-participant-ids="updateSelectedParticipantIds"
         :translation-path="getTranslationPath(tableArray[index])"
-        @participant-selected="participantSelectionChanged"
       />
     </el-card>
     <el-card
@@ -153,7 +153,7 @@ interface DataEntry {
   components: {
     Highscore,
   },
-  emits: ['participantSelected'],
+  emits: ['update:selectedParticipantIds'],
 })
 export default class Tables extends Vue {
   @Prop() readonly taskId!: string;
@@ -182,6 +182,15 @@ export default class Tables extends Vue {
     }
   }
 
+  @Watch('selectedParticipantIds', {immediate: true})
+  onSelectedParticipantIdsChanged(): void {
+    this.participantIds = this.selectedParticipantIds;
+  }
+
+  updateSelectedParticipantIds(): void {
+    this.$emit('update:selectedParticipantIds', this.participantIds);
+  }
+
   getTranslationPath(axis: Axis | null): string {
     if (!axis) {
       return '';
@@ -189,16 +198,6 @@ export default class Tables extends Vue {
     return `module.${axis.taskData.taskType.toLowerCase()}.${
       axis.taskData.moduleName
     }.analytics.highscore.`;
-  }
-
-  @Watch('selectedParticipantIds', { immediate: true })
-  onSelectedParticipantIdsChanged(): void {
-    this.participantIds = this.selectedParticipantIds;
-  }
-
-  participantSelectionChanged(ids: string[]) {
-    this.participantIds = ids;
-    this.$emit('participantSelected', this.participantIds);
   }
 
   getIconOfAxis(axis: Axis): string | undefined {

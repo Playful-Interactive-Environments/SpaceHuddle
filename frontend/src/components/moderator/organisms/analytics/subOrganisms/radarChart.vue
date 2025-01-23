@@ -146,7 +146,7 @@ import TaskType from '@/types/enum/TaskType';
   components: {
     ToolTip,
   },
-  emits: ['participantSelected'],
+  emits: ['update:selectedParticipantIds'],
 })
 export default class RadarChart extends Vue {
   // Props
@@ -184,9 +184,9 @@ export default class RadarChart extends Vue {
   participantSelectionChanged(ids: string[] | null) {
     if (ids) {
       if (JSON.stringify(this.selectedParticipantIds) === JSON.stringify(ids)) {
-        this.$emit('participantSelected', []);
+        this.$emit('update:selectedParticipantIds', []);
       } else {
-        this.$emit('participantSelected', ids);
+        this.$emit('update:selectedParticipantIds', ids);
       }
     }
   }
