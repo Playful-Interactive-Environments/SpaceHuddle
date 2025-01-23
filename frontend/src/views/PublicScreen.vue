@@ -48,15 +48,56 @@
   >
     <el-header class="public-screen__header star-header">
       <PublicHeader class="public-header"> </PublicHeader>
-      <TaskTimeline
-        v-if="topicId"
-        :topic-id="topicId"
-        :session-id="sessionId"
-        :activeTaskId="taskId"
-        :readonly="true"
-        :authHeaderTyp="authHeaderTyp"
-        :darkMode="true"
-      ></TaskTimeline>
+      <div class="header-content">
+        <TaskTimeline
+          v-if="topicId"
+          class="header-timeline"
+          :topic-id="topicId"
+          :session-id="sessionId"
+          :activeTaskId="taskId"
+          :readonly="true"
+          :authHeaderTyp="authHeaderTyp"
+          :darkMode="true"
+        ></TaskTimeline>
+
+        <el-dropdown class="header-qrcode" :trigger="'click'">
+          <span class="el-dropdown-link">
+            <font-awesome-icon :icon="['fas', 'qrcode']" />
+            <font-awesome-icon
+              :icon="['fas', 'angle-down']"
+              class="header-qrcode-angle-down"
+            />
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                :style="{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  fontSize: 'calc(23.2rem / var(--connection-key-length))',
+                  fontFamily: 'monospace',
+                  fontWeight: 'var(--font-weight-bold)',
+                  padding: '1.5rem',
+                  pointerEvents: 'none',
+                  '--connection-key-length': 8,
+                }"
+                class="header-qrcode-dropdown"
+              >
+                <p :style="{ marginBottom: '1rem' }">
+                  {{ session.connectionKey }}
+                </p>
+                <QrcodeVue
+                  :foreground="contrastColor"
+                  render-as="svg"
+                  :value="joinLink"
+                  :size="400"
+                  level="H"
+                />
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </el-header>
     <el-container class="public-screen__timer">
       <el-header>
@@ -384,6 +425,31 @@ h3 {
     background-color: var(--color-background);
     padding: 1rem var(--side-padding);
     z-index: 1000;
+
+    .header-content {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      .header-timeline {
+        width: calc(100% - 5rem);
+      }
+      .header-qrcode {
+        color: var(--color-background);
+        font-size: var(--font-size-xxlarge);
+        display: flex;
+        padding: 1rem 1rem;
+        width: 5rem;
+        .el-dropdown-link {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-evenly;
+          align-items: center;
+        }
+      }
+      .header-qrcode-angle-down {
+        font-size: var(--font-size-xlarge);
+      }
+    }
 
     &.star-header {
       background: var(--color-dark-contrast);
