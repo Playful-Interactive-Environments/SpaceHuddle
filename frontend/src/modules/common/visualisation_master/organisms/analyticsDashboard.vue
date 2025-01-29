@@ -43,7 +43,7 @@
         <h1>
           {{
             $t(
-              'module.common.visualisation_master.visModules.analytics.module.highscore'
+              'module.common.visualisation_master.visModules.analyticsDashboard.module.highscore'
             )
           }}
         </h1>
@@ -101,7 +101,7 @@
         <h1 class="media-content">
           {{
             $t(
-              'module.common.visualisation_master.visModules.analytics.module.join'
+              'module.common.visualisation_master.visModules.analyticsDashboard.module.join'
             )
           }}
           <span style="font-size: 14pt">
@@ -570,19 +570,19 @@ export default class AnalyticsDashboard extends Vue {
       const pElement = document.createElement('p');
       pElement.innerHTML =
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.coolItStats.temperature`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.coolItStats.temperature`
         ) +
         ': ' +
         +Math.round(step.parameter.state.temperature) +
         '°C<br />' +
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.coolItStats.normalisedTime`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.coolItStats.normalisedTime`
         ) +
         ': ' +
         +Math.round(step.parameter.state.normalisedTime / 1000) +
         's<br />' +
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.coolItStats.moleculeHitCount`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.coolItStats.moleculeHitCount`
         ) +
         ': ' +
         Math.round(step.parameter.state.moleculeHitCount);
@@ -640,7 +640,7 @@ export default class AnalyticsDashboard extends Vue {
       const pElement = document.createElement('p');
       pElement.innerHTML =
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.maxSpeed`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.drivingStats.maxSpeed`
         ) +
         ': ' +
         +Math.round(step.parameter.drive.maxSpeed) +
@@ -648,7 +648,7 @@ export default class AnalyticsDashboard extends Vue {
         this.$t('module.playing.moveit.enums.units.km/h') +
         '<br />' +
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.avgSpeed`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.drivingStats.avgSpeed`
         ) +
         ': ' +
         +Math.round(step.parameter.drive.averageSpeed) +
@@ -656,7 +656,7 @@ export default class AnalyticsDashboard extends Vue {
         this.$t('module.playing.moveit.enums.units.km/h') +
         '<br />' +
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.distance`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.drivingStats.distance`
         ) +
         ': ' +
         Math.round(step.parameter.drive.drivenPathLength * 10) / 10 +
@@ -664,7 +664,7 @@ export default class AnalyticsDashboard extends Vue {
         this.$t('module.playing.moveit.enums.units.km') +
         '<br />' +
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.drivingStats.consumption`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.drivingStats.consumption`
         ) +
         ': ' +
         Math.round(step.parameter.drive.consumption * 100) / 100 +
@@ -732,33 +732,33 @@ export default class AnalyticsDashboard extends Vue {
       const pElement = document.createElement('p');
       pElement.innerHTML =
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.shopItStats.cardProperties.CO²`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.shopItStats.cardProperties.CO²`
         ) +
         ': ' +
         +Math.round(step.parameter.game.co2) +
         ' ' +
         this.$t(
-          'module.common.visualisation_master.visModules.analytics.module.shopItStats.units.kg'
+          'module.common.visualisation_master.visModules.analyticsDashboard.module.shopItStats.units.kg'
         ) +
         '<br />' +
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.shopItStats.cardProperties.electricity`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.shopItStats.cardProperties.electricity`
         ) +
         ': ' +
         +Math.round(step.parameter.game.electricity) +
         ' ' +
         this.$t(
-          'module.common.visualisation_master.visModules.analytics.module.shopItStats.units.kwh'
+          'module.common.visualisation_master.visModules.analyticsDashboard.module.shopItStats.units.kwh'
         ) +
         '<br />' +
         this.$t(
-          `module.common.visualisation_master.visModules.analytics.module.shopItStats.cardProperties.water`
+          `module.common.visualisation_master.visModules.analyticsDashboard.module.shopItStats.cardProperties.water`
         ) +
         ': ' +
         Math.round(step.parameter.game.water) +
         ' ' +
         this.$t(
-          'module.common.visualisation_master.visModules.analytics.module.shopItStats.units.l'
+          'module.common.visualisation_master.visModules.analyticsDashboard.module.shopItStats.units.l'
         );
 
       pElement.classList.add('shopItStats');

@@ -58,48 +58,48 @@
     "analyticsDashboard": {
       "description": {
         "title": "Dashboard",
-        "description": "Get an overview over all games."
+        "description": "Get an overview over all games.",
+        "module": {
+          "billboard": "Problem Products",
+          "highscore": "Highscore",
+          "join": "Join Session on:",
+          "drivingStats": {
+            "maxSpeed": "max",
+            "avgSpeed": "average",
+            "consumption": "fuel",
+            "distance": "distance",
+            "persons": "persons",
+            "collected": "collected",
+            "time": "Time driven",
+            "goal": "Goal reached!"
+          },
+          "coolItStats": {
+            "temperature": "temperature",
+            "normalisedTime": "time",
+            "moleculeHitCount": "molecule hits"
+          },
+          "shopItStats": {
+            "units": {
+              "kg": "kg",
+              "kwh": "kwh",
+              "years": "years",
+              "l": "l",
+              "price": "€"
+            },
+            "cardProperties": {
+              "CO²": "CO²",
+              "electricity": "Energy",
+              "lifetime": "Lifetime",
+              "water": "Water",
+              "money": "Money"
+            }
+          }
+        }
       },
       "analytics": {
         "description": {
           "title": "Analytics",
           "description": "Analytics of all tasks."
-        }
-      },
-      "module": {
-        "billboard": "Problem Products",
-        "highscore": "Highscore",
-        "join": "Join Session on:",
-        "drivingStats": {
-          "maxSpeed": "max",
-          "avgSpeed": "average",
-          "consumption": "fuel",
-          "distance": "distance",
-          "persons": "persons",
-          "collected": "collected",
-          "time": "Time driven",
-          "goal": "Goal reached!"
-        },
-        "coolItStats": {
-          "temperature": "temperature",
-          "normalisedTime": "time",
-          "moleculeHitCount": "molecule hits"
-        },
-        "shopItStats": {
-          "units": {
-            "kg": "kg",
-            "kwh": "kwh",
-            "years": "years",
-            "l": "l",
-            "price": "€"
-          },
-          "cardProperties": {
-            "CO²": "CO²",
-            "electricity": "Energy",
-            "lifetime": "Lifetime",
-            "water": "Water",
-            "money": "Money"
-          }
         }
       }
     }
