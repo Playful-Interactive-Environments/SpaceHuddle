@@ -1,86 +1,75 @@
 <template>
   <div class="highscoreContainer" v-if="axes && chartData.length > 0">
     <el-card
-      class="highScoreSelectionContainer"
-      v-for="(axis, index) in tableArray"
-      :key="'highscoreSelectionContainer' + axis.taskId"
-      shadow="never"
-      body-style="text-align: center"
-      :class="{
-        addOn__boarder: !(tableArray[index] && chartData.length > 0),
-      }"
+        class="highScoreSelectionContainer"
+        v-for="(axis, index) in tableArray"
+        :key="axis?.taskId"
+        shadow="never"
+        body-style="text-align: center"
+        :class="{ addOn__boarder: !axis }"
     >
       <div class="highscoreModuleSelection">
         <el-dropdown
-          v-if="axes.length > 1"
-          v-on:command="tableArray.splice(index, 1, $event)"
-          trigger="click"
-          placement="bottom"
+            v-if="axes.length > 1"
+            @command="updateTableArray(index, $event)"
+            trigger="click"
+            placement="bottom"
         >
           <div class="el-dropdown-link">
             <font-awesome-icon
-              class="highscoreModuleIcon"
-              v-if="tableArray[index] && chartData.length > 0"
-              :icon="getIconOfAxis(tableArray[index] || axis)"
-              :style="{
-                color: getColorOfAxis(tableArray[index] || axis),
-              }"
+                v-if="axis"
+                class="highscoreModuleIcon"
+                :icon="getIconOfAxis(axis)"
+                :style="{ color: getColorOfAxis(axis) }"
             />
-            <p
-              class="oneLineText highscoreModuleName"
-              v-if="tableArray[index] && chartData.length > 0"
-            >
-              {{ tableArray[index]?.taskData.taskName }}
-              <font-awesome-icon :icon="['fas', 'angle-down']" />
-            </p>
-            <p class="oneLineText highscoreModuleName" v-else>
-              select task
+            <p class="oneLineText highscoreModuleName">
+              {{ axis ? axis.taskData.taskName : 'select task' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
             </p>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="(ax, axIndex) in axes"
-                :key="ax ? ax.taskId + 'ax' : axIndex"
-                :command="ax ? ax : null"
+                  v-for="ax in axes"
+                  :key="ax.taskId"
+                  :command="ax"
               >
-                {{ ax ? ax.taskData.taskName : 'N/A' }}
+                {{ ax.taskData.taskName }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
         <font-awesome-icon
-          :icon="['fas', 'trash']"
-          class="trashButton"
-          v-if="tableArray[index] && chartData.length > 0"
-          @click="removeFromTableArray(index)"
+            :icon="['fas', 'trash']"
+            class="trashButton"
+            v-if="axis"
+            @click="removeFromTableArray(index)"
         />
       </div>
       <Highscore
-        class="highscore"
-        v-if="tableArray[index] && chartData.length > 0"
-        :module-id="tableArray[index]!.taskId"
-        :table-data="filterParticipantData(JSON.parse(JSON.stringify(chartData)), tableArray[index]!.taskId)"
-        v-model:selectedParticipantIds="participantIds"
-        @update:selected-participant-ids="updateSelectedParticipantIds"
-        :translation-path="getTranslationPath(tableArray[index])"
+          v-if="axis"
+          class="highscore"
+          :module-id="axis.taskId"
+          :table-data="filterParticipantData(axis.taskId)"
+          v-model:selectedParticipantIds="participantIds"
+          @update:selected-participant-ids="updateSelectedParticipantIds"
+          :translation-path="getTranslationPath(axis)"
       />
     </el-card>
     <el-card
-      class="highScoreSelectionContainer addOn__boarder is-align-self-center"
-      shadow="never"
-      body-style="text-align: center"
+        class="highScoreSelectionContainer addOn__boarder is-align-self-center"
+        shadow="never"
+        body-style="text-align: center"
     >
       <p class="TableSelectionHeadline">
         {{ $t('moderator.organism.analytics.tables.table') }}
       </p>
       <div class="highscoreModuleSelection">
         <el-dropdown
-          v-if="axes.length > 1"
-          v-on:command="addToTableArray($event)"
-          trigger="click"
-          placement="bottom"
+            v-if="axes.length > 1"
+            @command="addToTableArray"
+            trigger="click"
+            placement="bottom"
         >
           <div class="el-dropdown-link">
             <p class="oneLineText highscoreModuleName">
@@ -91,11 +80,11 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="(ax, axIndex) in axes"
-                :key="ax ? ax.taskId + 'ax' : axIndex"
-                :command="ax ? ax : null"
+                  v-for="ax in axes"
+                  :key="ax.taskId"
+                  :command="ax"
               >
-                {{ ax ? ax.taskData.taskName : 'N/A' }}
+                {{ ax.taskData.taskName }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -109,10 +98,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Idea } from '@/types/api/Idea';
-
 import Highscore from '@/components/moderator/organisms/analytics/Highscore.vue';
-
 import { ParticipantInfo } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
@@ -162,27 +148,23 @@ export default class Tables extends Vue {
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  ideas: Idea[] = [];
-  sortOrder = 1;
 
   chartData: DataEntry[] = [];
-  tableCount = 0;
   tableArray: (Axis | null)[] = [];
-
   participantIds: string[] = [];
 
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
-    if (this.participantData != null) {
+    if (this.participantData) {
       this.chartData = this.participantData.filter((entry) =>
-        entry.axes.some((axis) =>
-          axis.axisValues.some((value) => value.value != null)
-        )
+          entry.axes.some((axis) =>
+              axis.axisValues.some((value) => value.value != null)
+          )
       );
     }
   }
 
-  @Watch('selectedParticipantIds', {immediate: true})
+  @Watch('selectedParticipantIds', { immediate: true })
   onSelectedParticipantIdsChanged(): void {
     this.participantIds = this.selectedParticipantIds;
   }
@@ -191,64 +173,54 @@ export default class Tables extends Vue {
     this.$emit('update:selectedParticipantIds', this.participantIds);
   }
 
-  getTranslationPath(axis: Axis | null): string {
-    if (!axis) {
-      return '';
-    }
-    return `module.${axis.taskData.taskType.toLowerCase()}.${
-      axis.taskData.moduleName
-    }.analytics.highscore.`;
+  getTranslationPath(axis: Axis): string {
+    return `module.${axis.taskData.taskType.toLowerCase()}.${axis.taskData.moduleName}.analytics.highscore.`;
   }
 
   getIconOfAxis(axis: Axis): string | undefined {
-    if (axis.taskData.taskType) {
-      return getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
-    }
+    return axis.taskData.taskType ? getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()]) : undefined;
   }
 
   getColorOfAxis(axis: Axis): string | undefined {
-    if (axis.taskData.taskType) {
-      return getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()]);
-    }
+    return axis.taskData.taskType ? getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()]) : undefined;
   }
 
   addToTableArray(axis: Axis): void {
     this.tableArray.push(axis);
-    this.tableCount += 1;
   }
 
   removeFromTableArray(index: number): void {
     this.tableArray.splice(index, 1);
-    this.tableCount -= 1;
   }
 
-  filterParticipantData(participantData: DataEntry[], taskId: string) {
-    const chartData = participantData
-      .filter((entry) => {
-        const moduleAxis = entry.axes.find((a) => a.taskId === taskId);
-        return moduleAxis?.axisValues.some((value) => value.value != null);
-      })
-      .map((entry) => ({
-        ...entry,
-        axes: entry.axes
-          .filter((axis) => axis.taskId === taskId)
-          .map((axis) => ({
-            ...axis,
-            axisValues: axis.axisValues.sort((a, b) => {
-              const aIsLast = ['stars', 'rate'].includes(a.id);
-              const bIsLast = ['stars', 'rate'].includes(b.id);
-              return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
-            }),
-          })),
-      }));
-    const returnArray: HighScoreEntry[] = [];
-    for (const entry of chartData) {
-      returnArray.push({
-        values: entry.axes[0].axisValues,
-        participant: entry.participant,
-      });
-    }
-    return returnArray;
+  updateTableArray(index: number, axis: Axis): void {
+    this.tableArray.splice(index, 1, axis);
+  }
+
+  filterParticipantData(taskId: string): HighScoreEntry[] {
+    const chartData = this.chartData
+        .filter((entry) => {
+          const moduleAxis = entry.axes.find((a) => a.taskId === taskId);
+          return moduleAxis?.axisValues.some((value) => value.value != null);
+        })
+        .map((entry) => ({
+          ...entry,
+          axes: entry.axes
+              .filter((axis) => axis.taskId === taskId)
+              .map((axis) => ({
+                ...axis,
+                axisValues: axis.axisValues.sort((a, b) => {
+                  const aIsLast = ['stars', 'rate'].includes(a.id);
+                  const bIsLast = ['stars', 'rate'].includes(b.id);
+                  return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
+                }),
+              })),
+        }));
+
+    return chartData.map((entry) => ({
+      values: entry.axes[0].axisValues,
+      participant: entry.participant,
+    }));
   }
 }
 </script>
@@ -269,11 +241,10 @@ export default class Tables extends Vue {
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
-
   overflow-x: hidden;
 }
 
-@media(max-width: calc((700px * 2) + 12rem)) {
+@media (max-width: calc((700px * 2) + 12rem)) {
   .highScoreSelectionContainer {
     width: 100%;
   }
@@ -326,13 +297,11 @@ export default class Tables extends Vue {
   font-size: var(--font-size-xlarge);
 }
 
-.addOn {
-  &__boarder {
-    border: 2px dashed var(--color-primary);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+.addOn__boarder {
+  border: 2px dashed var(--color-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .el-card {
@@ -342,7 +311,6 @@ export default class Tables extends Vue {
 .TableSelectionHeadline {
   font-size: var(--font-size-xlarge);
   font-weight: var(--font-weight-bold);
-
   margin-bottom: 0.5rem;
 }
 </style>

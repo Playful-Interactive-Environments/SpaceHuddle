@@ -1,99 +1,87 @@
 <template>
   <table class="highscore-table" v-if="chartData.length > 0">
-    <tr>
-      <th />
-      <th />
-      <th
-        v-for="entry in chartData[0].values"
-        :key="this.taskId + entry.id"
-        @click="setSortColumn(entry.id)"
-        :style="{
-          cursor: 'pointer',
-          width: `${93 / chartData[0].values.length}%`,
-        }"
-      >
-        <ToolTip :content="$t(translationPath + entry.id)" :show-after="500">
-          <span class="twoLineText">
-            {{ $t(translationPath + entry.id) }}
-            <font-awesome-icon
-              :icon="['fas', 'angle-up']"
-              v-if="entry.id === sortColumn && sortOrder === -1"
-            />
-            <font-awesome-icon
-              :icon="['fas', 'angle-down']"
-              v-if="entry.id === sortColumn && sortOrder === 1"
-            />
-          </span>
-        </ToolTip>
-      </th>
-    </tr>
-    <tr
-      v-for="(entry, index) in chartData.slice(0, this.highScoreCount)"
-      :key="entry.participant.id + index"
-      class="participantTableEntries"
-      @click="participantSelectionChanged(entry.participant.id)"
-      :class="{
-        participantSelected: selectedParticipantIds.includes(
-          entry.participant.id
-        ),
-      }"
-    >
-      <td>{{ index + 1 }}.</td>
-      <td>
-        <font-awesome-icon
-          :icon="entry.participant.avatar.symbol"
-          :style="{ color: entry.participant.avatar.color }"
-        ></font-awesome-icon>
-      </td>
-      <td
-        v-for="value in chartData[index].values"
-        :key="entry.participant.id + value.id"
-        class="valueTableEntry el-rate--large"
-      >
-        <span v-if="value.id !== 'rate' && value.id !== 'stars'"
-          >{{
-            value.value != null
-              ? Math.round((value.value + Number.EPSILON) * 100) / 100
-              : '---'
-          }}
-          {{
-            value.value != null
-              ? $t(translationPath + 'units.' + value.id).slice(
-                  -value.id.length
-                ) !== value.id
-                ? $t(translationPath + 'units.' + value.id)
-                : ''
-              : ''
-          }}</span
-        ><span v-else
-          ><el-rate
-            v-if="value.value != null"
-            v-model="value.value"
-            size="large"
-            :max="3"
-            :disabled="true"
-          />
-          <span v-else>---</span></span
+    <thead>
+      <tr>
+        <th />
+        <th />
+        <th
+          v-for="entry in chartData[0].values"
+          :key="entry.id"
+          @click="setSortColumn(entry.id)"
+          :style="{
+            cursor: 'pointer',
+            width: `${93 / chartData[0].values.length}%`,
+          }"
         >
-      </td>
-    </tr>
-    <tr
-      v-if="highScoreCount < chartData.length"
-      @click="highScoreCount = chartData.length"
-    >
-      <td>
-        <el-button link class="text-button valueTableEntry"
-          ><font-awesome-icon :icon="['fas', 'angle-down']"
-        /></el-button>
-      </td>
-    </tr>
-    <tr v-if="highScoreCount === chartData.length" @click="highScoreCount = 5">
-      <td>
-        <el-button link class="text-button valueTableEntry">
-          <font-awesome-icon :icon="['fas', 'angle-up']"
-        /></el-button>
-      </td>
-    </tr>
+          <ToolTip :content="getTranslation(entry.id)" :show-after="500">
+            <span class="twoLineText">
+              {{ getTranslation(entry.id) }}
+              <font-awesome-icon
+                :icon="sortIcon(entry.id)"
+                v-if="entry.id === sortColumn"
+              />
+            </span>
+          </ToolTip>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="(entry, index) in displayedChartData"
+        :key="entry.participant.id"
+        class="participantTableEntries"
+        @click="participantSelectionChanged(entry.participant.id)"
+        :class="{ participantSelected: isSelected(entry.participant.id) }"
+      >
+        <td>{{ index + 1 }}.</td>
+        <td>
+          <font-awesome-icon
+            :icon="entry.participant.avatar.symbol"
+            :style="{ color: entry.participant.avatar.color }"
+          ></font-awesome-icon>
+        </td>
+        <td
+          v-for="value in entry.values"
+          :key="value.id"
+          class="valueTableEntry el-rate--large"
+        >
+          <span v-if="value.id !== 'rate' && value.id !== 'stars'">
+            {{ formatValue(value) }}
+            {{ getUnit(value) }}
+          </span>
+          <span v-else>
+            <el-rate
+              v-if="value.value != null"
+              v-model="value.value"
+              size="large"
+              :max="3"
+              :disabled="true"
+            />
+            <span v-else>---</span>
+          </span>
+        </td>
+      </tr>
+      <tr
+        v-if="highScoreCount < chartData.length"
+        @click="highScoreCount = chartData.length"
+      >
+        <td>
+          <el-button link class="text-button valueTableEntry">
+            <font-awesome-icon :icon="['fas', 'angle-down']" />
+          </el-button>
+        </td>
+      </tr>
+      <tr
+        v-if="highScoreCount === chartData.length"
+        @click="highScoreCount = 5"
+      >
+        <td>
+          <el-button link class="text-button valueTableEntry">
+            <font-awesome-icon :icon="['fas', 'angle-up']" />
+          </el-button>
+        </td>
+      </tr>
+    </tbody>
   </table>
   <p v-else>No valid data for this task</p>
 </template>
@@ -106,7 +94,6 @@ import { ParticipantInfo } from '@/types/api/Participant';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 
 export interface HighScoreEntry {
   participant: ParticipantInfo;
@@ -117,7 +104,6 @@ export interface HighScoreEntry {
   components: { ToolTip, FontAwesomeIcon },
   emits: ['update:selectedParticipantIds'],
 })
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Highscore extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly tableData!:
@@ -131,19 +117,23 @@ export default class Highscore extends Vue {
   sortColumn = 'stars';
   sortOrder = 1;
   highScoreCount = 5;
-
-  participantIds: string[] = [];
-
   chartData: HighScoreEntry[] = [];
 
+  get displayedChartData() {
+    return this.chartData.slice(0, this.highScoreCount);
+  }
+
   setSortColumn(column: string): void {
-    if (this.sortColumn === column) this.sortOrder *= -1;
-    else this.sortOrder = 1;
+    if (this.sortColumn === column) {
+      this.sortOrder *= -1;
+    } else {
+      this.sortOrder = 1;
+    }
     this.sortColumn = column;
     this.sortData();
   }
 
-  @Watch('participantData', { immediate: true })
+  @Watch('tableData', { immediate: true })
   @Watch('taskId', { immediate: true })
   onChartDataChanged(): void {
     if (this.tableData?.length) {
@@ -153,7 +143,6 @@ export default class Highscore extends Vue {
         this.convertToHighScoreEntryArray(
           this.tableData as TaskParticipantIterationStep[]
         );
-        this.chartData = [];
       }
       this.sortData();
     }
@@ -161,22 +150,20 @@ export default class Highscore extends Vue {
 
   isHighScoreEntry(entry: any): boolean {
     return (
-      entry.values[0].id !== undefined &&
-      entry.values[0].value !== undefined &&
+      entry.values[0]?.id !== undefined &&
+      entry.values[0]?.value !== undefined &&
       entry.participant !== undefined
     );
   }
 
-  convertToHighScoreEntryArray(
-    data: TaskParticipantIterationStep[]
-  ): HighScoreEntry[] {
+  convertToHighScoreEntryArray(data: TaskParticipantIterationStep[]): void {
     console.log(data);
-    return [];
+    this.chartData = [];
   }
 
-  sortData(): HighScoreEntry[] {
+  sortData(): void {
     if (this.chartData.length >= 2) {
-      return this.chartData.sort((a, b) => {
+      this.chartData.sort((a, b) => {
         const bVal = b.values.find((value) => value.id === this.sortColumn);
         const aVal = a.values.find((value) => value.id === this.sortColumn);
 
@@ -197,7 +184,6 @@ export default class Highscore extends Vue {
         return primaryComparison;
       });
     }
-    return this.chartData;
   }
 
   participantSelectionChanged(id: string): void {
@@ -205,6 +191,37 @@ export default class Highscore extends Vue {
       ? this.selectedParticipantIds.filter((i) => i !== id)
       : [id];
     this.$emit('update:selectedParticipantIds', newValue);
+  }
+
+  getTranslation(id: string): string {
+    return this.$t(this.translationPath + id);
+  }
+
+  sortIcon(id: string): [string, string] {
+    if (id === this.sortColumn) {
+      return this.sortOrder === -1
+        ? ['fas', 'angle-up']
+        : ['fas', 'angle-down'];
+    }
+    return ['', ''];
+  }
+
+  formatValue(value: { id: string; value: number | null }): string {
+    return value.value != null
+      ? (Math.round((value.value + Number.EPSILON) * 100) / 100).toString()
+      : '---';
+  }
+
+  getUnit(value: { id: string; value: number | null }): string {
+    if (value.value != null) {
+      const unit = this.$t(this.translationPath + 'units.' + value.id);
+      return unit.slice(-value.id.length) !== value.id ? unit : '';
+    }
+    return '';
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedParticipantIds.includes(id);
   }
 }
 </script>
@@ -214,13 +231,17 @@ export default class Highscore extends Vue {
   color: var(--color-playing);
   width: 100%;
   height: auto;
+
   th {
     padding-bottom: 0.3rem;
+    cursor: pointer;
   }
+
   tr {
     text-align: left;
     border-bottom: 1px solid var(--color-background-dark);
   }
+
   td {
     width: auto;
     text-align: left;
@@ -231,10 +252,10 @@ export default class Highscore extends Vue {
 .participantTableEntries {
   transition: background-color 0.15s ease;
   cursor: pointer;
-}
 
-.participantTableEntries:hover {
-  background-color: var(--color-background-dark);
+  &:hover {
+    background-color: var(--color-background-dark);
+  }
 }
 
 .participantSelected {
