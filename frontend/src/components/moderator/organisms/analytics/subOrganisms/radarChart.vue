@@ -89,7 +89,7 @@
             )
           "
         >
-          <p class="twoLineText">
+          <p class="twoLineText radar-label-text">
             {{
               $t(
                 `module.information.personalityTest.${test}.result.${label}.name`
@@ -176,10 +176,22 @@ export default class RadarChart extends Vue {
 
   @Watch('datasets', { immediate: true, deep: true })
   updateNormalizedDatasets() {
-    this.normalizedDatasets = this.datasets.map((dataset) => ({
-      ...dataset,
-      data: this.normalizeData(dataset.data),
-    }));
+    this.normalizedDatasets = this.datasets
+      .map((dataset) => ({
+        ...dataset,
+        data: this.normalizeData(dataset.data),
+      }))
+      .sort(
+        (a, b) =>
+          b.data.reduce(
+            (acc: number, current: number): number => acc + current,
+            0
+          ) -
+          a.data.reduce(
+            (acc: number, current: number): number => acc + current,
+            0
+          )
+      );
   }
 
   get datasetColors(): Record<string, string> {
@@ -211,9 +223,12 @@ export default class RadarChart extends Vue {
   calculateOpacity(dataset: { data: unknown[]; avatar: Avatar }): number {
     if (this.selectedParticipantIds.includes(dataset.avatar.id)) {
       return 0.8;
-    } else if (!this.selectedParticipantIds.length || !this.datasets.find((dataset) =>
+    } else if (
+      !this.selectedParticipantIds.length ||
+      !this.datasets.find((dataset) =>
         this.selectedParticipantIds.includes(dataset.avatar.id)
-    )) {
+      )
+    ) {
       return 0.25;
     }
     return 0.05;
@@ -362,12 +377,13 @@ export default class RadarChart extends Vue {
   font-size: var(--font-size-xsmall);
   color: var(--color-dark-contrast);
   font-weight: var(--font-weight-default);
-  transition: font-weight 0.5s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
+  text-shadow: transparent;
 }
 
 .radar-label:hover {
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-informing-dark);
 }
 
 .radarPolygon {
