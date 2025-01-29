@@ -128,6 +128,7 @@ export default class AnalyticsTopicView extends Vue {
 
   updateTasks(tasks: Task[], topicId: string): void {
     const topic = this.topics.find((topic) => topic.id === topicId);
+
     if (topic) {
       topic.tasks = tasks;
       topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
@@ -202,7 +203,7 @@ export default class AnalyticsTopicView extends Vue {
     // Filter only tasks (leaf nodes)
     this.selectedTasks = checkedNodes
       .filter((node: any) => !node.tasks)
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => Number(`${a.topicOrder}${a.order}`) - Number(`${b.topicOrder}${b.order}`));
   }
 
   get selectedKeys(): string[] {

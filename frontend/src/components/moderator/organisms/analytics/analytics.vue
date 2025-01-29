@@ -44,7 +44,10 @@
       />
     </div>
     <div class="RadarChartContainer">
-      <div v-for="(entry, index) of radarDataEntries" :key="'radarChart' + index">
+      <div
+        v-for="(entry, index) of radarDataEntries"
+        :key="'radarChart' + index"
+      >
         <radar-chart
           :labels="entry.labels"
           :datasets="entry.data"
@@ -82,7 +85,7 @@ import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import { Session } from '@/types/api/Session';
 import QrcodeVue from 'qrcode.vue';
-import {Avatar, ParticipantInfo } from '@/types/api/Participant';
+import { Avatar, ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/components/moderator/organisms/analytics/subOrganisms/parallelCoordinates.vue';
 import Tables from '@/components/moderator/organisms/analytics/subOrganisms/Tables.vue';
 import { VoteResult } from '@/types/api/Vote';
@@ -287,7 +290,7 @@ export default class Analytics extends Vue {
   updateTasks(tasks: Task[]): void {
     this.resetData();
     this.deregisterSteps();
-    this.tasks = tasks.sort((a, b) => a.order - b.order);
+    this.tasks = tasks.sort((a, b) => Number(`${a.topicOrder}${a.order}`) - Number(`${b.topicOrder}${b.order}`));
     this.gameTasks = this.tasks.filter((task) => task.taskType === 'PLAYING');
     this.votingTasks = this.tasks.filter((task) => task.taskType === 'VOTING');
     this.brainstormingTasks = this.tasks.filter(
@@ -377,7 +380,11 @@ export default class Analytics extends Vue {
       taskParticipantService.registerGetList(
         task.id,
         (result: TaskParticipantState[]) => {
-          this.updatePersonalityTests(result, task.modules[0].parameter.test, task.name);
+          this.updatePersonalityTests(
+            result,
+            task.modules[0].parameter.test,
+            task.name
+          );
         },
         EndpointAuthorisationType.MODERATOR,
         120
@@ -495,7 +502,7 @@ export default class Analytics extends Vue {
         taskType: task.taskType as TaskType,
         taskName: task.name,
         moduleName: task.modules[0].name,
-        initOrder: task.order,
+        initOrder: Number(`${task.topicOrder}${task.order}`),
       },
       steps: filteredSteps,
     };
@@ -524,13 +531,13 @@ export default class Analytics extends Vue {
     title: string;
     test: string;
     labels: string[];
-    data: { data: number[]; avatar: Avatar; }[];
+    data: { data: number[]; avatar: Avatar }[];
   }[] = [];
 
   updatePersonalityTests(
     result: TaskParticipantState[],
     test: string,
-    title: string,
+    title: string
   ): void {
     if (result[0].parameter.resultTypeValues) {
       const radarData = {
