@@ -17,8 +17,8 @@
       <svg :width="size" :height="size" viewBox="0 0 100 100">
         <!-- Draw the grid -->
         <polygon
-          v-for="(level, index) in gridLevels"
-          :key="'grid-' + index"
+          v-for="level in gridLevels"
+          :key="level"
           :points="getPolygonPoints(level)"
           fill="none"
           stroke="#ccc"
@@ -28,7 +28,7 @@
         <!-- Draw the axes -->
         <line
           v-for="(label, index) in labels"
-          :key="'axis-' + index"
+          :key="label"
           x1="50"
           y1="50"
           :x2="getAxisEnd(index, maxRadius).x"
@@ -39,60 +39,28 @@
 
         <!-- Draw the data polygons -->
         <polygon
-          v-for="(dataset, datasetIndex) in normalizedDatasets"
-          :key="'dataset-' + datasetIndex"
+          v-for="dataset in normalizedDatasets"
+          :key="dataset.avatar.id"
           :points="getDataPoints(dataset.data)"
-          :fill="getColor(dataset)"
-          :fill-opacity="getOpacity(dataset)"
-          :stroke="getColor(dataset)"
-          :stroke-opacity="getOpacity(dataset) + 0.2"
+          :fill="datasetColors[dataset.avatar.id]"
+          :fill-opacity="datasetOpacities[dataset.avatar.id]"
+          :stroke="datasetColors[dataset.avatar.id]"
+          :stroke-opacity="datasetOpacities[dataset.avatar.id] + 0.2"
           stroke-width="0.5"
           class="radarPolygon"
-        ></polygon>
+        />
 
         <!-- Draw the average dataset polygon -->
         <polygon
           v-if="averageDataset"
           :points="getDataPoints(averageDataset.data)"
           :fill="'var(--color-evaluating)'"
-          :fill-opacity="getOpacity(averageDataset) + 0.1"
+          :fill-opacity="averageDatasetOpacity + 0.1"
           :stroke="'var(--color-evaluating)'"
-          :stroke-width="getOpacity(averageDataset) + 0.2"
+          :stroke-width="averageDatasetOpacity + 0.2"
           class="radarPolygon"
-        ></polygon>
-
-        <!-- Draw the selected participant dataset polygon -->
-        <!--      <polygon
-        v-if="selectedParticipantId !== '' && selectedParticipantDataset"
-        :points="getDataPoints(selectedParticipantDataset.data)"
-        :fill="getColor(selectedParticipantDataset)"
-        :fill-opacity="0.6"
-        :stroke="getColor(selectedParticipantDataset)"
-        :stroke-opacity="1"
-        stroke-width="0.5"
-        class="radarPolygon radarPolygonSelected"
-      ></polygon>-->
+        />
       </svg>
-
-      <!--      <div
-        v-for="(label, index) in labels"
-        :key="'label-' + index"
-        class="radar-label"
-        :style="getLabelPosition(index)"
-        @click="getParticipantsOfPrimaryClass(index)"
-      >
-        <p class="twoLineText">
-          {{
-            $t(
-              `module.information.personalityTest.${test}.result.${label}.name`
-            )
-          }}
-        </p>
-        <p>
-          {{ getParticipantsOfPrimaryClass(index).length }}
-          <font-awesome-icon icon="user" />
-        </p>
-      </div>-->
       <ToolTip
         v-for="(label, index) in labels"
         :key="'label-' + index"
@@ -112,11 +80,15 @@
             }"
           ></font-awesome-icon>
         </template>
-        <div :style="getLabelPosition(index)" class="radar-label" @click="
-          participantSelectionChanged(
-            getParticipantsOfPrimaryClass(index).map((avatar) => avatar.id)
-          )
-        ">
+        <div
+          :style="getLabelPosition(index)"
+          class="radar-label"
+          @click="
+            participantSelectionChanged(
+              getParticipantsOfPrimaryClass(index).map((avatar) => avatar.id)
+            )
+          "
+        >
           <p class="twoLineText">
             {{
               $t(
@@ -136,7 +108,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { Avatar } from '@/types/api/Participant';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
@@ -163,6 +135,7 @@ export default class RadarChart extends Vue {
   @Prop({ type: Number, default: 5 }) defaultColor!: string;
 
   taskType = TaskType.INFORMATION;
+  normalizedDatasets: { data: number[]; avatar: Avatar }[] = [];
 
   getColorOfType(taskType: TaskType) {
     return getColorOfType(taskType);
@@ -172,13 +145,23 @@ export default class RadarChart extends Vue {
     return getIconOfType(taskType);
   }
 
+  get minMaxValues(): { min: number; max: number } {
+    const allData = this.datasets.flatMap((dataset) => dataset.data);
+    const min = Math.min(...allData);
+    const max = Math.max(...allData);
+    return { min: min < 0 ? min : 0, max };
+  }
+
   get minValue(): number {
-    const min = Math.min(...this.datasets.flatMap((dataset) => dataset.data));
-    return min < 0 ? min : 0;
+    return this.minMaxValues.min;
   }
 
   get maxValue(): number {
-    return Math.max(...this.datasets.flatMap((dataset) => dataset.data));
+    return this.minMaxValues.max;
+  }
+
+  created() {
+    this.updateNormalizedDatasets();
   }
 
   participantSelectionChanged(ids: string[] | null) {
@@ -191,11 +174,31 @@ export default class RadarChart extends Vue {
     }
   }
 
-  get normalizedDatasets() {
-    return this.datasets.map((dataset) => ({
+  @Watch('datasets', { immediate: true, deep: true })
+  updateNormalizedDatasets() {
+    this.normalizedDatasets = this.datasets.map((dataset) => ({
       ...dataset,
       data: this.normalizeData(dataset.data),
     }));
+  }
+
+  get datasetColors(): Record<string, string> {
+    return this.datasets.reduce((acc, dataset) => {
+      acc[dataset.avatar.id] = this.getColor(dataset);
+      return acc;
+    }, {} as Record<string, string>);
+  }
+
+  get averageDatasetOpacity(): number {
+    if (!this.averageDataset) return 0;
+    return this.calculateOpacity(this.averageDataset);
+  }
+
+  get datasetOpacities(): Record<string, number> {
+    return this.datasets.reduce((acc, dataset) => {
+      acc[dataset.avatar.id] = this.calculateOpacity(dataset);
+      return acc;
+    }, {} as Record<string, number>);
   }
 
   getColor(dataset: { data: unknown[]; avatar: Avatar }): string {
@@ -205,23 +208,21 @@ export default class RadarChart extends Vue {
     return this.defaultColor;
   }
 
-  getOpacity(dataset: { data: unknown[]; avatar: Avatar }): number {
+  calculateOpacity(dataset: { data: unknown[]; avatar: Avatar }): number {
     if (this.selectedParticipantIds.includes(dataset.avatar.id)) {
       return 0.8;
-    } else if (
-      this.selectedParticipantIds.length <= 0 ||
-      !this.datasets.find((dataset) =>
+    } else if (!this.selectedParticipantIds.length || !this.datasets.find((dataset) =>
         this.selectedParticipantIds.includes(dataset.avatar.id)
-      )
-    ) {
+    )) {
       return 0.25;
     }
     return 0.05;
   }
 
   normalizeData(data: number[]): number[] {
-    const range = this.maxValue - this.minValue;
-    return data.map((value) => ((value - this.minValue) / range) * 100);
+    const { min, max } = this.minMaxValues;
+    const range = max - min || 1; // Prevent division by zero
+    return data.map((value) => ((value - min) / range) * 100);
   }
 
   get averageDataset(): { data: number[]; avatar: Avatar } | null {
@@ -362,6 +363,7 @@ export default class RadarChart extends Vue {
   color: var(--color-dark-contrast);
   font-weight: var(--font-weight-default);
   transition: font-weight 0.5s ease;
+  cursor: pointer;
 }
 
 .radar-label:hover {
@@ -369,7 +371,7 @@ export default class RadarChart extends Vue {
 }
 
 .radarPolygon {
-  transition: 0.5s ease;
+  transition: all 0.5s ease;
 }
 
 .radarPolygonSelected {
