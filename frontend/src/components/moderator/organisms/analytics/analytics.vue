@@ -613,7 +613,7 @@ export default class Analytics extends Vue {
 
   wantedValues = [
     'stars',
-    'points',
+    //'points',
     'playtime',
     'playTime',
     'maxSpeed',
