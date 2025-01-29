@@ -222,13 +222,12 @@ export default class PublicScreen extends Vue {
     }
     .score {
       position: absolute;
-      right: -1.25rem;
+      left: calc(100% + 0.25rem);
       top: 0;
       font-size: var(--font-size-xlarge);
       color: white;
       font-weight: var(--font-weight-bold);
       text-align: left;
-      width: 1rem;
       transition: opacity 1s ease;
     }
   }
