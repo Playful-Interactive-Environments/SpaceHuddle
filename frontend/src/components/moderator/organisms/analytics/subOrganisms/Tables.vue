@@ -1,26 +1,26 @@
 <template>
   <div class="highscoreContainer" v-if="axes && chartData.length > 0">
     <el-card
-        class="highScoreSelectionContainer"
-        v-for="(axis, index) in tableArray"
-        :key="axis?.taskId"
-        shadow="never"
-        body-style="text-align: center"
-        :class="{ addOn__boarder: !axis }"
+      class="highScoreSelectionContainer"
+      v-for="(axis, index) in tableArray"
+      :key="axis?.taskId"
+      shadow="never"
+      body-style="text-align: center"
+      :class="{ addOn__boarder: !axis }"
     >
       <div class="highscoreModuleSelection">
         <el-dropdown
-            v-if="axes.length > 1"
-            @command="updateTableArray(index, $event)"
-            trigger="click"
-            placement="bottom"
+          v-if="axes.length > 1"
+          @command="updateTableArray(index, $event)"
+          trigger="click"
+          placement="bottom"
         >
           <div class="el-dropdown-link">
             <font-awesome-icon
-                v-if="axis"
-                class="highscoreModuleIcon"
-                :icon="getIconOfAxis(axis)"
-                :style="{ color: getColorOfAxis(axis) }"
+              v-if="axis"
+              class="highscoreModuleIcon"
+              :icon="getIconOfAxis(axis)"
+              :style="{ color: getColorOfAxis(axis) }"
             />
             <p class="oneLineText highscoreModuleName">
               {{ axis ? axis.taskData.taskName : 'select task' }}
@@ -30,9 +30,9 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                  v-for="ax in axes"
-                  :key="ax.taskId"
-                  :command="ax"
+                v-for="ax in axes"
+                :key="ax.taskId"
+                :command="ax"
               >
                 {{ ax.taskData.taskName }}
               </el-dropdown-item>
@@ -40,36 +40,36 @@
           </template>
         </el-dropdown>
         <font-awesome-icon
-            :icon="['fas', 'trash']"
-            class="trashButton"
-            v-if="axis"
-            @click="removeFromTableArray(index)"
+          :icon="['fas', 'trash']"
+          class="trashButton"
+          v-if="axis"
+          @click="removeFromTableArray(index)"
         />
       </div>
       <Highscore
-          v-if="axis"
-          class="highscore"
-          :module-id="axis.taskId"
-          :table-data="filterParticipantData(axis.taskId)"
-          v-model:selectedParticipantIds="participantIds"
-          @update:selected-participant-ids="updateSelectedParticipantIds"
-          :translation-path="getTranslationPath(axis)"
+        v-if="axis"
+        class="highscore"
+        :module-id="axis.taskId"
+        :table-data="filterParticipantData(axis.taskId)"
+        v-model:selectedParticipantIds="participantIds"
+        @update:selected-participant-ids="updateSelectedParticipantIds"
+        :translation-path="getTranslationPath(axis)"
       />
     </el-card>
     <el-card
-        class="highScoreSelectionContainer addOn__boarder is-align-self-center"
-        shadow="never"
-        body-style="text-align: center"
+      class="highScoreSelectionContainer addOn__boarder is-align-self-center"
+      shadow="never"
+      body-style="text-align: center"
     >
       <p class="TableSelectionHeadline">
         {{ $t('moderator.organism.analytics.tables.table') }}
       </p>
       <div class="highscoreModuleSelection">
         <el-dropdown
-            v-if="axes.length > 1"
-            @command="addToTableArray"
-            trigger="click"
-            placement="bottom"
+          v-if="axes.length > 1"
+          @command="addToTableArray"
+          trigger="click"
+          placement="bottom"
         >
           <div class="el-dropdown-link">
             <p class="oneLineText highscoreModuleName">
@@ -80,9 +80,9 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                  v-for="ax in axes"
-                  :key="ax.taskId"
-                  :command="ax"
+                v-for="ax in axes"
+                :key="ax.taskId"
+                :command="ax"
               >
                 {{ ax.taskData.taskName }}
               </el-dropdown-item>
@@ -157,9 +157,9 @@ export default class Tables extends Vue {
   onChartDataChanged(): void {
     if (this.participantData) {
       this.chartData = this.participantData.filter((entry) =>
-          entry.axes.some((axis) =>
-              axis.axisValues.some((value) => value.value != null)
-          )
+        entry.axes.some((axis) =>
+          axis.axisValues.some((value) => value.value != null)
+        )
       );
     }
   }
@@ -174,15 +174,21 @@ export default class Tables extends Vue {
   }
 
   getTranslationPath(axis: Axis): string {
-    return `module.${axis.taskData.taskType.toLowerCase()}.${axis.taskData.moduleName}.analytics.highscore.`;
+    return `module.${axis.taskData.taskType.toLowerCase()}.${
+      axis.taskData.moduleName
+    }.analytics.highscore.`;
   }
 
   getIconOfAxis(axis: Axis): string | undefined {
-    return axis.taskData.taskType ? getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()]) : undefined;
+    return axis.taskData.taskType
+      ? getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()])
+      : undefined;
   }
 
   getColorOfAxis(axis: Axis): string | undefined {
-    return axis.taskData.taskType ? getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()]) : undefined;
+    return axis.taskData.taskType
+      ? getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()])
+      : undefined;
   }
 
   addToTableArray(axis: Axis): void {
@@ -199,23 +205,23 @@ export default class Tables extends Vue {
 
   filterParticipantData(taskId: string): HighScoreEntry[] {
     const chartData = this.chartData
-        .filter((entry) => {
-          const moduleAxis = entry.axes.find((a) => a.taskId === taskId);
-          return moduleAxis?.axisValues.some((value) => value.value != null);
-        })
-        .map((entry) => ({
-          ...entry,
-          axes: entry.axes
-              .filter((axis) => axis.taskId === taskId)
-              .map((axis) => ({
-                ...axis,
-                axisValues: axis.axisValues.sort((a, b) => {
-                  const aIsLast = ['stars', 'rate'].includes(a.id);
-                  const bIsLast = ['stars', 'rate'].includes(b.id);
-                  return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
-                }),
-              })),
-        }));
+      .filter((entry) => {
+        const moduleAxis = entry.axes.find((a) => a.taskId === taskId);
+        return moduleAxis?.axisValues.some((value) => value.value != null);
+      })
+      .map((entry) => ({
+        ...entry,
+        axes: entry.axes
+          .filter((axis) => axis.taskId === taskId)
+          .map((axis) => ({
+            ...axis,
+            axisValues: axis.axisValues.sort((a, b) => {
+              const aIsLast = ['stars', 'rate'].includes(a.id);
+              const bIsLast = ['stars', 'rate'].includes(b.id);
+              return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
+            }),
+          })),
+      }));
 
     return chartData.map((entry) => ({
       values: entry.axes[0].axisValues,
