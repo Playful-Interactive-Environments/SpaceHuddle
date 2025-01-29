@@ -186,7 +186,6 @@ export default class AnalyticsTopicView extends Vue {
       // Process the topic node and its children
       returnData.push(processNode(topicNode));
     }
-    console.log(returnData.filter(filterEmptyNodes));
     return [
       {
         title: this.$t('moderator.organism.analytics.taskSelection'),
@@ -203,7 +202,7 @@ export default class AnalyticsTopicView extends Vue {
     // Filter only tasks (leaf nodes)
     this.selectedTasks = checkedNodes
       .filter((node: any) => !node.tasks)
-      .sort((a, b) => Number(`${a.topicOrder}${a.order}`) - Number(`${b.topicOrder}${b.order}`));
+      .sort((a, b) => Number(`${a.topicOrder}000${a.order}`) - Number(`${b.topicOrder}000${b.order}`));
   }
 
   get selectedKeys(): string[] {

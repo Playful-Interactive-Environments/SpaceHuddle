@@ -290,7 +290,7 @@ export default class Analytics extends Vue {
   updateTasks(tasks: Task[]): void {
     this.resetData();
     this.deregisterSteps();
-    this.tasks = tasks.sort((a, b) => Number(`${a.topicOrder}${a.order}`) - Number(`${b.topicOrder}${b.order}`));
+    this.tasks = tasks.sort((a, b) => Number(`${a.topicOrder}000${a.order}`) - Number(`${b.topicOrder}000${b.order}`));
     this.gameTasks = this.tasks.filter((task) => task.taskType === 'PLAYING');
     this.votingTasks = this.tasks.filter((task) => task.taskType === 'VOTING');
     this.brainstormingTasks = this.tasks.filter(
@@ -502,7 +502,7 @@ export default class Analytics extends Vue {
         taskType: task.taskType as TaskType,
         taskName: task.name,
         moduleName: task.modules[0].name,
-        initOrder: Number(`${task.topicOrder}${task.order}`),
+        initOrder: Number(`${task.topicOrder}000${task.order}`),
       },
       steps: filteredSteps,
     };
