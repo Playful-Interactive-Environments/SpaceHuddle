@@ -173,7 +173,11 @@
         class="analyticsTopicView"
         :style="{
           width: '95%',
-          maxWidth: '100%'
+          maxWidth: '100%',
+          height: '90%',
+          maxHeight: '90%',
+          overflow: 'scroll',
+          margin: '2.5%',
         }"
       />
     </template>
@@ -501,9 +505,18 @@ export default class ModeratorSessionDetails extends Vue {
     opacity: 0.7;
   }
 }
+</style>
 
+<style lang="scss">
 .analyticsTopicView {
-  width: 95%;
-  max-width: 100% !important;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  .el-dialog__body {
+    max-height: none;
+  }
+}
+
+.analyticsTopicView::-webkit-scrollbar {
+  display: none;
 }
 </style>

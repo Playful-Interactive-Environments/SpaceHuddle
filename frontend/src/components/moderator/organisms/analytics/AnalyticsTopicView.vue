@@ -211,8 +211,6 @@ export default class AnalyticsTopicView extends Vue {
 
   onCheckChange(): void {
     // Get all checked nodes
-    console.log(this.topics);
-    console.log(this.topics.length);
     const treeRef = this.$refs.tree as any; // Use a reference to the ElTree component
     const checkedNodes = treeRef.getCheckedNodes(true); // Get all checked nodes, including child nodes
 
