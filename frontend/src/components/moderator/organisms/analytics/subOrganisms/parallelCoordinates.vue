@@ -38,6 +38,7 @@
                     cursor: 'default',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
+                    pointerEvents: 'none',
                     backgroundColor: selectedParticipantIds.includes(
                       entry.avatar.id
                     )
