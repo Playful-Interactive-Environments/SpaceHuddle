@@ -1,5 +1,5 @@
 <template>
-  <AnalyticsChart :task="task" :task-id="taskId" />
+  <AnalyticsChart :session-id="sessionId" :received-tasks="selectedTasks" />
 </template>
 
 <script lang="ts">
@@ -11,9 +11,13 @@ import { getAsyncModule, getEmptyComponent } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskType from '@/types/enum/TaskType';
 import AnalyticsChart from '@/components/moderator/organisms/analytics/analytics.vue';
+import { Topic } from '@/types/api/Topic';
+import * as taskService from '@/services/task-service';
+import * as topicService from '@/services/topic-service';
+import { ParticipantInfo } from '@/types/api/Participant';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-
 
 @Options({
   components: {
@@ -30,6 +34,15 @@ export default class Analytics extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   componentLoadIndex = 0;
+
+  topics: Topic[] = [];
+  participants: ParticipantInfo[] = [];
+  viewDetailsForParticipant: ParticipantInfo | null = null;
+
+  showSettings = false;
+
+  selectedTasks: Task[] = [];
+  taskCashEntry!: cashService.SimplifiedCashEntry<Task[]>;
 
   get topicId(): string | null {
     if (this.task) return this.task.topicId;
@@ -63,6 +76,21 @@ export default class Analytics extends Vue {
         }
       });
     }
+  }
+
+  @Watch('task', { immediate: true })
+  async onSessionIdChanged(): Promise<void> {
+    this.taskCashEntry = taskService.registerGetTaskList(
+      this.task.topicId,
+      this.updateTasks,
+      EndpointAuthorisationType.MODERATOR,
+      2 * 60
+    );
+  }
+
+  updateTasks(tasks: Task[]): void {
+    this.selectedTasks = tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
+    console.log(this.selectedTasks);
   }
 }
 </script>

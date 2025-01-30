@@ -389,7 +389,8 @@
         "off": "off"
       },
       "analytics": {
-        "loading": "Loading, please wait",
+        "loading": "Loading, please wait...",
+        "loadingNoTasks": "No tasks selected",
         "tables": {
           "selectTask": "select Task",
           "table": "Table"

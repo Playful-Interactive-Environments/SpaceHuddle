@@ -2,15 +2,15 @@
   <div
     id="analytics"
     :style="{ marginTop: '3rem' }"
-    v-loading="loadingSteps"
+    v-loading="receivedTasks.length <= 0"
     :element-loading-background="'var(--color-background)'"
-    :element-loading-text="$t('moderator.organism.analytics.loading')"
+    :element-loading-text="$t('moderator.organism.analytics.loadingNoTasks')"
   >
     <div
       class="AnalyticsParallelCoordinates"
-      :style="{
-        opacity: loadingSteps ? 0 : 1,
-      }"
+      v-loading="loadingSteps"
+      :element-loading-background="'var(--color-background)'"
+      :element-loading-text="$t('moderator.organism.analytics.loading')"
     >
       <parallel-coordinates
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
@@ -21,15 +21,17 @@
         :steps="JSON.parse(JSON.stringify(steps))"
         v-model:selectedParticipantIds="selectedParticipantIds"
         @participant-selected="participantSelectionChanged"
+        :style="{
+          opacity: loadingSteps ? 0 : 1,
+        }"
       />
     </div>
 
     <div
       class="AnalyticsTables"
+      v-loading="loadingSteps"
       :element-loading-background="'var(--color-background)'"
-      :style="{
-        opacity: loadingSteps ? 0 : 1,
-      }"
+      :element-loading-text="$t('moderator.organism.analytics.loading')"
     >
       <Tables
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
@@ -43,10 +45,18 @@
         }"
       />
     </div>
-    <div class="RadarChartContainer">
+    <div
+      class="RadarChartContainer"
+      v-loading="loadingSteps"
+      :element-loading-background="'var(--color-background)'"
+      :element-loading-text="$t('moderator.organism.analytics.loading')"
+    >
       <div
         v-for="(entry, index) of radarDataEntries"
         :key="'radarChart' + index"
+        :style="{
+          opacity: loadingSteps ? 0 : 1,
+        }"
       >
         <radar-chart
           :labels="entry.labels"
@@ -141,7 +151,7 @@ interface DataEntry {
 export default class Analytics extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly task!: Task;
-  @Prop() readonly receivedTasks!: Task[] | undefined;
+  @Prop() readonly receivedTasks!: Task[];
   @Prop() readonly sessionId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -194,6 +204,7 @@ export default class Analytics extends Vue {
   }
 
   resetData(): void {
+    this.loadingSteps = true;
     this.axes = [];
     this.steps = [];
     this.tasks = [];
@@ -227,7 +238,9 @@ export default class Analytics extends Vue {
 
   @Watch('receivedTasks', { immediate: true })
   onReceivedTasksChanged(): void {
-    if (this.receivedTasks != undefined) {
+    this.resetData();
+    console.log(this.receivedTasks);
+    if (this.receivedTasks.length > 0) {
       this.updateTasks(this.receivedTasks);
     }
   }
@@ -250,18 +263,6 @@ export default class Analytics extends Vue {
         EndpointAuthorisationType.MODERATOR,
         60 * 60
       );
-    }
-
-    if (this.topicId && this.receivedTasks == undefined) {
-      cashService.deregisterAllGet(this.updateTasks);
-      this.taskListService = taskService.registerGetTaskList(
-        this.topicId,
-        this.updateTasks,
-        this.authHeaderTyp,
-        30 * 60
-      );
-    } else {
-      cashService.deregisterAllGet(this.updateTasks);
     }
 
     if (this.getSessionId) {
@@ -288,9 +289,12 @@ export default class Analytics extends Vue {
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTasks(tasks: Task[]): void {
-    this.resetData();
     this.deregisterSteps();
-    this.tasks = tasks.sort((a, b) => Number(`${a.topicOrder}000${a.order}`) - Number(`${b.topicOrder}000${b.order}`));
+    this.tasks = tasks.sort(
+      (a, b) =>
+        Number(`${a.topicOrder}000${a.order}`) -
+        Number(`${b.topicOrder}000${b.order}`)
+    );
     this.gameTasks = this.tasks.filter((task) => task.taskType === 'PLAYING');
     this.votingTasks = this.tasks.filter((task) => task.taskType === 'VOTING');
     this.brainstormingTasks = this.tasks.filter(
@@ -386,7 +390,7 @@ export default class Analytics extends Vue {
           );
         },
         EndpointAuthorisationType.MODERATOR,
-        120
+        30
       );
     }
   }
@@ -770,6 +774,10 @@ export default class Analytics extends Vue {
     align-items: center;
     gap: 2rem;
     overflow: hidden;
+  }
+
+  .smoothAppear {
+    transition: opacity 3s ease;
   }
 }
 </style>
