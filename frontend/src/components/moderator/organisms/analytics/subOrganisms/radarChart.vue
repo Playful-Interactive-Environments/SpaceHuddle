@@ -54,11 +54,11 @@
         <polygon
           v-if="averageDataset"
           :points="getDataPoints(averageDataset.data)"
-          :fill="'var(--color-evaluating)'"
+          :fill="'transparent'"
           :fill-opacity="averageDatasetOpacity + 0.1"
           :stroke="'var(--color-evaluating)'"
-          :stroke-width="averageDatasetOpacity + 0.2"
-          class="radarPolygon"
+          :stroke-width="1"
+          class="radarPolygon averageRadarPolygon"
         />
       </svg>
       <ToolTip
@@ -388,6 +388,11 @@ export default class RadarChart extends Vue {
 
 .radarPolygon {
   transition: all 0.5s ease;
+}
+
+.averageRadarPolygon {
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .radarPolygonSelected {
