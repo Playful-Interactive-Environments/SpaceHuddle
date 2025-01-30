@@ -14,6 +14,7 @@
     <el-tree
       class="tree"
       ref="tree"
+      :key="treeDataKey"
       style="max-width: 600px"
       :data="treeData"
       node-key="id"
@@ -122,7 +123,7 @@ export default class AnalyticsTopicView extends Vue {
       this.sessionId,
       this.updateTopics,
       EndpointAuthorisationType.MODERATOR,
-      2 * 60
+      10
     );
   }
 
@@ -133,6 +134,15 @@ export default class AnalyticsTopicView extends Vue {
       topic.tasks = tasks;
       topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
     }
+  }
+
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateTopics);
+    cashService.deregisterAllGet(this.updateTasks);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   get treeData(): any {
@@ -194,15 +204,26 @@ export default class AnalyticsTopicView extends Vue {
     ];
   }
 
+  get treeDataKey(): string {
+    // Generate a unique key based on the structure of treeData
+    return JSON.stringify(this.treeData);
+  }
+
   onCheckChange(): void {
     // Get all checked nodes
+    console.log(this.topics);
+    console.log(this.topics.length);
     const treeRef = this.$refs.tree as any; // Use a reference to the ElTree component
     const checkedNodes = treeRef.getCheckedNodes(true); // Get all checked nodes, including child nodes
 
     // Filter only tasks (leaf nodes)
     this.selectedTasks = checkedNodes
       .filter((node: any) => !node.tasks)
-      .sort((a, b) => Number(`${a.topicOrder}000${a.order}`) - Number(`${b.topicOrder}000${b.order}`));
+      .sort(
+        (a, b) =>
+          Number(`${a.topicOrder}000${a.order}`) -
+          Number(`${b.topicOrder}000${b.order}`)
+      );
   }
 
   get selectedKeys(): string[] {

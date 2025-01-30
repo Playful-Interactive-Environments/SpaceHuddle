@@ -376,7 +376,6 @@ export default class Analytics extends Vue {
       }
     }
     for (const task of this.typoTasks) {
-      console.log(task);
       taskParticipantService.registerGetList(
         task.id,
         (result: TaskParticipantState[]) => {
