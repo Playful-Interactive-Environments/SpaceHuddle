@@ -291,7 +291,7 @@ export default class Analytics extends Vue {
         null,
         this.updateIdeas,
         this.authHeaderTyp,
-        30 * 60
+        30
       );
     }
     this.calculateSteps(
@@ -313,15 +313,6 @@ export default class Analytics extends Vue {
           task.id,
           (steps: TaskParticipantIterationStep[]) => {
             this.updateIterationSteps(task.id, task, steps);
-          },
-          EndpointAuthorisationType.MODERATOR,
-          30
-        );
-      } else if ((task.taskType as string) === 'VOTING') {
-        votingService.registerGetResult(
-          task.id,
-          (votes: VoteResult[]) => {
-            this.updateVotes(task.id, task, votes);
           },
           EndpointAuthorisationType.MODERATOR,
           30
@@ -349,6 +340,16 @@ export default class Analytics extends Vue {
           30
         );
       }
+    }
+    for (const task of this.votingTasks) {
+      votingService.registerGetResult(
+        task.id,
+        (votes: VoteResult[]) => {
+          this.updateVotes(task.id, task, votes);
+        },
+        EndpointAuthorisationType.MODERATOR,
+        30
+      );
     }
     for (const task of this.typoTasks) {
       taskParticipantService.registerGetList(
@@ -404,8 +405,10 @@ export default class Analytics extends Vue {
   }
 
   updateVotes(id: string, task: Task, votes: VoteResult[]): void {
+    console.log(votes);
     this.votes = votes;
     const newSteps = this.processVotes();
+    console.log(newSteps);
     newSteps && this.updateIterationSteps(id, task, newSteps);
   }
 
@@ -504,6 +507,7 @@ export default class Analytics extends Vue {
   }
 
   radarDataEntries: {
+    taskId: string;
     title: string;
     test: string;
     labels: string[];
@@ -517,6 +521,7 @@ export default class Analytics extends Vue {
   ): void {
     if (result[0].parameter.resultTypeValues) {
       const radarData = {
+        taskId: result[0].taskId,
         title: title,
         test: test,
         labels: Object.keys(result[0].parameter.resultTypeValues),
@@ -529,7 +534,13 @@ export default class Analytics extends Vue {
           }))
           .filter((entry) => entry.data.length > 0),
       };
-      this.radarDataEntries.push(radarData);
+      if (
+        !this.radarDataEntries.some(
+          (entry) => entry.taskId === radarData.taskId
+        )
+      ) {
+        this.radarDataEntries.push(radarData);
+      }
     }
   }
 
