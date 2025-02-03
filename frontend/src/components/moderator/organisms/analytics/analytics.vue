@@ -498,7 +498,7 @@ export default class Analytics extends Vue {
     task: Task,
     steps: TaskParticipantIterationStep[]
   ): void {
-    const filteredSteps = steps.filter((step) => step.parameter.gameplayResult);
+    const filteredSteps = (steps || []).filter((step) => step.parameter.gameplayResult);
     const stepsEntry = {
       taskId: taskId,
       taskData: {
