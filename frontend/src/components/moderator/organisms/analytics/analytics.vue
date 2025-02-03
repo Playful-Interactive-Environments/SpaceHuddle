@@ -547,10 +547,14 @@ export default class Analytics extends Vue {
         title: title,
         test: test,
         labels: Object.keys(result[0].parameter.resultTypeValues), // Assuming all entries have the same labels
-        data: result.map((entry) => ({
-          data: Object.values(entry.parameter.resultTypeValues) as number[],
-          avatar: entry.avatar,
-        })),
+        data: result
+          .map((entry) => ({
+            data: entry.parameter.resultTypeValues
+              ? (Object.values(entry.parameter.resultTypeValues) as number[])
+              : [],
+            avatar: entry.avatar,
+          }))
+          .filter((entry) => entry.data.length > 0),
       };
       this.radarDataEntries.push(radarData);
     }
