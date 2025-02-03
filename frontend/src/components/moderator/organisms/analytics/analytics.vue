@@ -14,16 +14,12 @@
     >
       <parallel-coordinates
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
-        :chart-axes="
-          JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
-        "
-        :participant-data="JSON.parse(JSON.stringify(dataEntries))"
-        :steps="JSON.parse(JSON.stringify(steps))"
+        :chart-axes="axes.filter((axis) => axis.available)"
+        :participant-data="dataEntries"
+        :steps="steps"
         v-model:selectedParticipantIds="selectedParticipantIds"
         @participant-selected="participantSelectionChanged"
-        :style="{
-          opacity: loadingSteps ? 0 : 1,
-        }"
+        :style="{ opacity: loadingSteps ? 0 : 1 }"
       />
     </div>
 
@@ -35,16 +31,13 @@
     >
       <Tables
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
-        :participant-data="JSON.parse(JSON.stringify(dataEntries))"
-        :axes="
-          JSON.parse(JSON.stringify(axes.filter((axis) => axis.available)))
-        "
+        :participant-data="dataEntries"
+        :axes="axes.filter((axis) => axis.available)"
         v-model:selectedParticipantIds="selectedParticipantIds"
-        :style="{
-          opacity: loadingSteps ? 0 : 1,
-        }"
+        :style="{ opacity: loadingSteps ? 0 : 1 }"
       />
     </div>
+
     <div
       class="RadarChartContainer"
       v-loading="loadingSteps"
@@ -54,9 +47,7 @@
       <div
         v-for="(entry, index) of radarDataEntries"
         :key="'radarChart' + index"
-        :style="{
-          opacity: loadingSteps ? 0 : 1,
-        }"
+        :style="{ opacity: loadingSteps ? 0 : 1 }"
       >
         <radar-chart
           :labels="entry.labels"
@@ -76,7 +67,6 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -90,11 +80,7 @@ import * as cashService from '@/services/cash-service';
 import * as votingService from '@/services/voting-service';
 import * as ideaService from '@/services/idea-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
-
-import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import { Session } from '@/types/api/Session';
-import QrcodeVue from 'qrcode.vue';
 import { Avatar, ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/components/moderator/organisms/analytics/subOrganisms/parallelCoordinates.vue';
 import Tables from '@/components/moderator/organisms/analytics/subOrganisms/Tables.vue';
@@ -102,8 +88,6 @@ import { VoteResult } from '@/types/api/Vote';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/radarChart.vue';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
-
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 
 interface subAxis {
   id: string;
@@ -141,11 +125,6 @@ interface DataEntry {
     RadarChart,
     Tables,
     ParallelCoordinates,
-    SpriteCanvas,
-    IdeaCard,
-    Gallery,
-    QrcodeVue,
-    PublicScreenComponent: getEmptyComponent(),
   },
 })
 export default class Analytics extends Vue {
@@ -190,17 +169,11 @@ export default class Analytics extends Vue {
   selectedParticipantIds: string[] = [];
 
   get topicId(): string | null {
-    if (this.task) return this.task.topicId;
-    return null;
+    return this.task?.topicId || null;
   }
 
   get getSessionId(): string | null {
-    if (this.sessionId) {
-      return this.sessionId;
-    } else if (this.task) {
-      return this.task.sessionId;
-    }
-    return null;
+    return this.sessionId || this.task?.sessionId || null;
   }
 
   resetData(): void {
@@ -239,7 +212,6 @@ export default class Analytics extends Vue {
   @Watch('receivedTasks', { immediate: true })
   onReceivedTasksChanged(): void {
     this.resetData();
-    console.log(this.receivedTasks);
     if (this.receivedTasks.length > 0) {
       this.updateTasks(this.receivedTasks);
     }
@@ -287,7 +259,6 @@ export default class Analytics extends Vue {
     this.ideas = this.ideas.concat(ideas);
   }
 
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTasks(tasks: Task[]): void {
     this.deregisterSteps();
     this.tasks = tasks.sort(
@@ -498,7 +469,9 @@ export default class Analytics extends Vue {
     task: Task,
     steps: TaskParticipantIterationStep[]
   ): void {
-    const filteredSteps = (steps || []).filter((step) => step.parameter.gameplayResult);
+    const filteredSteps = (steps || []).filter(
+      (step) => step.parameter.gameplayResult
+    );
     const stepsEntry = {
       taskId: taskId,
       taskData: {
@@ -546,7 +519,7 @@ export default class Analytics extends Vue {
       const radarData = {
         title: title,
         test: test,
-        labels: Object.keys(result[0].parameter.resultTypeValues), // Assuming all entries have the same labels
+        labels: Object.keys(result[0].parameter.resultTypeValues),
         data: result
           .map((entry) => ({
             data: entry.parameter.resultTypeValues
