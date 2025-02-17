@@ -5,7 +5,10 @@
   },
   "moderatorConfig": {
     "replayable": "mehrfach spielbar",
-    "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen"
+    "showTutorial": "Tutorial zeigen",
+    "showTutorialDisabled": "deaktiviert",
+    "showTutorialOnce": "einmalig",
+    "showTutorialAlways": "immer"
   },
   "statistic": {
     "rating": "Wie viele Sterne haben die Nutzer mit ihren Punkten erreicht?",

@@ -7,10 +7,14 @@
       <el-switch class="level-item" v-model="modelValue.replayable" />
     </el-form-item>
     <el-form-item
-      :label="$t('module.playing.moveit.moderatorConfig.showTutorialOnlyOnce')"
+      :label="$t('module.playing.moveit.moderatorConfig.showTutorial')"
       :prop="`${rulePropPath}.showTutorialOnlyOnce`"
     >
-      <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
+      <el-radio-group v-model="modelValue.showTutorial">
+        <el-radio-button :label="0">{{ $t('module.playing.moveit.moderatorConfig.showTutorialDisabled') }}</el-radio-button>
+        <el-radio-button :label="1">{{ $t('module.playing.moveit.moderatorConfig.showTutorialOnce') }}</el-radio-button>
+        <el-radio-button :label="2">{{ $t('module.playing.moveit.moderatorConfig.showTutorialAlways') }}</el-radio-button>
+      </el-radio-group>
     </el-form-item>
     <el-form-item
       :label="$t('module.playing.moveit.moderatorConfig.mapSection')"

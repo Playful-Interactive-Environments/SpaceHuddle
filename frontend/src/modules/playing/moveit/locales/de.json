@@ -6,7 +6,10 @@
   "moderatorConfig": {
     "mapSection": "Kartenabschnitt",
     "replayable": "mehrfach spielbar",
-    "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen"
+    "showTutorial": "Tutorial zeigen",
+    "showTutorialDisabled": "deaktiviert",
+    "showTutorialOnce": "einmalig",
+    "showTutorialAlways": "immer"
   },
   "participant": {
     "speed": "Geschwindigkeit",

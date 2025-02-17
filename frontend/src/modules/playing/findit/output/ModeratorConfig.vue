@@ -41,10 +41,14 @@
       <el-switch class="level-item" v-model="modelValue.replayable" />
     </el-form-item>
     <el-form-item
-      :label="$t('module.playing.findit.moderatorConfig.showTutorialOnlyOnce')"
+      :label="$t('module.playing.findit.moderatorConfig.showTutorial')"
       :prop="`${rulePropPath}.showTutorialOnlyOnce`"
     >
-      <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
+      <el-radio-group v-model="modelValue.showTutorial">
+        <el-radio-button :label="0">{{ $t('module.playing.findit.moderatorConfig.showTutorialDisabled') }}</el-radio-button>
+        <el-radio-button :label="1">{{ $t('module.playing.findit.moderatorConfig.showTutorialOnce') }}</el-radio-button>
+        <el-radio-button :label="2">{{ $t('module.playing.findit.moderatorConfig.showTutorialAlways') }}</el-radio-button>
+      </el-radio-group>
     </el-form-item>
   </div>
 </template>

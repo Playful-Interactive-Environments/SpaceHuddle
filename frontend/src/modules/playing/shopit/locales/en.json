@@ -5,7 +5,10 @@
   },
   "moderatorConfig": {
     "replayable": "replayable",
-    "showTutorialOnlyOnce": "show tutorial only once"
+    "showTutorial": "show tutorial",
+    "showTutorialDisabled": "disabled",
+    "showTutorialOnce": "once",
+    "showTutorialAlways": "always"
   },
   "statistic": {
     "rating": "How many stars did the users reach with their points?",

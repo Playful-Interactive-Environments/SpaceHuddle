@@ -1,7 +1,7 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
     <module-info
-      v-if="module"
+      v-if="module && module.parameter.showTutorial != 0"
       translation-path="module.playing.coolit.participant.tutorial"
       image-directory="/assets/games/coolit/tutorial"
       :module-info-entry-data-list="tutorialList"
@@ -10,7 +10,7 @@
       @tutorialNotShown="() => (tutorialNotShown = true)"
       :info-type="`cool-it-${gameStep}`"
       :showTutorialOnlyOnce="
-        module.parameter.showTutorialOnlyOnce && !reloadTutorial
+        module.parameter.showTutorial === 1 && !reloadTutorial
       "
     />
     <select-level
@@ -181,6 +181,10 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+
+    if (this.module.parameter.showTutorial === 0) {
+      this.infoRead();
+    }
   }
 
   infoRead(): void {
