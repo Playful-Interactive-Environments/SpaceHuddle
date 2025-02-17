@@ -55,6 +55,12 @@
         "description": "Move ideas around and draw."
       }
     },
+    "analytics": {
+      "description": {
+        "title": "Analytics",
+        "description": "Analytics of all tasks."
+      }
+    },
     "analyticsDashboard": {
       "description": {
         "title": "Dashboard",
@@ -94,12 +100,6 @@
               "money": "Money"
             }
           }
-        }
-      },
-      "analytics": {
-        "description": {
-          "title": "Analytics",
-          "description": "Analytics of all tasks."
         }
       }
     }
