@@ -62,6 +62,16 @@
         />
       </div>
     </div>
+<!--    <div
+      class="RadarChartContainer"
+      v-loading="loadingSteps"
+      :element-loading-background="'var(&#45;&#45;color-background)'"
+      :element-loading-text="$t('moderator.organism.analytics.loading')"
+    >
+      <stacked-bar-chart
+        :chart-data="sampleData"
+      />
+    </div>-->
   </div>
 </template>
 
@@ -88,6 +98,7 @@ import { VoteResult } from '@/types/api/Vote';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/radarChart.vue';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
 
 interface subAxis {
   id: string;
@@ -122,6 +133,7 @@ interface DataEntry {
 
 @Options({
   components: {
+    StackedBarChart,
     RadarChart,
     Tables,
     ParallelCoordinates,
@@ -167,6 +179,42 @@ export default class Analytics extends Vue {
   loadingSteps = true;
 
   selectedParticipantIds: string[] = [];
+
+  sampleData = [
+    {
+      question: "What is your favorite color?",
+      answers: [
+        { avatar: { id: "1", name: "User1" }, answer: "Red" },
+        { avatar: { id: "2", name: "User2" }, answer: "Blue" },
+        { avatar: { id: "3", name: "User3" }, answer: "Red" },
+        { avatar: { id: "4", name: "User4" }, answer: "Green" },
+        { avatar: { id: "5", name: "User5" }, answer: "Blue" },
+        { avatar: { id: "6", name: "User6" }, answer: "Blue" },
+      ],
+    },
+    {
+      question: "Which pet do you prefer?",
+      answers: [
+        { avatar: { id: "7", name: "User7" }, answer: "Dog" },
+        { avatar: { id: "8", name: "User8" }, answer: "Cat" },
+        { avatar: { id: "9", name: "User9" }, answer: "Dog" },
+        { avatar: { id: "10", name: "User10" }, answer: "Bird" },
+        { avatar: { id: "11", name: "User11" }, answer: "Dog" },
+      ],
+    },
+    {
+      question: "What is your favorite fruit?",
+      answers: [
+        { avatar: { id: "12", name: "User12" }, answer: "Apple" },
+        { avatar: { id: "13", name: "User13" }, answer: "Banana" },
+        { avatar: { id: "14", name: "User14" }, answer: "Apple" },
+        { avatar: { id: "15", name: "User15" }, answer: "Apple" },
+        { avatar: { id: "16", name: "User16" }, answer: "Banana" },
+        { avatar: { id: "17", name: "User17" }, answer: "Grapes" },
+      ],
+    },
+  ];
+
 
   get topicId(): string | null {
     return this.task?.topicId || null;
