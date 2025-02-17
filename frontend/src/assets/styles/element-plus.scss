@@ -368,6 +368,12 @@ $--font-size: (
                 --el-button-disabled-border-color: var(--color-evaluating-light);
         }
 
+        &.is-circle {
+                width: unset;
+                height: unset;
+                border-radius: 50%;
+        }
+
         &.stretch > span {
                 display: flex;
                 gap: 0.8rem;

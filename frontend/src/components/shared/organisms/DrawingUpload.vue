@@ -249,6 +249,7 @@ export default class DrawingUpload extends Vue {
 <style lang="scss" scoped>
 .is-circle {
   width: 40px;
+  height: 40px;
   margin-right: 0.5rem;
 }
 
