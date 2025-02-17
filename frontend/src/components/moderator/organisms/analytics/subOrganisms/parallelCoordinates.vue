@@ -315,10 +315,11 @@
           <div class="axisSelections">
             <div class="column">
               <el-dropdown
-                v-if="axis.axisValues.length > 1"
                 v-on:command="updateSubAxis(index, $event)"
                 trigger="click"
                 placement="bottom"
+                :style="{opacity: axis.axisValues.length > 1 ? '1' : '0'}"
+                :disabled="axis.axisValues.length <= 1"
               >
                 <div class="el-dropdown-link cogButton">
                   <font-awesome-icon icon="cog" />
@@ -1184,10 +1185,15 @@ export default class ParallelCoordinates extends Vue {
   align-items: flex-start;
 }
 .axisControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   .axisSelections {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: fit-content;
+    gap: 1rem;
   }
   .axisIcon {
     font-size: var(--font-size-xlarge);

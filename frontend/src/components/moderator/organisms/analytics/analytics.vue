@@ -405,10 +405,8 @@ export default class Analytics extends Vue {
   }
 
   updateVotes(id: string, task: Task, votes: VoteResult[]): void {
-    console.log(votes);
     this.votes = votes;
     const newSteps = this.processVotes();
-    console.log(newSteps);
     newSteps && this.updateIterationSteps(id, task, newSteps);
   }
 
