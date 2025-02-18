@@ -62,16 +62,26 @@
         />
       </div>
     </div>
-<!--    <div
-      class="RadarChartContainer"
+    <div
+      class="stackedBarChartContainer"
       v-loading="loadingSteps"
-      :element-loading-background="'var(&#45;&#45;color-background)'"
+      :element-loading-background="'var(--color-background)'"
       :element-loading-text="$t('moderator.organism.analytics.loading')"
     >
-      <stacked-bar-chart
-        :chart-data="sampleData"
-      />
-    </div>-->
+      <div class="stackedBarChart">
+        <stacked-bar-chart
+          :chart-data="testSurveyData"
+          :color-theme="[
+            'var(--color-informing)',
+            'var(--color-brainstorming)',
+            'var(--color-structuring)',
+            'var(--color-evaluating)',
+            'var(--color-playing)',
+          ]"
+          v-model:selectedParticipantIds="selectedParticipantIds"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -81,9 +91,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task } from '@/types/api/Task';
-import { getEmptyComponent } from '@/modules';
 import TaskType from '@/types/enum/TaskType';
-import * as taskService from '@/services/task-service';
 import * as sessionService from '@/services/session-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import * as cashService from '@/services/cash-service';
@@ -131,6 +139,26 @@ interface DataEntry {
   }[];
 }
 
+interface Answer {
+  avatar: Avatar;
+  answer: string[];
+}
+
+interface QuestionData {
+  question: string;
+  questionType: string;
+  parameter: any;
+  answers: Answer[];
+}
+
+interface AnswerSegment {
+  answer: string;
+  x: number;
+  width: number;
+  isLargest: boolean;
+  color: string;
+}
+
 @Options({
   components: {
     StackedBarChart,
@@ -153,8 +181,10 @@ export default class Analytics extends Vue {
   votingTasks: Task[] = [];
   brainstormingTasks: Task[] = [];
   typoTasks: Task[] = [];
+  surveyTasks: Task[] = [];
 
   ideas: Idea[] = [];
+  surveyIdeas: Idea[] = [];
   votes: VoteResult[] = [];
 
   session: Session | null = null;
@@ -180,41 +210,10 @@ export default class Analytics extends Vue {
 
   selectedParticipantIds: string[] = [];
 
-  sampleData = [
-    {
-      question: "What is your favorite color?",
-      answers: [
-        { avatar: { id: "1", name: "User1" }, answer: "Red" },
-        { avatar: { id: "2", name: "User2" }, answer: "Blue" },
-        { avatar: { id: "3", name: "User3" }, answer: "Red" },
-        { avatar: { id: "4", name: "User4" }, answer: "Green" },
-        { avatar: { id: "5", name: "User5" }, answer: "Blue" },
-        { avatar: { id: "6", name: "User6" }, answer: "Blue" },
-      ],
-    },
-    {
-      question: "Which pet do you prefer?",
-      answers: [
-        { avatar: { id: "7", name: "User7" }, answer: "Dog" },
-        { avatar: { id: "8", name: "User8" }, answer: "Cat" },
-        { avatar: { id: "9", name: "User9" }, answer: "Dog" },
-        { avatar: { id: "10", name: "User10" }, answer: "Bird" },
-        { avatar: { id: "11", name: "User11" }, answer: "Dog" },
-      ],
-    },
-    {
-      question: "What is your favorite fruit?",
-      answers: [
-        { avatar: { id: "12", name: "User12" }, answer: "Apple" },
-        { avatar: { id: "13", name: "User13" }, answer: "Banana" },
-        { avatar: { id: "14", name: "User14" }, answer: "Apple" },
-        { avatar: { id: "15", name: "User15" }, answer: "Apple" },
-        { avatar: { id: "16", name: "User16" }, answer: "Banana" },
-        { avatar: { id: "17", name: "User17" }, answer: "Grapes" },
-      ],
-    },
-  ];
-
+  testSurveyData: {
+    question: string;
+    answers: { avatar: Avatar; answer: string[] }[];
+  }[] = [];
 
   get topicId(): string | null {
     return this.task?.topicId || null;
@@ -234,8 +233,10 @@ export default class Analytics extends Vue {
     this.votingTasks = [];
     this.brainstormingTasks = [];
     this.typoTasks = [];
+    this.surveyTasks = [];
     this.radarDataEntries = [];
     this.ideas = [];
+    this.surveyIdeas = [];
     this.votes = [];
   }
 
@@ -307,6 +308,10 @@ export default class Analytics extends Vue {
     this.ideas = this.ideas.concat(ideas);
   }
 
+  updateSurveyIdeas(ideas: Idea[]): void {
+    this.surveyIdeas = this.surveyIdeas.concat(ideas);
+  }
+
   updateTasks(tasks: Task[]): void {
     this.deregisterSteps();
     this.tasks = tasks.sort(
@@ -328,8 +333,14 @@ export default class Analytics extends Vue {
     this.typoTasks = this.otherTasks.filter((task) =>
       task.modules.find((module) => module.name === 'personalityTest')
     );
+    this.surveyTasks = this.otherTasks.filter((task) =>
+      task.modules.find((module) => module.name === 'survey')
+    );
     this.otherTasks = this.otherTasks.filter((task) =>
-      task.modules.find((module) => module.name !== 'personalityTest')
+      task.modules.find(
+        (module) =>
+          module.name !== 'personalityTest' && module.name !== 'survey'
+      )
     );
 
     for (const task of this.brainstormingTasks) {
@@ -342,6 +353,18 @@ export default class Analytics extends Vue {
         30
       );
     }
+
+    for (const task of this.surveyTasks) {
+      ideaService.registerGetIdeasForTask(
+        task.id,
+        null,
+        null,
+        this.updateSurveyIdeas,
+        this.authHeaderTyp,
+        30
+      );
+    }
+
     this.calculateSteps(
       this.gameTasks
         .concat(this.votingTasks)
@@ -408,6 +431,16 @@ export default class Analytics extends Vue {
             task.modules[0].parameter.test,
             task.name
           );
+        },
+        EndpointAuthorisationType.MODERATOR,
+        30
+      );
+    }
+    for (const task of this.surveyTasks) {
+      taskParticipantService.registerGetIterationStepList(
+        task.id,
+        (steps: TaskParticipantIterationStep[]) => {
+          this.updateSurveyTasks(task.id, task, steps);
         },
         EndpointAuthorisationType.MODERATOR,
         30
@@ -588,6 +621,56 @@ export default class Analytics extends Vue {
         this.radarDataEntries.push(radarData);
       }
     }
+  }
+
+  updateSurveyTasks(
+    id: string,
+    task: Task,
+    steps: TaskParticipantIterationStep[]
+  ): void {
+    console.log(this.surveyIdeas);
+    console.log(steps);
+    const surveyData: Record<string, QuestionData> = {};
+    steps.forEach((entry) => {
+      const { avatar, ideaId, parameter } = entry;
+      const answer = parameter.answer != null ? parameter.answer : [];
+
+      const question = this.surveyIdeas.find((idea) => idea.id === ideaId);
+      if (!question) return;
+
+      const questionKeywords = question.keywords || '';
+
+      const answers: string[] = [];
+      if (Array.isArray(answer)) {
+        answer.forEach((a) => {
+          const answerIdea = this.surveyIdeas.find((idea) => idea.id === a);
+          if (answerIdea) {
+            answers.push(answerIdea.keywords || '');
+          }
+        });
+      } else {
+        answers.push(answer || '');
+      }
+
+      if (!surveyData[questionKeywords]) {
+        surveyData[questionKeywords] = {
+          question: questionKeywords,
+          questionType: question.parameter.questionType,
+          parameter: {
+            minValue: question.parameter.minValue || undefined,
+            maxValue: question.parameter.maxValue || undefined,
+          },
+          answers: [],
+        };
+      }
+
+      surveyData[questionKeywords].answers.push({
+        avatar,
+        answer: answers,
+      });
+    });
+
+    this.testSurveyData = Object.values(surveyData);
   }
 
   getAllParticipantData() {
@@ -812,6 +895,17 @@ export default class Analytics extends Vue {
 
   .smoothAppear {
     transition: opacity 3s ease;
+  }
+
+  .stackedBarChartContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    .stackedBarChart {
+      position: relative;
+      min-width: 47.5%;
+      max-width: 75%;
+    }
   }
 }
 </style>
