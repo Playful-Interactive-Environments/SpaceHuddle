@@ -554,21 +554,18 @@ export default class PlayState extends Vue {
       }
     }
 
-    console.log(clothingItem);
     if (clothingItem) {
       clothingItem.infoKey = this.$t(
         'module.playing.shopit.participant.cardCategories.clothing'
       );
     }
 
-    console.log(electronicsItem);
     if (electronicsItem) {
       electronicsItem.infoKey = this.$t(
         'module.playing.shopit.participant.cardCategories.electronics'
       );
     }
 
-    console.log(foodItem);
     if (foodItem) {
       foodItem.infoKey = this.$t(
         'module.playing.shopit.participant.cardCategories.food'

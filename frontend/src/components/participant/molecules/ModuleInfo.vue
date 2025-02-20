@@ -5,6 +5,7 @@
     "
     :info-type="infoType"
     :show-tutorial-only-once="showTutorialOnlyOnce"
+    :show-tutorial="showTutorial"
     :active="active"
     @infoRead="() => $emit('infoRead')"
     @tutorialNotShown="() => $emit('tutorialNotShown')"
@@ -70,6 +71,7 @@ export default class ModuleInfo extends Vue {
   @Prop({ default: 'jpg' }) readonly fileExtension!: string;
   @Prop({ default: 'moduleInfo' }) readonly infoType!: string;
   @Prop({ default: true }) readonly showTutorialOnlyOnce!: boolean;
+  @Prop({ default: true }) readonly showTutorial!: boolean;
   @Prop({ default: true }) readonly active!: boolean;
   gameWidth = 0;
   gameHeight = 0;

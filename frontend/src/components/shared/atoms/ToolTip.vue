@@ -8,7 +8,10 @@
     :disabled="disabled"
     :trigger="trigger"
   >
-    <template #content><p v-if="text.length > 0">{{text}}</p><slot name="content"></slot></template>
+    <template #content>
+      <p v-if="text.length > 0">{{ text }}</p>
+      <slot name="content"></slot>
+    </template>
     <slot />
   </el-tooltip>
 </template>

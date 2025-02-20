@@ -1,5 +1,11 @@
 <template>
-  <div :style="{ display: active ? 'block' : 'none' }" class="infoArea">
+  <div
+    :style="{
+      display:
+        active && !openModuleInfoEntryDataList.length > 0 ? 'block' : 'none',
+    }"
+    class="infoArea"
+  >
     <slot name="prefix" />
     <el-carousel
       ref="carousel"
@@ -58,6 +64,7 @@ export default class ParticipantTutorial extends Vue {
   readonly moduleInfoEntryDataList!: string[];
   @Prop({ default: 'moduleInfo' }) readonly infoType!: string;
   @Prop({ default: true }) readonly showTutorialOnlyOnce!: boolean;
+  @Prop({ default: true }) readonly showTutorial!: boolean;
   @Prop({ default: true }) readonly active!: boolean;
   tutorialSteps: Tutorial[] = [];
   activeTabIndex = 0;
@@ -114,7 +121,11 @@ export default class ParticipantTutorial extends Vue {
 
   @Watch('active', { immediate: true })
   onActiveChanged(): void {
-    if (this.active && this.initTutorialDone && this.tutorialSteps.length > 0) {
+    if (
+      this.active &&
+      ((this.initTutorialDone && this.tutorialSteps.length > 0) ||
+        !this.showTutorial)
+    ) {
       this.initTutorialDone = false;
       this.updateTutorial(this.tutorialSteps);
     }
@@ -135,6 +146,7 @@ export default class ParticipantTutorial extends Vue {
   }
 
   getIncludeStep(stepName: string): boolean {
+    if (!this.showTutorial) return true;
     if (this.showTutorialOnlyOnce) {
       return !!this.tutorialSteps.find(
         (tutorial) =>

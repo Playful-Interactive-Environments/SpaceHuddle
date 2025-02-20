@@ -8,12 +8,18 @@
     </el-form-item>
     <el-form-item
       :label="$t('module.playing.coolit.moderatorConfig.showTutorial')"
-      :prop="`${rulePropPath}.showTutorialOnlyOnce`"
+      :prop="`${rulePropPath}.showTutorial`"
     >
       <el-radio-group v-model="modelValue.showTutorial">
-        <el-radio-button :label="0">{{ $t('module.playing.coolit.moderatorConfig.showTutorialDisabled') }}</el-radio-button>
-        <el-radio-button :label="1">{{ $t('module.playing.coolit.moderatorConfig.showTutorialOnce') }}</el-radio-button>
-        <el-radio-button :label="2">{{ $t('module.playing.coolit.moderatorConfig.showTutorialAlways') }}</el-radio-button>
+        <el-radio-button :label="0">{{
+          $t('module.playing.coolit.moderatorConfig.showTutorialDisabled')
+        }}</el-radio-button>
+        <el-radio-button :label="1">{{
+          $t('module.playing.coolit.moderatorConfig.showTutorialOnce')
+        }}</el-radio-button>
+        <el-radio-button :label="2">{{
+          $t('module.playing.coolit.moderatorConfig.showTutorialAlways')
+        }}</el-radio-button>
       </el-radio-group>
     </el-form-item>
     <el-form-item
@@ -111,7 +117,6 @@ export default class ModeratorConfig extends Vue implements CustomInit {
       if (!('showTutorial' in this.modelValue)) {
         this.modelValue.showTutorial = 1;
       }
-      console.log(this.modelValue);
     }
   }
 
@@ -157,10 +162,6 @@ export default class ModeratorConfig extends Vue implements CustomInit {
         EndpointAuthorisationType.MODERATOR
       );
     }
-  }
-
-  handleTutorialSelectionChange(value: number) {
-    console.log('Selection changed:', value);
   }
 }
 </script>

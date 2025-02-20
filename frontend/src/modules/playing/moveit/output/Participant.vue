@@ -1,7 +1,7 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
     <module-info
-      v-if="module && module.parameter.showTutorial != 0"
+      v-if="module"
       translation-path="module.playing.moveit.participant.tutorial"
       image-directory="/assets/games/moveit/tutorial"
       :module-info-entry-data-list="tutorialList"
@@ -9,8 +9,11 @@
       @infoRead="infoRead"
       :info-type="`move-it-${gameStep}`"
       :showTutorialOnlyOnce="
-        module.parameter.showTutorial === 1 && !reloadTutorial
+        (module.parameter.showTutorialOnlyOnce ||
+          module.parameter.showTutorial === 1) &&
+        !reloadTutorial
       "
+      :show-tutorial="module.parameter.showTutorial !== 0"
     />
     <select-challenge
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
@@ -448,10 +451,6 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
-
-    if (this.module.parameter.showTutorial === 0) {
-      this.infoRead();
-    }
   }
 
   updateHighScore(votes: Vote[]): void {

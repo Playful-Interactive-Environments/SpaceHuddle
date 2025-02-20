@@ -86,9 +86,7 @@
           <span v-on:click="showAnalytics = true" v-if="isModerator">
             <ToolTip
               :effect="'light'"
-              :text="
-                $t('moderator.organism.settings.analytics.header')
-              "
+              :text="$t('moderator.organism.settings.analytics.header')"
             >
               <font-awesome-icon
                 class="awesome-icon"

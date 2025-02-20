@@ -42,12 +42,18 @@
     </el-form-item>
     <el-form-item
       :label="$t('module.playing.findit.moderatorConfig.showTutorial')"
-      :prop="`${rulePropPath}.showTutorialOnlyOnce`"
+      :prop="`${rulePropPath}.showTutorial`"
     >
       <el-radio-group v-model="modelValue.showTutorial">
-        <el-radio-button :label="0">{{ $t('module.playing.findit.moderatorConfig.showTutorialDisabled') }}</el-radio-button>
-        <el-radio-button :label="1">{{ $t('module.playing.findit.moderatorConfig.showTutorialOnce') }}</el-radio-button>
-        <el-radio-button :label="2">{{ $t('module.playing.findit.moderatorConfig.showTutorialAlways') }}</el-radio-button>
+        <el-radio-button :label="0">{{
+          $t('module.playing.findit.moderatorConfig.showTutorialDisabled')
+        }}</el-radio-button>
+        <el-radio-button :label="1">{{
+          $t('module.playing.findit.moderatorConfig.showTutorialOnce')
+        }}</el-radio-button>
+        <el-radio-button :label="2">{{
+          $t('module.playing.findit.moderatorConfig.showTutorialAlways')
+        }}</el-radio-button>
       </el-radio-group>
     </el-form-item>
   </div>
@@ -93,8 +99,8 @@ export default class ModeratorConfig extends Vue implements CustomInit {
       if (!('replayable' in this.modelValue)) {
         this.modelValue.replayable = true;
       }
-      if (!('showTutorialOnlyOnce' in this.modelValue)) {
-        this.modelValue.showTutorialOnlyOnce = true;
+      if (!('showTutorial' in this.modelValue)) {
+        this.modelValue.showTutorial = 1;
       }
     }
   }
