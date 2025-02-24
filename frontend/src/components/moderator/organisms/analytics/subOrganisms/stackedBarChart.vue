@@ -24,6 +24,7 @@
           <g v-for="(segment, i) in computedSegments[index]" :key="i">
             <defs>
               <linearGradient
+                class="linearGradient"
                 :id="'gradient-' + index + '-' + i"
                 x1="0%"
                 y1="0%"
@@ -31,6 +32,7 @@
                 y2="0%"
               >
                 <stop
+                  class="linearGradientStop"
                   v-for="(color, j) in getColor(segment)"
                   :key="j"
                   :offset="
@@ -107,6 +109,7 @@
             <g v-for="(segment, i) in computedSegments[index]" :key="i">
               <defs>
                 <linearGradient
+                  class="linearGradient"
                   :id="'gradient-' + index + '-' + i"
                   x1="0%"
                   y1="0%"
@@ -114,6 +117,7 @@
                   y2="0%"
                 >
                   <stop
+                    class="linearGradientStop"
                     v-for="(color, j) in getColor(segment)"
                     :key="j"
                     :offset="(j / (getColor(segment).length - 1)) * 100 + '%'"
@@ -130,7 +134,7 @@
                 "
                 :cy="barHeight / 2"
                 :r="circleRadius + (segment.avatars.length - 1)"
-                :fill="getColor(segment)"
+                :fill="'url(#gradient-' + index + '-' + i + ')'"
               />
             </g>
           </g>
@@ -323,5 +327,9 @@ export default class StackedBarChart extends Vue {
   font-weight: bold;
   text-align: center;
   padding: 0 2rem;
+}
+
+.linearGradientStop {
+  transition: stop-color 0.5s ease;
 }
 </style>

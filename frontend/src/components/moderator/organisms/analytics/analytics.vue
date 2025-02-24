@@ -898,6 +898,7 @@ export default class Analytics extends Vue {
   }
 
   .stackedBarChartContainer {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
