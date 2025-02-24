@@ -15,10 +15,129 @@
         class="barSegments"
         :style="{ width: `${100 * barWidthPercentage}%` }"
         v-if="
-          computedSegments[index]?.length &&
-          questionData.questionType !== 'slider' &&
-          questionData.questionType !== 'number'
+          (computedSegments[index]?.length &&
+            questionData.questionType === 'slider') ||
+          questionData.questionType === 'number' ||
+          questionData.questionType === 'rating'
         "
+      >
+        <svg :width="parentWidth * barWidthPercentage" :height="barHeight">
+          <g>
+            <line
+              :x1="paddingSlider"
+              :x2="parentWidth * barWidthPercentage - paddingSlider"
+              :y1="barHeight / 2"
+              :y2="barHeight / 2"
+              :stroke="'var(--color-dark-contrast)'"
+              :stroke-opacity="'25%'"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <g
+              v-for="(x, i) in [
+                paddingSlider,
+                parentWidth * barWidthPercentage * 0.25,
+                parentWidth * barWidthPercentage * 0.5,
+                parentWidth * barWidthPercentage * 0.75,
+                parentWidth * barWidthPercentage - paddingSlider,
+              ]"
+              :key="i"
+            >
+              <line
+                :x1="x"
+                :x2="x"
+                :y1="barHeight / 2.5"
+                :y2="barHeight - barHeight / 2.5"
+                :stroke="'var(--color-dark-contrast)'"
+                stroke-width="2"
+                :stroke-opacity="'25%'"
+                stroke-linecap="round"
+              />
+              <text
+                class="svgText"
+                v-if="x == paddingSlider"
+                :x="x"
+                :y="barHeight"
+                font-size="10.5"
+                text-anchor="middle"
+                :style="{
+                  color: 'var(--color-dark-contrast)',
+                  textAlign: 'center',
+                }"
+              >
+                {{ questionData.parameter.minValue || 0 }}
+              </text>
+              <text
+                v-else-if="
+                  x == parentWidth * barWidthPercentage - paddingSlider
+                "
+                :x="x"
+                :y="barHeight"
+                font-size="10.5"
+                text-anchor="middle"
+                :style="{
+                  color: 'var(--color-dark-contrast)',
+                  textAlign: 'center',
+                }"
+              >
+                {{ questionData.parameter.maxValue }}
+              </text>
+            </g>
+            <g v-for="(segment, i) in computedSegments[index]" :key="i">
+              <defs>
+                <linearGradient
+                  class="linearGradient"
+                  :id="'gradient-' + index + '-' + i"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop
+                    class="linearGradientStop"
+                    v-for="(color, j) in getColor(segment)"
+                    :key="j"
+                    :offset="(j / (getColor(segment).length - 1)) * 100 + '%'"
+                    :stop-color="color"
+                  />
+                </linearGradient>
+              </defs>
+              <circle
+                class="circle"
+                :cx="
+                  (segment.answer / questionData.parameter.maxValue) *
+                    (parentWidth * barWidthPercentage - 2 * paddingSlider) +
+                  paddingSlider
+                "
+                :cy="barHeight / 2"
+                :r="circleRadius + (segment.avatars.length - 1)"
+                :fill="'url(#gradient-' + index + '-' + i + ')'"
+              />
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div
+        :style="{ width: `${100 * barWidthPercentage}%`, height: `${barHeight * 3}` }"
+        v-else-if="
+          computedSegments[index]?.length &&
+          questionData.questionType === 'text'
+        "
+      >
+        <el-carousel :interval="5000" type="card" :height="`${barHeight*3}px`">
+          <el-carousel-item
+            v-for="(segment, i) in computedSegments[index]"
+            :key="i"
+            :style="{borderColor: getColor(segment)[0]}"
+          >
+            <p>{{ segment.answer }}</p>
+          </el-carousel-item>
+        </el-carousel>
+      </div>
+      <div
+        class="barSegments"
+        :style="{ width: `${100 * barWidthPercentage}%` }"
+        v-else-if="computedSegments[index]?.length"
       >
         <svg :width="parentWidth * barWidthPercentage" :height="barHeight">
           <g v-for="(segment, i) in computedSegments[index]" :key="i">
@@ -86,107 +205,6 @@
         >
           <span>{{ segment.answer }}</span>
         </div>
-      </div>
-      <div
-        class="barSegments"
-        :style="{ width: `${100 * barWidthPercentage}%` }"
-        v-else-if="computedSegments[index]?.length"
-      >
-        <svg :width="parentWidth * barWidthPercentage" :height="barHeight">
-          <g>
-            <line
-              :x1="paddingSlider"
-              :x2="parentWidth * barWidthPercentage - paddingSlider"
-              :y1="barHeight / 2"
-              :y2="barHeight / 2"
-              :stroke="'var(--color-dark-contrast)'"
-              :stroke-opacity="'25%'"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-            <g
-              v-for="(x, i) in [
-                paddingSlider,
-                parentWidth * barWidthPercentage * 0.25,
-                parentWidth * barWidthPercentage * 0.5,
-                parentWidth * barWidthPercentage * 0.75,
-                parentWidth * barWidthPercentage - paddingSlider,
-              ]"
-              :key="i"
-            >
-              <line
-                :x1="x"
-                :x2="x"
-                :y1="barHeight / 2.5"
-                :y2="barHeight - barHeight / 2.5"
-                :stroke="'var(--color-dark-contrast)'"
-                stroke-width="2"
-                :stroke-opacity="'25%'"
-                stroke-linecap="round"
-              />
-              <text
-                class="svgText"
-                v-if="x == paddingSlider"
-                :x="x"
-                :y="barHeight"
-                font-size="10.5"
-                text-anchor="middle"
-                :style="{
-                  color: 'var(--color-dark-contrast)',
-                  textAlign: 'center',
-                }"
-              >
-                {{ questionData.parameter.minValue }}
-              </text>
-              <text
-                v-else-if="
-                  x == parentWidth * barWidthPercentage - paddingSlider
-                "
-                :x="x"
-                :y="barHeight"
-                font-size="10.5"
-                text-anchor="middle"
-                :style="{
-                  color: 'var(--color-dark-contrast)',
-                  textAlign: 'center',
-                }"
-              >
-                {{ questionData.parameter.maxValue }}
-              </text>
-            </g>
-            <g v-for="(segment, i) in computedSegments[index]" :key="i">
-              <defs>
-                <linearGradient
-                  class="linearGradient"
-                  :id="'gradient-' + index + '-' + i"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="0%"
-                >
-                  <stop
-                    class="linearGradientStop"
-                    v-for="(color, j) in getColor(segment)"
-                    :key="j"
-                    :offset="(j / (getColor(segment).length - 1)) * 100 + '%'"
-                    :stop-color="color"
-                  />
-                </linearGradient>
-              </defs>
-              <circle
-                class="circle"
-                :cx="
-                  (segment.answer / questionData.parameter.maxValue) *
-                    (parentWidth * barWidthPercentage - 2 * paddingSlider) +
-                  paddingSlider
-                "
-                :cy="barHeight / 2"
-                :r="circleRadius + (segment.avatars.length - 1)"
-                :fill="'url(#gradient-' + index + '-' + i + ')'"
-              />
-            </g>
-          </g>
-        </svg>
       </div>
     </div>
   </div>
@@ -393,5 +411,28 @@ export default class StackedBarChart extends Vue {
 
 .linearGradientStop {
   transition: stop-color 0.5s ease;
+}
+
+.el-carousel__item {
+  height: 100%;
+  padding: 1rem;
+  overflow: scroll;
+
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  background-color: var(--color-background);
+
+  border: 0.4rem solid;
+  border-radius: var(--border-radius);
+}
+
+.el-carousel__item::-webkit-scrollbar {
+  display: none;
 }
 </style>

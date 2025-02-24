@@ -382,7 +382,6 @@ export default class RadarChart extends Vue {
   font-weight: var(--font-weight-default);
   transition: all 0.3s ease;
   cursor: pointer;
-  text-shadow: transparent;
 }
 
 .radar-label:hover {
