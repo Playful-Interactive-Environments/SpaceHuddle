@@ -65,10 +65,10 @@
             width: segment.width + 'px',
             top: '50%',
             transform: 'translateY(-50%)',
-            color: 'var(--color-dark-contrast)',
+            textShadow: selectedParticipantIds.length > 0 ? '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)' : 'unset',
           }"
         >
-          {{ segment.answer }}
+          <span>{{ segment.answer }}</span>
         </div>
       </div>
       <div
@@ -88,7 +88,7 @@
               stroke-width="2"
               stroke-linecap="round"
             />
-            <line
+            <g
               v-for="(x, i) in [
                 paddingSlider,
                 parentWidth * barWidthPercentage * 0.25,
@@ -97,15 +97,47 @@
                 parentWidth * barWidthPercentage - paddingSlider,
               ]"
               :key="i"
-              :x1="x"
-              :x2="x"
-              :y1="barHeight / 2.5"
-              :y2="barHeight - barHeight / 2.5"
-              :stroke="'var(--color-dark-contrast)'"
-              stroke-width="2"
-              :stroke-opacity="'25%'"
-              stroke-linecap="round"
-            />
+            >
+              <line
+                :x1="x"
+                :x2="x"
+                :y1="barHeight / 2.5"
+                :y2="barHeight - barHeight / 2.5"
+                :stroke="'var(--color-dark-contrast)'"
+                stroke-width="2"
+                :stroke-opacity="'25%'"
+                stroke-linecap="round"
+              />
+              <text
+                class="svgText"
+                v-if="x == paddingSlider"
+                :x="x"
+                :y="barHeight"
+                font-size="10.5"
+                text-anchor="middle"
+                :style="{
+                  color: 'var(--color-dark-contrast)',
+                  textAlign: 'center',
+                }"
+              >
+                {{ questionData.parameter.minValue }}
+              </text>
+              <text
+                v-else-if="
+                  x == parentWidth * barWidthPercentage - paddingSlider
+                "
+                :x="x"
+                :y="barHeight"
+                font-size="10.5"
+                text-anchor="middle"
+                :style="{
+                  color: 'var(--color-dark-contrast)',
+                  textAlign: 'center',
+                }"
+              >
+                {{ questionData.parameter.maxValue }}
+              </text>
+            </g>
             <g v-for="(segment, i) in computedSegments[index]" :key="i">
               <defs>
                 <linearGradient
@@ -211,17 +243,17 @@ export default class StackedBarChart extends Vue {
       this.parentWidth = Math.max(20, parentElement.clientWidth);
   }
 
-  getAnswerSegments(answers: Answer[]): AnswerSegment[] {
+  getAnswerSegments(answers: Answer[], questionType: string): AnswerSegment[] {
     if (!answers.length) return [];
 
     const answerDetails = answers.reduce<
       Record<string, { count: number; avatars: Avatar[] }>
     >((acc, { answer, avatar }) => {
-      answer.forEach((response) => {
+      answer.forEach((response, index) => {
         if (!acc[response]) {
           acc[response] = { count: 0, avatars: [] };
         }
-        acc[response].count += 1;
+        acc[response].count += questionType === 'order' ? index : 1;
         acc[response].avatars.push(avatar);
       });
       return acc;
@@ -258,8 +290,9 @@ export default class StackedBarChart extends Vue {
   }
 
   get computedSegments() {
+    console.log(this.chartData);
     return this.chartData.map((question) =>
-      this.getAnswerSegments(question.answers)
+      this.getAnswerSegments(question.answers, question.questionType)
     );
   }
 
@@ -317,6 +350,10 @@ export default class StackedBarChart extends Vue {
   }
 }
 
+.svgText {
+  font-family: var(--font-family);
+}
+
 .question-container:not(:last-child) {
   border-bottom: 2px solid var(--color-background-dark);
 }
@@ -327,6 +364,8 @@ export default class StackedBarChart extends Vue {
   font-weight: bold;
   text-align: center;
   padding: 0 2rem;
+  color: var(--color-dark-contrast);
+  transition: text-shadow 0.4s ease;
 }
 
 .linearGradientStop {
