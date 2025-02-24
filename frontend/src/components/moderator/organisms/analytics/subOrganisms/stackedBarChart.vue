@@ -49,10 +49,23 @@
               :y="0"
               :width="segment.width"
               :height="barHeight"
+              :fill="'var(--color-background)'"
+              :rx="barHeight / 2"
+              :ry="barHeight / 2"
+            />
+            <rect
+              :x="segment.x"
+              :y="0"
+              :width="segment.width"
+              :height="barHeight"
               :fill="'url(#gradient-' + index + '-' + i + ')'"
               :rx="barHeight / 2"
               :ry="barHeight / 2"
-              :style="{ strokeWidth: 6, stroke: 'var(--color-background)' }"
+              :style="{
+                strokeWidth: 6,
+                stroke: 'var(--color-background)',
+                backgroundColor: 'var(--color-background)',
+              }"
             />
           </g>
         </svg>
@@ -65,7 +78,10 @@
             width: segment.width + 'px',
             top: '50%',
             transform: 'translateY(-50%)',
-            textShadow: selectedParticipantIds.length > 0 ? '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)' : 'unset',
+            textShadow:
+              selectedParticipantIds.length > 0
+                ? '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)'
+                : 'unset',
           }"
         >
           <span>{{ segment.answer }}</span>
@@ -253,8 +269,15 @@ export default class StackedBarChart extends Vue {
         if (!acc[response]) {
           acc[response] = { count: 0, avatars: [] };
         }
-        acc[response].count += questionType === 'order' ? index : 1;
-        acc[response].avatars.push(avatar);
+        acc[response].count +=
+          questionType === 'order' ? answer.length - index - 1 : 1;
+        if (questionType === 'order') {
+          if (index === 0) {
+            acc[response].avatars.push(avatar);
+          }
+        } else {
+          acc[response].avatars.push(avatar);
+        }
       });
       return acc;
     }, {});
