@@ -1,15 +1,5 @@
 <template>
   <div class="radarChartContainer">
-    <p v-if="title !== ''" class="heading">
-      <font-awesome-icon
-        class="headingIcon"
-        :icon="getIconOfType(taskType)"
-        :style="{
-          color: getColorOfType(taskType),
-        }"
-      />
-      {{ title }}
-    </p>
     <div
       class="radar-chart"
       :style="{ width: size + 'px', height: size + 'px' }"

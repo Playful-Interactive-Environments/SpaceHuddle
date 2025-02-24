@@ -45,10 +45,21 @@
       :element-loading-text="$t('moderator.organism.analytics.loading')"
     >
       <div
+        class="radarChart"
         v-for="(entry, index) of radarDataEntries"
         :key="'radarChart' + index"
         :style="{ opacity: loadingSteps ? 0 : 1 }"
       >
+        <p v-if="entry.title !== ''" class="heading">
+          <font-awesome-icon
+            class="headingIcon"
+            :icon="getIconOfType(TaskType.INFORMATION)"
+            :style="{
+              color: getColorOfType(TaskType.INFORMATION),
+            }"
+          />
+          {{ entry.title }}
+        </p>
         <radar-chart
           :labels="entry.labels"
           :datasets="entry.data"
@@ -68,9 +79,24 @@
       :element-loading-background="'var(--color-background)'"
       :element-loading-text="$t('moderator.organism.analytics.loading')"
     >
-      <div class="stackedBarChart">
+      <div
+        class="stackedBarChart"
+        v-for="(entry, index) of surveyData"
+        :key="'stackedBarChart' + index"
+        :style="{ opacity: loadingSteps ? 0 : 1 }"
+      >
+        <p v-if="entry.title !== ''" class="heading">
+          <font-awesome-icon
+            class="headingIcon"
+            :icon="getIconOfType(TaskType.INFORMATION)"
+            :style="{
+              color: getColorOfType(TaskType.INFORMATION),
+            }"
+          />
+          {{ entry.title }}
+        </p>
         <stacked-bar-chart
-          :chart-data="testSurveyData"
+          :chart-data="entry.questions"
           :color-theme="[
             'var(--color-informing)',
             'var(--color-brainstorming)',
@@ -107,6 +133,7 @@ import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipant
 import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/radarChart.vue';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
+import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 
 interface subAxis {
   id: string;
@@ -160,6 +187,11 @@ interface AnswerSegment {
 }
 
 @Options({
+  computed: {
+    TaskType() {
+      return TaskType;
+    },
+  },
   components: {
     StackedBarChart,
     RadarChart,
@@ -210,10 +242,24 @@ export default class Analytics extends Vue {
 
   selectedParticipantIds: string[] = [];
 
-  testSurveyData: {
-    question: string;
-    answers: { avatar: Avatar; answer: string[] }[];
+  surveyData: {
+    taskId: string;
+    title: string;
+    questions: {
+      question: string;
+      questionType: string;
+      parameter: any;
+      answers: { avatar: Avatar; answer: string[] }[];
+    }[];
   }[] = [];
+
+  getColorOfType(taskType: TaskType) {
+    return getColorOfType(taskType);
+  }
+
+  getIconOfType(taskType: TaskType) {
+    return getIconOfType(taskType);
+  }
 
   get topicId(): string | null {
     return this.task?.topicId || null;
@@ -238,6 +284,7 @@ export default class Analytics extends Vue {
     this.ideas = [];
     this.surveyIdeas = [];
     this.votes = [];
+    this.surveyData = [];
   }
 
   get dataEntries(): DataEntry[] {
@@ -628,9 +675,31 @@ export default class Analytics extends Vue {
     task: Task,
     steps: TaskParticipantIterationStep[]
   ): void {
-    console.log(this.surveyIdeas);
-    console.log(steps);
-    const surveyData: Record<string, QuestionData> = {};
+    // Create a task entry with taskId and title
+    const taskEntry = {
+      taskId: task.id,
+      title: task.name,
+      questions: [] as {
+        question: string;
+        questionType: string;
+        parameter: {
+          minValue?: number;
+          maxValue?: number;
+        };
+        answers: { avatar: Avatar; answer: string[] }[];
+      }[],
+    };
+
+    const questionData: Record<
+      string,
+      {
+        question: string;
+        questionType: string;
+        parameter: { minValue?: number; maxValue?: number };
+        answers: { avatar: Avatar; answer: string[] }[];
+      }
+    > = {};
+
     steps.forEach((entry) => {
       const { avatar, ideaId, parameter } = entry;
       const answer = parameter.answer != null ? parameter.answer : [];
@@ -652,25 +721,35 @@ export default class Analytics extends Vue {
         answers.push(answer || '');
       }
 
-      if (!surveyData[questionKeywords]) {
-        surveyData[questionKeywords] = {
+      if (!questionData[questionKeywords]) {
+        questionData[questionKeywords] = {
           question: questionKeywords,
           questionType: question.parameter.questionType,
           parameter: {
-            minValue: question.parameter.minValue || undefined,
-            maxValue: question.parameter.maxValue || undefined,
+            minValue:
+              question.parameter.minValue != null
+                ? question.parameter.minValue
+                : undefined,
+            maxValue:
+              question.parameter.maxValue != null
+                ? question.parameter.maxValue
+                : undefined,
           },
           answers: [],
         };
       }
 
-      surveyData[questionKeywords].answers.push({
+      questionData[questionKeywords].answers.push({
         avatar,
         answer: answers,
       });
     });
 
-    this.testSurveyData = Object.values(surveyData);
+    // Add the question data to the task entry
+    taskEntry.questions = Object.values(questionData);
+
+    // Push the task entry into surveyData
+    this.surveyData.push(taskEntry);
   }
 
   getAllParticipantData() {
@@ -891,6 +970,11 @@ export default class Analytics extends Vue {
     align-items: center;
     gap: 2rem;
     overflow: hidden;
+    .radarChart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
   }
 
   .smoothAppear {
@@ -901,12 +985,20 @@ export default class Analytics extends Vue {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-evenly;
+    justify-content: space-between;
     .stackedBarChart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       position: relative;
       min-width: 47.5%;
       max-width: 75%;
     }
+  }
+
+  .headingIcon {
+    font-size: var(--font-size-xlarge);
+    cursor: pointer;
   }
 }
 </style>
