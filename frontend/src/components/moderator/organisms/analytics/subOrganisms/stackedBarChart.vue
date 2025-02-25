@@ -143,6 +143,7 @@
             :style="{ borderColor: getColor(segment)[0] }"
           >
             <p>{{ segment.answer }}</p>
+            <div class="carouselColorItem" :style="{ backgroundColor: getColor(segment)[0] }"></div>
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -481,13 +482,29 @@ export default class StackedBarChart extends Vue {
   scrollbar-width: none;
   -ms-overflow-style: none;
 
-  background-color: var(--color-background);
+  background-color: white;
 
-  border: 0.4rem solid;
   border-radius: var(--border-radius);
 }
 
 .el-carousel__item::-webkit-scrollbar {
   display: none;
+}
+
+.el-carousel__item:nth-child(2n) {
+  background-color: white;
+}
+
+.el-carousel__item:nth-child(2n + 1) {
+  background-color: #f1f1f1;
+}
+
+.carouselColorItem {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 1.5rem;
 }
 </style>
