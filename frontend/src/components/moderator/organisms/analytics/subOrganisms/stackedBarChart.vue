@@ -116,6 +116,7 @@
                   :cy="barHeight / 2"
                   :r="circleRadius + (segment.avatars.length - 1)"
                   :fill="'url(#gradient-' + index + '-' + i + ')'"
+                  @click="changeParticipantSelection(segment)"
                 />
                 <text
                   class="circleLabel"
@@ -169,6 +170,7 @@
                     ? segment.avatars[0].color
                     : getColor(segment)[0],
               }"
+              @click="changeParticipantSelection(segment)"
             ></font-awesome-icon>
           </el-carousel-item>
         </el-carousel>
@@ -183,6 +185,7 @@
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
             class="barSegmentElement"
+            @click="changeParticipantSelection(segment)"
           >
             <defs>
               <linearGradient
@@ -428,6 +431,21 @@ export default class StackedBarChart extends Vue {
     }
 
     return colors;
+  }
+
+  changeParticipantSelection(segment: AnswerSegment): void {
+    const participantIds = segment.avatars.map((avatar) => avatar.id);
+    this.participantSelectionChanged(participantIds);
+  }
+
+  participantSelectionChanged(ids: string[] | null) {
+    if (ids) {
+      if (JSON.stringify(this.selectedParticipantIds) === JSON.stringify(ids)) {
+        this.$emit('update:selectedParticipantIds', []);
+      } else {
+        this.$emit('update:selectedParticipantIds', ids);
+      }
+    }
   }
 }
 </script>
