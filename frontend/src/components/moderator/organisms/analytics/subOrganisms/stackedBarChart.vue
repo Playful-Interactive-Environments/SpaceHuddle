@@ -135,6 +135,7 @@
           :interval="5000"
           type="card"
           :height="`${barHeight * 3}px`"
+          :trigger="'click'"
         >
           <el-carousel-item
             v-for="(segment, i) in computedSegments[index]"
@@ -151,7 +152,11 @@
         v-else-if="computedSegments[index]?.length"
       >
         <svg :width="parentWidth * barWidthPercentage" :height="barHeight">
-          <g v-for="(segment, i) in computedSegments[index]" :key="i">
+          <g
+            v-for="(segment, i) in computedSegments[index]"
+            :key="i"
+            class="barSegmentElement"
+          >
             <defs>
               <linearGradient
                 class="linearGradient"
@@ -197,6 +202,30 @@
                 backgroundColor: 'var(--color-background)',
               }"
             />
+            <g class="barSegmentPercentages">
+              <rect
+                :x="segment.x + segment.width - 55"
+                :y="0"
+                :width="30"
+                :height="12"
+                :fill="'var(--color-background)'"
+                :rx="12 / 2.5"
+                :ry="12 / 2.5"
+              />
+              <text
+                class="svgText"
+                :x="segment.x + segment.width - 50"
+                :y="7.5"
+                font-size="10.5"
+                text-anchor="left"
+                :style="{
+                  color: 'var(--color-dark-contrast)',
+                  textAlign: 'center',
+                }"
+              >
+                {{ Math.round(segment.percentage * 100) }}%
+              </text>
+            </g>
           </g>
         </svg>
         <div
@@ -244,6 +273,7 @@ interface AnswerSegment {
   x: number;
   width: number;
   isLargest: boolean;
+  percentage: number;
   color: string;
   avatars: Avatar[];
 }
@@ -333,6 +363,7 @@ export default class StackedBarChart extends Vue {
         x: cumulativeX - (i > 0 ? overlap : 0),
         width: width + (i > 0 ? overlap : 0),
         isLargest: count === maxCount,
+        percentage: count / total,
         color: this.colorTheme[i % this.colorTheme.length],
       };
 
@@ -342,7 +373,6 @@ export default class StackedBarChart extends Vue {
   }
 
   get computedSegments() {
-    console.log(this.chartData);
     return this.chartData.map((question) =>
       this.getAnswerSegments(question.answers, question.questionType)
     );
@@ -412,12 +442,25 @@ export default class StackedBarChart extends Vue {
 
 .segment-text {
   position: absolute;
-  font-size: 12px;
+  font-size: var(--font-size-small);
   font-weight: bold;
   text-align: center;
   padding: 0 2rem;
   color: var(--color-dark-contrast);
   transition: text-shadow 0.4s ease;
+
+  pointer-events: none;
+}
+
+.barSegmentPercentages {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.barSegmentElement:hover {
+  .barSegmentPercentages {
+    opacity: 1;
+  }
 }
 
 .linearGradientStop {
@@ -433,6 +476,7 @@ export default class StackedBarChart extends Vue {
   justify-content: center;
   text-align: center;
   font-weight: bold;
+  font-size: var(--font-size-small);
 
   scrollbar-width: none;
   -ms-overflow-style: none;

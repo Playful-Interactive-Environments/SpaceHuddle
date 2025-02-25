@@ -985,14 +985,14 @@ export default class Analytics extends Vue {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: space-evenly;
     .stackedBarChart {
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
       min-width: 47.5%;
-      max-width: 75%;
+      max-width: 65%;
     }
   }
 
