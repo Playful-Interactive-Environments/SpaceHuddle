@@ -395,6 +395,10 @@
           "selectTask": "Aufgabe auswählen",
           "table": "Tabelle"
         },
+        "stackedBarCharts": {
+          "selectTask": "Aufgabe auswählen",
+          "survey": "Umfrage"
+        },
         "legend": {
           "gearIcon": "Achsenwert einstellen",
           "listIcon": "Liste der Ideen",

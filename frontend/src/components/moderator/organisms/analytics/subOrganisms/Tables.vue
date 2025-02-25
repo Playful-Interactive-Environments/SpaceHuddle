@@ -10,7 +10,7 @@
     >
       <div class="highscoreModuleSelection">
         <el-dropdown
-          v-if="axes.length > 1"
+          v-if="axes.length >= 1"
           @command="updateTableArray(index, $event)"
           trigger="click"
           placement="bottom"
@@ -66,7 +66,7 @@
       </p>
       <div class="highscoreModuleSelection">
         <el-dropdown
-          v-if="axes.length > 1"
+          v-if="axes.length >= 1"
           @command="addToTableArray"
           trigger="click"
           placement="bottom"

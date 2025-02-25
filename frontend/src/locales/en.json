@@ -395,6 +395,10 @@
           "selectTask": "select Task",
           "table": "Table"
         },
+        "stackedBarCharts": {
+          "selectTask": "select Task",
+          "survey": "Survey"
+        },
         "legend": {
           "gearIcon": "Axis value settings",
           "listIcon": "List of ideas",

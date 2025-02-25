@@ -140,10 +140,18 @@
           <el-carousel-item
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
-            :style="{ borderColor: getColor(segment)[0] }"
           >
             <p>{{ segment.answer }}</p>
-            <div class="carouselColorItem" :style="{ backgroundColor: getColor(segment)[0] }"></div>
+            <font-awesome-icon
+              class="carouselColorItem"
+              :icon="segment.avatars[0].symbol"
+              :style="{
+                color:
+                  selectedParticipantIds.length <= 0
+                    ? segment.avatars[0].color
+                    : getColor(segment)[0],
+              }"
+            ></font-awesome-icon>
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -483,20 +491,12 @@ export default class StackedBarChart extends Vue {
   -ms-overflow-style: none;
 
   background-color: white;
-
+  border: 2px solid #f1f1f1;
   border-radius: var(--border-radius);
 }
 
 .el-carousel__item::-webkit-scrollbar {
   display: none;
-}
-
-.el-carousel__item:nth-child(2n) {
-  background-color: white;
-}
-
-.el-carousel__item:nth-child(2n + 1) {
-  background-color: #f1f1f1;
 }
 
 .carouselColorItem {
@@ -505,6 +505,5 @@ export default class StackedBarChart extends Vue {
   right: 1rem;
   width: 1.5rem;
   height: 1.5rem;
-  border-radius: 1.5rem;
 }
 </style>

@@ -79,34 +79,12 @@
       :element-loading-background="'var(--color-background)'"
       :element-loading-text="$t('moderator.organism.analytics.loading')"
     >
-      <div
-        class="stackedBarChart"
-        v-for="(entry, index) of surveyData"
-        :key="'stackedBarChart' + index"
+      <StackedBarChartSelection
+        v-if="surveyData.length > 0 && !loadingSteps"
+        :survey-data="surveyData"
+        v-model:selectedParticipantIds="selectedParticipantIds"
         :style="{ opacity: loadingSteps ? 0 : 1 }"
-      >
-        <p v-if="entry.title !== ''" class="heading">
-          <font-awesome-icon
-            class="headingIcon"
-            :icon="getIconOfType(TaskType.INFORMATION)"
-            :style="{
-              color: getColorOfType(TaskType.INFORMATION),
-            }"
-          />
-          {{ entry.title }}
-        </p>
-        <stacked-bar-chart
-          :chart-data="entry.questions"
-          :color-theme="[
-            'var(--color-informing)',
-            'var(--color-brainstorming)',
-            'var(--color-structuring)',
-            'var(--color-evaluating)',
-            'var(--color-playing)',
-          ]"
-          v-model:selectedParticipantIds="selectedParticipantIds"
-        />
-      </div>
+      />
     </div>
   </div>
 </template>
@@ -134,6 +112,7 @@ import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+import StackedBarChartSelection from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChartSelection.vue';
 
 interface subAxis {
   id: string;
@@ -178,14 +157,6 @@ interface QuestionData {
   answers: Answer[];
 }
 
-interface AnswerSegment {
-  answer: string;
-  x: number;
-  width: number;
-  isLargest: boolean;
-  color: string;
-}
-
 @Options({
   computed: {
     TaskType() {
@@ -193,6 +164,7 @@ interface AnswerSegment {
     },
   },
   components: {
+    StackedBarChartSelection,
     StackedBarChart,
     RadarChart,
     Tables,
@@ -245,12 +217,7 @@ export default class Analytics extends Vue {
   surveyData: {
     taskId: string;
     title: string;
-    questions: {
-      question: string;
-      questionType: string;
-      parameter: any;
-      answers: { avatar: Avatar; answer: string[] }[];
-    }[];
+    questions: QuestionData[];
   }[] = [];
 
   getColorOfType(taskType: TaskType) {
