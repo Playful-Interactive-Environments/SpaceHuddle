@@ -399,6 +399,11 @@
           "selectTask": "Aufgabe auswählen",
           "survey": "Umfrage"
         },
+        "radarCharts": {
+          "primary": "Primärklasse",
+          "secondary": "Sekundärklasse",
+          "exception": "Ausnahmeklasse"
+        },
         "legend": {
           "gearIcon": "Achsenwert einstellen",
           "listIcon": "Liste der Ideen",

@@ -399,6 +399,11 @@
           "selectTask": "select Task",
           "survey": "Survey"
         },
+        "radarCharts": {
+          "primary": "primary class",
+          "secondary": "secondary class",
+          "exception": "exception class"
+        },
         "legend": {
           "gearIcon": "Axis value settings",
           "listIcon": "List of ideas",
