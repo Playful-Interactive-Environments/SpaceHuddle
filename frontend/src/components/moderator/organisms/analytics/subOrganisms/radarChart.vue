@@ -45,7 +45,6 @@
           v-if="averageDataset"
           :points="getDataPoints(averageDataset.data)"
           :fill="'url(#diagonalHatch)'"
-
           :stroke="'var(--color-evaluating)'"
           :stroke-width="1"
           class="radarPolygon averageRadarPolygon"
@@ -69,11 +68,11 @@
         :key="'label-' + index"
         :show-after="200"
         :effect="'light'"
-        :disabled="getParticipantsOfPrimaryClass(index).length <= 0"
+        :disabled="getParticipantsOfFilterClass(index).length <= 0"
       >
         <template #content>
           <font-awesome-icon
-            v-for="avatar of getParticipantsOfPrimaryClass(index)"
+            v-for="avatar of getParticipantsOfFilterClass(index)"
             :key="avatar.id"
             :icon="avatar.symbol"
             :style="{
@@ -88,7 +87,7 @@
           class="radar-label"
           @click="
             participantSelectionChanged(
-              getParticipantsOfPrimaryClass(index).map((avatar) => avatar.id)
+              getParticipantsOfFilterClass(index).map((avatar) => avatar.id)
             )
           "
         >
@@ -99,13 +98,24 @@
               )
             }}
           </p>
-          <p>
-            {{ getParticipantsOfPrimaryClass(index).length }}
+          <p v-if="getParticipantsOfFilterClass(index).length > 0">
+            {{ getParticipantsOfFilterClass(index).length }}
             <font-awesome-icon icon="user" />
           </p>
         </div>
       </ToolTip>
     </div>
+    <el-radio-group v-model="filterClass" class="classSelection">
+      <el-radio-button :label="'primary'">{{
+          $t('moderator.organism.analytics.radarCharts.primary')
+        }}</el-radio-button>
+      <el-radio-button :label="'secondary'">{{
+          $t('moderator.organism.analytics.radarCharts.secondary')
+        }}</el-radio-button>
+      <el-radio-button :label="'exception'">{{
+          $t('moderator.organism.analytics.radarCharts.exception')
+        }}</el-radio-button>
+    </el-radio-group>
   </div>
 </template>
 
@@ -139,6 +149,8 @@ export default class RadarChart extends Vue {
 
   taskType = TaskType.INFORMATION;
   normalizedDatasets: { data: number[]; avatar: Avatar }[] = [];
+
+  filterClass = 'exception';
 
   getColorOfType(taskType: TaskType) {
     return getColorOfType(taskType);
@@ -319,11 +331,49 @@ export default class RadarChart extends Vue {
     };
   }
 
+  getParticipantsOfFilterClass(index: number): Avatar[] {
+    switch (this.filterClass) {
+      case 'primary':
+        return this.getParticipantsOfPrimaryClass(index);
+      case 'secondary':
+        return this.getParticipantsOfSecondaryClass(index);
+      case 'exception':
+        return this.getParticipantsOfExceptionClass(index);
+    }
+    return this.getParticipantsOfPrimaryClass(index);
+  }
+
   getParticipantsOfPrimaryClass(index: number): Avatar[] {
     const participants: Avatar[] = [];
 
     for (const entry of this.normalizedDatasets) {
       if (entry.data[index] >= Math.max(...entry.data)) {
+        participants.push(entry.avatar);
+      }
+    }
+    return participants;
+  }
+
+  getParticipantsOfSecondaryClass(index: number): Avatar[] {
+    const participants: Avatar[] = [];
+
+    for (const entry of this.normalizedDatasets) {
+      const value = entry.data[index];
+      const sortedData = [...entry.data].sort((a, b) => b - a);
+      const secondMaxValue = sortedData[1];
+
+      if (value === secondMaxValue) {
+        participants.push(entry.avatar);
+      }
+    }
+    return participants;
+  }
+
+  getParticipantsOfExceptionClass(index: number): Avatar[] {
+    const participants: Avatar[] = [];
+
+    for (const entry of this.normalizedDatasets) {
+      if (entry.data[index] <= Math.min(...entry.data)) {
         participants.push(entry.avatar);
       }
     }
@@ -413,5 +463,9 @@ export default class RadarChart extends Vue {
 .headingIcon {
   font-size: var(--font-size-xlarge);
   cursor: pointer;
+}
+
+.classSelection {
+  font-size: var(--font-size-small);
 }
 </style>
