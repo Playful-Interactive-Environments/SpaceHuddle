@@ -106,17 +106,35 @@
                   />
                 </linearGradient>
               </defs>
-              <circle
-                class="circle"
-                :cx="
-                  (segment.answer / questionData.parameter.maxValue) *
-                    (parentWidth * barWidthPercentage - 2 * paddingSlider) +
-                  paddingSlider
-                "
-                :cy="barHeight / 2"
-                :r="circleRadius + (segment.avatars.length - 1)"
-                :fill="'url(#gradient-' + index + '-' + i + ')'"
-              />
+              <g class="circle">
+                <circle
+                  :cx="
+                    (segment.answer / questionData.parameter.maxValue) *
+                      (parentWidth * barWidthPercentage - 2 * paddingSlider) +
+                    paddingSlider
+                  "
+                  :cy="barHeight / 2"
+                  :r="circleRadius + (segment.avatars.length - 1)"
+                  :fill="'url(#gradient-' + index + '-' + i + ')'"
+                />
+                <text
+                  class="circleLabel"
+                  :x="
+                    (segment.answer / questionData.parameter.maxValue) *
+                      (parentWidth * barWidthPercentage - 2 * paddingSlider) +
+                    paddingSlider
+                  "
+                  :y="7.5"
+                  font-size="10.5"
+                  text-anchor="middle"
+                  :style="{
+                    color: 'var(--color-dark-contrast)',
+                    textAlign: 'center',
+                  }"
+                >
+                  {{ segment.answer || 0 }}
+                </text>
+              </g>
             </g>
           </g>
         </svg>
@@ -505,5 +523,18 @@ export default class StackedBarChart extends Vue {
   right: 1rem;
   width: 1.5rem;
   height: 1.5rem;
+}
+
+.circle {
+  .circleLabel {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+}
+
+.circle:hover {
+  .circleLabel {
+    opacity: 1;
+  }
 }
 </style>
