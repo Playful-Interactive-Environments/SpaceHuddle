@@ -97,7 +97,11 @@
                     class="linearGradientStop"
                     v-for="(color, j) in getColor(segment)"
                     :key="j"
-                    :offset="(j / (getColor(segment).length - 1)) * 100 + '%'"
+                    :offset="
+                      getColor(segment).length > 1
+                        ? (j / (getColor(segment).length - 1)) * 100 + '%'
+                        : '50%'
+                    "
                     :stop-color="color"
                   />
                 </linearGradient>
@@ -118,17 +122,24 @@
         </svg>
       </div>
       <div
-        :style="{ width: `${100 * barWidthPercentage}%`, height: `${barHeight * 3}` }"
+        :style="{
+          width: `${100 * barWidthPercentage}%`,
+          height: `${barHeight * 3}`,
+        }"
         v-else-if="
           computedSegments[index]?.length &&
           questionData.questionType === 'text'
         "
       >
-        <el-carousel :interval="5000" type="card" :height="`${barHeight*3}px`">
+        <el-carousel
+          :interval="5000"
+          type="card"
+          :height="`${barHeight * 3}px`"
+        >
           <el-carousel-item
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
-            :style="{borderColor: getColor(segment)[0]}"
+            :style="{ borderColor: getColor(segment)[0] }"
           >
             <p>{{ segment.answer }}</p>
           </el-carousel-item>
@@ -157,7 +168,7 @@
                   :offset="
                     getColor(segment).length > 1
                       ? (j / (getColor(segment).length - 1)) * 100 + '%'
-                      : '0%'
+                      : '50%'
                   "
                   :stop-color="color"
                 />
@@ -166,7 +177,7 @@
             <rect
               :x="segment.x"
               :y="0"
-              :width="segment.width"
+              :width="segment.width >= 0 ? segment.width : 0"
               :height="barHeight"
               :fill="'var(--color-background)'"
               :rx="barHeight / 2"
@@ -175,7 +186,7 @@
             <rect
               :x="segment.x"
               :y="0"
-              :width="segment.width"
+              :width="segment.width >= 0 ? segment.width : 0"
               :height="barHeight"
               :fill="'url(#gradient-' + index + '-' + i + ')'"
               :rx="barHeight / 2"
