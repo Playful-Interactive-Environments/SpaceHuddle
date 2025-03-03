@@ -9,10 +9,7 @@
         class="questionText twoLineText"
         :style="{ width: `${100 - 100 * barWidthPercentage - 2}%` }"
       >
-        <ToolTip
-            :content="questionData.question"
-            :show-after="200"
-        >
+        <ToolTip :content="questionData.question" :show-after="200">
           <span>{{ questionData.question }}</span>
         </ToolTip>
       </p>
@@ -92,7 +89,7 @@
               <defs>
                 <linearGradient
                   class="linearGradient"
-                  :id="'gradient-' + index + '-' + i"
+                  :id="'gradient-' + index + '-' + i + '-' + taskId"
                   x1="0%"
                   y1="0%"
                   x2="100%"
@@ -113,7 +110,7 @@
               </defs>
               <g class="circle">
                 <circle
-                    class="cursorPointer"
+                  class="cursorPointer"
                   :cx="
                     (segment.answer / questionData.parameter.maxValue) *
                       (parentWidth * barWidthPercentage - 2 * paddingSlider) +
@@ -121,7 +118,9 @@
                   "
                   :cy="barHeight / 2"
                   :r="circleRadius + (segment.avatars.length - 1)"
-                  :fill="'url(#gradient-' + index + '-' + i + ')'"
+                  :fill="
+                    'url(#gradient-' + index + '-' + i + '-' + taskId + ')'
+                  "
                   @click="changeParticipantSelection(segment)"
                 />
                 <text
@@ -196,7 +195,7 @@
             <defs>
               <linearGradient
                 class="linearGradient"
-                :id="'gradient-' + index + '-' + i"
+                :id="'gradient-' + index + '-' + i + '-' + taskId"
                 x1="0%"
                 y1="0%"
                 x2="100%"
@@ -229,7 +228,7 @@
               :y="0"
               :width="segment.width >= 0 ? segment.width : 0"
               :height="barHeight"
-              :fill="'url(#gradient-' + index + '-' + i + ')'"
+              :fill="'url(#gradient-' + index + '-' + i + '-' + taskId + ')'"
               :rx="barHeight / 2"
               :ry="barHeight / 2"
               :style="{
@@ -267,6 +266,24 @@
         <div
           v-for="(segment, i) in computedSegments[index]"
           :key="'text-' + i"
+          class="segment-avatars"
+          :style="{
+            left: segment.x + 'px',
+            width: segment.width + 'px',
+          }"
+        >
+          <font-awesome-icon
+            v-for="avatar in segment.avatars.filter((av) =>
+              selectedParticipantIds.includes(av.id)
+            )"
+            :key="avatar.id"
+            :icon="avatar.symbol"
+            :style="{ color: avatar.color }"
+          />
+        </div>
+        <div
+          v-for="(segment, i) in computedSegments[index]"
+          :key="'text-' + i"
           class="segment-text oneLineText"
           :style="{
             left: segment.x + 'px',
@@ -280,10 +297,7 @@
           }"
           @click="changeParticipantSelection(segment)"
         >
-          <ToolTip
-              :content="segment.answer"
-              :show-after="200"
-          >
+          <ToolTip :content="segment.answer" :show-after="200">
             <span>{{ segment.answer }}</span>
           </ToolTip>
         </div>
@@ -293,13 +307,14 @@
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { debounce } from 'lodash';
 import { Avatar } from '@/types/api/Participant';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
-import VariableSVGWrapper from "@/components/moderator/organisms/analytics/subOrganisms/VariableSVGWrapper.vue";
-import IdeaCard from "@/components/moderator/organisms/cards/IdeaCard.vue";
+import VariableSVGWrapper from '@/components/moderator/organisms/analytics/subOrganisms/VariableSVGWrapper.vue';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface Answer {
   avatar: Avatar;
@@ -325,10 +340,12 @@ interface AnswerSegment {
 
 @Options({
   components: {
+    FontAwesomeIcon,
     ToolTip,
-  }
+  },
 })
 export default class StackedBarChart extends Vue {
+  @Prop() readonly taskId!: string;
   @Prop({ required: true }) readonly chartData!: QuestionData[];
   @Prop({ default: () => ['var(--color-evaluating)'] })
   readonly colorTheme!: string[];
@@ -514,6 +531,21 @@ export default class StackedBarChart extends Vue {
   color: var(--color-dark-contrast);
   transition: text-shadow 0.4s ease;
   cursor: pointer;
+}
+
+.segment-avatars {
+  position: absolute;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  top: 75%;
+  * {
+    background-color: var(--color-background);
+    padding: 0.3rem;
+    border-radius: 50%;
+    margin-left: -0.4rem;
+  }
 }
 
 .barSegmentPercentages {

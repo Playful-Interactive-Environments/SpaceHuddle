@@ -49,6 +49,7 @@
       <stacked-bar-chart
         v-if="survey"
         class="stackedChart"
+        :task-id="survey.taskId"
         :chart-data="survey.questions"
         :color-theme="colorTheme"
         v-model:selectedParticipantIds="participantIds"
