@@ -33,6 +33,7 @@
         v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
         :participant-data="dataEntries"
         :axes="axes.filter((axis) => axis.available)"
+        :steps="steps"
         v-model:selectedParticipantIds="selectedParticipantIds"
         :style="{ opacity: loadingSteps ? 0 : 1 }"
       />
@@ -136,6 +137,7 @@ interface Axis {
 interface AxisValue {
   id: string;
   value: number | null;
+  ideas?: Idea[] | null;
 }
 interface DataEntry {
   participant: ParticipantInfo;
@@ -803,6 +805,7 @@ export default class Analytics extends Vue {
     'ratingSum',
     'averageRating',
     'bestIdeaAverageRating',
+    'ideas',
   ];
 
   CalculateAxes(): Axis[] {
@@ -810,8 +813,10 @@ export default class Analytics extends Vue {
       const { taskId, taskData } = step;
       const axisValues = this.wantedValues.reduce((acc, value) => {
         if (
-          (taskData.taskType as string) === 'BRAINSTORMING' &&
-          value === 'stars'
+          ((taskData.taskType as string) === 'BRAINSTORMING' &&
+            value === 'stars') ||
+          ((taskData.taskType as string) !== 'BRAINSTORMING' &&
+            value === 'ideas')
         ) {
           return acc;
         }
@@ -867,10 +872,10 @@ export default class Analytics extends Vue {
         .map((axis) => {
           const moduleData = data.find((d) => d.taskId === axis.taskId);
           const axisValues = axis.axisValues.map((axisValue) => {
-            if (!axisValue) return { id: '', value: null };
-
+            if (!axisValue) return { id: '', value: null, ideas: null };
             const { id } = axisValue;
             let value = null;
+            let ideas = null;
 
             if (moduleData?.bestStep) {
               const sources = [
@@ -885,6 +890,9 @@ export default class Analytics extends Vue {
                 if (source && id in source) {
                   if (Array.isArray(source[id])) {
                     value = source[id].length;
+                    if (id === 'ideas') {
+                      ideas = source[id].filter((idea) => idea != undefined);
+                    }
                   } else {
                     value = source[id];
                   }
@@ -893,7 +901,7 @@ export default class Analytics extends Vue {
               }
             }
 
-            return { id, value };
+            return { id, value, ideas };
           });
           return { taskId: axis.taskId, axisValues };
         })

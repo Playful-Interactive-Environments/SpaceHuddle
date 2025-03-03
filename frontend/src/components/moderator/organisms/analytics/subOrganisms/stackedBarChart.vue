@@ -108,6 +108,7 @@
               </defs>
               <g class="circle">
                 <circle
+                    class="cursorPointer"
                   :cx="
                     (segment.answer / questionData.parameter.maxValue) *
                       (parentWidth * barWidthPercentage - 2 * paddingSlider) +
@@ -162,7 +163,7 @@
           >
             <p>{{ segment.answer }}</p>
             <font-awesome-icon
-              class="carouselColorItem"
+              class="carouselColorItem cursorPointer"
               :icon="segment.avatars[0].symbol"
               :style="{
                 color:
@@ -184,7 +185,7 @@
           <g
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
-            class="barSegmentElement"
+            class="barSegmentElement cursorPointer"
             @click="changeParticipantSelection(segment)"
           >
             <defs>
@@ -541,6 +542,12 @@ export default class StackedBarChart extends Vue {
   right: 1rem;
   width: 1.5rem;
   height: 1.5rem;
+  transform: scale(1);
+  transition: transform 0.15s ease;
+}
+
+.carouselColorItem:hover {
+  transform: scale(1.15);
 }
 
 .circle {
@@ -554,5 +561,9 @@ export default class StackedBarChart extends Vue {
   .circleLabel {
     opacity: 1;
   }
+}
+
+.cursorPointer:hover {
+  cursor: pointer;
 }
 </style>

@@ -13,6 +13,7 @@
   },
   "analytics": {
     "highscore": {
+      "ideas": "Ideas",
       "points": "Points",
       "ideaCount": "Idea Count"
     }

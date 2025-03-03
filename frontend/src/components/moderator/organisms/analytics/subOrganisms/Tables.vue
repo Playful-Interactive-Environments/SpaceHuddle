@@ -49,7 +49,7 @@
       <Highscore
         v-if="axis"
         class="highscore"
-        :module-id="axis.taskId"
+        :task-id="axis.taskId"
         :table-data="filterParticipantData(axis.taskId)"
         v-model:selectedParticipantIds="participantIds"
         @update:selected-participant-ids="updateSelectedParticipantIds"
@@ -99,10 +99,12 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import Highscore from '@/components/moderator/organisms/analytics/Highscore.vue';
-import { ParticipantInfo } from '@/types/api/Participant';
+import {Avatar, ParticipantInfo} from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import { HighScoreEntry } from '@/components/moderator/organisms/analytics/Highscore.vue';
+import {TaskParticipantIterationStep} from "@/types/api/TaskParticipantIterationStep";
+import {Idea} from "@/types/api/Idea";
 
 interface SubAxis {
   id: string;
@@ -126,6 +128,7 @@ interface Axis {
 interface AxisValue {
   id: string;
   value: number | null;
+  ideas?: Idea[];
 }
 interface DataEntry {
   participant: ParticipantInfo;

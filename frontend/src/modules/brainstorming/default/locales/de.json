@@ -26,6 +26,7 @@
   },
   "analytics": {
     "highscore": {
+      "ideas": "Ideen",
       "points": "Punkte",
       "ideaCount": "Ideen Anzahl"
     }

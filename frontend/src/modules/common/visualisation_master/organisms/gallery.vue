@@ -3,7 +3,7 @@
     <el-carousel
       v-if="ideas.length > 0"
       :height="`${this.contentHeight}px`"
-      type="card"
+      :type="type"
       arrow="always"
       :initial-index="0"
       :interval="paused ? 0 : 7000 / timeModifier"
@@ -49,6 +49,7 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: false }) readonly paused!: boolean;
+  @Prop({default: 'card'}) readonly type!: string;
   galleryIndex = 0;
 
   contentHeight = 100;
@@ -95,7 +96,7 @@ export default class PublicScreen extends Vue {
   justify-content: center;
   align-items: center;
   height: 100%;
-  //width: 20rem;
+  width: 100%;
   max-height: 500px;
 }
 

@@ -45,11 +45,17 @@
           :key="value.id"
           class="valueTableEntry el-rate--large"
         >
-          <span v-if="value.id !== 'rate' && value.id !== 'stars'">
+          <span
+            v-if="
+              value.id !== 'rate' &&
+              value.id !== 'stars' &&
+              value.id !== 'ideas'
+            "
+          >
             {{ formatValue(value) }}
             {{ getUnit(value) }}
           </span>
-          <span v-else>
+          <span v-else-if="value.id === 'rate' || value.id === 'stars'">
             <el-rate
               v-if="value.value != null"
               v-model="value.value"
@@ -59,6 +65,16 @@
             />
             <span v-else>---</span>
           </span>
+          <span v-else-if="value.id === 'ideas'">
+            <Gallery
+              v-if="value.ideas && value.ideas.length > 0"
+              :task-id="taskId"
+              :ideas="value.ideas"
+              :time-modifier="1"
+            />
+            <span v-else>---</span>
+          </span>
+          <span v-else>---</span>
         </td>
       </tr>
       <tr
@@ -94,14 +110,16 @@ import { ParticipantInfo } from '@/types/api/Participant';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
+import { Idea } from '@/types/api/Idea';
 
 export interface HighScoreEntry {
   participant: ParticipantInfo;
-  values: { id: string; value: number | null }[];
+  values: { id: string; value: number | null; ideas?: Idea[] | null }[];
 }
 
 @Options({
-  components: { ToolTip, FontAwesomeIcon },
+  components: { Gallery, ToolTip, FontAwesomeIcon },
   emits: ['update:selectedParticipantIds'],
 })
 export default class Highscore extends Vue {
@@ -157,7 +175,6 @@ export default class Highscore extends Vue {
   }
 
   convertToHighScoreEntryArray(data: TaskParticipantIterationStep[]): void {
-    console.log(data);
     this.chartData = [];
   }
 

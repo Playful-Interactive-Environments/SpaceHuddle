@@ -520,6 +520,7 @@ interface Axis {
 interface AxisValue {
   id: string;
   value: number | null;
+  ideas?: Idea[];
 }
 
 interface DataEntry {
