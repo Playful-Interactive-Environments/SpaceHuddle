@@ -162,6 +162,7 @@
           :trigger="'click'"
         >
           <el-carousel-item
+              class="carouselItem"
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
           >
@@ -312,8 +313,6 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { debounce } from 'lodash';
 import { Avatar } from '@/types/api/Participant';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
-import VariableSVGWrapper from '@/components/moderator/organisms/analytics/subOrganisms/VariableSVGWrapper.vue';
-import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface Answer {
@@ -565,7 +564,7 @@ export default class StackedBarChart extends Vue {
 
 .el-carousel__item {
   height: 100%;
-  padding: 1rem;
+  padding: 1rem 3rem 1rem 1rem;
   overflow: scroll;
 
   display: flex;
