@@ -35,16 +35,7 @@
               stroke-width="2"
               stroke-linecap="round"
             />
-            <g
-              v-for="(x, i) in [
-                paddingSlider,
-                parentWidth * barWidthPercentage * 0.25,
-                parentWidth * barWidthPercentage * 0.5,
-                parentWidth * barWidthPercentage * 0.75,
-                parentWidth * barWidthPercentage - paddingSlider,
-              ]"
-              :key="i"
-            >
+            <g v-for="(x, i) in sliderPositions" :key="i">
               <line
                 :x1="x"
                 :x2="x"
@@ -57,7 +48,7 @@
               />
               <text
                 class="svgText"
-                v-if="x == paddingSlider"
+                v-if="x === paddingSlider"
                 :x="x"
                 :y="barHeight"
                 font-size="10.5"
@@ -71,7 +62,7 @@
               </text>
               <text
                 v-else-if="
-                  x == parentWidth * barWidthPercentage - paddingSlider
+                  x === parentWidth * barWidthPercentage - paddingSlider
                 "
                 :x="x"
                 :y="barHeight"
@@ -111,11 +102,7 @@
               <g class="circle">
                 <circle
                   class="cursorPointer"
-                  :cx="
-                    (segment.answer / questionData.parameter.maxValue) *
-                      (parentWidth * barWidthPercentage - 2 * paddingSlider) +
-                    paddingSlider
-                  "
+                  :cx="calculateCircleX(segment, questionData)"
                   :cy="barHeight / 2"
                   :r="circleRadius + (segment.avatars.length - 1)"
                   :fill="
@@ -125,11 +112,7 @@
                 />
                 <text
                   class="circleLabel"
-                  :x="
-                    (segment.answer / questionData.parameter.maxValue) *
-                      (parentWidth * barWidthPercentage - 2 * paddingSlider) +
-                    paddingSlider
-                  "
+                  :x="calculateCircleX(segment, questionData)"
                   :y="7.5"
                   font-size="10.5"
                   text-anchor="middle"
@@ -500,6 +483,25 @@ export default class StackedBarChart extends Vue {
         this.$emit('update:selectedParticipantIds', ids);
       }
     }
+  }
+
+  calculateCircleX(segment: AnswerSegment, questionData: QuestionData): number {
+    return (
+      (Number(segment.answer) / questionData.parameter.maxValue) *
+        (this.parentWidth * this.barWidthPercentage - 2 * this.paddingSlider) +
+      this.paddingSlider
+    );
+  }
+
+  get sliderPositions() {
+    const positions = [
+      this.paddingSlider,
+      this.parentWidth * this.barWidthPercentage * 0.25,
+      this.parentWidth * this.barWidthPercentage * 0.5,
+      this.parentWidth * this.barWidthPercentage * 0.75,
+      this.parentWidth * this.barWidthPercentage - this.paddingSlider,
+    ];
+    return positions;
   }
 }
 </script>

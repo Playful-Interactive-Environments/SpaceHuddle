@@ -154,7 +154,6 @@ export default class StackedBarCharts extends Vue {
   onChartDataChanged(): void {
     if (this.surveyData) {
       this.chartData = this.surveyData;
-      console.log(this.chartData);
     }
   }
 
