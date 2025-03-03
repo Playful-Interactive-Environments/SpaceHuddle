@@ -9,7 +9,12 @@
         class="questionText twoLineText"
         :style="{ width: `${100 - 100 * barWidthPercentage - 2}%` }"
       >
-        {{ questionData.question }}
+        <ToolTip
+            :content="questionData.question"
+            :show-after="200"
+        >
+          <span>{{ questionData.question }}</span>
+        </ToolTip>
       </p>
       <div
         class="barSegments"
@@ -273,8 +278,14 @@
                 ? '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)'
                 : 'unset',
           }"
+          @click="changeParticipantSelection(segment)"
         >
-          <span>{{ segment.answer }}</span>
+          <ToolTip
+              :content="segment.answer"
+              :show-after="200"
+          >
+            <span>{{ segment.answer }}</span>
+          </ToolTip>
         </div>
       </div>
     </div>
@@ -282,10 +293,13 @@
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import {Options, Vue} from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { debounce } from 'lodash';
 import { Avatar } from '@/types/api/Participant';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import VariableSVGWrapper from "@/components/moderator/organisms/analytics/subOrganisms/VariableSVGWrapper.vue";
+import IdeaCard from "@/components/moderator/organisms/cards/IdeaCard.vue";
 
 interface Answer {
   avatar: Avatar;
@@ -309,6 +323,11 @@ interface AnswerSegment {
   avatars: Avatar[];
 }
 
+@Options({
+  components: {
+    ToolTip,
+  }
+})
 export default class StackedBarChart extends Vue {
   @Prop({ required: true }) readonly chartData!: QuestionData[];
   @Prop({ default: () => ['var(--color-evaluating)'] })
@@ -494,8 +513,7 @@ export default class StackedBarChart extends Vue {
   padding: 0 2rem;
   color: var(--color-dark-contrast);
   transition: text-shadow 0.4s ease;
-
-  pointer-events: none;
+  cursor: pointer;
 }
 
 .barSegmentPercentages {
