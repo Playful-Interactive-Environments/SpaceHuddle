@@ -150,6 +150,7 @@ interface DataEntry {
 interface Answer {
   avatar: Avatar;
   answer: string[];
+  correct?: boolean[] | null;
 }
 
 interface QuestionData {
@@ -218,6 +219,7 @@ export default class Analytics extends Vue {
 
   surveyData: {
     taskId: string;
+    moduleName: string;
     title: string;
     questions: QuestionData[];
   }[] = [];
@@ -647,6 +649,7 @@ export default class Analytics extends Vue {
     // Create a task entry with taskId and title
     const taskEntry = {
       taskId: task.id,
+      moduleName: task.modules[0].name,
       title: task.name,
       questions: [] as {
         question: string;
@@ -655,7 +658,7 @@ export default class Analytics extends Vue {
           minValue?: number;
           maxValue?: number;
         };
-        answers: { avatar: Avatar; answer: string[] }[];
+        answers: { avatar: Avatar; answer: string[]; correct?: boolean[] | null }[];
       }[],
     };
 
@@ -665,7 +668,7 @@ export default class Analytics extends Vue {
         question: string;
         questionType: string;
         parameter: { minValue?: number; maxValue?: number };
-        answers: { avatar: Avatar; answer: string[] }[];
+        answers: { avatar: Avatar; answer: string[]; correct?: boolean[] | null }[];
       }
     > = {};
 
@@ -679,11 +682,13 @@ export default class Analytics extends Vue {
       const questionKeywords = question.keywords || '';
 
       const answers: string[] = [];
+      const correct: boolean[] = [];
       if (Array.isArray(answer)) {
         answer.forEach((a) => {
           const answerIdea = this.surveyIdeas.find((idea) => idea.id === a);
           if (answerIdea) {
             answers.push(answerIdea.keywords || '');
+            correct.push(answerIdea.parameter.isCorrect);
           }
         });
       } else {
@@ -711,6 +716,7 @@ export default class Analytics extends Vue {
       questionData[questionKeywords].answers.push({
         avatar,
         answer: answers,
+        correct: correct,
       });
     });
 

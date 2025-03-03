@@ -50,8 +50,11 @@
         v-if="survey"
         class="stackedChart"
         :task-id="survey.taskId"
+        :has-correct="survey.moduleName === 'quiz' || survey.moduleName === 'talk'"
         :chart-data="survey.questions"
         :color-theme="colorTheme"
+        :color-correct="'var(--color-brainstorming)'"
+        :color-incorrect="'var(--color-evaluating)'"
         v-model:selectedParticipantIds="participantIds"
         @update:selected-participant-ids="updateSelectedParticipantIds"
       />
@@ -116,6 +119,7 @@ interface QuestionData {
 
 interface SurveyData {
   taskId: string;
+  moduleName: string;
   title: string;
   questions: QuestionData[];
 }
@@ -139,11 +143,11 @@ export default class StackedBarCharts extends Vue {
   tableArray: (SurveyData | null)[] = [];
   participantIds: string[] = [];
   colorTheme = [
-    'var(--color-informing)',
-    'var(--color-brainstorming)',
-    'var(--color-structuring)',
-    'var(--color-evaluating)',
-    'var(--color-playing)',
+    'var(--color-informing-light)',
+    'var(--color-brainstorming-light)',
+    'var(--color-structuring-light)',
+    'var(--color-evaluating-light)',
+    'var(--color-playing-light)',
   ];
 
   @Watch('surveyData', { immediate: true })

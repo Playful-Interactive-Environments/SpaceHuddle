@@ -162,7 +162,7 @@
           :trigger="'click'"
         >
           <el-carousel-item
-              class="carouselItem"
+            class="carouselItem"
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
           >
@@ -318,6 +318,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 interface Answer {
   avatar: Avatar;
   answer: string[];
+  correct?: boolean[];
 }
 
 interface QuestionData {
@@ -345,9 +346,14 @@ interface AnswerSegment {
 })
 export default class StackedBarChart extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: () => false }) readonly hasCorrect!: boolean;
   @Prop({ required: true }) readonly chartData!: QuestionData[];
-  @Prop({ default: () => ['var(--color-evaluating)'] })
+  @Prop({ default: () => ['var(--color-informing)'] })
   readonly colorTheme!: string[];
+  @Prop({ default: () => 'var(--color-brainstorming)' })
+  readonly colorCorrect!: string;
+  @Prop({ default: () => 'var(--color-evaluating)' })
+  readonly colorIncorrect!: string;
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
 
   barHeight = 40;
@@ -388,11 +394,14 @@ export default class StackedBarChart extends Vue {
     if (!answers.length) return [];
 
     const answerDetails = answers.reduce<
-      Record<string, { count: number; avatars: Avatar[] }>
-    >((acc, { answer, avatar }) => {
+      Record<
+        string,
+        { count: number; avatars: Avatar[]; isCorrect: boolean | null }
+      >
+    >((acc, { answer, avatar, correct }) => {
       answer.forEach((response, index) => {
         if (!acc[response]) {
-          acc[response] = { count: 0, avatars: [] };
+          acc[response] = { count: 0, avatars: [], isCorrect: null };
         }
         acc[response].count +=
           questionType === 'order' ? answer.length - index - 1 : 1;
@@ -402,6 +411,9 @@ export default class StackedBarChart extends Vue {
           }
         } else {
           acc[response].avatars.push(avatar);
+        }
+        if (correct && correct.length > 0) {
+          acc[response].isCorrect = correct[index];
         }
       });
       return acc;
@@ -417,25 +429,31 @@ export default class StackedBarChart extends Vue {
     );
     const overlap = 10;
 
-    return Object.entries(answerDetails).map(([key, { count, avatars }], i) => {
-      const width =
-        (count / total) * (this.parentWidth * this.barWidthPercentage) -
-        this.gapSize +
-        (i > 0 ? overlap : 0);
+    return Object.entries(answerDetails).map(
+      ([key, { count, avatars, isCorrect }], i) => {
+        const width =
+          (count / total) * (this.parentWidth * this.barWidthPercentage) -
+          this.gapSize +
+          (i > 0 ? overlap : 0);
 
-      const segment = {
-        answer: key,
-        avatars: avatars,
-        x: cumulativeX - (i > 0 ? overlap : 0),
-        width: width + (i > 0 ? overlap : 0),
-        isLargest: count === maxCount,
-        percentage: count / total,
-        color: this.colorTheme[i % this.colorTheme.length],
-      };
+        const segment = {
+          answer: key,
+          avatars: avatars,
+          x: cumulativeX - (i > 0 ? overlap : 0),
+          width: width + (i > 0 ? overlap : 0),
+          isLargest: count === maxCount,
+          percentage: count / total,
+          color: this.hasCorrect
+            ? isCorrect
+              ? this.colorCorrect
+              : this.colorIncorrect
+            : this.colorTheme[i % this.colorTheme.length],
+        };
 
-      cumulativeX += width - overlap;
-      return segment;
-    });
+        cumulativeX += width - overlap;
+        return segment;
+      }
+    );
   }
 
   get computedSegments() {
