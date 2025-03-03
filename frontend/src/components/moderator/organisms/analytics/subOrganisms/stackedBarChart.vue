@@ -5,96 +5,47 @@
       :key="index"
       class="question-container"
     >
-      <p
-        class="questionText twoLineText"
-        :style="{ width: `${100 - 100 * barWidthPercentage - 2}%` }"
-      >
+      <p class="questionText twoLineText" :style="questionTextStyle">
         <ToolTip :content="questionData.question" :show-after="200">
           <span>{{ questionData.question }}</span>
         </ToolTip>
       </p>
       <div
+        v-if="shouldRenderSlider(questionData, index)"
         class="barSegments"
-        :style="{ width: `${100 * barWidthPercentage}%` }"
-        v-if="
-          (computedSegments[index]?.length &&
-            questionData.questionType === 'slider') ||
-          questionData.questionType === 'number' ||
-          questionData.questionType === 'rating'
-        "
+        :style="barSegmentsStyle"
       >
-        <svg :width="parentWidth * barWidthPercentage" :height="barHeight">
+        <svg :width="barWidth" :height="barHeight">
           <g>
             <line
-              :x1="paddingSlider"
-              :x2="parentWidth * barWidthPercentage - paddingSlider"
-              :y1="barHeight / 2"
-              :y2="barHeight / 2"
-              :stroke="'var(--color-dark-contrast)'"
-              :stroke-opacity="'25%'"
+              v-bind="sliderLineProps()"
               stroke-width="2"
               stroke-linecap="round"
             />
             <g v-for="(x, i) in sliderPositions" :key="i">
               <line
-                :x1="x"
-                :x2="x"
-                :y1="barHeight / 2.5"
-                :y2="barHeight - barHeight / 2.5"
-                :stroke="'var(--color-dark-contrast)'"
+                v-bind="sliderTickProps(x)"
                 stroke-width="2"
-                :stroke-opacity="'25%'"
                 stroke-linecap="round"
               />
               <text
+                v-if="isSliderEdge(x)"
                 class="svgText"
-                v-if="x === paddingSlider"
-                :x="x"
-                :y="barHeight"
-                font-size="10.5"
+                v-bind="sliderTextProps(x, questionData)"
                 text-anchor="middle"
-                :style="{
-                  color: 'var(--color-dark-contrast)',
-                  textAlign: 'center',
-                }"
-              >
-                {{ questionData.parameter.minValue || 0 }}
-              </text>
-              <text
-                v-else-if="
-                  x === parentWidth * barWidthPercentage - paddingSlider
-                "
-                :x="x"
-                :y="barHeight"
-                font-size="10.5"
-                text-anchor="middle"
-                :style="{
-                  color: 'var(--color-dark-contrast)',
-                  textAlign: 'center',
-                }"
-              >
-                {{ questionData.parameter.maxValue }}
-              </text>
+              />
             </g>
             <g v-for="(segment, i) in computedSegments[index]" :key="i">
               <defs>
                 <linearGradient
-                  class="linearGradient"
-                  :id="'gradient-' + index + '-' + i + '-' + taskId"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="0%"
+                  :id="gradientId(index, i)"
+                  v-bind="gradientProps"
                 >
                   <stop
                     class="linearGradientStop"
                     v-for="(color, j) in getColor(segment)"
                     :key="j"
-                    :offset="
-                      getColor(segment).length > 1
-                        ? (j / (getColor(segment).length - 1)) * 100 + '%'
-                        : '50%'
-                    "
+                    v-bind="gradientStopProps(segment, j)"
                     :stop-color="color"
                   />
                 </linearGradient>
@@ -102,24 +53,13 @@
               <g class="circle">
                 <circle
                   class="cursorPointer"
-                  :cx="calculateCircleX(segment, questionData)"
-                  :cy="barHeight / 2"
-                  :r="circleRadius + (segment.avatars.length - 1)"
-                  :fill="
-                    'url(#gradient-' + index + '-' + i + '-' + taskId + ')'
-                  "
+                  v-bind="circleProps(segment, questionData)"
                   @click="changeParticipantSelection(segment)"
                 />
                 <text
                   class="circleLabel"
-                  :x="calculateCircleX(segment, questionData)"
-                  :y="7.5"
-                  font-size="10.5"
+                  v-bind="circleTextProps(segment, questionData)"
                   text-anchor="middle"
-                  :style="{
-                    color: 'var(--color-dark-contrast)',
-                    textAlign: 'center',
-                  }"
                 >
                   {{ segment.answer || 0 }}
                 </text>
@@ -129,20 +69,14 @@
         </svg>
       </div>
       <div
-        :style="{
-          width: `${100 * barWidthPercentage}%`,
-          height: `${barHeight * 3}`,
-        }"
-        v-else-if="
-          computedSegments[index]?.length &&
-          questionData.questionType === 'text'
-        "
+        v-else-if="shouldRenderTextCarousel(questionData, index)"
+        :style="carouselStyle"
       >
         <el-carousel
           :interval="5000"
           type="card"
-          :height="`${barHeight * 3}px`"
-          :trigger="'click'"
+          :height="carouselHeight"
+          trigger="click"
         >
           <el-carousel-item
             class="carouselItem"
@@ -153,23 +87,18 @@
             <font-awesome-icon
               class="carouselColorItem cursorPointer"
               :icon="segment.avatars[0].symbol"
-              :style="{
-                color:
-                  selectedParticipantIds.length <= 0
-                    ? segment.avatars[0].color
-                    : getColor(segment)[0],
-              }"
+              :style="carouselIconStyle(segment)"
               @click="changeParticipantSelection(segment)"
-            ></font-awesome-icon>
+            />
           </el-carousel-item>
         </el-carousel>
       </div>
       <div
+        v-else-if="shouldRenderBarSegments(index)"
         class="barSegments"
-        :style="{ width: `${100 * barWidthPercentage}%` }"
-        v-else-if="computedSegments[index]?.length"
+        :style="barSegmentsStyle"
       >
-        <svg :width="parentWidth * barWidthPercentage" :height="barHeight">
+        <svg :width="barWidth" :height="barHeight">
           <g
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
@@ -177,70 +106,24 @@
             @click="changeParticipantSelection(segment)"
           >
             <defs>
-              <linearGradient
-                class="linearGradient"
-                :id="'gradient-' + index + '-' + i + '-' + taskId"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
+              <linearGradient :id="gradientId(index, i)" v-bind="gradientProps">
                 <stop
-                  class="linearGradientStop"
                   v-for="(color, j) in getColor(segment)"
                   :key="j"
-                  :offset="
-                    getColor(segment).length > 1
-                      ? (j / (getColor(segment).length - 1)) * 100 + '%'
-                      : '50%'
-                  "
+                  class="linearGradientStop"
+                  v-bind="gradientStopProps(segment, j)"
                   :stop-color="color"
                 />
               </linearGradient>
             </defs>
-            <rect
-              :x="segment.x"
-              :y="0"
-              :width="segment.width >= 0 ? segment.width : 0"
-              :height="barHeight"
-              :fill="'var(--color-background)'"
-              :rx="barHeight / 2"
-              :ry="barHeight / 2"
-            />
-            <rect
-              :x="segment.x"
-              :y="0"
-              :width="segment.width >= 0 ? segment.width : 0"
-              :height="barHeight"
-              :fill="'url(#gradient-' + index + '-' + i + '-' + taskId + ')'"
-              :rx="barHeight / 2"
-              :ry="barHeight / 2"
-              :style="{
-                strokeWidth: 6,
-                stroke: 'var(--color-background)',
-                backgroundColor: 'var(--color-background)',
-              }"
-            />
+            <rect v-bind="barRectProps(segment)" />
+            <rect class="barRectGradient" v-bind="barRectGradientProps(index, i, segment)" />
             <g class="barSegmentPercentages">
-              <rect
-                :x="segment.x + segment.width - 55"
-                :y="0"
-                :width="30"
-                :height="12"
-                :fill="'var(--color-background)'"
-                :rx="12 / 2.5"
-                :ry="12 / 2.5"
-              />
+              <rect v-bind="percentageRectProps(segment)" />
               <text
                 class="svgText"
-                :x="segment.x + segment.width - 50"
-                :y="7.5"
-                font-size="10.5"
+                v-bind="percentageTextProps(segment)"
                 text-anchor="left"
-                :style="{
-                  color: 'var(--color-dark-contrast)',
-                  textAlign: 'center',
-                }"
               >
                 {{ Math.round(segment.percentage * 100) }}%
               </text>
@@ -251,15 +134,10 @@
           v-for="(segment, i) in computedSegments[index]"
           :key="'text-' + i"
           class="segment-avatars"
-          :style="{
-            left: segment.x + 'px',
-            width: segment.width + 'px',
-          }"
+          :style="avatarStyle(segment)"
         >
           <font-awesome-icon
-            v-for="avatar in segment.avatars.filter((av) =>
-              selectedParticipantIds.includes(av.id)
-            )"
+            v-for="avatar in filteredAvatars(segment)"
             :key="avatar.id"
             :icon="avatar.symbol"
             :style="{ color: avatar.color }"
@@ -269,16 +147,7 @@
           v-for="(segment, i) in computedSegments[index]"
           :key="'text-' + i"
           class="segment-text oneLineText"
-          :style="{
-            left: segment.x + 'px',
-            width: segment.width + 'px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            textShadow:
-              selectedParticipantIds.length > 0
-                ? '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)'
-                : 'unset',
-          }"
+          :style="segmentTextStyle(segment)"
           @click="changeParticipantSelection(segment)"
         >
           <ToolTip :content="segment.answer" :show-after="200">
@@ -494,14 +363,241 @@ export default class StackedBarChart extends Vue {
   }
 
   get sliderPositions() {
-    const positions = [
+    return [
       this.paddingSlider,
       this.parentWidth * this.barWidthPercentage * 0.25,
       this.parentWidth * this.barWidthPercentage * 0.5,
       this.parentWidth * this.barWidthPercentage * 0.75,
       this.parentWidth * this.barWidthPercentage - this.paddingSlider,
     ];
-    return positions;
+  }
+
+  get questionTextStyle() {
+    return { width: `${100 - 100 * this.barWidthPercentage - 2}%` };
+  }
+
+  get barSegmentsStyle() {
+    return { width: `${100 * this.barWidthPercentage}%` };
+  }
+
+  get carouselStyle() {
+    return {
+      width: `${100 * this.barWidthPercentage}%`,
+      height: `${this.barHeight * 3}px`,
+    };
+  }
+
+  get carouselHeight() {
+    return `${this.barHeight * 3}px`;
+  }
+
+  get barWidth() {
+    return this.parentWidth * this.barWidthPercentage;
+  }
+
+  get gradientProps() {
+    return {
+      x1: '0%',
+      y1: '0%',
+      x2: '100%',
+      y2: '0%',
+    };
+  }
+
+  gradientId(index: number, i: number) {
+    return `gradient-${index}-${i}-${this.taskId}`;
+  }
+
+  gradientStopProps(segment: AnswerSegment, j: number) {
+    return {
+      offset:
+        this.getColor(segment).length > 1
+          ? (j / (this.getColor(segment).length - 1)) * 100 + '%'
+          : '50%',
+    };
+  }
+
+  sliderLineProps() {
+    return {
+      x1: this.paddingSlider,
+      x2: this.parentWidth * this.barWidthPercentage - this.paddingSlider,
+      y1: this.barHeight / 2,
+      y2: this.barHeight / 2,
+      stroke: 'var(--color-dark-contrast)',
+      opacity: '25%',
+    };
+  }
+
+  sliderTickProps(x: number) {
+    return {
+      x1: x,
+      x2: x,
+      y1: this.barHeight / 2.5,
+      y2: this.barHeight - this.barHeight / 2.5,
+      stroke: 'var(--color-dark-contrast)',
+      opacity: '25%',
+    };
+  }
+
+  sliderTextProps(x: number, questionData: QuestionData) {
+    return {
+      x: x,
+      y: this.barHeight,
+      fontSize: '10.5',
+      style: {
+        color: 'var(--color-dark-contrast)',
+        textAlign: 'center',
+      },
+    };
+  }
+
+  circleProps(segment: AnswerSegment, questionData: QuestionData) {
+    return {
+      cx: this.calculateCircleX(segment, questionData),
+      cy: this.barHeight / 2,
+      r: this.circleRadius + (segment.avatars.length - 1),
+      fill: `url(#${this.gradientId(
+        this.indexOfSegment(segment),
+        this.indexOfAnswer(segment)
+      )})`,
+    };
+  }
+
+  circleTextProps(segment: AnswerSegment, questionData: QuestionData) {
+    return {
+      x: this.calculateCircleX(segment, questionData),
+      y: 7.5,
+      fontSize: '10.5',
+      style: {
+        color: 'var(--color-dark-contrast)',
+        textAlign: 'center',
+      },
+    };
+  }
+
+  barRectProps(segment: AnswerSegment) {
+    return {
+      x: segment.x,
+      y: 0,
+      width: segment.width >= 0 ? segment.width : 0,
+      height: this.barHeight,
+      fill: 'var(--color-background)',
+      rx: this.barHeight / 2,
+      ry: this.barHeight / 2,
+    };
+  }
+
+  barRectGradientProps(index: number, i: number, segment: AnswerSegment) {
+    return {
+      x: segment.x,
+      y: 0,
+      width: segment.width >= 0 ? segment.width : 0,
+      height: this.barHeight,
+      fill: `url(#${this.gradientId(index, i)})`,
+      rx: this.barHeight / 2,
+      ry: this.barHeight / 2,
+      style: {
+        strokeWidth: 6,
+        stroke: 'var(--color-background)',
+        backgroundColor: 'var(--color-background)',
+      },
+    };
+  }
+
+  percentageRectProps(segment: AnswerSegment) {
+    return {
+      x: segment.x + segment.width - 55,
+      y: 0,
+      width: 30,
+      height: 12,
+      fill: 'var(--color-background)',
+      rx: 12 / 2.5,
+      ry: 12 / 2.5,
+    };
+  }
+
+  percentageTextProps(segment: AnswerSegment) {
+    return {
+      x: segment.x + segment.width - 50,
+      y: 7.5,
+      fontSize: '10.5',
+      style: {
+        color: 'var(--color-dark-contrast)',
+        textAlign: 'center',
+      },
+    };
+  }
+
+  avatarStyle(segment: AnswerSegment) {
+    return {
+      left: `${segment.x}px`,
+      width: `${segment.width}px`,
+    };
+  }
+
+  segmentTextStyle(segment: AnswerSegment) {
+    return {
+      left: `${segment.x}px`,
+      width: `${segment.width}px`,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      textShadow:
+        this.selectedParticipantIds.length > 0
+          ? '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)'
+          : 'unset',
+    };
+  }
+
+  carouselIconStyle(segment: AnswerSegment) {
+    return {
+      color:
+        this.selectedParticipantIds.length <= 0
+          ? segment.avatars[0].color
+          : this.getColor(segment)[0],
+    };
+  }
+
+  filteredAvatars(segment: AnswerSegment) {
+    return segment.avatars.filter((av) =>
+      this.selectedParticipantIds.includes(av.id)
+    );
+  }
+
+  shouldRenderSlider(questionData: QuestionData, index: number) {
+    return (
+      (this.computedSegments[index]?.length &&
+        questionData.questionType === 'slider') ||
+      questionData.questionType === 'number' ||
+      questionData.questionType === 'rating'
+    );
+  }
+
+  shouldRenderTextCarousel(questionData: QuestionData, index: number) {
+    return (
+      this.computedSegments[index]?.length &&
+      questionData.questionType === 'text'
+    );
+  }
+
+  shouldRenderBarSegments(index: number) {
+    return !!this.computedSegments[index]?.length;
+  }
+
+  isSliderEdge(x: number) {
+    return (
+      x === this.paddingSlider ||
+      x === this.parentWidth * this.barWidthPercentage - this.paddingSlider
+    );
+  }
+
+  indexOfSegment(segment: AnswerSegment) {
+    return this.computedSegments.findIndex((segments) =>
+      segments.includes(segment)
+    );
+  }
+
+  indexOfAnswer(segment: AnswerSegment) {
+    return this.computedSegments[this.indexOfSegment(segment)].indexOf(segment);
   }
 }
 </script>
@@ -612,7 +708,7 @@ export default class StackedBarChart extends Vue {
   width: 1.5rem;
   height: 1.5rem;
   transform: scale(1);
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, color 0.3s ease;
 }
 
 .carouselColorItem:hover {
