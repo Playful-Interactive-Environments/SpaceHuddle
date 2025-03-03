@@ -350,12 +350,12 @@ export default class Analytics extends Vue {
       task.modules.find((module) => module.name === 'personalityTest')
     );
     this.surveyTasks = this.otherTasks.filter((task) =>
-      task.modules.find((module) => module.name === 'survey')
+      task.modules.find((module) => module.name === 'survey' || module.name === 'quiz')
     );
     this.otherTasks = this.otherTasks.filter((task) =>
       task.modules.find(
         (module) =>
-          module.name !== 'personalityTest' && module.name !== 'survey'
+          module.name !== 'personalityTest' && module.name !== 'survey' && module.name !== 'quiz'
       )
     );
 

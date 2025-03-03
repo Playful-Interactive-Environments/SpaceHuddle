@@ -397,7 +397,7 @@
         },
         "stackedBarCharts": {
           "selectTask": "select Task",
-          "survey": "Survey"
+          "survey": "Survey or Quiz"
         },
         "radarCharts": {
           "primary": "primary class",
