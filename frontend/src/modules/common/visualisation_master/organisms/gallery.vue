@@ -4,7 +4,7 @@
       v-if="ideas.length > 0"
       :height="`${this.contentHeight}px`"
       :type="type"
-      arrow="always"
+      :arrow="arrow"
       :initial-index="0"
       :interval="paused ? 0 : 7000 / timeModifier"
       v-on:change="galleryIndexChanged"
@@ -50,6 +50,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: false }) readonly paused!: boolean;
   @Prop({default: 'card'}) readonly type!: string;
+  @Prop({default: 'always'}) readonly arrow!: string;
   galleryIndex = 0;
 
   contentHeight = 100;
@@ -81,6 +82,13 @@ export default class PublicScreen extends Vue {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.el-carousel::v-deep(.el-carousel__item)::-webkit-scrollbar {
+  display: none;
 }
 
 .public-idea {

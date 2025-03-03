@@ -71,6 +71,8 @@
               :task-id="taskId"
               :ideas="value.ideas"
               :time-modifier="1"
+              :type="''"
+              :arrow="'hover'"
             />
             <span v-else>---</span>
           </span>
