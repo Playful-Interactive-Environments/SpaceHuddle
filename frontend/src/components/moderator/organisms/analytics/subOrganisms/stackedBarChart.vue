@@ -54,7 +54,7 @@
                 <circle
                   class="cursorPointer"
                   v-bind="circleProps(segment, questionData)"
-                  @click="changeParticipantSelection(segment)"
+                  @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
                 />
                 <text
                   class="circleLabel"
@@ -88,7 +88,7 @@
               class="carouselColorItem cursorPointer"
               :icon="segment.avatars[0].symbol"
               :style="carouselIconStyle(segment)"
-              @click="changeParticipantSelection(segment)"
+              @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
             />
           </el-carousel-item>
         </el-carousel>
@@ -103,7 +103,7 @@
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
             class="barSegmentElement cursorPointer"
-            @click="changeParticipantSelection(segment)"
+            @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
           >
             <defs>
               <linearGradient :id="gradientId(index, i)" v-bind="gradientProps">
@@ -117,7 +117,10 @@
               </linearGradient>
             </defs>
             <rect v-bind="barRectProps(segment)" />
-            <rect class="barRectGradient" v-bind="barRectGradientProps(index, i, segment)" />
+            <rect
+              class="barRectGradient"
+              v-bind="barRectGradientProps(index, i, segment)"
+            />
             <g class="barSegmentPercentages">
               <rect v-bind="percentageRectProps(segment)" />
               <text
@@ -137,10 +140,12 @@
           :style="avatarStyle(segment)"
         >
           <font-awesome-icon
+            class="segment-avatars-icon"
             v-for="avatar in filteredAvatars(segment)"
             :key="avatar.id"
             :icon="avatar.symbol"
             :style="{ color: avatar.color }"
+            @click="participantSelectionChanged([avatar.id])"
           />
         </div>
         <div
@@ -148,7 +153,7 @@
           :key="'text-' + i"
           class="segment-text oneLineText"
           :style="segmentTextStyle(segment)"
-          @click="changeParticipantSelection(segment)"
+          @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
         >
           <ToolTip :content="segment.answer" :show-after="200">
             <span>{{ segment.answer }}</span>
@@ -337,11 +342,6 @@ export default class StackedBarChart extends Vue {
     }
 
     return colors;
-  }
-
-  changeParticipantSelection(segment: AnswerSegment): void {
-    const participantIds = segment.avatars.map((avatar) => avatar.id);
-    this.participantSelectionChanged(participantIds);
   }
 
   participantSelectionChanged(ids: string[] | null) {
@@ -655,11 +655,19 @@ export default class StackedBarChart extends Vue {
   justify-content: right;
   align-items: center;
   top: 75%;
-  * {
+  .segment-avatars-icon {
     background-color: var(--color-background);
     padding: 0.3rem;
     border-radius: 50%;
     margin-left: -0.4rem;
+
+    cursor: pointer;
+    transform: scale(1);
+    transition: transform 0.3s ease;
+  }
+  .segment-avatars-icon:hover {
+    z-index: 10;
+    transform: scale(1.15);
   }
 }
 
