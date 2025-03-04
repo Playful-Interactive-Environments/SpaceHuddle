@@ -71,6 +71,26 @@
             </g>
           </g>
         </svg>
+        <div
+          v-for="(segment, i) in computedSegments[index]"
+          :key="'text-' + i"
+          class="segment-avatars-circle"
+          :style="{
+            left: `${
+              calculateCircleX(segment, questionData) - segment.width / 2
+            }px`,
+            width: `${segment.width}px`,
+          }"
+        >
+          <font-awesome-icon
+            class="segment-avatars-icon"
+            v-for="avatar in filteredAvatars(segment)"
+            :key="avatar.id"
+            :icon="avatar.symbol"
+            :style="{ color: avatar.color }"
+            @click="participantSelectionChanged([avatar.id])"
+          />
+        </div>
       </div>
       <div
         v-else-if="shouldRenderTextCarousel(questionData, index)"
@@ -241,7 +261,7 @@ export default class StackedBarChart extends Vue {
   parentWidth = 0;
   resizeObserver: ResizeObserver | null = null;
 
-  circleRadius = 8;
+  circleRadius = 9;
 
   paddingSlider = this.circleRadius * 1.5;
 
@@ -482,13 +502,18 @@ export default class StackedBarChart extends Vue {
         this.indexOfSegment(segment),
         this.indexOfAnswer(segment)
       )})`,
+      style: {
+        strokeWidth: 3,
+        stroke: 'var(--color-background)',
+        backgroundColor: 'var(--color-background)',
+      }
     };
   }
 
   circleTextProps(segment: AnswerSegment, questionData: QuestionData) {
     return {
       x: this.calculateCircleX(segment, questionData),
-      y: 7.5,
+      y: this.barHeight/2 + 5.25,
       fontSize: '10.5',
       style: {
         color: 'var(--color-dark-contrast)',
@@ -690,20 +715,33 @@ export default class StackedBarChart extends Vue {
   justify-content: right;
   align-items: center;
   top: 75%;
-  .segment-avatars-icon {
-    background-color: var(--color-background);
-    padding: 0.3rem;
-    border-radius: 50%;
-    margin-left: -0.4rem;
 
-    cursor: pointer;
-    transform: scale(1);
-    transition: transform 0.3s ease;
-  }
-  .segment-avatars-icon:hover {
-    z-index: 10;
-    transform: scale(1.15);
-  }
+  transform: translateX(0.2rem);
+}
+
+.segment-avatars-circle {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 60%;
+
+  transform: translateX(0.2rem);
+}
+
+.segment-avatars-icon {
+  background-color: var(--color-background);
+  padding: 0.3rem;
+  border-radius: 50%;
+  margin-left: -0.4rem;
+
+  cursor: pointer;
+  transform: scale(1);
+  transition: transform 0.3s ease;
+}
+.segment-avatars-icon:hover {
+  z-index: 10;
+  transform: scale(1.15);
 }
 
 .barSegmentPercentages {
@@ -762,6 +800,7 @@ export default class StackedBarChart extends Vue {
   .circleLabel {
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
   }
 }
 
