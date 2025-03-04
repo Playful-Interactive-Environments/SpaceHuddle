@@ -67,16 +67,16 @@
           </span>
           <div v-else-if="value.id === 'ideas'" class="tableIdeaGallery">
             <span>
-            {{ formatValue(value) }}
-            {{ getUnit(value) }}
-          </span>
+              {{ formatValue(value) }}
+              {{ getUnit(value) }}
+            </span>
             <Gallery
               v-if="value.ideas && value.ideas.length > 0"
               :task-id="taskId"
               :ideas="value.ideas"
               :time-modifier="1"
               :type="''"
-              :arrow="'hover'"
+              :arrow="value.ideas.length <= 1 ? 'never' : 'hover'"
             />
             <span v-else>---</span>
           </div>
@@ -276,6 +276,9 @@ export default class Highscore extends Vue {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    * {
+      min-width: 20%;
+    }
   }
 }
 
