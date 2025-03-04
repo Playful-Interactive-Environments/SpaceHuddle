@@ -705,6 +705,9 @@ export default class StackedBarChart extends Vue {
     justify-content: center;
     align-items: center;
     flex-wrap: nowrap;
+    span {
+      width: 100%;
+    }
   }
 }
 

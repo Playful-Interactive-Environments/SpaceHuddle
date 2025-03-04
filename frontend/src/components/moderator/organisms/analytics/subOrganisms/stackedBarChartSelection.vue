@@ -3,7 +3,7 @@
     <el-card
       class="stackedChartsSelectionContainer"
       v-for="(survey, index) in tableArray"
-      :key="survey?.taskId"
+      :key="survey?.taskData.taskId"
       shadow="never"
       body-style="text-align: center"
       :class="{ addOn__boarder: !survey }"
@@ -23,7 +23,7 @@
               :style="{ color: getColorOfType(TaskType.INFORMATION) }"
             />
             <p class="oneLineText stackedChartsTaskName">
-              {{ survey ? survey.title : 'select survey' }}
+              {{ survey ? survey.taskData.taskName : 'select survey' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
             </p>
           </div>
@@ -31,10 +31,10 @@
             <el-dropdown-menu>
               <el-dropdown-item
                 v-for="sv in surveyData"
-                :key="sv.taskId"
+                :key="sv.taskData.taskId"
                 :command="sv"
               >
-                {{ sv.title }}
+                {{ sv.taskData.taskName }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -49,8 +49,11 @@
       <stacked-bar-chart
         v-if="survey"
         class="stackedChart"
-        :task-id="survey.taskId"
-        :has-correct="survey.moduleName === 'quiz' || survey.moduleName === 'talk'"
+        :task-id="survey.taskData.taskId"
+        :has-correct="
+          survey.taskData.moduleName === 'quiz' ||
+          survey.taskData.moduleName === 'talk'
+        "
         :chart-data="survey.questions"
         :color-theme="colorTheme"
         :color-correct="'var(--color-brainstorming)'"
@@ -76,19 +79,55 @@
         >
           <div class="el-dropdown-link">
             <p class="oneLineText stackedChartsTaskName">
-              {{ $t('moderator.organism.analytics.stackedBarCharts.selectTask') }}
+              {{
+                $t('moderator.organism.analytics.stackedBarCharts.selectTask')
+              }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
             </p>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="sv in surveyData"
-                :key="sv.taskId"
-                :command="sv"
+              <template
+                v-for="(sv, index) in surveyData"
+                :key="sv.taskData.taskId"
               >
-                {{ sv.title }}
-              </el-dropdown-item>
+                <el-dropdown-item
+                  v-if="
+                    (surveyData[index - 1] &&
+                      sv.taskData.topicOrder !==
+                        surveyData[index - 1].taskData.topicOrder) ||
+                    index === 0
+                  "
+                  class="heading oneLineText"
+                  :divided="true"
+                  :style="{
+                    pointerEvents: 'none',
+                    paddingBottom: '0.02rem',
+                    paddingTop: '0.02rem',
+                  }"
+                  disabled
+                >
+                  {{ sv.taskData.topicName }}
+                </el-dropdown-item>
+                <el-dropdown-item
+                  :command="sv"
+                  :divided="
+                    (surveyData[index - 1] &&
+                      sv.taskData.topicOrder !==
+                        surveyData[index - 1].taskData.topicOrder) ||
+                    index === 0
+                  "
+                >
+                  <font-awesome-icon
+                    class="axisIcon"
+                    :icon="getIconOfType(TaskType.INFORMATION)"
+                    :style="{
+                      color: getColorOfType(TaskType.INFORMATION),
+                    }"
+                  />
+                  <span>&nbsp;{{ sv.taskData.taskName }}</span>
+                </el-dropdown-item>
+              </template>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -101,7 +140,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
-import { Avatar, ParticipantInfo } from '@/types/api/Participant';
+import { Avatar } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 
@@ -118,9 +157,14 @@ interface QuestionData {
 }
 
 interface SurveyData {
-  taskId: string;
-  moduleName: string;
-  title: string;
+  taskData: {
+    moduleName: string;
+    taskId: string;
+    taskName: string;
+    taskType: TaskType;
+    topicName: string;
+    topicOrder: number;
+  };
   questions: QuestionData[];
 }
 

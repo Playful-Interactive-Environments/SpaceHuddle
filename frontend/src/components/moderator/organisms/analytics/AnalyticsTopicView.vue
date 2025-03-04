@@ -54,7 +54,7 @@
         </span>
       </template>
     </el-tree>
-    <analytics :session-id="sessionId" :received-tasks="selectedTasks" />
+    <analytics :session-id="sessionId" :received-tasks="selectedTasks" :topics="topics" />
   </el-dialog>
 </template>
 

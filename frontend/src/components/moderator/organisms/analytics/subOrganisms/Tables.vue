@@ -79,13 +79,44 @@
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="ax in axes"
-                :key="ax.taskId"
-                :command="ax"
-              >
-                {{ ax.taskData.taskName }}
-              </el-dropdown-item>
+              <template v-for="(ax, index) in axes" :key="ax.taskId">
+                <el-dropdown-item
+                  v-if="
+                    (axes[index - 1] &&
+                            ax.taskData.topicOrder !==
+                              axes[index - 1].taskData.topicOrder) ||
+                          index === 0
+                  "
+                  class="heading oneLineText"
+                  :divided="true"
+                  :style="{
+                    pointerEvents: 'none',
+                    paddingBottom: '0.02rem',
+                    paddingTop: '0.02rem',
+                  }"
+                  disabled
+                >
+                  {{ ax.taskData.topicName }}
+                </el-dropdown-item>
+                <el-dropdown-item
+                  :command="ax"
+                  :divided="
+                    (axes[index - 1] &&
+                      ax.taskData.topicOrder !==
+                        axes[index - 1].taskData.topicOrder) ||
+                    index === 0
+                  "
+                >
+                  <font-awesome-icon
+                    class="axisIcon"
+                    :icon="getIconOfAxis(ax)"
+                    :style="{
+                      color: getColorOfAxis(ax),
+                    }"
+                  />
+                  <span>&nbsp;{{ ax.taskData.taskName }}</span>
+                </el-dropdown-item>
+              </template>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -99,12 +130,12 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import Highscore from '@/components/moderator/organisms/analytics/Highscore.vue';
-import {Avatar, ParticipantInfo} from '@/types/api/Participant';
+import { Avatar, ParticipantInfo } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import { HighScoreEntry } from '@/components/moderator/organisms/analytics/Highscore.vue';
-import {TaskParticipantIterationStep} from "@/types/api/TaskParticipantIterationStep";
-import {Idea} from "@/types/api/Idea";
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import { Idea } from '@/types/api/Idea';
 
 interface SubAxis {
   id: string;
@@ -116,6 +147,8 @@ interface Axis {
   taskData: {
     taskType: TaskType;
     taskName: string;
+    topicName: string;
+    topicOrder: number;
     moduleName: string;
     initOrder: number;
   };

@@ -114,6 +114,7 @@ import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import StackedBarChartSelection from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChartSelection.vue';
+import { Topic } from '@/types/api/Topic';
 
 interface subAxis {
   id: string;
@@ -125,6 +126,8 @@ interface Axis {
   taskData: {
     taskType: TaskType;
     taskName: string;
+    topicName: string;
+    topicOrder: number;
     moduleName: string;
     initOrder: number;
   };
@@ -177,6 +180,7 @@ interface QuestionData {
 export default class Analytics extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly task!: Task;
+  @Prop() readonly topics!: Topic[];
   @Prop() readonly receivedTasks!: Task[];
   @Prop() readonly sessionId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
@@ -201,6 +205,8 @@ export default class Analytics extends Vue {
     taskData: {
       taskType: TaskType;
       taskName: string;
+      topicName: string;
+      topicOrder: number;
       moduleName: string;
       initOrder: number;
     };
@@ -218,9 +224,14 @@ export default class Analytics extends Vue {
   selectedParticipantIds: string[] = [];
 
   surveyData: {
-    taskId: string;
-    moduleName: string;
-    title: string;
+    taskData: {
+      moduleName: string;
+      taskId: string;
+      taskName: string;
+      taskType: TaskType;
+      topicName: string;
+      topicOrder: number;
+    };
     questions: QuestionData[];
   }[] = [];
 
@@ -588,6 +599,8 @@ export default class Analytics extends Vue {
       taskData: {
         taskType: task.taskType as TaskType,
         taskName: task.name,
+        topicName: this.topics[task.topicOrder].title,
+        topicOrder: task.topicOrder,
         moduleName: task.modules[0].name,
         initOrder: Number(`${task.topicOrder}000${task.order}`),
       },
@@ -659,9 +672,14 @@ export default class Analytics extends Vue {
   ): void {
     // Create a task entry with taskId and title
     const taskEntry = {
-      taskId: task.id,
-      moduleName: task.modules[0].name,
-      title: task.name,
+      taskData: {
+        moduleName: task.modules[0].name,
+        taskId: task.id,
+        taskName: task.name,
+        taskType: task.taskType as TaskType,
+        topicName: this.topics[task.topicOrder].title,
+        topicOrder: task.topicOrder,
+      },
       questions: [] as {
         question: string;
         questionType: string;
@@ -743,8 +761,15 @@ export default class Analytics extends Vue {
     taskEntry.questions = Object.values(questionData);
 
     // Push the task entry into surveyData
-    if (!this.surveyData.some((entry) => entry.taskId === taskEntry.taskId)) {
+    if (
+      !this.surveyData.some(
+        (entry) => entry.taskData.taskId === taskEntry.taskData.taskId
+      )
+    ) {
       this.surveyData.push(taskEntry);
+      this.surveyData.sort(
+        (a, b) => a.taskData.topicOrder - b.taskData.topicOrder
+      );
     }
   }
 
@@ -756,6 +781,8 @@ export default class Analytics extends Vue {
         taskData: {
           taskType: TaskType;
           taskName: string;
+          topicName: string;
+          topicOrder: number;
           moduleName: string;
           initOrder: number;
         };
@@ -779,6 +806,8 @@ export default class Analytics extends Vue {
     taskData: {
       taskType: TaskType;
       taskName: string;
+      topicName: string;
+      topicOrder: number;
       moduleName: string;
       initOrder: number;
     };
@@ -836,58 +865,62 @@ export default class Analytics extends Vue {
   ];
 
   CalculateAxes(): Axis[] {
-    return this.steps.map((step) => {
-      const { taskId, taskData } = step;
-      const axisValues = this.wantedValues.reduce((acc, value) => {
-        if (
-          ((taskData.taskType as string) === 'BRAINSTORMING' &&
-            value === 'stars') ||
-          ((taskData.taskType as string) !== 'BRAINSTORMING' &&
-            value === 'ideas')
-        ) {
-          return acc;
-        }
-
-        const maxValue = step.steps.reduce((max, subStep) => {
-          const sources = [
-            subStep,
-            subStep.parameter,
-            subStep.parameter?.gameplayResult,
-            subStep.parameter?.drive,
-            subStep.parameter?.game,
-          ];
-          for (const source of sources) {
-            if (source && value in source) {
-              if (Array.isArray(source[value])) {
-                return Math.max(max, source[value].length);
-              }
-              return Math.max(max, source[value]);
-            }
+    return this.steps
+      .map((step) => {
+        const { taskId, taskData } = step;
+        const axisValues = this.wantedValues.reduce((acc, value) => {
+          if (
+            ((taskData.taskType as string) === 'BRAINSTORMING' &&
+              value === 'stars') ||
+            ((taskData.taskType as string) !== 'BRAINSTORMING' &&
+              value === 'ideas')
+          ) {
+            return acc;
           }
-          return max;
-        }, 0);
 
-        if (maxValue) {
-          acc.push({
-            id: value,
-            range: value === 'stars' ? 3 : Math.ceil(maxValue),
-          });
-        }
+          const maxValue = step.steps.reduce((max, subStep) => {
+            const sources = [
+              subStep,
+              subStep.parameter,
+              subStep.parameter?.gameplayResult,
+              subStep.parameter?.drive,
+              subStep.parameter?.game,
+            ];
+            for (const source of sources) {
+              if (source && value in source) {
+                if (Array.isArray(source[value])) {
+                  if (value !== 'ideas') {
+                    return Math.max(max, source[value].length);
+                  }
+                }
+                return Math.max(max, source[value]);
+              }
+            }
+            return max;
+          }, 0);
 
-        return acc;
-      }, [] as { id: string; range: number }[]);
+          if (maxValue) {
+            acc.push({
+              id: value,
+              range: value === 'stars' ? 3 : Math.ceil(maxValue),
+            });
+          }
 
-      const active = axisValues.length > 0;
+          return acc;
+        }, [] as { id: string; range: number }[]);
 
-      return {
-        taskId,
-        taskData,
-        axisValues,
-        categoryActive: active ? axisValues[0]?.id || '' : '',
-        active,
-        available: active,
-      };
-    });
+        const active = axisValues.length > 0;
+
+        return {
+          taskId,
+          taskData,
+          axisValues,
+          categoryActive: active ? axisValues[0]?.id || '' : '',
+          active,
+          available: active,
+        };
+      })
+      .sort((a, b) => a.taskData.topicOrder - b.taskData.topicOrder);
   }
 
   CalculateDataEntries(): DataEntry[] {

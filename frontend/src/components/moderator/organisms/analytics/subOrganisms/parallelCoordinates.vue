@@ -318,7 +318,7 @@
                 v-on:command="updateSubAxis(index, $event)"
                 trigger="click"
                 placement="bottom"
-                :style="{opacity: axis.axisValues.length > 1 ? '1' : '0'}"
+                :style="{ opacity: axis.axisValues.length > 1 ? '1' : '0' }"
                 :disabled="axis.axisValues.length <= 1"
               >
                 <div class="el-dropdown-link cogButton">
@@ -363,25 +363,51 @@
                 </div>
                 <template #dropdown>
                   <el-dropdown-menu class="centered-dropdown-menu">
-                    <el-dropdown-item
-                      v-for="(ax, axIndex) in availableAxes.filter(
-                        (avAxis) =>
-                          !this.axes.includes(avAxis) || !avAxis.active
-                      )"
+                    <template
+                      v-for="(ax, axIndex) in availableAxesForSelection"
                       :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
-                      :command="ax ? ax : null"
                     >
-                      <div class="centered-dropdown-item">
-                        <font-awesome-icon
-                          class="axisIcon"
-                          :icon="getIconOfAxis(ax)"
-                          :style="{
-                            color: getColorOfAxis(ax),
-                          }"
-                        />
-                        &nbsp;{{ ax ? ax.taskData.taskName : 'N/A' }}
-                      </div>
-                    </el-dropdown-item>
+                      <el-dropdown-item
+                        v-if="
+                          (availableAxesForSelection[axIndex - 1] &&
+                            ax.taskData.topicOrder !==
+                              availableAxesForSelection[axIndex - 1].taskData
+                                .topicOrder) ||
+                          axIndex === 0
+                        "
+                        class="heading oneLineText"
+                        :divided="true"
+                        :style="{
+                          pointerEvents: 'none',
+                          paddingBottom: '0.02rem',
+                          paddingTop: '0.02rem',
+                        }"
+                        disabled
+                      >
+                        {{ ax.taskData.topicName }}
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        :command="ax ? ax : null"
+                        :divided="
+                          (availableAxesForSelection[axIndex - 1] &&
+                            ax.taskData.topicOrder !==
+                              availableAxesForSelection[axIndex - 1].taskData
+                                .topicOrder) ||
+                          axIndex === 0
+                        "
+                      >
+                        <div class="centered-dropdown-item">
+                          <font-awesome-icon
+                            class="axisIcon"
+                            :icon="getIconOfAxis(ax)"
+                            :style="{
+                              color: getColorOfAxis(ax),
+                            }"
+                          />
+                          &nbsp;{{ ax ? ax.taskData.taskName : 'N/A' }}
+                        </div>
+                      </el-dropdown-item>
+                    </template>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -436,23 +462,54 @@
               <font-awesome-icon :icon="['fas', 'circle-plus']" />
             </div>
             <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item
-                  v-for="(ax, axIndex) in availableAxes.filter(
+              <el-dropdown-menu class="centered-dropdown-menu">
+                <template
+                  v-for="(ax, axIndex) in availableAxesForSelection.filter(
                     (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
                   )"
                   :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
-                  :command="ax ? ax : null"
                 >
-                  <font-awesome-icon
-                    class="axisIcon"
-                    :icon="getIconOfAxis(ax)"
+                  <el-dropdown-item
+                    v-if="
+                      (availableAxesForSelection[axIndex - 1] &&
+                        ax.taskData.topicOrder !==
+                          availableAxesForSelection[axIndex - 1].taskData
+                            .topicOrder) ||
+                      axIndex === 0
+                    "
+                    class="heading oneLineText"
+                    :divided="true"
                     :style="{
-                      color: getColorOfAxis(ax),
+                      pointerEvents: 'none',
+                      paddingBottom: '0.02rem',
+                      paddingTop: '0.02rem',
                     }"
-                  />
-                  &nbsp;{{ ax ? ax.taskData.taskName : 'N/A' }}
-                </el-dropdown-item>
+                    disabled
+                  >
+                    {{ ax.taskData.topicName }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    :command="ax ? ax : null"
+                    :divided="
+                      (availableAxesForSelection[axIndex - 1] &&
+                        ax.taskData.topicOrder !==
+                          availableAxesForSelection[axIndex - 1].taskData
+                            .topicOrder) ||
+                      axIndex === 0
+                    "
+                  >
+                    <div class="centered-dropdown-item">
+                      <font-awesome-icon
+                        class="axisIcon"
+                        :icon="getIconOfAxis(ax)"
+                        :style="{
+                          color: getColorOfAxis(ax),
+                        }"
+                      />
+                      &nbsp;{{ ax ? ax.taskData.taskName : 'N/A' }}
+                    </div>
+                  </el-dropdown-item>
+                </template>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -508,6 +565,8 @@ interface Axis {
   taskData: {
     taskType: TaskType;
     taskName: string;
+    topicName: string;
+    topicOrder: number;
     moduleName: string;
     initOrder: number;
   };
@@ -605,6 +664,12 @@ export default class ParallelCoordinates extends Vue {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
+  }
+
+  get availableAxesForSelection(): Axis[] {
+    return this.availableAxes.filter(
+      (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
+    );
   }
 
   participantSelectionChanged(id: string) {
