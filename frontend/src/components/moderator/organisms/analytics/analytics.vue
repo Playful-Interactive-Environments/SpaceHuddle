@@ -857,7 +857,6 @@ export default class Analytics extends Vue {
     'lifetime',
     'pointsSpent',
     'count',
-    'ideaCount',
     'ratingSum',
     'averageRating',
     'bestIdeaAverageRating',
@@ -889,9 +888,7 @@ export default class Analytics extends Vue {
             for (const source of sources) {
               if (source && value in source) {
                 if (Array.isArray(source[value])) {
-                  if (value !== 'ideas') {
-                    return Math.max(max, source[value].length);
-                  }
+                  return Math.max(max, source[value].length);
                 }
                 return Math.max(max, source[value]);
               }
