@@ -266,6 +266,11 @@ export default class Analytics extends Vue {
     cashService.deregisterAllGet(this.updateTasks);
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateParticipants);
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateBrainstormings);
+    cashService.deregisterAllGet(this.updatePersonalityTests);
+    cashService.deregisterAllGet(this.updateSurveyTasks);
     cashService.deregisterAllGet(this.updateIterationSteps);
     this.deregisterSteps();
   }
@@ -352,12 +357,16 @@ export default class Analytics extends Vue {
       task.modules.find((module) => module.name === 'personalityTest')
     );
     this.surveyTasks = this.otherTasks.filter((task) =>
-      task.modules.find((module) => module.name === 'survey' || module.name === 'quiz')
+      task.modules.find(
+        (module) => module.name === 'survey' || module.name === 'quiz'
+      )
     );
     this.otherTasks = this.otherTasks.filter((task) =>
       task.modules.find(
         (module) =>
-          module.name !== 'personalityTest' && module.name !== 'survey' && module.name !== 'quiz'
+          module.name !== 'personalityTest' &&
+          module.name !== 'survey' &&
+          module.name !== 'quiz'
       )
     );
 
@@ -395,6 +404,8 @@ export default class Analytics extends Vue {
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateBrainstormings);
+    cashService.deregisterAllGet(this.updatePersonalityTests);
+    cashService.deregisterAllGet(this.updateSurveyTasks);
     cashService.deregisterAllGet(this.updateIterationSteps);
     for (const task of tasks) {
       if ((task.taskType as string) === 'PLAYING') {
@@ -658,7 +669,11 @@ export default class Analytics extends Vue {
           minValue?: number;
           maxValue?: number;
         };
-        answers: { avatar: Avatar; answer: string[]; correct?: boolean[] | null }[];
+        answers: {
+          avatar: Avatar;
+          answer: string[];
+          correct?: boolean[] | null;
+        }[];
       }[],
     };
 
@@ -668,7 +683,11 @@ export default class Analytics extends Vue {
         question: string;
         questionType: string;
         parameter: { minValue?: number; maxValue?: number };
-        answers: { avatar: Avatar; answer: string[]; correct?: boolean[] | null }[];
+        answers: {
+          avatar: Avatar;
+          answer: string[];
+          correct?: boolean[] | null;
+        }[];
       }
     > = {};
 
@@ -724,7 +743,9 @@ export default class Analytics extends Vue {
     taskEntry.questions = Object.values(questionData);
 
     // Push the task entry into surveyData
-    this.surveyData.push(taskEntry);
+    if (!this.surveyData.some((entry) => entry.taskId === taskEntry.taskId)) {
+      this.surveyData.push(taskEntry);
+    }
   }
 
   getAllParticipantData() {
