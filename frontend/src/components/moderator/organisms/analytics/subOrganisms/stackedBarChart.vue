@@ -54,7 +54,11 @@
                 <circle
                   class="cursorPointer"
                   v-bind="circleProps(segment, questionData)"
-                  @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
+                  @click="
+                    participantSelectionChanged(
+                      segment.avatars.map((avatar) => avatar.id)
+                    )
+                  "
                 />
                 <text
                   class="circleLabel"
@@ -88,7 +92,11 @@
               class="carouselColorItem cursorPointer"
               :icon="segment.avatars[0].symbol"
               :style="carouselIconStyle(segment)"
-              @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
+              @click="
+                participantSelectionChanged(
+                  segment.avatars.map((avatar) => avatar.id)
+                )
+              "
             />
           </el-carousel-item>
         </el-carousel>
@@ -103,7 +111,11 @@
             v-for="(segment, i) in computedSegments[index]"
             :key="i"
             class="barSegmentElement cursorPointer"
-            @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
+            @click="
+              participantSelectionChanged(
+                segment.avatars.map((avatar) => avatar.id)
+              )
+            "
           >
             <defs>
               <linearGradient :id="gradientId(index, i)" v-bind="gradientProps">
@@ -151,12 +163,22 @@
         <div
           v-for="(segment, i) in computedSegments[index]"
           :key="'text-' + i"
-          class="segment-text oneLineText"
+          class="segment-text"
           :style="segmentTextStyle(segment)"
-          @click="participantSelectionChanged(segment.avatars.map((avatar) => avatar.id))"
+          @click="
+            participantSelectionChanged(
+              segment.avatars.map((avatar) => avatar.id)
+            )
+          "
         >
-          <ToolTip :content="segment.answer" :show-after="200">
-            <span>{{ segment.answer }}</span>
+          <ToolTip
+            :content="segment.answer"
+            :show-after="200"
+            class="segment-text-toolTip"
+          >
+            <div class="segment-text-toolTip oneLineText">
+              <span class="oneLineText">{{ segment.answer }}</span>
+            </div>
           </ToolTip>
         </div>
       </div>
@@ -642,10 +664,23 @@ export default class StackedBarChart extends Vue {
   font-size: var(--font-size-small);
   font-weight: bold;
   text-align: center;
-  padding: 0 2rem;
+
+  width: 100%;
+  height: 100%;
+
   color: var(--color-dark-contrast);
   transition: text-shadow 0.4s ease;
   cursor: pointer;
+  .segment-text-toolTip {
+    width: 100%;
+    height: 100%;
+    padding: 0 2rem;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
 }
 
 .segment-avatars {
