@@ -328,8 +328,9 @@ export default class StackedBarChart extends Vue {
     );
     const overlap = 10;
 
-    return Object.entries(answerDetails).map(
-      ([key, { count, avatars, isCorrect }], i) => {
+    return Object.entries(answerDetails)
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .map(([key, { count, avatars, isCorrect }], i) => {
         const width =
           (count / total) * (this.parentWidth * this.barWidthPercentage) -
           this.gapSize +
@@ -351,9 +352,9 @@ export default class StackedBarChart extends Vue {
 
         cumulativeX += width - overlap;
         return segment;
-      }
-    );
+      });
   }
+
 
   get computedSegments() {
     return this.chartData.map((question) =>
