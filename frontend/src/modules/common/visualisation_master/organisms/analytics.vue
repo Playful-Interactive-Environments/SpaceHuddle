@@ -1,5 +1,5 @@
 <template>
-  <AnalyticsChart :session-id="sessionId" :received-tasks="selectedTasks" />
+  <AnalyticsChart :session-id="sessionId" :received-tasks="selectedTasks" :topics="topics" />
 </template>
 
 <script lang="ts">

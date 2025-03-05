@@ -7,7 +7,12 @@
     :element-loading-text="$t('moderator.organism.analytics.loadingNoTasks')"
   >
     <div v-if="!loadingSteps" class="participantSelection">
-      <participant-selection :participants="participants" v-model:selectedParticipantIds="selectedParticipantIds" @participant-selected="participantSelectionChanged"/>
+      <participant-selection
+        :participants="participants"
+        v-model:selectedParticipantIds="selectedParticipantIds"
+        @participant-selected="participantSelectionChanged"
+        :style="{ borderBottom: '2px solid var(--color-background-dark)' }"
+      />
     </div>
     <div
       class="AnalyticsParallelCoordinates"
@@ -604,7 +609,7 @@ export default class Analytics extends Vue {
       taskData: {
         taskType: task.taskType as TaskType,
         taskName: task.name,
-        topicName: this.topics[task.topicOrder].title,
+        topicName: this.topics[task.topicOrder]?.title ?? '',
         topicOrder: task.topicOrder,
         moduleName: task.modules[0].name,
         initOrder: Number(`${task.topicOrder}000${task.order}`),
@@ -682,7 +687,7 @@ export default class Analytics extends Vue {
         taskId: task.id,
         taskName: task.name,
         taskType: task.taskType as TaskType,
-        topicName: this.topics[task.topicOrder].title,
+        topicName: this.topics[task.topicOrder]?.title ?? '',
         topicOrder: task.topicOrder,
       },
       questions: [] as {
