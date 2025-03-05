@@ -6,6 +6,9 @@
     :element-loading-background="'var(--color-background)'"
     :element-loading-text="$t('moderator.organism.analytics.loadingNoTasks')"
   >
+    <div v-if="!loadingSteps" class="participantSelection">
+      <participant-selection :participants="participants" v-model:selectedParticipantIds="selectedParticipantIds" @participant-selected="participantSelectionChanged"/>
+    </div>
     <div
       class="AnalyticsParallelCoordinates"
       v-loading="loadingSteps"
@@ -114,6 +117,7 @@ import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import StackedBarChartSelection from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChartSelection.vue';
+import ParticipantSelection from '@/components/moderator/organisms/analytics/subOrganisms/participantSelection.vue';
 import { Topic } from '@/types/api/Topic';
 
 interface subAxis {
@@ -175,6 +179,7 @@ interface QuestionData {
     RadarChart,
     Tables,
     ParallelCoordinates,
+    ParticipantSelection,
   },
 })
 export default class Analytics extends Vue {
@@ -993,6 +998,11 @@ export default class Analytics extends Vue {
   .AnalyticsTables,
   .AnalyticsParallelCoordinates {
     transition: opacity 3s ease;
+  }
+
+  .participantSelection {
+    position: relative;
+    width: 100%;
   }
 
   .RadarChartContainer {
