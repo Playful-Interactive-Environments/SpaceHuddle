@@ -998,6 +998,7 @@ export default class Analytics extends Vue {
   }
   .AnalyticsTables {
     width: 100%;
+    break-before: page;
   }
 
   .AnalyticsTables,
@@ -1017,6 +1018,7 @@ export default class Analytics extends Vue {
     align-items: center;
     gap: 2rem;
     overflow: hidden;
+    break-before: page;
     .radarChart {
       display: flex;
       flex-direction: column;
@@ -1033,14 +1035,7 @@ export default class Analytics extends Vue {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
-    .stackedBarChart {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      min-width: 47.5%;
-      max-width: 65%;
-    }
+    break-before: page;
   }
 
   .headingIcon {

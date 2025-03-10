@@ -234,6 +234,7 @@ export default class StackedBarCharts extends Vue {
 
 <style lang="scss" scoped>
 .stackedChartsContainer {
+  position: relative;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -252,6 +253,12 @@ export default class StackedBarCharts extends Vue {
 }
 
 @media (max-width: calc((700px * 2) + 12rem)) {
+  .stackedChartsSelectionContainer {
+    width: 100%;
+  }
+}
+
+@media print {
   .stackedChartsSelectionContainer {
     width: 100%;
   }

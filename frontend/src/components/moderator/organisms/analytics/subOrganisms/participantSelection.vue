@@ -50,6 +50,7 @@ export default class ParticipantSelection extends Vue {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
   padding: 1rem 2rem;
   font-size: var(--font-size-large);

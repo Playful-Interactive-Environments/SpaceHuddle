@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    ref="analyticsContainer"
     v-model="showSettings"
     :before-close="handleClose"
     width="calc(var(--app-width) * 0.8)"
@@ -8,7 +9,9 @@
       <div :style="{ display: 'flex' }">
         <span class="el-dialog__title">{{
           $t('moderator.organism.settings.analytics.header')
-        }}</span>
+        }}
+        <el-button @click="exportToPDF" class="exportButton"><font-awesome-icon :icon="['fas', 'file-export']" /></el-button>
+        </span>
       </div>
     </template>
     <el-tree
@@ -54,7 +57,14 @@
         </span>
       </template>
     </el-tree>
-    <analytics :session-id="sessionId" :received-tasks="selectedTasks" :topics="topics" />
+    <div class="analyticsContainer">
+      <analytics
+          ref="analyticsComponent"
+        :session-id="sessionId"
+        :received-tasks="selectedTasks"
+        :topics="topics"
+      />
+    </div>
   </el-dialog>
 </template>
 
@@ -77,6 +87,7 @@ import { Task } from '@/types/api/Task';
 import * as sessionService from '@/services/session-service';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import Analytics from '@/components/moderator/organisms/analytics/analytics.vue';
+import { createPdf, PDFOptions } from '@/utils/html2pdf';
 
 @Options({
   methods: { getColorOfType, getIconOfType },
@@ -246,6 +257,46 @@ export default class AnalyticsTopicView extends Vue {
   async onShowModalChanged(showModal: boolean): Promise<void> {
     this.showSettings = showModal;
   }
+
+  exportToPDF(): void {
+    const analyticsComponent = this.$refs.analyticsComponent as Analytics;
+    const element = analyticsComponent.$el;
+
+    // Get the dimensions of the parent container
+    console.log(analyticsComponent.$parent);
+    if (analyticsComponent.$parent) {
+      const widthInPixels = analyticsComponent.$parent.$el.clientWidth;
+      const heightInPixels = analyticsComponent.$parent.$el.clientHeight;
+
+      // Convert pixels to inches (1 inch = 96 pixels, approximately)
+      const widthInInches = widthInPixels / 96;
+      const heightInInches = heightInPixels / 96;
+
+      const margin = 0.5;
+
+      // Set the PDF options with the calculated dimensions
+      createPdf(element, {
+        margin: margin,
+        filename: `Analytics.pdf`,
+        image: {
+          type: 'jpeg',
+          quality: 0.98,
+        },
+        enableLinks: false,
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+        },
+        jsPDF: {
+          unit: 'in',
+          format: [widthInInches+margin, heightInInches+margin], // Use the calculated dimensions
+          orientation: 'landscape',
+        },
+      }).save();
+    } else {
+      console.error('Parent container not found');
+    }
+  }
 }
 </script>
 
@@ -264,5 +315,21 @@ export default class AnalyticsTopicView extends Vue {
   ::v-deep(.el-checkbox) {
     transform: scale(0.5);
   }
+}
+
+.exportButton {
+  margin-left: 0.5rem;
+  padding: 0;
+  background-color: transparent;
+}
+
+.exportButton:hover {
+  background-color: transparent;
+}
+
+.analyticsContainer {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background);
 }
 </style>
