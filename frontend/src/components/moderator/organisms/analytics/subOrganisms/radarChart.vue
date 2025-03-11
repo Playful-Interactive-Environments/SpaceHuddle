@@ -99,13 +99,13 @@
       </ToolTip>
     </div>
     <el-radio-group v-model="filterClass" class="classSelection">
-      <el-radio-button :label="'primary'">{{
+      <el-radio-button :label="'primary'" :value="'primary'">{{
         $t('moderator.organism.analytics.radarCharts.primary')
       }}</el-radio-button>
-      <el-radio-button :label="'secondary'">{{
+      <el-radio-button :label="'secondary'" :value="'secondary'">{{
         $t('moderator.organism.analytics.radarCharts.secondary')
       }}</el-radio-button>
-      <el-radio-button :label="'exception'">{{
+      <el-radio-button :label="'exception'" :value="'exception'">{{
         $t('moderator.organism.analytics.radarCharts.exception')
       }}</el-radio-button>
     </el-radio-group>
