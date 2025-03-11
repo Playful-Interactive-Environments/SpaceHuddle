@@ -64,6 +64,13 @@
         :received-tasks="selectedTasks"
         :topics="topics"
       />
+      <transition name="transition-anim">
+        <section class="pdf-preview" v-if="pdfFile">
+          <button @click.self="closePreview()">&times;</button>
+
+          <iframe :src="pdfFile" width="100%" height="100%" />
+        </section>
+      </transition>
     </div>
   </el-dialog>
 </template>
@@ -258,7 +265,8 @@ export default class AnalyticsTopicView extends Vue {
     this.showSettings = showModal;
   }
 
-  exportToPDF(): void {
+  pdfFile = null;
+  async exportToPDF(): Promise<void> {
     const analyticsComponent = this.$refs.analyticsComponent as Analytics;
     const element = analyticsComponent.$el;
 
@@ -268,14 +276,12 @@ export default class AnalyticsTopicView extends Vue {
       const widthInPixels = analyticsComponent.$parent.$el.clientWidth;
       const heightInPixels = analyticsComponent.$parent.$el.clientHeight;
 
-      // Convert pixels to inches (1 inch = 96 pixels, approximately)
       const widthInInches = widthInPixels / 96;
       const heightInInches = heightInPixels / 96;
 
       const margin = 0.5;
 
-      // Set the PDF options with the calculated dimensions
-      createPdf(element, {
+      const pdf = createPdf(element, {
         margin: margin,
         filename: `Analytics.pdf`,
         image: {
@@ -289,13 +295,18 @@ export default class AnalyticsTopicView extends Vue {
         },
         jsPDF: {
           unit: 'in',
-          format: [widthInInches+margin, heightInInches+margin], // Use the calculated dimensions
+          format: [widthInInches + margin, heightInInches + margin],
           orientation: 'landscape',
         },
-      }).save();
+      });
+      this.pdfFile = await pdf.output('bloburl');
     } else {
       console.error('Parent container not found');
     }
+  }
+
+  closePreview() {
+    this.pdfFile = null;
   }
 }
 </script>
@@ -331,5 +342,50 @@ export default class AnalyticsTopicView extends Vue {
   width: 100%;
   height: 100%;
   background-color: var(--color-background);
+}
+
+.pdf-preview {
+  position: fixed;
+  width: 65%;
+  min-width: 600px;
+  height: 80vh;
+  top: 100px;
+  z-index: 9999999;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 5px;
+  box-shadow: 0 0 10px #00000048;
+
+  button {
+    position: absolute;
+    top: -20px;
+    left: -15px;
+    width: 35px;
+    height: 35px;
+    background: #555;
+    border: 0;
+    box-shadow: 0 0 10px #00000048;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  iframe {
+    border: 0;
+  }
+}
+
+.transition-anim-enter-active,
+.transition-anim-leave-active {
+  transition: opacity 0.3s ease-in;
+}
+
+.transition-anim-enter,
+.transition-anim-leave-to {
+  opacity: 0;
 }
 </style>

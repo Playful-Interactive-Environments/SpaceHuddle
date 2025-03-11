@@ -150,7 +150,7 @@ export default class RadarChart extends Vue {
   taskType = TaskType.INFORMATION;
   normalizedDatasets: { data: number[]; avatar: Avatar }[] = [];
 
-  filterClass = 'exception';
+  filterClass = 'primary';
 
   getColorOfType(taskType: TaskType) {
     return getColorOfType(taskType);
