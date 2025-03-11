@@ -9,7 +9,10 @@
       <div :style="{ display: 'flex' }">
         <span class="el-dialog__title"
           >{{ $t('moderator.organism.settings.analytics.header') }}
-          <el-button @click="exportToPDF" class="exportButton"
+          <el-button
+            @click="exportToPDF"
+            class="exportButton"
+            :loading="isConverting"
             ><font-awesome-icon :icon="['fas', 'file-export']"
           /></el-button>
         </span>
@@ -26,7 +29,6 @@
       :props="{
         children: 'tasks',
         label: (treeData) => treeData.name || treeData.title,
-        //disabled: (data) => data.participantCount === 0,
         disabled: false,
       }"
       show-checkbox
@@ -134,7 +136,7 @@ export default class AnalyticsTopicView extends Vue {
     });
   }
 
-  @Watch('sessionId', { immediate: true })
+  /* @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
     this.topicsCashEntry = topicService.registerGetTopicsList(
       this.sessionId,
@@ -142,7 +144,7 @@ export default class AnalyticsTopicView extends Vue {
       EndpointAuthorisationType.MODERATOR,
       10
     );
-  }
+  }*/
 
   updateTasks(tasks: Task[], topicId: string): void {
     const topic = this.topics.find((topic) => topic.id === topicId);
@@ -222,16 +224,13 @@ export default class AnalyticsTopicView extends Vue {
   }
 
   get treeDataKey(): string {
-    // Generate a unique key based on the structure of treeData
     return JSON.stringify(this.treeData);
   }
 
   onCheckChange(): void {
-    // Get all checked nodes
-    const treeRef = this.$refs.tree as any; // Use a reference to the ElTree component
-    const checkedNodes = treeRef.getCheckedNodes(true); // Get all checked nodes, including child nodes
+    const treeRef = this.$refs.tree as any;
+    const checkedNodes = treeRef.getCheckedNodes(true);
 
-    // Filter only tasks (leaf nodes)
     this.selectedTasks = checkedNodes
       .filter((node: any) => !node.tasks)
       .sort(
@@ -254,6 +253,7 @@ export default class AnalyticsTopicView extends Vue {
   }
 
   handleClose(done: { (): void }): void {
+    this.deregisterAll();
     this.viewDetailsForParticipant = null;
     done();
     this.$emit('update:showModal', false);
@@ -262,6 +262,14 @@ export default class AnalyticsTopicView extends Vue {
   @Watch('showModal', { immediate: true })
   async onShowModalChanged(showModal: boolean): Promise<void> {
     this.showSettings = showModal;
+    if (this.sessionId !== '' && showModal) {
+      this.topicsCashEntry = topicService.registerGetTopicsList(
+        this.sessionId,
+        this.updateTopics,
+        EndpointAuthorisationType.MODERATOR,
+        10
+      );
+    }
   }
 
   pdfFile = null;
@@ -270,8 +278,6 @@ export default class AnalyticsTopicView extends Vue {
     const analyticsComponent = this.$refs.analyticsComponent as Analytics;
     const element = analyticsComponent.$el;
 
-    // Get the dimensions of the parent container
-    console.log(analyticsComponent.$parent);
     if (analyticsComponent.$parent) {
       this.isConverting = true;
       const widthInPixels = analyticsComponent.$parent.$el.clientWidth;
@@ -299,10 +305,9 @@ export default class AnalyticsTopicView extends Vue {
           format: [widthInInches + margin, heightInInches + margin],
           orientation: 'landscape',
         },
-      }).then(() => {
-        this.isConverting = false;
       });
       this.pdfFile = await pdf.output('bloburl');
+      this.isConverting = false;
     } else {
       console.error('Parent container not found');
     }

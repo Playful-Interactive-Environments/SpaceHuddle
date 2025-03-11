@@ -4,7 +4,10 @@
       v-for="participant in participants"
       :key="participant.id"
       :icon="participant.avatar.symbol"
-      :style="{ color: getParticipantColor(participant) }"
+      :style="{
+        color: getParticipantColor(participant),
+        transform: getParticipantScale(participant),
+      }"
       class="participant"
       @click="participantSelectionChanged(participant.id)"
     />
@@ -28,6 +31,8 @@ export default class ParticipantSelection extends Vue {
   @Prop({ default: () => [] }) readonly participants!: ParticipantInfo[];
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
 
+  defaultColor = 'var(--color-background-darker)';
+
   participantSelectionChanged(id: string): void {
     const isSelected = this.selectedParticipantIds.includes(id);
     const updatedSelection = isSelected
@@ -42,7 +47,13 @@ export default class ParticipantSelection extends Vue {
   getParticipantColor(participant: ParticipantInfo): string {
     return this.selectedParticipantIds.includes(participant.id)
       ? participant.avatar.color
-      : 'var(--color-background-darker)';
+      : this.defaultColor;
+  }
+
+  getParticipantScale(participant: ParticipantInfo): string {
+    return this.selectedParticipantIds.includes(participant.id)
+      ? 'scale(1.15)'
+      : 'scale(1)';
   }
 }
 </script>
@@ -64,7 +75,7 @@ export default class ParticipantSelection extends Vue {
   cursor: pointer;
 
   &:hover {
-    transform: scale(1.15);
+    transform: scale(1.15) !important;
   }
 }
 </style>
