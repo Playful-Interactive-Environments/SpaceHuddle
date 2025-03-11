@@ -83,9 +83,9 @@
                 <el-dropdown-item
                   v-if="
                     (axes[index - 1] &&
-                            ax.taskData.topicOrder !==
-                              axes[index - 1].taskData.topicOrder) ||
-                          index === 0
+                      ax.taskData.topicOrder !==
+                        axes[index - 1].taskData.topicOrder) ||
+                    index === 0
                   "
                   class="heading oneLineText"
                   :divided="true"
@@ -130,11 +130,10 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import Highscore from '@/components/moderator/organisms/analytics/Highscore.vue';
-import { Avatar, ParticipantInfo } from '@/types/api/Participant';
+import { ParticipantInfo } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import { HighScoreEntry } from '@/components/moderator/organisms/analytics/Highscore.vue';
-import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { Idea } from '@/types/api/Idea';
 
 interface SubAxis {

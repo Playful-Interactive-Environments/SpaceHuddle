@@ -7,10 +7,11 @@
   >
     <template #header>
       <div :style="{ display: 'flex' }">
-        <span class="el-dialog__title">{{
-          $t('moderator.organism.settings.analytics.header')
-        }}
-        <el-button @click="exportToPDF" class="exportButton"><font-awesome-icon :icon="['fas', 'file-export']" /></el-button>
+        <span class="el-dialog__title"
+          >{{ $t('moderator.organism.settings.analytics.header') }}
+          <el-button @click="exportToPDF" class="exportButton"
+            ><font-awesome-icon :icon="['fas', 'file-export']"
+          /></el-button>
         </span>
       </div>
     </template>
@@ -24,7 +25,7 @@
       :default-checked-keys="selectedKeys"
       :props="{
         children: 'tasks',
-        label: (data) => data.name || data.title,
+        label: (treeData) => treeData.name || treeData.title,
         //disabled: (data) => data.participantCount === 0,
         disabled: false,
       }"
@@ -59,7 +60,7 @@
     </el-tree>
     <div class="analyticsContainer">
       <analytics
-          ref="analyticsComponent"
+        ref="analyticsComponent"
         :session-id="sessionId"
         :received-tasks="selectedTasks"
         :topics="topics"
@@ -80,7 +81,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Session } from '@/types/api/Session';
 import * as cashService from '@/services/cash-service';
 import { ParticipantInfo } from '@/types/api/Participant';
 import QrcodeVue from 'qrcode.vue';
@@ -91,10 +91,9 @@ import * as topicService from '@/services/topic-service';
 import { Topic } from '@/types/api/Topic';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
-import * as sessionService from '@/services/session-service';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import Analytics from '@/components/moderator/organisms/analytics/analytics.vue';
-import { createPdf, PDFOptions } from '@/utils/html2pdf';
+import { createPdf } from '@/utils/html2pdf';
 
 @Options({
   methods: { getColorOfType, getIconOfType },
@@ -266,6 +265,7 @@ export default class AnalyticsTopicView extends Vue {
   }
 
   pdfFile = null;
+  isConverting = false;
   async exportToPDF(): Promise<void> {
     const analyticsComponent = this.$refs.analyticsComponent as Analytics;
     const element = analyticsComponent.$el;
@@ -273,6 +273,7 @@ export default class AnalyticsTopicView extends Vue {
     // Get the dimensions of the parent container
     console.log(analyticsComponent.$parent);
     if (analyticsComponent.$parent) {
+      this.isConverting = true;
       const widthInPixels = analyticsComponent.$parent.$el.clientWidth;
       const heightInPixels = analyticsComponent.$parent.$el.clientHeight;
 
@@ -298,6 +299,8 @@ export default class AnalyticsTopicView extends Vue {
           format: [widthInInches + margin, heightInInches + margin],
           orientation: 'landscape',
         },
+      }).then(() => {
+        this.isConverting = false;
       });
       this.pdfFile = await pdf.output('bloburl');
     } else {

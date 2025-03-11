@@ -225,7 +225,6 @@ export default class Analytics extends Vue {
 
   participantCash?: cashService.SimplifiedCashEntry<ParticipantInfo[]>;
   participants: ParticipantInfo[] | null = null;
-  taskListService?: cashService.SimplifiedCashEntry<Task[]>;
   sessionService?: cashService.SimplifiedCashEntry<Session>;
 
   axes: Axis[] = [];
@@ -343,9 +342,6 @@ export default class Analytics extends Vue {
 
   updateParticipants(participants: ParticipantInfo[]): void {
     this.participants = participants;
-    for (const participant of this.participants) {
-      (participant as any).selected = false;
-    }
   }
 
   updateIdeas(ideas: Idea[]): void {

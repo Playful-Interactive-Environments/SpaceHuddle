@@ -164,9 +164,7 @@ export default class Highscore extends Vue {
       if (this.isHighScoreEntry(this.tableData[0])) {
         this.chartData = this.tableData as HighScoreEntry[];
       } else {
-        this.convertToHighScoreEntryArray(
-          this.tableData as TaskParticipantIterationStep[]
-        );
+        this.chartData = [];
       }
       this.sortData();
     }
@@ -178,10 +176,6 @@ export default class Highscore extends Vue {
       entry.values[0]?.value !== undefined &&
       entry.participant !== undefined
     );
-  }
-
-  convertToHighScoreEntryArray(data: TaskParticipantIterationStep[]): void {
-    this.chartData = [];
   }
 
   sortData(): void {

@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { ParticipantInfo } from '@/types/api/Participant';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
@@ -31,7 +31,9 @@ export default class ParticipantSelection extends Vue {
   participantSelectionChanged(id: string): void {
     const isSelected = this.selectedParticipantIds.includes(id);
     const updatedSelection = isSelected
-      ? this.selectedParticipantIds.filter(participantId => participantId !== id)
+      ? this.selectedParticipantIds.filter(
+          (participantId) => participantId !== id
+        )
       : [...this.selectedParticipantIds, id];
 
     this.$emit('update:selectedParticipantIds', updatedSelection);

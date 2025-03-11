@@ -182,7 +182,7 @@
             >
               <path
                 class="participantDataLineIcon"
-                v-if="index === dataLine.length - 1"
+                v-if="index === dataLine?.length - 1"
                 :transform="`translate(${pathPart?.x + 5}, ${
                   pathPart?.y - 10
                 }), scale(0.04)`"
@@ -620,18 +620,13 @@ export default class ParallelCoordinates extends Vue {
   }[];
 
   padding = 20;
-  hoverStroke: string | null = null;
-
   legend = legend;
 
   availableAxes: Axis[] = [];
   axes: Axis[] = [];
 
   averageAxisValues: number[] = [];
-
   chartData: DataEntry[] = [];
-
-  labelCount = 3;
 
   parentWidth = 0;
   parentHeight = 0;
@@ -1119,10 +1114,12 @@ export default class ParallelCoordinates extends Vue {
   getVoteIdeasForList(
     steps: TaskParticipantIterationStep[]
   ): { avatar: Avatar; ideas: Idea[] }[] {
-    return steps.map((step) => ({
-      avatar: step.avatar,
-      ideas: step.parameter.ideas.map((i) => i.idea),
-    }));
+    return steps.map((step) => {
+      return {
+        avatar: step.avatar,
+        ideas: step.parameter.ideas.map((i) => i.idea),
+      };
+    });
   }
 
   setHoverStroke(color: string, id: string, participantColor: string) {

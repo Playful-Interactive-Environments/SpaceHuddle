@@ -107,14 +107,14 @@
     </div>
     <el-radio-group v-model="filterClass" class="classSelection">
       <el-radio-button :label="'primary'">{{
-          $t('moderator.organism.analytics.radarCharts.primary')
-        }}</el-radio-button>
+        $t('moderator.organism.analytics.radarCharts.primary')
+      }}</el-radio-button>
       <el-radio-button :label="'secondary'">{{
-          $t('moderator.organism.analytics.radarCharts.secondary')
-        }}</el-radio-button>
+        $t('moderator.organism.analytics.radarCharts.secondary')
+      }}</el-radio-button>
       <el-radio-button :label="'exception'">{{
-          $t('moderator.organism.analytics.radarCharts.exception')
-        }}</el-radio-button>
+        $t('moderator.organism.analytics.radarCharts.exception')
+      }}</el-radio-button>
     </el-radio-group>
   </div>
 </template>
@@ -124,7 +124,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Avatar } from '@/types/api/Participant';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
-import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import TaskType from '@/types/enum/TaskType';
 
 @Options({
@@ -151,14 +150,6 @@ export default class RadarChart extends Vue {
   normalizedDatasets: { data: number[]; avatar: Avatar }[] = [];
 
   filterClass = 'primary';
-
-  getColorOfType(taskType: TaskType) {
-    return getColorOfType(taskType);
-  }
-
-  getIconOfType(taskType: TaskType) {
-    return getIconOfType(taskType);
-  }
 
   get minMaxValues(): { min: number; max: number } {
     const allData = this.datasets.flatMap((dataset) => dataset.data);
@@ -216,11 +207,6 @@ export default class RadarChart extends Vue {
     }, {} as Record<string, string>);
   }
 
-  get averageDatasetOpacity(): number {
-    if (!this.averageDataset) return 0;
-    return this.calculateOpacity(this.averageDataset);
-  }
-
   get datasetOpacities(): Record<string, number> {
     return this.datasets.reduce((acc, dataset) => {
       acc[dataset.avatar.id] = this.calculateOpacity(dataset);
@@ -272,14 +258,6 @@ export default class RadarChart extends Vue {
       data: this.normalizeData(averageData),
       avatar: { id: 'null', color: 'var(--color-evaluating)', symbol: 'null' },
     };
-  }
-
-  get selectedParticipantDataset(): { data: number[]; avatar: Avatar } | null {
-    return (
-      this.normalizedDatasets.find((dataset) =>
-        this.selectedParticipantIds.includes(dataset.avatar.id)
-      ) || null
-    );
   }
 
   get maxRadius() {
@@ -379,32 +357,6 @@ export default class RadarChart extends Vue {
     }
     return participants;
   }
-
-  getPrimaryClass(data: number[]): string {
-    const maxValue = Math.max(...data);
-    const maxIndex = data.findIndex((entry) => entry === maxValue);
-    return this.labels[maxIndex];
-  }
-
-  getSecondaryClass(data: number[]): string {
-    if (data.length < 2) {
-      return '';
-    }
-
-    const maxIndex = data.indexOf(Math.max(...data));
-    const filteredData = data.map((val, idx) =>
-      idx === maxIndex ? -Infinity : val
-    );
-    const secondMaxIndex = filteredData.indexOf(Math.max(...filteredData));
-
-    return this.labels[secondMaxIndex];
-  }
-
-  getExceptionClass(data: number[]): string {
-    const minValue = Math.min(...data);
-    const minIndex = data.findIndex((entry) => entry === minValue);
-    return this.labels[minIndex];
-  }
 }
 </script>
 
@@ -447,10 +399,6 @@ export default class RadarChart extends Vue {
   stroke-linecap: round;
 }
 
-.radarPolygonSelected {
-  animation: appear 0.5s ease forwards;
-}
-
 @keyframes appear {
   0% {
     opacity: 0;
@@ -458,11 +406,6 @@ export default class RadarChart extends Vue {
   100% {
     opacity: 1;
   }
-}
-
-.headingIcon {
-  font-size: var(--font-size-xlarge);
-  cursor: pointer;
 }
 
 .classSelection {

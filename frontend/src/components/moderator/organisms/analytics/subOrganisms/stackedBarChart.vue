@@ -31,7 +31,7 @@
               <text
                 v-if="isSliderEdge(x)"
                 class="svgText"
-                v-bind="sliderTextProps(x, questionData)"
+                v-bind="sliderTextProps(x)"
                 text-anchor="middle"
               />
             </g>
@@ -355,7 +355,6 @@ export default class StackedBarChart extends Vue {
       });
   }
 
-
   get computedSegments() {
     return this.chartData.map((question) =>
       this.getAnswerSegments(question.answers, question.questionType)
@@ -482,7 +481,7 @@ export default class StackedBarChart extends Vue {
     };
   }
 
-  sliderTextProps(x: number, questionData: QuestionData) {
+  sliderTextProps(x: number) {
     return {
       x: x,
       y: this.barHeight,
@@ -507,14 +506,14 @@ export default class StackedBarChart extends Vue {
         strokeWidth: 3,
         stroke: 'var(--color-background)',
         backgroundColor: 'var(--color-background)',
-      }
+      },
     };
   }
 
   circleTextProps(segment: AnswerSegment, questionData: QuestionData) {
     return {
       x: this.calculateCircleX(segment, questionData),
-      y: this.barHeight/2 + 5.25,
+      y: this.barHeight / 2 + 5.25,
       fontSize: '10.5',
       style: {
         color: 'var(--color-dark-contrast)',
