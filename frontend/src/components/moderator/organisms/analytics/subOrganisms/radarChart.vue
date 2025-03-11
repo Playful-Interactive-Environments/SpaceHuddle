@@ -10,9 +10,7 @@
           v-for="level in gridLevels"
           :key="level"
           :points="getPolygonPoints(level)"
-          fill="none"
-          stroke="#ccc"
-          stroke-width="0.2"
+          class="grid-polygon"
         ></polygon>
 
         <!-- Draw the axes -->
@@ -23,8 +21,7 @@
           y1="50"
           :x2="getAxisEnd(index, maxRadius).x"
           :y2="getAxisEnd(index, maxRadius).y"
-          stroke="#666"
-          stroke-width="0.2"
+          class="axis-line"
         ></line>
 
         <!-- Draw the data polygons -->
@@ -37,17 +34,14 @@
           :stroke="datasetColors[dataset.avatar.id]"
           :stroke-opacity="datasetOpacities[dataset.avatar.id] + 0.2"
           stroke-width="0.5"
-          class="radarPolygon"
+          class="radar-polygon"
         />
 
         <!-- Draw the average dataset polygon -->
         <polygon
           v-if="averageDataset"
           :points="getDataPoints(averageDataset.data)"
-          :fill="'url(#diagonalHatch)'"
-          :stroke="'var(--color-evaluating)'"
-          :stroke-width="1"
-          class="radarPolygon averageRadarPolygon"
+          class="average-radar-polygon"
         />
         <pattern
           id="diagonalHatch"
@@ -59,7 +53,7 @@
             d="M-1,1 l2,-2
            M0,4 l4,-4
            M3,5 l2,-2"
-            style="stroke: var(--color-evaluating); stroke-width: 0.3"
+            class="hatch-path"
           />
         </pattern>
       </svg>
@@ -75,10 +69,9 @@
             v-for="avatar of getParticipantsOfFilterClass(index)"
             :key="avatar.id"
             :icon="avatar.symbol"
+            class="avatar-icon"
             :style="{
               color: avatar.color,
-              fontSize: 'var(--font-size-large)',
-              margin: '0 0.2rem',
             }"
           ></font-awesome-icon>
         </template>
@@ -377,6 +370,37 @@ export default class RadarChart extends Vue {
   margin: 4rem;
 }
 
+.grid-polygon {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 0.2;
+  will-change: transform;
+}
+
+.axis-line {
+  stroke: #666;
+  stroke-width: 0.2;
+  will-change: transform;
+}
+
+.radar-polygon {
+  transition: all 0.5s ease;
+  will-change: fill-opacity, stroke-opacity;
+}
+
+.average-radar-polygon {
+  fill: url(#diagonalHatch);
+  stroke: var(--color-evaluating);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.hatch-path {
+  stroke: var(--color-evaluating);
+  stroke-width: 0.3;
+}
+
 .radar-label {
   text-align: center;
   font-size: var(--font-size-xsmall);
@@ -390,22 +414,11 @@ export default class RadarChart extends Vue {
   color: var(--color-informing-dark);
 }
 
-.radarPolygon {
-  transition: all 0.5s ease;
-}
-
-.averageRadarPolygon {
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-
-@keyframes appear {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+.avatar-icon {
+  color: var(--color-dark-contrast);
+  font-size: var(--font-size-large);
+  margin: 0 0.2rem;
+  transition: color 0.3s ease;
 }
 
 .classSelection {

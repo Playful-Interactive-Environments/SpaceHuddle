@@ -1,17 +1,17 @@
 <template>
-  <div class="highscoreContainer" v-if="axes && chartData.length > 0">
+  <div v-if="hasData" class="highscoreContainer">
     <el-card
-      class="highScoreSelectionContainer"
       v-for="(axis, index) in tableArray"
       :key="axis?.taskId"
+      class="highScoreSelectionContainer"
       shadow="never"
       body-style="text-align: center"
       :class="{ addOn__boarder: !axis }"
     >
       <div class="highscoreModuleSelection">
         <el-dropdown
-          v-if="axes.length >= 1"
-          @command="updateTableArray(index, $event)"
+          v-if="hasAxes"
+          @command="(command) => updateTableArray(index, command)"
           trigger="click"
           placement="bottom"
         >
@@ -23,7 +23,7 @@
               :style="{ color: getColorOfAxis(axis) }"
             />
             <p class="oneLineText highscoreModuleName">
-              {{ axis ? axis.taskData.taskName : 'select task' }}
+              {{ axis ? axis.taskData.taskName : 'Select Task' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
             </p>
           </div>
@@ -40,9 +40,9 @@
           </template>
         </el-dropdown>
         <font-awesome-icon
+          v-if="axis"
           :icon="['fas', 'trash']"
           class="trashButton"
-          v-if="axis"
           @click="removeFromTableArray(index)"
         />
       </div>
@@ -66,7 +66,7 @@
       </p>
       <div class="highscoreModuleSelection">
         <el-dropdown
-          v-if="axes.length >= 1"
+          v-if="hasAxes"
           @command="addToTableArray"
           trigger="click"
           placement="bottom"
@@ -81,38 +81,22 @@
             <el-dropdown-menu>
               <template v-for="(ax, index) in axes" :key="ax.taskId">
                 <el-dropdown-item
-                  v-if="
-                    (axes[index - 1] &&
-                      ax.taskData.topicOrder !==
-                        axes[index - 1].taskData.topicOrder) ||
-                    index === 0
-                  "
+                  v-if="isTopicHeading(index)"
                   class="heading oneLineText"
                   :divided="true"
-                  :style="{
-                    pointerEvents: 'none',
-                    paddingBottom: '0.02rem',
-                    paddingTop: '0.02rem',
-                  }"
+                  :style="{ pointerEvents: 'none', padding: '0.02rem 0' }"
                   disabled
                 >
                   {{ ax.taskData.topicName }}
                 </el-dropdown-item>
                 <el-dropdown-item
                   :command="ax"
-                  :divided="
-                    (axes[index - 1] &&
-                      ax.taskData.topicOrder !==
-                        axes[index - 1].taskData.topicOrder) ||
-                    index === 0
-                  "
+                  :divided="isTopicHeading(index)"
                 >
                   <font-awesome-icon
                     class="axisIcon"
                     :icon="getIconOfAxis(ax)"
-                    :style="{
-                      color: getColorOfAxis(ax),
-                    }"
+                    :style="{ color: getColorOfAxis(ax) }"
                   />
                   <span>&nbsp;{{ ax.taskData.taskName }}</span>
                 </el-dropdown-item>
@@ -162,6 +146,7 @@ interface AxisValue {
   value: number | null;
   ideas?: Idea[];
 }
+
 interface DataEntry {
   participant: ParticipantInfo;
   axes: {
@@ -171,9 +156,7 @@ interface DataEntry {
 }
 
 @Options({
-  components: {
-    Highscore,
-  },
+  components: { Highscore },
   emits: ['update:selectedParticipantIds'],
 })
 export default class Tables extends Vue {
@@ -187,6 +170,14 @@ export default class Tables extends Vue {
   chartData: DataEntry[] = [];
   tableArray: (Axis | null)[] = [];
   participantIds: string[] = [];
+
+  get hasData(): boolean {
+    return !!this.axes && this.chartData.length > 0;
+  }
+
+  get hasAxes(): boolean {
+    return this.axes.length >= 1;
+  }
 
   @Watch('participantData', { immediate: true })
   onChartDataChanged(): void {
@@ -239,43 +230,39 @@ export default class Tables extends Vue {
   }
 
   filterParticipantData(taskId: string): HighScoreEntry[] {
-    const chartData = this.chartData
-      .filter((entry) => {
-        const moduleAxis = entry.axes.find((a) => a.taskId === taskId);
-        return moduleAxis?.axisValues.some((value) => value.value != null);
-      })
+    return this.chartData
+      .filter((entry) =>
+        entry.axes.some(
+          (a) =>
+            a.taskId === taskId &&
+            a.axisValues.some((value) => value.value != null)
+        )
+      )
       .map((entry) => ({
-        ...entry,
-        axes: entry.axes
-          .filter((axis) => axis.taskId === taskId)
-          .map((axis) => ({
-            ...axis,
-            axisValues: axis.axisValues.sort((a, b) => {
-              const aIsLast = ['stars', 'rate'].includes(a.id);
-              const bIsLast = ['stars', 'rate'].includes(b.id);
-              return aIsLast === bIsLast ? 0 : aIsLast ? 1 : -1;
-            }),
-          })),
+        values:
+          entry.axes
+            .find((axis) => axis.taskId === taskId)
+            ?.axisValues.sort(
+              (a, b) =>
+                (['stars', 'rate'].includes(a.id) ? 1 : -1) -
+                (['stars', 'rate'].includes(b.id) ? 1 : -1)
+            ) || [],
+        participant: entry.participant,
       }));
+  }
 
-    return chartData.map((entry) => ({
-      values: entry.axes[0].axisValues,
-      participant: entry.participant,
-    }));
+  isTopicHeading(index: number): boolean {
+    return (
+      (this.axes[index - 1] &&
+        this.axes[index].taskData.topicOrder !==
+          this.axes[index - 1].taskData.topicOrder) ||
+      index === 0
+    );
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.highscoreContainer {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 3rem;
-  width: 100%;
-}
-
 .highscoreContainer {
   display: flex;
   justify-content: flex-start;
@@ -292,20 +279,18 @@ export default class Tables extends Vue {
   scrollbar-width: none;
   -ms-overflow-style: none;
   overflow-x: hidden;
-}
 
-@media (max-width: calc((700px * 2) + 12rem)) {
-  .highScoreSelectionContainer {
+  @media (max-width: calc((700px * 2) + 12rem)) {
     width: 100%;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 .highscore {
   margin-top: 1rem;
-}
-
-.highScoreSelectionContainer::-webkit-scrollbar {
-  display: none;
 }
 
 .el-dropdown-link {
@@ -318,10 +303,10 @@ export default class Tables extends Vue {
   padding: 0.2rem 0.6rem;
   transition: border 0.3s ease;
   cursor: pointer;
-}
 
-.el-dropdown-link:hover {
-  border: 2px solid var(--color-background-darker);
+  &:hover {
+    border: 2px solid var(--color-background-darker);
+  }
 }
 
 .highscoreModuleSelection {

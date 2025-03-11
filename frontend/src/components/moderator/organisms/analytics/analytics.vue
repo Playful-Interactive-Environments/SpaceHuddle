@@ -2,9 +2,9 @@
   <div
     id="analytics"
     :style="{ marginTop: '3rem' }"
-    v-loading="receivedTasks.length <= 0"
+    v-loading="isLoading"
     :element-loading-background="'var(--color-background)'"
-    :element-loading-text="$t('moderator.organism.analytics.loadingNoTasks')"
+    :element-loading-text="loadingText"
   >
     <div v-if="!loadingSteps" class="participantSelection">
       <participant-selection
@@ -14,15 +14,16 @@
         :style="{ borderBottom: '2px solid var(--color-background-dark)' }"
       />
     </div>
+
     <div
       class="AnalyticsParallelCoordinates"
       v-loading="loadingSteps"
       :element-loading-background="'var(--color-background)'"
-      :element-loading-text="$t('moderator.organism.analytics.loading')"
+      :element-loading-text="loadingText"
     >
       <parallel-coordinates
-        v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
-        :chart-axes="axes.filter((axis) => axis.available)"
+        v-if="hasAxesAndData"
+        :chart-axes="availableAxes"
         :participant-data="dataEntries"
         :steps="steps"
         v-model:selectedParticipantIds="selectedParticipantIds"
@@ -35,12 +36,12 @@
       class="AnalyticsTables"
       v-loading="loadingSteps"
       :element-loading-background="'var(--color-background)'"
-      :element-loading-text="$t('moderator.organism.analytics.loading')"
+      :element-loading-text="loadingText"
     >
       <Tables
-        v-if="axes.length > 0 && dataEntries.length > 0 && !loadingSteps"
+        v-if="hasAxesAndData"
         :participant-data="dataEntries"
-        :axes="axes.filter((axis) => axis.available)"
+        :axes="availableAxes"
         :steps="steps"
         v-model:selectedParticipantIds="selectedParticipantIds"
         :style="{ opacity: loadingSteps ? 0 : 1 }"
@@ -51,21 +52,19 @@
       class="RadarChartContainer"
       v-loading="loadingSteps"
       :element-loading-background="'var(--color-background)'"
-      :element-loading-text="$t('moderator.organism.analytics.loading')"
+      :element-loading-text="loadingText"
     >
       <div
         class="radarChart"
-        v-for="(entry, index) of radarDataEntries"
+        v-for="(entry, index) in radarDataEntries"
         :key="'radarChart' + index"
         :style="{ opacity: loadingSteps ? 0 : 1 }"
       >
-        <p v-if="entry.title !== ''" class="heading">
+        <p v-if="entry.title" class="heading">
           <font-awesome-icon
             class="headingIcon"
             :icon="getIconOfType(TaskType.INFORMATION)"
-            :style="{
-              color: getColorOfType(TaskType.INFORMATION),
-            }"
+            :style="{ color: getColorOfType(TaskType.INFORMATION) }"
           />
           {{ entry.title }}
         </p>
@@ -82,14 +81,15 @@
         />
       </div>
     </div>
+
     <div
       class="stackedBarChartContainer"
       v-loading="loadingSteps"
       :element-loading-background="'var(--color-background)'"
-      :element-loading-text="$t('moderator.organism.analytics.loading')"
+      :element-loading-text="loadingText"
     >
       <StackedBarChartSelection
-        v-if="surveyData.length > 0 && !loadingSteps"
+        v-if="hasSurveyData"
         :survey-data="surveyData"
         v-model:selectedParticipantIds="selectedParticipantIds"
         :style="{ opacity: loadingSteps ? 0 : 1 }"
@@ -151,6 +151,7 @@ interface AxisValue {
   value: number | null;
   ideas?: Idea[] | null;
 }
+
 interface DataEntry {
   participant: ParticipantInfo;
   axes: {
@@ -243,6 +244,28 @@ export default class Analytics extends Vue {
     };
     questions: QuestionData[];
   }[] = [];
+
+  get isLoading(): boolean {
+    return this.receivedTasks.length <= 0;
+  }
+
+  get loadingText(): string {
+    return this.$t('moderator.organism.analytics.loadingNoTasks');
+  }
+
+  get hasAxesAndData(): boolean {
+    return (
+      this.axes.length > 0 && this.dataEntries.length > 0 && !this.loadingSteps
+    );
+  }
+
+  get availableAxes(): Axis[] {
+    return this.axes.filter((axis) => axis.available);
+  }
+
+  get hasSurveyData(): boolean {
+    return this.surveyData.length > 0 && !this.loadingSteps;
+  }
 
   getColorOfType(taskType: TaskType) {
     return getColorOfType(taskType);
@@ -444,9 +467,9 @@ export default class Analytics extends Vue {
           30
         );
       } else if (
-        task.taskType !== 'PLAYING' &&
-        task.taskType !== 'BRAINSTORMING' &&
-        task.taskType !== 'VOTING'
+        (task.taskType as string) !== 'PLAYING' &&
+        (task.taskType as string) !== 'BRAINSTORMING' &&
+        (task.taskType as string) !== 'VOTING'
       ) {
         taskParticipantService.registerGetIterationList(
           task.id,
@@ -539,7 +562,7 @@ export default class Analytics extends Vue {
 
   processVotes(): TaskParticipantIterationStep[] {
     const brainstormingSteps = this.steps.filter(
-      (step) => String(step.taskData.taskType) === 'BRAINSTORMING'
+      (step) => (step.taskData.taskType as string) === 'BRAINSTORMING'
     );
 
     const newSteps = this.votes.flatMap((vote) =>
@@ -676,7 +699,6 @@ export default class Analytics extends Vue {
     task: Task,
     steps: TaskParticipantIterationStep[]
   ): void {
-    // Create a task entry with taskId and title
     const taskEntry = {
       taskData: {
         moduleName: task.modules[0].name,
@@ -763,10 +785,8 @@ export default class Analytics extends Vue {
       });
     });
 
-    // Add the question data to the task entry
     taskEntry.questions = Object.values(questionData);
 
-    // Push the task entry into surveyData
     if (
       !this.surveyData.some(
         (entry) => entry.taskData.taskId === taskEntry.taskData.taskId
@@ -850,7 +870,6 @@ export default class Analytics extends Vue {
 
   wantedValues = [
     'stars',
-    //'points',
     'playtime',
     'playTime',
     'maxSpeed',

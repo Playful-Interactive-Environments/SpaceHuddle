@@ -1,17 +1,17 @@
 <template>
-  <div class="stackedChartsContainer" v-if="surveyData && chartData.length > 0">
+  <div v-if="hasData" class="stackedChartsContainer">
     <el-card
-      class="stackedChartsSelectionContainer"
       v-for="(survey, index) in tableArray"
       :key="survey?.taskData.taskId"
+      class="stackedChartsSelectionContainer"
       shadow="never"
       body-style="text-align: center"
       :class="{ addOn__boarder: !survey }"
     >
       <div class="stackedChartsTaskSelection">
         <el-dropdown
-          v-if="surveyData.length >= 1"
-          @command="updateTableArray(index, $event)"
+          v-if="hasSurveyData"
+          @command="(command) => updateTableArray(index, command)"
           trigger="click"
           placement="bottom"
         >
@@ -23,7 +23,7 @@
               :style="{ color: getColorOfType(TaskType.INFORMATION) }"
             />
             <p class="oneLineText stackedChartsTaskName">
-              {{ survey ? survey.taskData.taskName : 'select survey' }}
+              {{ survey ? survey.taskData.taskName : 'Select Survey' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
             </p>
           </div>
@@ -40,9 +40,9 @@
           </template>
         </el-dropdown>
         <font-awesome-icon
+          v-if="survey"
           :icon="['fas', 'trash']"
           class="trashButton"
-          v-if="survey"
           @click="removeFromTableArray(index)"
         />
       </div>
@@ -50,10 +50,7 @@
         v-if="survey"
         class="stackedChart"
         :task-id="survey.taskData.taskId"
-        :has-correct="
-          survey.taskData.moduleName === 'quiz' ||
-          survey.taskData.moduleName === 'talk'
-        "
+        :has-correct="isQuizOrTalk(survey)"
         :chart-data="survey.questions"
         :color-theme="colorTheme"
         :color-correct="'var(--color-brainstorming)'"
@@ -72,7 +69,7 @@
       </p>
       <div class="stackedChartsTaskSelection">
         <el-dropdown
-          v-if="surveyData.length >= 1"
+          v-if="hasSurveyData"
           @command="addToTableArray"
           trigger="click"
           placement="bottom"
@@ -92,38 +89,22 @@
                 :key="sv.taskData.taskId"
               >
                 <el-dropdown-item
-                  v-if="
-                    (surveyData[index - 1] &&
-                      sv.taskData.topicOrder !==
-                        surveyData[index - 1].taskData.topicOrder) ||
-                    index === 0
-                  "
+                  v-if="isTopicHeading(index)"
                   class="heading oneLineText"
                   :divided="true"
-                  :style="{
-                    pointerEvents: 'none',
-                    paddingBottom: '0.02rem',
-                    paddingTop: '0.02rem',
-                  }"
+                  :style="{ pointerEvents: 'none', padding: '0.02rem 0' }"
                   disabled
                 >
                   {{ sv.taskData.topicName }}
                 </el-dropdown-item>
                 <el-dropdown-item
                   :command="sv"
-                  :divided="
-                    (surveyData[index - 1] &&
-                      sv.taskData.topicOrder !==
-                        surveyData[index - 1].taskData.topicOrder) ||
-                    index === 0
-                  "
+                  :divided="isTopicHeading(index)"
                 >
                   <font-awesome-icon
                     class="axisIcon"
                     :icon="getIconOfType(TaskType.INFORMATION)"
-                    :style="{
-                      color: getColorOfType(TaskType.INFORMATION),
-                    }"
+                    :style="{ color: getColorOfType(TaskType.INFORMATION) }"
                   />
                   <span>&nbsp;{{ sv.taskData.taskName }}</span>
                 </el-dropdown-item>
@@ -174,9 +155,7 @@ interface SurveyData {
       return TaskType;
     },
   },
-  components: {
-    StackedBarChart,
-  },
+  components: { StackedBarChart },
   emits: ['update:selectedParticipantIds'],
 })
 export default class StackedBarCharts extends Vue {
@@ -193,6 +172,14 @@ export default class StackedBarCharts extends Vue {
     'var(--color-evaluating-light)',
     'var(--color-playing-light)',
   ];
+
+  get hasData(): boolean {
+    return !!this.surveyData && this.chartData.length > 0;
+  }
+
+  get hasSurveyData(): boolean {
+    return this.surveyData.length >= 1;
+  }
 
   @Watch('surveyData', { immediate: true })
   onChartDataChanged(): void {
@@ -229,6 +216,19 @@ export default class StackedBarCharts extends Vue {
   updateTableArray(index: number, survey: SurveyData): void {
     this.tableArray.splice(index, 1, survey);
   }
+
+  isQuizOrTalk(survey: SurveyData): boolean {
+    return ['quiz', 'talk'].includes(survey.taskData.moduleName);
+  }
+
+  isTopicHeading(index: number): boolean {
+    return (
+      (this.surveyData[index - 1] &&
+        this.surveyData[index].taskData.topicOrder !==
+          this.surveyData[index - 1].taskData.topicOrder) ||
+      index === 0
+    );
+  }
 }
 </script>
 
@@ -250,26 +250,22 @@ export default class StackedBarCharts extends Vue {
   scrollbar-width: none;
   -ms-overflow-style: none;
   overflow-x: hidden;
-}
 
-@media (max-width: calc((700px * 2) + 12rem)) {
-  .stackedChartsSelectionContainer {
+  @media (max-width: calc((700px * 2) + 12rem)) {
     width: 100%;
   }
-}
 
-@media print {
-  .stackedChartsSelectionContainer {
+  @media print {
     width: 100%;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 .stackedChart {
   margin-top: 1rem;
-}
-
-.stackedChartsSelectionContainer::-webkit-scrollbar {
-  display: none;
 }
 
 .el-dropdown-link {
@@ -282,10 +278,10 @@ export default class StackedBarCharts extends Vue {
   padding: 0.2rem 0.6rem;
   transition: border 0.3s ease;
   cursor: pointer;
-}
 
-.el-dropdown-link:hover {
-  border: 2px solid var(--color-background-darker);
+  &:hover {
+    border: 2px solid var(--color-background-darker);
+  }
 }
 
 .stackedChartsTaskSelection {

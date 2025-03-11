@@ -816,4 +816,11 @@ export default class StackedBarChart extends Vue {
 .cursorPointer:hover {
   cursor: pointer;
 }
+
+.grid-polygon,
+.axis-line,
+.radar-polygon,
+.average-radar-polygon {
+  will-change: transform;
+}
 </style>
