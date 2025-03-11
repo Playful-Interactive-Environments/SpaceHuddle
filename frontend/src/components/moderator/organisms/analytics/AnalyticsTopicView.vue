@@ -275,6 +275,7 @@ export default class AnalyticsTopicView extends Vue {
   pdfFile = null;
   isConverting = false;
   async exportToPDF(): Promise<void> {
+    this.isConverting = true;
     const analyticsComponent = this.$refs.analyticsComponent as Analytics;
     const element = analyticsComponent.$el;
 
@@ -307,10 +308,10 @@ export default class AnalyticsTopicView extends Vue {
         },
       });
       this.pdfFile = await pdf.output('bloburl');
-      this.isConverting = false;
     } else {
       console.error('Parent container not found');
     }
+    this.isConverting = false;
   }
 
   closePreview() {

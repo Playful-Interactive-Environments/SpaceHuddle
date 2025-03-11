@@ -391,18 +391,27 @@
       "analytics": {
         "loading": "Wird geladen, bitte warten...",
         "loadingNoTasks": "Keine Aufgaben ausgewählt",
+        "participantSelection": {
+          "title": "Teilnehmer Auswahl"
+        },
+        "parallelCoordinates": {
+          "title": "Übersicht"
+        },
         "tables": {
           "selectTask": "Aufgabe auswählen",
-          "table": "Tabelle"
+          "table": "Tabelle",
+          "title": "Tabellen"
         },
         "stackedBarCharts": {
           "selectTask": "Aufgabe auswählen",
-          "survey": "Umfrage oder Quiz"
+          "survey": "Umfrage oder Quiz",
+          "title": "Umfragen und Quizzes"
         },
         "radarCharts": {
           "primary": "Primärklasse",
           "secondary": "Sekundärklasse",
-          "exception": "Ausnahmeklasse"
+          "exception": "Ausnahmeklasse",
+          "title": "Typologietests"
         },
         "legend": {
           "gearIcon": "Achsenwert einstellen",

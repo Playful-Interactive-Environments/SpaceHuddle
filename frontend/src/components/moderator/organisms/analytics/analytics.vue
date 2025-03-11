@@ -4,97 +4,105 @@
     :style="{ marginTop: '3rem' }"
     v-loading="isLoading"
     :element-loading-background="'var(--color-background)'"
-    :element-loading-text="loadingText"
+    :element-loading-text="loadingTextNoTasks"
   >
-    <div v-if="!loadingSteps" class="participantSelection">
-      <participant-selection
-        :participants="participants"
-        v-model:selectedParticipantIds="selectedParticipantIds"
-        @participant-selected="participantSelectionChanged"
-        :style="{ borderBottom: '2px solid var(--color-background-dark)' }"
-      />
-    </div>
-
-    <div
-      class="AnalyticsParallelCoordinates"
+    <el-collapse
+      v-model="activeNames"
       v-loading="loadingSteps"
       :element-loading-background="'var(--color-background)'"
       :element-loading-text="loadingText"
     >
-      <parallel-coordinates
-        v-if="hasAxesAndData"
-        :chart-axes="availableAxes"
-        :participant-data="dataEntries"
-        :steps="steps"
-        v-model:selectedParticipantIds="selectedParticipantIds"
-        @participant-selected="participantSelectionChanged"
-        :style="{ opacity: loadingSteps ? 0 : 1 }"
-      />
-    </div>
-
-    <div
-      class="AnalyticsTables"
-      v-loading="loadingSteps"
-      :element-loading-background="'var(--color-background)'"
-      :element-loading-text="loadingText"
-    >
-      <Tables
-        v-if="hasAxesAndData"
-        :participant-data="dataEntries"
-        :axes="availableAxes"
-        :steps="steps"
-        v-model:selectedParticipantIds="selectedParticipantIds"
-        :style="{ opacity: loadingSteps ? 0 : 1 }"
-      />
-    </div>
-
-    <div
-      class="RadarChartContainer"
-      v-loading="loadingSteps"
-      :element-loading-background="'var(--color-background)'"
-      :element-loading-text="loadingText"
-    >
-      <div
-        class="radarChart"
-        v-for="(entry, index) in radarDataEntries"
-        :key="'radarChart' + index"
-        :style="{ opacity: loadingSteps ? 0 : 1 }"
-      >
-        <p v-if="entry.title" class="heading">
-          <font-awesome-icon
-            class="headingIcon"
-            :icon="getIconOfType(TaskType.INFORMATION)"
-            :style="{ color: getColorOfType(TaskType.INFORMATION) }"
+      <el-collapse-item name="participantSelection">
+        <template #title>
+          <span>{{ $t('moderator.organism.analytics.participantSelection.title') }}</span>
+        </template>
+        <div v-if="!loadingSteps" class="participantSelection">
+          <participant-selection
+            :participants="participants"
+            v-model:selectedParticipantIds="selectedParticipantIds"
+            @participant-selected="participantSelectionChanged"
+            :style="{ borderBottom: '2px solid var(--color-background-dark)' }"
           />
-          {{ entry.title }}
-        </p>
-        <radar-chart
-          :labels="entry.labels"
-          :datasets="entry.data"
-          :test="entry.test"
-          :title="entry.title"
-          :size="300"
-          :levels="5"
-          :defaultColor="'var(--color-dark-contrast-light)'"
-          v-model:selectedParticipantIds="selectedParticipantIds"
-          @participant-selected="participantSelectionChanged"
-        />
-      </div>
-    </div>
-
-    <div
-      class="stackedBarChartContainer"
-      v-loading="loadingSteps"
-      :element-loading-background="'var(--color-background)'"
-      :element-loading-text="loadingText"
-    >
-      <StackedBarChartSelection
-        v-if="hasSurveyData"
-        :survey-data="surveyData"
-        v-model:selectedParticipantIds="selectedParticipantIds"
-        :style="{ opacity: loadingSteps ? 0 : 1 }"
-      />
-    </div>
+        </div>
+      </el-collapse-item>
+      <el-collapse-item name="overview">
+        <template #title>
+          <span>{{ $t('moderator.organism.analytics.parallelCoordinates.title') }}</span>
+        </template>
+        <div class="AnalyticsParallelCoordinates">
+          <parallel-coordinates
+            v-if="hasAxesAndData"
+            :chart-axes="availableAxes"
+            :participant-data="dataEntries"
+            :steps="steps"
+            v-model:selectedParticipantIds="selectedParticipantIds"
+            @participant-selected="participantSelectionChanged"
+            :style="{ opacity: loadingSteps ? 0 : 1 }"
+          />
+        </div>
+      </el-collapse-item>
+      <el-collapse-item name="tables"  class="pdfPageBreakElement">
+        <template #title>
+          <span>{{ $t('moderator.organism.analytics.tables.title') }}</span>
+        </template>
+        <div class="AnalyticsTables">
+          <Tables
+            v-if="hasAxesAndData"
+            :participant-data="dataEntries"
+            :axes="availableAxes"
+            :steps="steps"
+            v-model:selectedParticipantIds="selectedParticipantIds"
+            :style="{ opacity: loadingSteps ? 0 : 1 }"
+          />
+        </div>
+      </el-collapse-item>
+      <el-collapse-item name="radarCharts"  class="pdfPageBreakElement">
+        <template #title>
+          <span>{{ $t('moderator.organism.analytics.radarCharts.title') }}</span>
+        </template>
+        <div class="RadarChartContainer">
+          <div
+            class="radarChart"
+            v-for="(entry, index) in radarDataEntries"
+            :key="'radarChart' + index"
+            :style="{ opacity: loadingSteps ? 0 : 1 }"
+          >
+            <p v-if="entry.title" class="heading">
+              <font-awesome-icon
+                class="headingIcon"
+                :icon="getIconOfType(TaskType.INFORMATION)"
+                :style="{ color: getColorOfType(TaskType.INFORMATION) }"
+              />
+              {{ entry.title }}
+            </p>
+            <radar-chart
+              :labels="entry.labels"
+              :datasets="entry.data"
+              :test="entry.test"
+              :title="entry.title"
+              :size="300"
+              :levels="5"
+              :defaultColor="'var(--color-dark-contrast-light)'"
+              v-model:selectedParticipantIds="selectedParticipantIds"
+              @participant-selected="participantSelectionChanged"
+            />
+          </div>
+        </div>
+      </el-collapse-item>
+      <el-collapse-item name="surveysQuizzes" class="pdfPageBreakElement">
+        <template #title>
+          <span>{{ $t('moderator.organism.analytics.stackedBarCharts.title') }}</span>
+        </template>
+        <div class="stackedBarChartContainer">
+          <StackedBarChartSelection
+            v-if="hasSurveyData"
+            :survey-data="surveyData"
+            v-model:selectedParticipantIds="selectedParticipantIds"
+            :style="{ opacity: loadingSteps ? 0 : 1 }"
+          />
+        </div>
+      </el-collapse-item>
+    </el-collapse>
   </div>
 </template>
 
@@ -245,12 +253,24 @@ export default class Analytics extends Vue {
     questions: QuestionData[];
   }[] = [];
 
+  activeNames = [
+    'participantSelection',
+    'overview',
+    'tables',
+    'radarCharts',
+    'surveysQuizzes',
+  ];
+
   get isLoading(): boolean {
     return this.receivedTasks.length <= 0;
   }
 
-  get loadingText(): string {
+  get loadingTextNoTasks(): string {
     return this.$t('moderator.organism.analytics.loadingNoTasks');
+  }
+
+  get loadingText(): string {
+    return this.$t('moderator.organism.analytics.loading');
   }
 
   get hasAxesAndData(): boolean {
@@ -1001,6 +1021,16 @@ export default class Analytics extends Vue {
   flex-direction: column;
   align-items: center;
   gap: 3rem;
+  .el-collapse {
+    width: 100%;
+  }
+  .el-collapse-item {
+    width: 100%;
+  }
+
+  .el-collapse-item::v-deep(.el-collapse-item__content) {
+    line-height: unset;
+  }
   hr {
     margin: 1.5rem 0 0.5rem 0;
     width: 70%;
@@ -1010,10 +1040,10 @@ export default class Analytics extends Vue {
   .AnalyticsParallelCoordinates {
     height: 50vh;
     width: 100%;
+    margin: 2rem 0;
   }
   .AnalyticsTables {
     width: 100%;
-    break-before: page;
   }
 
   .AnalyticsTables,
@@ -1033,7 +1063,6 @@ export default class Analytics extends Vue {
     align-items: center;
     gap: 2rem;
     overflow: hidden;
-    break-before: page;
     .radarChart {
       display: flex;
       flex-direction: column;
@@ -1050,12 +1079,15 @@ export default class Analytics extends Vue {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
-    break-before: page;
   }
 
   .headingIcon {
     font-size: var(--font-size-xlarge);
     cursor: pointer;
+  }
+
+  .pdfPageBreakElement {
+    break-before: page;
   }
 }
 </style>

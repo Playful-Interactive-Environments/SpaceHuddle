@@ -391,18 +391,27 @@
       "analytics": {
         "loading": "Loading, please wait...",
         "loadingNoTasks": "No tasks selected",
+        "participantSelection": {
+          "title": "Participant Selection"
+        },
+        "parallelCoordinates": {
+          "title": "Overview"
+        },
         "tables": {
           "selectTask": "select Task",
-          "table": "Table"
+          "table": "Table",
+          "title": "Tables"
         },
         "stackedBarCharts": {
           "selectTask": "select Task",
-          "survey": "Survey or Quiz"
+          "survey": "Survey or Quiz",
+          "title": "Surveys and Quizzes"
         },
         "radarCharts": {
           "primary": "primary class",
           "secondary": "secondary class",
-          "exception": "exception class"
+          "exception": "exception class",
+          "title": "Typology tests"
         },
         "legend": {
           "gearIcon": "Axis value settings",
