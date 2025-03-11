@@ -2,7 +2,7 @@
   <div
     :style="{
       display:
-        active && !openModuleInfoEntryDataList.length > 0 ? 'block' : 'none',
+        active && openModuleInfoEntryDataList.length > 0 ? 'block' : 'none',
     }"
     class="infoArea"
   >
