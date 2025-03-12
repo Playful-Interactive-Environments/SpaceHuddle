@@ -96,6 +96,7 @@ import { Task } from '@/types/api/Task';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import Analytics from '@/components/moderator/organisms/analytics/analytics.vue';
 import { createPdf } from '@/utils/html2pdf';
+import TaskType from '@/types/enum/TaskType';
 
 @Options({
   methods: { getColorOfType, getIconOfType },
@@ -135,16 +136,6 @@ export default class AnalyticsTopicView extends Vue {
       );
     });
   }
-
-  /* @Watch('sessionId', { immediate: true })
-  async onSessionIdChanged(): Promise<void> {
-    this.topicsCashEntry = topicService.registerGetTopicsList(
-      this.sessionId,
-      this.updateTopics,
-      EndpointAuthorisationType.MODERATOR,
-      10
-    );
-  }*/
 
   updateTasks(tasks: Task[], topicId: string): void {
     const topic = this.topics.find((topic) => topic.id === topicId);

@@ -14,7 +14,9 @@
     >
       <el-collapse-item name="participantSelection">
         <template #title>
-          <span>{{ $t('moderator.organism.analytics.participantSelection.title') }}</span>
+          <span>{{
+            $t('moderator.organism.analytics.participantSelection.title')
+          }}</span>
         </template>
         <div v-if="!loadingSteps" class="participantSelection">
           <participant-selection
@@ -27,7 +29,9 @@
       </el-collapse-item>
       <el-collapse-item name="overview">
         <template #title>
-          <span>{{ $t('moderator.organism.analytics.parallelCoordinates.title') }}</span>
+          <span>{{
+            $t('moderator.organism.analytics.parallelCoordinates.title')
+          }}</span>
         </template>
         <div class="AnalyticsParallelCoordinates">
           <parallel-coordinates
@@ -41,7 +45,7 @@
           />
         </div>
       </el-collapse-item>
-      <el-collapse-item name="tables"  class="pdfPageBreakElement">
+      <el-collapse-item name="tables" class="pdfPageBreakElement">
         <template #title>
           <span>{{ $t('moderator.organism.analytics.tables.title') }}</span>
         </template>
@@ -56,9 +60,15 @@
           />
         </div>
       </el-collapse-item>
-      <el-collapse-item name="radarCharts"  class="pdfPageBreakElement">
+      <el-collapse-item
+        v-if="radarDataEntries.length > 0"
+        name="radarCharts"
+        class="pdfPageBreakElement"
+      >
         <template #title>
-          <span>{{ $t('moderator.organism.analytics.radarCharts.title') }}</span>
+          <span>{{
+            $t('moderator.organism.analytics.radarCharts.title')
+          }}</span>
         </template>
         <div class="RadarChartContainer">
           <div
@@ -89,9 +99,15 @@
           </div>
         </div>
       </el-collapse-item>
-      <el-collapse-item name="surveysQuizzes" class="pdfPageBreakElement">
+      <el-collapse-item
+        v-if="surveyData.length > 0"
+        name="surveysQuizzes"
+        class="pdfPageBreakElement"
+      >
         <template #title>
-          <span>{{ $t('moderator.organism.analytics.stackedBarCharts.title') }}</span>
+          <span>{{
+            $t('moderator.organism.analytics.stackedBarCharts.title')
+          }}</span>
         </template>
         <div class="stackedBarChartContainer">
           <StackedBarChartSelection
