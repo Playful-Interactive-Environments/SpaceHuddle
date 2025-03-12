@@ -77,7 +77,10 @@
         </template>
         <div
           :style="getLabelPosition(index)"
-          class="radar-label"
+          :class="{
+            'radar-label': true,
+            'radar-label-hover': getParticipantsOfFilterClass(index).length > 0,
+          }"
           @click="
             participantSelectionChanged(
               getParticipantsOfFilterClass(index).map((avatar) => avatar.id)
@@ -126,7 +129,6 @@ import TaskType from '@/types/enum/TaskType';
   emits: ['update:selectedParticipantIds'],
 })
 export default class RadarChart extends Vue {
-  // Props
   @Prop({ type: Array, required: true }) labels!: string[];
   @Prop({ default: () => '' }) test!: string;
   @Prop({ default: () => '' }) title!: string;
@@ -230,7 +232,7 @@ export default class RadarChart extends Vue {
 
   normalizeData(data: number[]): number[] {
     const { min, max } = this.minMaxValues;
-    const range = max - min || 1; // Prevent division by zero
+    const range = max - min || 1;
     return data.map((value) => ((value - min) / range) * 100);
   }
 
@@ -353,7 +355,7 @@ export default class RadarChart extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .radarChartContainer {
   position: relative;
   display: flex;
@@ -407,10 +409,10 @@ export default class RadarChart extends Vue {
   color: var(--color-dark-contrast);
   font-weight: var(--font-weight-default);
   transition: all 0.3s ease;
-  cursor: pointer;
 }
 
-.radar-label:hover {
+.radar-label-hover:hover {
+  cursor: pointer;
   color: var(--color-informing-dark);
 }
 

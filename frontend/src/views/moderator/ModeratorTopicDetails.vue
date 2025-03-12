@@ -15,6 +15,19 @@
         v-on:delete="deleteTopic"
       >
         <template #settings>
+          <span v-if="isModerator" v-on:click="showDependencies = true">
+            <ToolTip
+              :effect="'light'"
+              :text="
+                $t('moderator.organism.settings.topicDependencySettings.header')
+              "
+            >
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="table"
+              ></font-awesome-icon>
+            </ToolTip>
+          </span>
           <span v-on:click="download">
             <ToolTip
               :effect="'light'"
@@ -29,19 +42,6 @@
                 v-else
                 class="awesome-icon fa-spin"
                 icon="spinner"
-              ></font-awesome-icon>
-            </ToolTip>
-          </span>
-          <span v-if="isModerator" v-on:click="showDependencies = true">
-            <ToolTip
-              :effect="'light'"
-              :text="
-                $t('moderator.organism.settings.topicDependencySettings.header')
-              "
-            >
-              <font-awesome-icon
-                class="awesome-icon"
-                icon="table"
               ></font-awesome-icon>
             </ToolTip>
           </span>
@@ -81,6 +81,17 @@
               <font-awesome-icon
                 class="awesome-icon"
                 icon="users"
+              ></font-awesome-icon>
+            </ToolTip>
+          </span>
+          <span v-on:click="showAnalytics = true" v-if="isModerator">
+            <ToolTip
+              :effect="'light'"
+              :text="$t('moderator.organism.settings.analytics.header')"
+            >
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="chart-column"
               ></font-awesome-icon>
             </ToolTip>
           </span>
@@ -364,6 +375,20 @@
     :session-id="sessionId"
     :topic-id="topicId"
   />
+  <AnalyticsTopicView
+    v-if="isModerator"
+    v-model:show-modal="showAnalytics"
+    :session-id="sessionId"
+    class="analyticsTopicView"
+    :style="{
+      width: '95%',
+      maxWidth: '100%',
+      height: '90%',
+      maxHeight: '90%',
+      overflow: 'scroll',
+      margin: '2.5%',
+    }"
+  />
 </template>
 
 <script lang="ts">
@@ -417,9 +442,11 @@ import ParticipantSettings from '@/components/moderator/organisms/settings/Parti
 import TopicDependencySettings from '@/components/moderator/organisms/settings/TopicDependencySettings.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import TaskMoveSettings from '@/components/moderator/organisms/settings/TaskMoveSettings.vue';
+import AnalyticsTopicView from '@/components/moderator/organisms/analytics/AnalyticsTopicView.vue';
 
 @Options({
   components: {
+    AnalyticsTopicView,
     TaskMoveSettings,
     ToolTip,
     ParticipantSettings,
@@ -453,6 +480,7 @@ export default class ModeratorTopicDetails extends Vue {
   showTaskSettings = false;
   showTaskMoveSettings = false;
   showTopicSettings = false;
+  showAnalytics = false;
   tasks: Task[] = [];
   activeTab = TaskCategoryOption.BRAINSTORMING;
   previousActiveTab = TaskCategoryOption.BRAINSTORMING;
@@ -1142,5 +1170,19 @@ p {
 
 .el-switch {
   --el-switch-on-color: var(--color-dark-contrast-light);
+}
+</style>
+
+<style lang="scss">
+.analyticsTopicView {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  .el-dialog__body {
+    max-height: none;
+  }
+}
+
+.analyticsTopicView::-webkit-scrollbar {
+  display: none;
 }
 </style>

@@ -10,6 +10,7 @@
         <span class="el-dialog__title"
           >{{ $t('moderator.organism.settings.analytics.header') }}
           <el-button
+            v-if="selectedTasks.length > 0"
             @click="exportToPDF"
             class="exportButton"
             :loading="isConverting"
@@ -96,7 +97,6 @@ import { Task } from '@/types/api/Task';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import Analytics from '@/components/moderator/organisms/analytics/analytics.vue';
 import { createPdf } from '@/utils/html2pdf';
-import TaskType from '@/types/enum/TaskType';
 
 @Options({
   methods: { getColorOfType, getIconOfType },
