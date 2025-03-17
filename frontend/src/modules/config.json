@@ -297,7 +297,15 @@
            "locales": "de,en,",  
              "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,  
            "path": "voting/vote"  
-       },  
+       },
+       "like": {
+           "participant": "output/Participant",
+           "moderatorContent": "output/ModeratorContent",
+           "moderatorConfig": "output/ModeratorConfig",
+           "locales": "de,en,",
+           "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,
+           "path": "voting/like"
+       },
        "settings": {  
            "parameter": "TaskParameter",  
            "locales": "de,en,",  

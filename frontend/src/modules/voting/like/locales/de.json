@@ -1,0 +1,24 @@
+{
+  "description": {
+    "title": "Like",
+    "description": "Wähle zwischen mehreren Auswahlen"
+  },
+  "participant": {
+    "thanksModerated": "Deine Wahl wurde gespeichert.",
+    "thanksIndividual": "Deine Wahl wurde gespeichert.",
+    "submit": "Speichern",
+    "waiting": "Bitte warten. Fragen und Antworten werden geladen.",
+    "imageKeywords": "Bildbeschreibung",
+    "saveQuestion": "Soll die Auswahl gespeichert werden?",
+    "yes": "ja",
+    "no": "nein",
+    "back": "abschließen"
+  },
+  "analytics": {
+    "highscore": {
+      "ratingSum": "Summe Bewertungen",
+      "averageRating": "Ø Bewertungen",
+      "bestIdeaAverageRating": "Ø Berwertung der besten Idee"
+    }
+  }
+}

@@ -7,6 +7,7 @@
       :arrow="arrow"
       :initial-index="0"
       :interval="paused ? 0 : 7000 / timeModifier"
+      :indicator-position="indicatorPosition"
       v-on:change="galleryIndexChanged"
       trigger="click"
     >
@@ -20,7 +21,7 @@
             :idea="idea"
             :is-editable="false"
             class="public-idea"
-            :portrait="portrait"
+            :portrait="portraitHeight || portrait"
           />
         </div>
       </el-carousel-item>
@@ -51,11 +52,13 @@ export default class PublicScreen extends Vue {
   @Prop({ default: false }) readonly paused!: boolean;
   @Prop({default: 'card'}) readonly type!: string;
   @Prop({default: 'always'}) readonly arrow!: string;
+  @Prop({default: ''}) readonly indicatorPosition!: string;
+  @Prop({default: false}) readonly portrait!: boolean;
   galleryIndex = 0;
 
   contentHeight = 100;
 
-  get portrait(): boolean {
+  get portraitHeight(): boolean {
     return this.contentHeight > 200;
   }
 

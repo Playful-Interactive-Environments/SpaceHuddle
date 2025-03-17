@@ -1,0 +1,8 @@
+{
+  "icon": "questions-check",
+  "iconPrefix": "fac",
+  "type": "main",
+  "input": "yes",
+  "syncPublicParticipant": false,
+  "finishManuel": false
+}

@@ -1,0 +1,26 @@
+{
+  "description": {
+    "title": "Like",
+    "description": "Vote out of multiple options"
+  },
+  "participant": {
+    "thanksModerated": "Your vote has been saved.",
+    "thanksIndividual": "Your vote has been saved.",
+    "previous": "previous",
+    "next": "next",
+    "submit": "Save",
+    "waiting": "Please wait. Questions and answers are being loaded.",
+    "imageKeywords": "image caption",
+    "saveQuestion": "Do you want to save your selection?",
+    "yes": "yes",
+    "no": "no",
+    "back": "finalize"
+  },
+  "analytics": {
+    "highscore": {
+      "ratingSum": "Rating Sum",
+      "averageRating": "Ø Rating",
+      "bestIdeaAverageRating": "Ø Rating of best idea"
+    }
+  }
+}
