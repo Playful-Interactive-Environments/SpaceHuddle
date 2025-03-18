@@ -1,10 +1,14 @@
 <template>
   <div class="moderatorContent">
+    <el-checkbox v-model="allSelected" @change="onAllSelectedChanged"
+      >Include all in voting</el-checkbox
+    >
     <el-checkbox-group v-model="includedGroups">
       <el-checkbox
         v-for="ideaGroup in groupedIdeas"
         :label="ideaGroup[0].participantId"
         :key="ideaGroup[0].participantId"
+        class="GalleryCheckbox"
       >
         <div class="GalleryContainer">
           <Gallery
@@ -52,7 +56,7 @@ import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue
 import * as votingService from '@/services/voting-service';
 
 interface IdeaGroup {
-  groupId: string;
+  groupId: string | null;
   ideaIds: string[];
 }
 
@@ -75,9 +79,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   task: Task | null = null;
   groupedIdeas: Idea[][] = [];
 
-  includedGroups = [];
+  includedGroups: (string | null)[] = [];
 
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+
+  allSelected = true;
 
   get contrastColor(): string {
     return themeColors.getContrastColor();
@@ -134,11 +140,23 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Watch('includedGroups', { immediate: true })
   onIncludedGroupsChanged(): void {
     this.updateModule();
+    this.allSelected = this.includedGroups.length === this.groupedIdeas.length;
   }
 
   @Watch('groupedIdeas', { immediate: true })
   onGroupedIdeasChanged(): void {
     this.updateModule();
+    this.allSelected = this.includedGroups.length === this.groupedIdeas.length;
+  }
+
+  onAllSelectedChanged(): void {
+    if (!this.allSelected) {
+      this.includedGroups = [];
+    } else {
+      this.includedGroups = this.groupedIdeas.map(
+        (group) => group[0].participantId
+      );
+    }
   }
 
   updateModule(): void {
@@ -194,6 +212,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 .moderatorContent {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 3rem;
 
   width: 100%;
 }
@@ -205,7 +226,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   gap: 2rem;
 }
 
-.el-checkbox {
+.el-checkbox.GalleryCheckbox {
   height: 30rem;
   display: flex;
   flex-direction: column;
@@ -214,7 +235,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   justify-content: center;
 }
 
-.el-checkbox::v-deep(.el-checkbox__label) {
+.el-checkbox.GalleryCheckbox::v-deep(.el-checkbox__label) {
   display: block;
   font-size: var(--font-size-default);
   height: 100%;

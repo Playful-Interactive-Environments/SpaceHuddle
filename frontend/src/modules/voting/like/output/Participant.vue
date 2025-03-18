@@ -51,7 +51,6 @@
           :type="''"
           :indicator-position="'none'"
           :item-max-width="'100%'"
-          :arrow="'hover'"
         />
         <p class="like-count">
           <font-awesome-icon
