@@ -329,19 +329,21 @@ export default class Participant extends Vue {
 
   async submit() {
     this.submitScreen = true;
-    for (const groupId of this.likedGroups) {
-      const ideaGroup = this.ideasByParticipant.find(
-        (group) => group.groupId === groupId
-      );
-      if (ideaGroup) {
-        for (const idea of ideaGroup.ideas) {
-          await this.postVote(idea.id);
+
+    for (const group of this.ideasByParticipant) {
+      if (this.likedGroups.includes(group.groupId)) {
+        for (const idea of group.ideas) {
+          await this.postVote(idea.id, 1);
+        }
+      } else {
+        for (const idea of group.ideas) {
+          await this.postVote(idea.id, 0);
         }
       }
     }
   }
 
-  async postVote(ideaId: string) {
+  async postVote(ideaId: string, rating: number) {
     const vote = await votingService.postVote(this.taskId, {
       ideaId: ideaId,
       rating: 1,

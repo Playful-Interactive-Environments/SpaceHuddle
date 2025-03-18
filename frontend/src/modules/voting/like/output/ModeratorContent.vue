@@ -180,6 +180,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateInputIdeas);
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateTask);
   }
 
   unmounted(): void {
@@ -206,6 +208,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 .el-checkbox {
   height: 30rem;
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
 }
 
 .el-checkbox::v-deep(.el-checkbox__label) {
@@ -213,6 +219,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   font-size: var(--font-size-default);
   height: 100%;
   width: 20rem;
+  padding: 0;
 }
 
 .gallery {
