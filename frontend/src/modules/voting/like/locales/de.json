@@ -1,18 +1,19 @@
 {
   "description": {
     "title": "Like",
-    "description": "Wähle zwischen mehreren Auswahlen"
+    "description": "Like die Posts der anderen Teilnehmer"
   },
   "participant": {
     "thanksModerated": "Deine Wahl wurde gespeichert.",
     "thanksIndividual": "Deine Wahl wurde gespeichert.",
     "submit": "Speichern",
-    "waiting": "Bitte warten. Fragen und Antworten werden geladen.",
+    "waiting": "Bitte warten. Ideen werden geladen.",
     "imageKeywords": "Bildbeschreibung",
     "saveQuestion": "Soll die Auswahl gespeichert werden?",
     "yes": "ja",
     "no": "nein",
-    "back": "abschließen"
+    "back": "abschließen",
+    "likes": "Anzahl likes zum vergeben"
   },
   "analytics": {
     "highscore": {

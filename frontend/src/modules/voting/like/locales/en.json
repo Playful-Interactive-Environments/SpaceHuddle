@@ -1,7 +1,7 @@
 {
   "description": {
     "title": "Like",
-    "description": "Vote out of multiple options"
+    "description": "Like the posts of other participants"
   },
   "participant": {
     "thanksModerated": "Your vote has been saved.",
@@ -9,12 +9,13 @@
     "previous": "previous",
     "next": "next",
     "submit": "Save",
-    "waiting": "Please wait. Questions and answers are being loaded.",
+    "waiting": "Please wait. Ideas are being loaded.",
     "imageKeywords": "image caption",
     "saveQuestion": "Do you want to save your selection?",
     "yes": "yes",
     "no": "no",
-    "back": "finalize"
+    "back": "finalize",
+    "likes": "Likes to give"
   },
   "analytics": {
     "highscore": {

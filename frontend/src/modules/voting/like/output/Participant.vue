@@ -29,7 +29,7 @@
     </template>
     <div v-if="!submitScreen" class="votingContainer">
       <p class="heading">
-        Likes to give: {{ likesToGive - likesGiven }}
+        {{ $t('module.voting.like.participant.likes') }}: {{ likesToGive - likesGiven }}
         <font-awesome-icon
           class="like-heart"
           :icon="['fas', 'heart']"
@@ -212,7 +212,6 @@ export default class Participant extends Vue {
 
   updateVotes(votes: Vote[]): void {
     this.votes = votes;
-    console.log(votes);
   }
 
   inputIdeas: Idea[] = [];
