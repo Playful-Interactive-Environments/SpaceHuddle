@@ -3,7 +3,6 @@
     :task-id="taskId"
     :module="moduleName"
     :module-theme="theme"
-    :class="{ PMDC: hasImage }"
   >
     <div id="preloader"></div>
     <div id="loadingScreen">
@@ -20,7 +19,7 @@
           type="primary"
           class="el-button--submit"
           native-type="submit"
-          :disabled="!answerId"
+          :disabled="likedGroups.length <= 0"
           @click="submit"
           v-if="!submitScreen"
         >
@@ -28,36 +27,54 @@
         </el-button>
       </span>
     </template>
-    <el-space direction="vertical" class="fill votables" v-if="!submitScreen">
-      <div v-for="idea in allIdeas" :key="idea.id" class="votable">
-        <el-button
-          :disabled="false"
-          v-on:click="changeVote(idea.id)"
-          class="circleCheck"
-        >
-          <template #icon>
-            <font-awesome-icon
-              v-if="isAnswerSelected(idea.id)"
-              icon="circle-check"
-              class="circleCheckIcon"
-            />
-            <font-awesome-icon
-              v-else
-              :icon="['far', 'circle']"
-              class="circleCheckIcon"
-            />
-          </template>
-        </el-button>
-        <IdeaCard
-          class="media-left, IdeaCard"
-          :idea="idea"
-          :is-selectable="false"
-          :is-editable="false"
-          :show-state="false"
-          :portrait="isMobile"
+    <div v-if="!submitScreen" class="votingContainer">
+      <p class="heading">
+        Likes to give: {{ likesToGive - likesGiven }}
+        <font-awesome-icon
+          class="like-heart"
+          :icon="['fas', 'heart']"
+          :style="{
+            color: 'var(--color-evaluating)',
+          }"
         />
+      </p>
+      <div
+        v-for="ideaGroup in ideasByParticipant"
+        :key="ideaGroup.groupId"
+        class="GalleryContainer"
+      >
+        <Gallery
+          :ideas="ideaGroup.ideas"
+          :portrait="true"
+          class="gallery"
+          :time-modifier="1"
+          :type="''"
+          :indicator-position="'none'"
+          :item-max-width="'100%'"
+          :arrow="'hover'"
+        />
+        <p class="like-count">
+          <font-awesome-icon
+            v-if="likedGroups.includes(ideaGroup.groupId)"
+            class="like-heart"
+            :icon="['fas', 'heart']"
+            @click="toggleSelection(ideaGroup.groupId)"
+            :style="{
+              color: 'var(--color-evaluating)',
+            }"
+          />
+          <font-awesome-icon
+            v-else
+            class="like-heart"
+            :icon="['far', 'heart']"
+            @click="toggleSelection(ideaGroup.groupId)"
+            :style="{
+              color: 'var(--color-dark-contrast)',
+            }"
+          />
+        </p>
       </div>
-    </el-space>
+    </div>
     <div id="submitScreen" v-if="submitScreen">
       <span>{{ $t('module.voting.vote.participant.thanksIndividual') }}</span>
       <br />
@@ -97,9 +114,16 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { ElMessageBox } from 'element-plus';
 import EndpointType from '@/types/enum/EndpointType';
+import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
+
+interface IdeaGroup {
+  groupId: string;
+  ideas: Idea[];
+}
 
 @Options({
   components: {
+    Gallery,
     IdeaCard,
     ParticipantModuleDefaultContainer,
   },
@@ -122,7 +146,11 @@ export default class Participant extends Vue {
 
   ideas: Idea[] = [];
   allIdeas: Idea[] = [];
-  groupedIdeas: Idea[][] = [];
+  groupedIdeas: IdeaGroup[] = [];
+
+  likesGiven = 0;
+
+  likedGroups: string[] = [];
 
   trackingManager!: TrackingManager;
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
@@ -130,8 +158,14 @@ export default class Participant extends Vue {
   QuestionType = QuestionType;
   submitScreen = false;
 
+  ideasByParticipant: IdeaGroup[] = [];
+
   get isMobile(): boolean {
     return window.innerWidth < 600;
+  }
+
+  get likesToGive(): number {
+    return Math.floor(this.ideasByParticipant.length / 1.5);
   }
 
   hasAnswer(): boolean {
@@ -162,7 +196,7 @@ export default class Participant extends Vue {
       null,
       this.updateInputIdeas,
       EndpointAuthorisationType.PARTICIPANT,
-      30
+      10
     );
   }
 
@@ -183,23 +217,36 @@ export default class Participant extends Vue {
     );
     this.allIdeas = [...ideas];
     this.ideas = ideas;
-    console.log(this.ideas);
+    this.ideasByParticipant = [];
     this.groupIdeasByParticipant(this.ideas);
   }
 
   groupIdeasByParticipant(ideas: Idea[]): void {
-    const groupedIdeas = ideas.reduce((acc, idea) => {
-      const { participantId } = idea;
-      const key = participantId === null ? 'null' : participantId;
-      if (!acc[key]) {
-        acc[key] = [];
+    if (this.task) {
+      for (const ideaGroup of this.task.modules[0].parameter.ideaGroups) {
+        this.ideasByParticipant.push({
+          groupId: ideaGroup.groupId,
+          ideas: ideas
+            .filter((idea) => ideaGroup.ideaIds.includes(idea.id))
+            .sort(),
+        });
       }
-      acc[key].push(idea);
-      return acc;
-    }, {} as { [key: string]: Idea[] });
+    }
+  }
 
-    console.log(groupedIdeas);
-    console.log(Object.values(groupedIdeas));
+  toggleSelection(id: string): void {
+    if (this.likedGroups.includes(id)) {
+      this.likedGroups.splice(
+        this.likedGroups.findIndex((element) => element === id),
+        1
+      );
+      this.likesGiven -= 1;
+    } else {
+      if (this.likesToGive - this.likesGiven > 0) {
+        this.likedGroups.push(id);
+        this.likesGiven += 1;
+      }
+    }
   }
 
   get loading(): boolean {
@@ -221,19 +268,6 @@ export default class Participant extends Vue {
   mounted(): void {
     this.initData = true;
     this.loading;
-  }
-
-  get hasImage(): boolean {
-    //check if the question has an image and return true or false
-    return false;
-  }
-
-  isAnswerSelected(answerId: string): boolean {
-    return answerId === this.answerId;
-  }
-
-  async changeVote(answerId: string): Promise<void> {
-    this.answerId = answerId;
   }
 
   get moduleName(): string {
@@ -262,7 +296,6 @@ export default class Participant extends Vue {
 
   updateTask(task: Task): void {
     this.task = task;
-    console.log(this.task);
   }
 
   deregisterAll(): void {
@@ -296,8 +329,21 @@ export default class Participant extends Vue {
 
   async submit() {
     this.submitScreen = true;
+    for (const groupId of this.likedGroups) {
+      const ideaGroup = this.ideasByParticipant.find(
+        (group) => group.groupId === groupId
+      );
+      if (ideaGroup) {
+        for (const idea of ideaGroup.ideas) {
+          await this.postVote(idea.id);
+        }
+      }
+    }
+  }
+
+  async postVote(ideaId: string) {
     const vote = await votingService.postVote(this.taskId, {
-      ideaId: this.answerId,
+      ideaId: ideaId,
       rating: 1,
       detailRating: 1,
     });
@@ -316,20 +362,6 @@ export default class Participant extends Vue {
         false,
         () => true
       );
-      /*await this.trackingManager.saveIterationStep(
-        {
-          rating: vote.rating,
-          detailRating: vote.detailRating,
-          parameter: vote.parameter,
-        },
-        TaskParticipantIterationStepStatesType.NEUTRAL,
-        null,
-        100,
-        true,
-        null,
-        false,
-        () => true
-      );*/
       await this.trackingManager.saveIteration(
         null,
         TaskParticipantIterationStatesType.PARTICIPATED,
@@ -352,18 +384,40 @@ export default class Participant extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-space::v-deep(.el-space__item) {
+.GalleryContainer {
+  position: relative;
   width: 100%;
+  height: 30rem;
+  .gallery {
+    width: 100%;
+    height: 100%;
+  }
+  .like-count {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    text-align: right;
+    font-size: var(--font-size-xlarge);
+    .like-heart {
+      animation: grow 0.3s ease forwards;
+    }
+  }
+}
+
+@keyframes grow {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .el-footer {
   height: auto;
-}
-
-.module-content::v-deep(.question) {
-  text-transform: none;
-  font-weight: var(--font-weight-bold);
-  font-size: var(--el-font-size-extra-large);
 }
 
 .explanation {
@@ -382,24 +436,6 @@ export default class Participant extends Vue {
 .el-button {
   padding: 1rem 2rem;
   justify-content: left;
-}
-
-.PMDC {
-  border-radius: 30px 30px 0 0;
-  position: absolute;
-  top: 30%;
-  min-height: 70%;
-
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-
-  z-index: 1;
-}
-
-#PMDC::v-deep(.el-steps) {
-  margin-bottom: 3%;
 }
 
 div#loadingScreen {
@@ -456,167 +492,5 @@ div#loadingScreen > span#loading::v-deep(.path) {
 
 .hidden {
   display: none !important;
-}
-
-#QuizImageBackground {
-  position: absolute;
-
-  max-width: inherit;
-  height: 80%;
-
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-
-  background-image: url('@/assets/illustrations/Voting/StarsSpace.png');
-  background-size: contain;
-
-  z-index: 0;
-}
-
-#QuizImageContainer {
-  position: absolute;
-
-  height: 23%;
-
-  width: 60%;
-
-  top: 3%;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.QuizImage {
-  position: absolute;
-  height: 100%;
-
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-
-  border-radius: 20px;
-  border: 10px solid var(--color-dark-contrast-light);
-}
-
-.el-space::v-deep(.outline-thick):hover {
-  background-color: var(--color-dark-contrast);
-  border-color: var(--color-dark-contrast-light);
-  color: white;
-}
-
-.outline-thick {
-  border-color: var(--el-button-border-color);
-  border-width: 2px;
-  border-style: solid;
-}
-
-.el-space::v-deep(.link) > span {
-  width: 100%;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-  text-align: left;
-  margin-left: 4%;
-
-  img {
-    background-color: white;
-  }
-}
-
-.el-space::v-deep(.link) {
-  height: auto;
-  padding: 2% 5% 2% 5%;
-}
-
-.el-space::v-deep(.fa-circle-check) > path {
-  fill: var(--color-informing);
-}
-
-.el-space::v-deep(.fa-circle) > path {
-  fill: var(--color-dark-contrast-light);
-}
-
-#submitScreen {
-  margin-top: 10%;
-  text-align: center;
-}
-
-.el-button.submitScreenButton {
-  width: 100%;
-  text-align: center;
-  display: flex;
-
-  justify-content: center;
-  justify-items: center;
-  align-items: center;
-  align-content: center;
-}
-
-#ScoreString {
-  display: block;
-  font-size: var(--font-size-xxxxlarge);
-  font-weight: var(--font-weight-bold);
-  margin-top: 2rem;
-}
-
-.el-button::v-deep(> span) {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.question-image {
-  overflow: unset;
-}
-
-.question-image::v-deep(img.el-image__preview) {
-  height: 5rem;
-  object-fit: contain;
-  background-color: var(--color-primary);
-  //margin: -0.8rem -2.1rem -0.8rem 0.5rem;
-  //border-radius: 0 0.8rem 0.8rem 0;
-  border-radius: 0.8rem;
-  max-width: unset;
-  width: unset;
-}
-
-label {
-  font-weight: var(--font-weight-semibold);
-}
-
-.el-slider::v-deep(.el-slider__stop) {
-  width: 0.1px;
-}
-
-.media + .media {
-  padding-top: 1rem;
-}
-
-.ghost {
-  background-color: var(--color-dark-contrast);
-  color: white;
-}
-
-.votable {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: left;
-  .IdeaCard {
-    width: 100%;
-  }
-}
-
-.circleCheck {
-  font-size: var(--font-size-xxlarge);
-  width: fit-content;
-  padding: 0;
-  background: transparent;
-  border: none;
-  margin-right: 0.5rem;
-  margin-left: 0;
 }
 </style>

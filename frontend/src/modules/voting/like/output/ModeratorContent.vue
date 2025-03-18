@@ -2,9 +2,9 @@
   <div class="moderatorContent">
     <el-checkbox-group v-model="includedGroups">
       <el-checkbox
-        v-for="(ideaGroup, index) in groupedIdeas"
-        :label="index"
-        :key="index"
+        v-for="ideaGroup in groupedIdeas"
+        :label="ideaGroup[0].participantId"
+        :key="ideaGroup[0].participantId"
       >
         <div class="GalleryContainer">
           <Gallery
@@ -17,9 +17,14 @@
             :indicator-position="'none'"
           />
           <p class="like-count">
-            {{ votes.find((vote) => vote.idea.id === ideaGroup[0].id) || '' }}
-            <font-awesome-icon class="" :icon="['fas', 'heart']" />
+            {{ getRatingSum(ideaGroup[0].id) }}
+            <font-awesome-icon class="like-heart" :icon="['fas', 'heart']" />
           </p>
+          <font-awesome-icon
+            class="participant-icon"
+            :icon="ideaGroup[0].avatar[0].symbol"
+            :style="{ color: ideaGroup[0].avatar[0].color }"
+          ></font-awesome-icon>
         </div>
       </el-checkbox>
     </el-checkbox-group>
@@ -45,6 +50,11 @@ import { Task } from '@/types/api/Task';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
 import * as votingService from '@/services/voting-service';
+
+interface IdeaGroup {
+  groupId: string;
+  ideaIds: string[];
+}
 
 @Options({
   components: {
@@ -101,11 +111,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   updateVotes(votes: VoteResult[]): void {
     this.votes = votes;
-    console.log(votes);
   }
 
   updateTask(task: Task): void {
     this.task = task;
+    this.includedGroups = this.task.modules[0].parameter.includedGroups || [];
   }
 
   updateInputIdeas(ideas: Idea[]): void {
@@ -133,13 +143,21 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   updateModule(): void {
     if (this.task) {
-      const ideaGroups: string[][] = [];
-      for (const index of this.includedGroups) {
-        ideaGroups.push(this.groupedIdeas[index].map((idea) => idea.id));
+      const ideaGroups: IdeaGroup[] = [];
+      for (const groupId of this.includedGroups) {
+        const groupOfId = this.groupedIdeas.find(
+          (group) => groupId === group[0].participantId
+        );
+        if (groupOfId) {
+          ideaGroups.push({
+            groupId: groupId,
+            ideaIds: groupOfId.map((idea) => idea.id),
+          });
+        }
       }
       this.task.modules[0].parameter.ideaGroups = ideaGroups;
+      this.task.modules[0].parameter.includedGroups = this.includedGroups;
       moduleService.putModule(this.task.modules[0]);
-      console.log(this.task.modules[0]);
     }
   }
 
@@ -147,9 +165,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.eventBus.off(EventType.CHANGE_SETTINGS);
     this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
       if (this.taskId === taskId) {
-        this.voteCashEntry.refreshData();
+        await this.voteCashEntry.refreshData();
       }
     });
+  }
+
+  getRatingSum(id: string): string {
+    const vote = this.votes.find((vote) => vote.idea.id === id);
+    if (vote) {
+      return String(vote.ratingSum);
+    }
+    return '';
   }
 
   deregisterAll(): void {
@@ -163,7 +189,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 </script>
 
 <style lang="scss" scoped>
-
 .moderatorContent {
   display: flex;
   justify-content: center;
@@ -173,11 +198,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .el-checkbox-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2rem;
 }
 
 .el-checkbox {
-  width: 100%;
   height: 30rem;
   display: flex;
 }
@@ -205,6 +231,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   bottom: 1rem;
   right: 1rem;
   text-align: right;
+  font-size: var(--font-size-xlarge);
+}
+
+.participant-icon {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  text-align: left;
   font-size: var(--font-size-xlarge);
 }
 </style>

@@ -1,7 +1,5 @@
 <template>
-  <el-form-item>
-    <el-button @click="console.log(this.formData)">click</el-button>
-  </el-form-item>
+  <el-form-item></el-form-item>
 </template>
 
 <script lang="ts">
@@ -48,11 +46,6 @@ export default class ModeratorConfig extends Vue {
         60 * 60
       );
     }
-  }
-
-  @Watch('modelValue', { immediate: true })
-  async onModelValueChanged(): Promise<void> {
-    console.log(this.modelValue);
   }
 
   updateModule(module: Module): void {

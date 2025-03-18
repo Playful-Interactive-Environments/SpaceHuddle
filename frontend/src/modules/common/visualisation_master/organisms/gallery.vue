@@ -22,6 +22,7 @@
             :is-editable="false"
             class="public-idea"
             :portrait="portraitHeight || portrait"
+            :style="{ maxWidth: itemMaxWidth }"
           />
         </div>
       </el-carousel-item>
@@ -50,10 +51,11 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: false }) readonly paused!: boolean;
-  @Prop({default: 'card'}) readonly type!: string;
-  @Prop({default: 'always'}) readonly arrow!: string;
-  @Prop({default: ''}) readonly indicatorPosition!: string;
-  @Prop({default: false}) readonly portrait!: boolean;
+  @Prop({ default: 'card' }) readonly type!: string;
+  @Prop({ default: 'always' }) readonly arrow!: string;
+  @Prop({ default: '' }) readonly indicatorPosition!: string;
+  @Prop({ default: false }) readonly portrait!: boolean;
+  @Prop({ default: '20rem' }) readonly itemMaxWidth!: string;
   galleryIndex = 0;
 
   contentHeight = 100;
@@ -92,10 +94,6 @@ export default class PublicScreen extends Vue {
 
 .el-carousel::v-deep(.el-carousel__item)::-webkit-scrollbar {
   display: none;
-}
-
-.public-idea {
-  max-width: 20rem;
 }
 
 .public-idea.landscape {
@@ -142,5 +140,9 @@ export default class PublicScreen extends Vue {
   align-items: center;
   gap: 0.5rem;
   overflow-y: auto;
+}
+
+.el-card::v-deep(.card__image) {
+  max-height: 70%;
 }
 </style>
