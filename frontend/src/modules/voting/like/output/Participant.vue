@@ -115,6 +115,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { ElMessageBox } from 'element-plus';
 import EndpointType from '@/types/enum/EndpointType';
 import Gallery from '@/modules/common/visualisation_master/organisms/gallery.vue';
+import { Vote } from '@/types/api/Vote';
 
 interface IdeaGroup {
   groupId: string;
@@ -144,6 +145,8 @@ export default class Participant extends Vue {
   theme = '';
   answerId = '';
 
+  votes: Vote[] = [];
+
   ideas: Idea[] = [];
   allIdeas: Idea[] = [];
   groupedIdeas: IdeaGroup[] = [];
@@ -154,6 +157,7 @@ export default class Participant extends Vue {
 
   trackingManager!: TrackingManager;
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
 
   QuestionType = QuestionType;
   submitScreen = false;
@@ -198,6 +202,17 @@ export default class Participant extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       10
     );
+    this.votingCash = votingService.registerGetVotes(
+      this.taskId,
+      this.updateVotes,
+      EndpointAuthorisationType.PARTICIPANT,
+      10
+    );
+  }
+
+  updateVotes(votes: Vote[]): void {
+    this.votes = votes;
+    console.log(votes);
   }
 
   inputIdeas: Idea[] = [];
@@ -301,6 +316,8 @@ export default class Participant extends Vue {
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateInputIdeas);
+    cashService.deregisterAllGet(this.updateVotes);
   }
 
   async unmounted(): Promise<void> {
@@ -333,22 +350,30 @@ export default class Participant extends Vue {
     for (const group of this.ideasByParticipant) {
       if (this.likedGroups.includes(group.groupId)) {
         for (const idea of group.ideas) {
-          await this.postVote(idea.id, 1);
+          const vote = this.votes.find((v) => v.ideaId === idea.id);
+          await this.postVote(idea.id, 1, vote);
         }
       } else {
         for (const idea of group.ideas) {
-          await this.postVote(idea.id, 0);
+          const vote = this.votes.find((v) => v.ideaId === idea.id);
+          await this.postVote(idea.id, 0, vote);
         }
       }
     }
   }
 
-  async postVote(ideaId: string, rating: number) {
-    const vote = await votingService.postVote(this.taskId, {
-      ideaId: ideaId,
-      rating: 1,
-      detailRating: 1,
-    });
+  async postVote(ideaId: string, rating: number, vote: Vote | undefined) {
+    if (!vote) {
+      vote = await votingService.postVote(this.taskId, {
+        ideaId: ideaId,
+        rating: rating,
+        detailRating: rating,
+      });
+    } else {
+      vote.rating = rating;
+      vote.detailRating = rating;
+      await votingService.putVote(vote);
+    }
     if (this.trackingManager) {
       await this.trackingManager.createInstanceStepPoints(
         vote.ideaId,
