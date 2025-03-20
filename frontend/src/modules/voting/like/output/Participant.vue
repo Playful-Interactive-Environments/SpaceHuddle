@@ -6,7 +6,7 @@
   >
     <div id="preloader"></div>
     <div id="loadingScreen">
-      <span>{{ $t('module.voting.vote.participant.waiting') }}...</span>
+      <span>{{ $t('module.voting.like.participant.waiting') }}...</span>
       <span
         id="loading"
         v-loading="true"
@@ -23,13 +23,14 @@
           @click="submit"
           v-if="!submitScreen"
         >
-          {{ $t('module.voting.vote.participant.submit') }}
+          {{ $t('module.voting.like.participant.submit') }}
         </el-button>
       </span>
     </template>
     <div v-if="!submitScreen" class="votingContainer">
       <p class="heading">
-        {{ $t('module.voting.like.participant.likes') }}: {{ likesToGive - likesGiven }}
+        {{ $t('module.voting.like.participant.likes') }}:
+        {{ likesToGive - likesGiven }}
         <font-awesome-icon
           class="like-heart"
           :icon="['fas', 'heart']"
@@ -75,7 +76,7 @@
       </div>
     </div>
     <div id="submitScreen" v-if="submitScreen">
-      <span>{{ $t('module.voting.vote.participant.thanksIndividual') }}</span>
+      <span>{{ $t('module.voting.like.participant.thanksIndividual') }}</span>
       <br />
       <el-button
         type="primary"
@@ -83,7 +84,7 @@
         native-type="submit"
         @click="$router.back()"
       >
-        {{ $t('module.voting.vote.participant.back') }}
+        {{ $t('module.voting.like.participant.back') }}
       </el-button>
     </div>
   </ParticipantModuleDefaultContainer>
@@ -191,7 +192,7 @@ export default class Participant extends Vue {
       this.taskId,
       this.updateTask,
       EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
+      10
     );
     this.inputCash = viewService.registerGetInputIdeas(
       this.taskId,
@@ -214,11 +215,13 @@ export default class Participant extends Vue {
   }
 
   inputIdeas: Idea[] = [];
+
   updateInputIdeas(ideas: Idea[]): void {
     this.inputIdeas = ideas;
     this.updateIdeas();
   }
 
+  @Watch('groupedIdeas', { immediate: true })
   updateIdeas(): void {
     const ideas = viewService.customizeView(
       this.inputIdeas,
@@ -262,10 +265,19 @@ export default class Participant extends Vue {
     }
   }
 
-  get loading(): boolean {
+  @Watch('ideasByParticipant', { immediate: true })
+  onIdeasByParticipantChanged(): void {
+    if (this.ideasByParticipant.length > 0) {
+      this.loading(true);
+    } else {
+      this.loading(false);
+    }
+  }
+
+  loading(loaded: boolean): boolean {
     const element = document.getElementById('loadingScreen');
 
-    if (element && !element.classList.contains('zeroOpacity')) {
+    if (element && !element.classList.contains('zeroOpacity') && loaded) {
       const preload = document.getElementById('preloader');
       preload?.classList.add('PreloadSprites');
 
@@ -274,13 +286,21 @@ export default class Participant extends Vue {
       setTimeout(() => element?.classList.add('hidden'), 3000);
       return true;
     }
+    if (element && element.classList.contains('zeroOpacity') && !loaded) {
+      const preload = document.getElementById('preloader');
+      preload?.classList.add('PreloadSprites');
+
+      preload?.classList.add('PreloadSprites');
+      element?.classList.remove('hidden');
+      element?.classList.remove('zeroOpacity');
+      return false;
+    }
     return false;
   }
 
   initData = true;
   mounted(): void {
     this.initData = true;
-    this.loading;
   }
 
   get moduleName(): string {
@@ -309,6 +329,7 @@ export default class Participant extends Vue {
 
   updateTask(task: Task): void {
     this.task = task;
+    this.groupedIdeas = this.task.modules[0].parameter.ideaGroups;
   }
 
   deregisterAll(): void {

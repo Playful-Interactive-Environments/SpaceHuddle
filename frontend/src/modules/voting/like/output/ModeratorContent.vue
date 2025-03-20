@@ -1,11 +1,11 @@
 <template>
   <div class="moderatorContent">
-    <p class="postHeading">Select posts to include in voting</p>
+    <p class="postHeading">{{ $t('module.voting.like.moderator.header') }}</p>
     <el-checkbox
       class="includeAll"
       v-model="allSelected"
       @change="onAllSelectedChanged"
-      >Include all in voting
+      >{{ $t('module.voting.like.moderator.includeAll') }}
     </el-checkbox>
     <el-checkbox-group v-model="includedGroups">
       <el-checkbox

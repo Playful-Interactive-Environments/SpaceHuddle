@@ -9,13 +9,17 @@
     "previous": "previous",
     "next": "next",
     "submit": "Save",
-    "waiting": "Please wait. Ideas are being loaded.",
+    "waiting": "Please wait. The moderator is selecting ideas.",
     "imageKeywords": "image caption",
     "saveQuestion": "Do you want to save your selection?",
     "yes": "yes",
     "no": "no",
     "back": "finalize",
     "likes": "Likes to give"
+  },
+  "moderator": {
+    "header": "Select posts to include in voting.",
+    "includeAll": "Include all posts."
   },
   "analytics": {
     "highscore": {

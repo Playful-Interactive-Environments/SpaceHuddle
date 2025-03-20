@@ -7,13 +7,17 @@
     "thanksModerated": "Deine Wahl wurde gespeichert.",
     "thanksIndividual": "Deine Wahl wurde gespeichert.",
     "submit": "Speichern",
-    "waiting": "Bitte warten. Ideen werden geladen.",
+    "waiting": "Bitte warten. Moderator selektiert Ideen.",
     "imageKeywords": "Bildbeschreibung",
     "saveQuestion": "Soll die Auswahl gespeichert werden?",
     "yes": "ja",
     "no": "nein",
     "back": "abschließen",
     "likes": "Anzahl likes zum vergeben"
+  },
+  "moderator": {
+    "header": "Selektiere Beiträge die in die Abstimmung inkludiert werden.",
+    "includeAll": "Inkludiere alle Beiträge."
   },
   "analytics": {
     "highscore": {
