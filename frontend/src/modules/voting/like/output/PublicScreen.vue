@@ -2,7 +2,7 @@
   <div class="likePublicScreen">
     <div
       class="GalleryContainer"
-      v-for="ideaGroup in groupedIdeas"
+      v-for="ideaGroup in groupedIdeas.filter((group) => includedGroups.includes(String(group[0].participantId)))"
       :key="ideaGroup[0].participantId"
     >
       <Gallery
@@ -41,7 +41,7 @@ import * as viewService from '@/services/view-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import * as taskService from '@/services/task-service';
 import { Idea } from '@/types/api/Idea';
-import {Task} from "@/types/api/Task";
+import { Task } from '@/types/api/Task';
 
 @Options({
   components: {
@@ -78,7 +78,7 @@ export default class PublicScreen extends Vue {
       this.taskId,
       this.updateVotes,
       this.authHeaderTyp,
-        10
+      10
     );
     taskService.registerGetTaskById(
       this.taskId,
@@ -139,8 +139,6 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
-
 .likePublicScreen {
   width: 100%;
   display: flex;
