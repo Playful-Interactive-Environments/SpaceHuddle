@@ -1,8 +1,12 @@
 <template>
   <div class="moderatorContent">
-    <el-checkbox v-model="allSelected" @change="onAllSelectedChanged"
-      >Include all in voting</el-checkbox
-    >
+    <p class="postHeading">Select posts to include in voting</p>
+    <el-checkbox
+      class="includeAll"
+      v-model="allSelected"
+      @change="onAllSelectedChanged"
+      >Include all in voting
+    </el-checkbox>
     <el-checkbox-group v-model="includedGroups">
       <el-checkbox
         v-for="ideaGroup in groupedIdeas"
@@ -21,7 +25,7 @@
             :indicator-position="'none'"
           />
           <p class="like-count">
-            {{ getRatingSum(ideaGroup[0].id) }}
+            <span>{{ getRatingSum(ideaGroup[0].id) || 0 }}</span>
             <font-awesome-icon class="like-heart" :icon="['fas', 'heart']" />
           </p>
           <font-awesome-icon
@@ -83,7 +87,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
 
-  allSelected = true;
+  allSelected = false;
 
   get contrastColor(): string {
     return themeColors.getContrastColor();
@@ -135,6 +139,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       return acc;
     }, {});
     this.groupedIdeas = Object.values(groupedIdeas);
+    if (this.includedGroups.length < 0) {
+      for (const group of this.groupedIdeas) {
+        this.includedGroups.push(group[0].participantId);
+      }
+    }
   }
 
   @Watch('includedGroups', { immediate: true })
@@ -214,16 +223,26 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: 3rem;
+  gap: 1rem;
 
   width: 100%;
+}
+
+.postHeading {
+  font-size: var(--font-size-xlarge);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
 }
 
 .el-checkbox-group {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 2rem;
+}
+
+.el-checkbox {
 }
 
 .el-checkbox.GalleryCheckbox {
@@ -243,6 +262,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   padding: 0;
 }
 
+.el-checkbox.includeAll::v-deep(.el-checkbox__label) {
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-large);
+}
+
 .gallery {
   width: 20rem;
   height: 100%;
@@ -260,6 +285,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   right: 1rem;
   text-align: right;
   font-size: var(--font-size-xlarge);
+  color: var(--color-evaluating);
+
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  span {
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-semibold);
+  }
 }
 
 .participant-icon {
