@@ -126,7 +126,9 @@ export default class PublicScreen extends Vue {
   }
 
   deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateInputIdeas);
     cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateTask);
   }
 
   unmounted(): void {
