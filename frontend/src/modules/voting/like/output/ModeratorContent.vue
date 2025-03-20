@@ -229,7 +229,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 
 .postHeading {
-  font-size: var(--font-size-xlarge);
+  font-size: var(--font-size-large);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
 }
@@ -242,7 +242,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   gap: 2rem;
 }
 
-.el-checkbox {
+.el-checkbox.includeAll {
+  margin-bottom: 2rem;
 }
 
 .el-checkbox.GalleryCheckbox {
