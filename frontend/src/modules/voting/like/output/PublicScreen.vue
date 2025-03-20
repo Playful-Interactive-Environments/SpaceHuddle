@@ -77,7 +77,8 @@ export default class PublicScreen extends Vue {
     votingService.registerGetResult(
       this.taskId,
       this.updateVotes,
-      this.authHeaderTyp
+      this.authHeaderTyp,
+        10
     );
     taskService.registerGetTaskById(
       this.taskId,
