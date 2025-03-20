@@ -298,9 +298,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .participant-icon {
   position: absolute;
-  bottom: 1rem;
+  top: 1rem;
   left: 1rem;
   text-align: left;
-  font-size: var(--font-size-xlarge);
+  width: var(--font-size-large);
+  height: var(--font-size-large);
+
+  padding: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--el-color-white);
 }
 </style>
