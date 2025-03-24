@@ -1,7 +1,7 @@
 <template>
   <div v-if="hasData" class="stackedChartsContainer">
     <el-card
-      v-for="(survey, index) in tableArray"
+      v-for="(survey, index) in surveyElements"
       :key="survey?.taskData.taskId"
       class="stackedChartsSelectionContainer"
       shadow="never"
@@ -11,7 +11,7 @@
       <div class="stackedChartsTaskSelection">
         <el-dropdown
           v-if="hasSurveyData"
-          @command="(command) => updateTableArray(index, command)"
+          @command="(command) => updateSurveyElements(index, command)"
           trigger="click"
           placement="bottom"
         >
@@ -43,7 +43,7 @@
           v-if="survey"
           :icon="['fas', 'trash']"
           class="trashButton"
-          @click="removeFromTableArray(index)"
+          @click="removeFromSurveyElements(index)"
         />
       </div>
       <stacked-bar-chart
@@ -58,61 +58,6 @@
         v-model:selectedParticipantIds="participantIds"
         @update:selected-participant-ids="updateSelectedParticipantIds"
       />
-    </el-card>
-    <el-card
-      class="stackedChartsSelectionContainer addOn__boarder is-align-self-center"
-      shadow="never"
-      body-style="text-align: center"
-    >
-      <p class="stackedChartsSelectionHeadline">
-        {{ $t('moderator.organism.analytics.stackedBarCharts.survey') }}
-      </p>
-      <div class="stackedChartsTaskSelection">
-        <el-dropdown
-          v-if="hasSurveyData"
-          @command="addToTableArray"
-          trigger="click"
-          placement="bottom"
-        >
-          <div class="el-dropdown-link">
-            <p class="oneLineText stackedChartsTaskName">
-              {{
-                $t('moderator.organism.analytics.stackedBarCharts.selectTask')
-              }}
-              <font-awesome-icon :icon="['fas', 'angle-down']" />
-            </p>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <template
-                v-for="(sv, index) in surveyData"
-                :key="sv.taskData.taskId"
-              >
-                <el-dropdown-item
-                  v-if="isTopicHeading(index)"
-                  class="heading oneLineText"
-                  :divided="true"
-                  :style="{ pointerEvents: 'none', padding: '0.02rem 0' }"
-                  disabled
-                >
-                  {{ sv.taskData.topicName }}
-                </el-dropdown-item>
-                <el-dropdown-item
-                  :command="sv"
-                  :divided="isTopicHeading(index)"
-                >
-                  <font-awesome-icon
-                    class="axisIcon"
-                    :icon="getIconOfType(TaskType.INFORMATION)"
-                    :style="{ color: getColorOfType(TaskType.INFORMATION) }"
-                  />
-                  <span>&nbsp;{{ sv.taskData.taskName }}</span>
-                </el-dropdown-item>
-              </template>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
     </el-card>
   </div>
 </template>
@@ -156,14 +101,14 @@ interface SurveyData {
     },
   },
   components: { StackedBarChart },
-  emits: ['update:selectedParticipantIds'],
+  emits: ['update:selectedParticipantIds', 'update:surveyElements'],
 })
 export default class StackedBarCharts extends Vue {
   @Prop() readonly surveyData!: SurveyData[];
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
+  @Prop({ default: () => [] }) surveyElements!: SurveyData[];
 
   chartData: SurveyData[] = [];
-  tableArray: (SurveyData | null)[] = [];
   participantIds: string[] = [];
   colorTheme = [
     'var(--color-informing-light)',
@@ -172,6 +117,11 @@ export default class StackedBarCharts extends Vue {
     'var(--color-evaluating-light)',
     'var(--color-playing-light)',
   ];
+
+  @Watch('surveyElements', { deep: true })
+  onValueChanged(newValue: SurveyData[]) {
+    this.$emit('update:surveyElements', newValue);
+  }
 
   get hasData(): boolean {
     return !!this.surveyData && this.chartData.length > 0;
@@ -205,16 +155,16 @@ export default class StackedBarCharts extends Vue {
     return getIconOfType(taskType);
   }
 
-  addToTableArray(survey: SurveyData): void {
-    this.tableArray.push(survey);
+  addToSurveyElements(survey: SurveyData): void {
+    this.surveyElements.push(survey);
   }
 
-  removeFromTableArray(index: number): void {
-    this.tableArray.splice(index, 1);
+  removeFromSurveyElements(index: number): void {
+    this.surveyElements.splice(index, 1);
   }
 
-  updateTableArray(index: number, survey: SurveyData): void {
-    this.tableArray.splice(index, 1, survey);
+  updateSurveyElements(index: number, survey: SurveyData): void {
+    this.surveyElements.splice(index, 1, survey);
   }
 
   isQuizOrTalk(survey: SurveyData): boolean {

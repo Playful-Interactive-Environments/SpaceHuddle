@@ -1,7 +1,7 @@
 <template>
   <div v-if="hasData" class="highscoreContainer">
     <el-card
-      v-for="(axis, index) in tableArray"
+      v-for="(axis, index) in tableElements"
       :key="axis?.taskId"
       class="highScoreSelectionContainer"
       shadow="never"
@@ -11,7 +11,7 @@
       <div class="highscoreModuleSelection">
         <el-dropdown
           v-if="hasAxes"
-          @command="(command) => updateTableArray(index, command)"
+          @command="(command) => updateTableElements(index, command)"
           trigger="click"
           placement="bottom"
         >
@@ -31,7 +31,7 @@
             <el-dropdown-menu>
               <el-dropdown-item
                 v-for="ax in axes"
-                :key="ax.taskId"
+                :key="ax.taskData.taskId"
                 :command="ax"
               >
                 {{ ax.taskData.taskName }}
@@ -43,68 +43,18 @@
           v-if="axis"
           :icon="['fas', 'trash']"
           class="trashButton"
-          @click="removeFromTableArray(index)"
+          @click="removeFromTableElements(index)"
         />
       </div>
       <Highscore
         v-if="axis"
         class="highscore"
-        :task-id="axis.taskId"
-        :table-data="filterParticipantData(axis.taskId)"
+        :task-id="axis.taskData.taskId"
+        :table-data="filterParticipantData(axis.taskData.taskId)"
         v-model:selectedParticipantIds="participantIds"
         @update:selected-participant-ids="updateSelectedParticipantIds"
         :translation-path="getTranslationPath(axis)"
       />
-    </el-card>
-    <el-card
-      class="highScoreSelectionContainer addOn__boarder is-align-self-center"
-      shadow="never"
-      body-style="text-align: center"
-    >
-      <p class="TableSelectionHeadline">
-        {{ $t('moderator.organism.analytics.tables.table') }}
-      </p>
-      <div class="highscoreModuleSelection">
-        <el-dropdown
-          v-if="hasAxes"
-          @command="addToTableArray"
-          trigger="click"
-          placement="bottom"
-        >
-          <div class="el-dropdown-link">
-            <p class="oneLineText highscoreModuleName">
-              {{ $t('moderator.organism.analytics.tables.selectTask') }}
-              <font-awesome-icon :icon="['fas', 'angle-down']" />
-            </p>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <template v-for="(ax, index) in axes" :key="ax.taskId">
-                <el-dropdown-item
-                  v-if="isTopicHeading(index)"
-                  class="heading oneLineText"
-                  :divided="true"
-                  :style="{ pointerEvents: 'none', padding: '0.02rem 0' }"
-                  disabled
-                >
-                  {{ ax.taskData.topicName }}
-                </el-dropdown-item>
-                <el-dropdown-item
-                  :command="ax"
-                  :divided="isTopicHeading(index)"
-                >
-                  <font-awesome-icon
-                    class="axisIcon"
-                    :icon="getIconOfAxis(ax)"
-                    :style="{ color: getColorOfAxis(ax) }"
-                  />
-                  <span>&nbsp;{{ ax.taskData.taskName }}</span>
-                </el-dropdown-item>
-              </template>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
     </el-card>
   </div>
 </template>
@@ -126,8 +76,8 @@ interface SubAxis {
 }
 
 interface Axis {
-  taskId: string;
   taskData: {
+    taskId: string;
     taskType: TaskType;
     taskName: string;
     topicName: string;
@@ -157,7 +107,7 @@ interface DataEntry {
 
 @Options({
   components: { Highscore },
-  emits: ['update:selectedParticipantIds'],
+  emits: ['update:selectedParticipantIds', 'update:tableElements'],
 })
 export default class Tables extends Vue {
   @Prop() readonly taskId!: string;
@@ -167,8 +117,9 @@ export default class Tables extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
 
+  @Prop({ default: () => [] }) tableElements!: Axis[];
+
   chartData: DataEntry[] = [];
-  tableArray: (Axis | null)[] = [];
   participantIds: string[] = [];
 
   get hasData(): boolean {
@@ -217,16 +168,21 @@ export default class Tables extends Vue {
       : undefined;
   }
 
-  addToTableArray(axis: Axis): void {
-    this.tableArray.push(axis);
+  @Watch('tableElements', { deep: true })
+  onValueChanged(newValue: Axis[]) {
+    this.$emit('update:tableElements', newValue);
   }
 
-  removeFromTableArray(index: number): void {
-    this.tableArray.splice(index, 1);
+  addToTableElements(axis: Axis): void {
+    this.tableElements.push(axis);
   }
 
-  updateTableArray(index: number, axis: Axis): void {
-    this.tableArray.splice(index, 1, axis);
+  removeFromTableElements(index: number): void {
+    this.tableElements.splice(index, 1);
+  }
+
+  updateTableElements(index: number, axis: Axis): void {
+    this.tableElements.splice(index, 1, axis);
   }
 
   filterParticipantData(taskId: string): HighScoreEntry[] {

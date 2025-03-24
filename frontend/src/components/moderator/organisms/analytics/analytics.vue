@@ -47,7 +47,15 @@
       </el-collapse-item>
       <el-collapse-item name="tables" class="pdfPageBreakElement">
         <template #title>
-          <span>{{ $t('moderator.organism.analytics.tables.title') }}</span>
+          <span @click.stop
+            >{{ $t('moderator.organism.analytics.tables.title') }}
+            <ToolTip
+              :text="$t('moderator.organism.analytics.tables.selectTask')"
+              ><task-selection-dropdown
+                :available-elements="availableAxes"
+                v-model:elements="tableElements"
+            /></ToolTip>
+          </span>
         </template>
         <div class="AnalyticsTables">
           <Tables
@@ -55,7 +63,36 @@
             :participant-data="dataEntries"
             :axes="availableAxes"
             :steps="steps"
+            v-model:tableElements="tableElements"
             v-model:selectedParticipantIds="selectedParticipantIds"
+            :style="{ opacity: loadingSteps ? 0 : 1 }"
+          />
+        </div>
+      </el-collapse-item>
+      <el-collapse-item
+        v-if="surveyData.length > 0"
+        name="surveysQuizzes"
+        class="pdfPageBreakElement"
+      >
+        <template #title>
+          <span @click.stop
+            >{{ $t('moderator.organism.analytics.stackedBarCharts.title') }}
+
+            <ToolTip
+              :text="
+                $t('moderator.organism.analytics.stackedBarCharts.selectTask')
+              "
+              ><task-selection-dropdown
+                :available-elements="surveyData"
+                v-model:elements="surveyElements" /></ToolTip
+          ></span>
+        </template>
+        <div class="stackedBarChartContainer">
+          <StackedBarChartSelection
+            v-if="hasSurveyData"
+            :survey-data="surveyData"
+            v-model:selectedParticipantIds="selectedParticipantIds"
+            v-model:survey-elements="surveyElements"
             :style="{ opacity: loadingSteps ? 0 : 1 }"
           />
         </div>
@@ -99,25 +136,6 @@
           </div>
         </div>
       </el-collapse-item>
-      <el-collapse-item
-        v-if="surveyData.length > 0"
-        name="surveysQuizzes"
-        class="pdfPageBreakElement"
-      >
-        <template #title>
-          <span>{{
-            $t('moderator.organism.analytics.stackedBarCharts.title')
-          }}</span>
-        </template>
-        <div class="stackedBarChartContainer">
-          <StackedBarChartSelection
-            v-if="hasSurveyData"
-            :survey-data="surveyData"
-            v-model:selectedParticipantIds="selectedParticipantIds"
-            :style="{ opacity: loadingSteps ? 0 : 1 }"
-          />
-        </div>
-      </el-collapse-item>
     </el-collapse>
   </div>
 </template>
@@ -148,6 +166,8 @@ import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import StackedBarChartSelection from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChartSelection.vue';
 import ParticipantSelection from '@/components/moderator/organisms/analytics/subOrganisms/participantSelection.vue';
 import { Topic } from '@/types/api/Topic';
+import TaskSelectionDropdown from '@/components/moderator/organisms/analytics/subOrganisms/taskSelectionDropdown.vue';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 interface subAxis {
   id: string;
@@ -155,8 +175,8 @@ interface subAxis {
 }
 
 interface Axis {
-  taskId: string;
   taskData: {
+    taskId: string;
     taskType: TaskType;
     taskName: string;
     topicName: string;
@@ -204,6 +224,8 @@ interface QuestionData {
     },
   },
   components: {
+    ToolTip,
+    TaskSelectionDropdown,
     StackedBarChartSelection,
     StackedBarChart,
     RadarChart,
@@ -236,8 +258,8 @@ export default class Analytics extends Vue {
   session: Session | null = null;
 
   steps: {
-    taskId: string;
     taskData: {
+      taskId: string;
       taskType: TaskType;
       taskName: string;
       topicName: string;
@@ -276,6 +298,9 @@ export default class Analytics extends Vue {
     'radarCharts',
     'surveysQuizzes',
   ];
+
+  tableElements: Axis[] = [];
+  surveyElements: Axis[] = [];
 
   get isLoading(): boolean {
     return this.receivedTasks.length <= 0;
@@ -660,8 +685,8 @@ export default class Analytics extends Vue {
       (step) => step.parameter.gameplayResult
     );
     const stepsEntry = {
-      taskId: taskId,
       taskData: {
+        taskId: taskId,
         taskType: task.taskType as TaskType,
         taskName: task.name,
         topicName: this.topics[task.topicOrder]?.title ?? '',
@@ -672,7 +697,7 @@ export default class Analytics extends Vue {
       steps: filteredSteps,
     };
     const index = this.steps.findIndex(
-      (step) => step.taskId === stepsEntry.taskId
+      (step) => step.taskData.taskId === stepsEntry.taskData.taskId
     );
 
     if (index > -1) {
@@ -897,7 +922,7 @@ export default class Analytics extends Vue {
       }
 
       return {
-        taskId: stepEntry.taskId,
+        taskId: stepEntry.taskData.taskId,
         taskData: stepEntry.taskData,
         bestStep,
       };
@@ -927,7 +952,7 @@ export default class Analytics extends Vue {
   CalculateAxes(): Axis[] {
     return this.steps
       .map((step) => {
-        const { taskId, taskData } = step;
+        const { taskData } = step;
         const axisValues = this.wantedValues.reduce((acc, value) => {
           if (
             ((taskData.taskType as string) === 'BRAINSTORMING' &&
@@ -970,7 +995,6 @@ export default class Analytics extends Vue {
         const active = axisValues.length > 0;
 
         return {
-          taskId,
           taskData,
           axisValues,
           categoryActive: active ? axisValues[0]?.id || '' : '',
@@ -988,7 +1012,9 @@ export default class Analytics extends Vue {
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {
-          const moduleData = data.find((d) => d.taskId === axis.taskId);
+          const moduleData = data.find(
+            (d) => d.taskId === axis.taskData.taskId
+          );
           const axisValues = axis.axisValues.map((axisValue) => {
             if (!axisValue) return { id: '', value: null, ideas: null };
             const { id } = axisValue;
@@ -1021,7 +1047,7 @@ export default class Analytics extends Vue {
 
             return { id, value, ideas };
           });
-          return { taskId: axis.taskId, axisValues };
+          return { taskId: axis.taskData.taskId, axisValues };
         })
         .filter((axis) => axis.axisValues.length > 0);
       return { participant, axes: formattedAxes };
