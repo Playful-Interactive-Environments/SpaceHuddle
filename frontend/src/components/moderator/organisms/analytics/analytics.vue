@@ -14,7 +14,7 @@
     >
       <el-collapse-item name="participantSelection">
         <template #title>
-          <span>{{
+          <span @click.stop>{{
             $t('moderator.organism.analytics.participantSelection.title')
           }}</span>
         </template>
@@ -29,7 +29,7 @@
       </el-collapse-item>
       <el-collapse-item name="overview">
         <template #title>
-          <span>{{
+          <span @click.stop>{{
             $t('moderator.organism.analytics.parallelCoordinates.title')
           }}</span>
         </template>
@@ -45,7 +45,13 @@
           />
         </div>
       </el-collapse-item>
-      <el-collapse-item name="tables" class="pdfPageBreakElement">
+      <el-collapse-item
+        name="tables"
+        class="pdfPageBreakElement"
+        :style="{
+          width: tableElements.length > 0 ? '100%' : '50%',
+        }"
+      >
         <template #title>
           <span @click.stop
             >{{ $t('moderator.organism.analytics.tables.title') }}
@@ -73,6 +79,9 @@
         v-if="surveyData.length > 0"
         name="surveysQuizzes"
         class="pdfPageBreakElement"
+        :style="{
+          width: surveyElements.length > 0 ? '100%' : '50%',
+        }"
       >
         <template #title>
           <span @click.stop
@@ -103,7 +112,7 @@
         class="pdfPageBreakElement"
       >
         <template #title>
-          <span>{{
+          <span @click.stop>{{
             $t('moderator.organism.analytics.radarCharts.title')
           }}</span>
         </template>
@@ -1065,6 +1074,9 @@ export default class Analytics extends Vue {
   gap: 3rem;
   .el-collapse {
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
   .el-collapse-item {
     width: 100%;
