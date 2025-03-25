@@ -172,8 +172,8 @@ export default class PublicScreen extends Vue {
 
 .participant-icon {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: 0.5rem;
+  left: 0.5rem;
   text-align: left;
   width: var(--font-size-large);
   height: var(--font-size-large);

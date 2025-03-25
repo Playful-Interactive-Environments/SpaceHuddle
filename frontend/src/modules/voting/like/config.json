@@ -1,6 +1,6 @@
 {
-  "icon": "questions-check",
-  "iconPrefix": "fac",
+  "icon": "heart",
+  "iconPrefix": "fas",
   "type": "main",
   "input": "yes",
   "syncPublicParticipant": false,
