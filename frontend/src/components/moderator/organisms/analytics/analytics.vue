@@ -157,6 +157,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task } from '@/types/api/Task';
 import TaskType from '@/types/enum/TaskType';
 import * as sessionService from '@/services/session-service';
+import * as hierarchyService from '@/services/hierarchy-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import * as cashService from '@/services/cash-service';
 import * as votingService from '@/services/voting-service';
@@ -177,6 +178,7 @@ import ParticipantSelection from '@/components/moderator/organisms/analytics/sub
 import { Topic } from '@/types/api/Topic';
 import TaskSelectionDropdown from '@/components/moderator/organisms/analytics/subOrganisms/taskSelectionDropdown.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import { Hierarchy } from '@/types/api/Hierarchy';
 
 interface subAxis {
   id: string;
@@ -261,7 +263,7 @@ export default class Analytics extends Vue {
   surveyTasks: Task[] = [];
 
   ideas: Idea[] = [];
-  surveyIdeas: Idea[] = [];
+  surveyIdeas: Map<string, Hierarchy> = new Map();
   votes: VoteResult[] = [];
 
   session: Session | null = null;
@@ -366,7 +368,7 @@ export default class Analytics extends Vue {
     this.surveyTasks = [];
     this.radarDataEntries = [];
     this.ideas = [];
-    this.surveyIdeas = [];
+    this.surveyIdeas = new Map();
     this.votes = [];
     this.surveyData = [];
   }
@@ -384,6 +386,8 @@ export default class Analytics extends Vue {
     cashService.deregisterAllGet(this.updateBrainstormings);
     cashService.deregisterAllGet(this.updatePersonalityTests);
     cashService.deregisterAllGet(this.updateSurveyTasks);
+    cashService.deregisterAllGet(this.updateSurveyIdeas);
+    cashService.deregisterAllGet(this.updateSurveyQuestions);
     cashService.deregisterAllGet(this.updateIterationSteps);
     this.deregisterSteps();
   }
@@ -441,8 +445,40 @@ export default class Analytics extends Vue {
     this.ideas = this.ideas.concat(ideas);
   }
 
-  updateSurveyIdeas(ideas: Idea[]): void {
-    this.surveyIdeas = this.surveyIdeas.concat(ideas);
+  updateSurveyQuestions(questions: Hierarchy[], taskId: string): void {
+    for (const question of questions) {
+      hierarchyService.registerGetList(
+        taskId,
+        question.id,
+        this.updateSurveyIdeas,
+        this.authHeaderTyp,
+        30
+      );
+    }
+    cashService.deregisterAllGet(this.updateSurveyIdeas);
+  }
+
+  updateSurveyIdeas(answers: Hierarchy[]): void {
+    for (const answer of answers) {
+      if (answer.id) {
+        this.surveyIdeas.set(answer.id, answer);
+      }
+    }
+  }
+
+  @Watch('surveyIdeas', { immediate: true, deep: true })
+  onSurveyIdeasChanged(): void {
+    cashService.deregisterAllGet(this.updateSurveyTasks);
+    for (const task of this.surveyTasks) {
+      taskParticipantService.registerGetIterationStepList(
+        task.id,
+        (steps: TaskParticipantIterationStep[]) => {
+          this.updateSurveyTasks(task.id, task, steps);
+        },
+        EndpointAuthorisationType.MODERATOR,
+        30
+      );
+    }
   }
 
   updateTasks(tasks: Task[]): void {
@@ -492,11 +528,13 @@ export default class Analytics extends Vue {
     }
 
     for (const task of this.surveyTasks) {
-      ideaService.registerGetIdeasForTask(
+      this.surveyIdeas = new Map();
+      hierarchyService.registerGetQuestions(
         task.id,
-        null,
-        null,
-        this.updateSurveyIdeas,
+        (questions: Hierarchy[]) => {
+          this.updateSurveyIdeas(questions);
+          this.updateSurveyQuestions(questions, task.id);
+        },
         this.authHeaderTyp,
         30
       );
@@ -515,7 +553,6 @@ export default class Analytics extends Vue {
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateBrainstormings);
     cashService.deregisterAllGet(this.updatePersonalityTests);
-    cashService.deregisterAllGet(this.updateSurveyTasks);
     cashService.deregisterAllGet(this.updateIterationSteps);
     for (const task of tasks) {
       if ((task.taskType as string) === 'PLAYING') {
@@ -570,16 +607,6 @@ export default class Analytics extends Vue {
             task.modules[0].parameter.test,
             task.name
           );
-        },
-        EndpointAuthorisationType.MODERATOR,
-        30
-      );
-    }
-    for (const task of this.surveyTasks) {
-      taskParticipantService.registerGetIterationStepList(
-        task.id,
-        (steps: TaskParticipantIterationStep[]) => {
-          this.updateSurveyTasks(task.id, task, steps);
         },
         EndpointAuthorisationType.MODERATOR,
         30
@@ -807,11 +834,13 @@ export default class Analytics extends Vue {
       }
     > = {};
 
+    console.log(this.surveyIdeas);
+
     steps.forEach((entry) => {
       const { avatar, ideaId, parameter } = entry;
       const answer = parameter.answer != null ? parameter.answer : [];
 
-      const question = this.surveyIdeas.find((idea) => idea.id === ideaId);
+      const question = this.surveyIdeas.get(ideaId || '');
       if (!question) return;
 
       const questionKeywords = question.keywords || '';
@@ -820,7 +849,7 @@ export default class Analytics extends Vue {
       const correct: boolean[] = [];
       if (Array.isArray(answer)) {
         answer.forEach((a) => {
-          const answerIdea = this.surveyIdeas.find((idea) => idea.id === a);
+          const answerIdea = this.surveyIdeas.get(a);
           if (answerIdea) {
             answers.push(answerIdea.keywords || '');
             correct.push(answerIdea.parameter.isCorrect);
@@ -857,12 +886,17 @@ export default class Analytics extends Vue {
 
     taskEntry.questions = Object.values(questionData);
 
-    if (
-      !this.surveyData.some(
-        (entry) => entry.taskData.taskId === taskEntry.taskData.taskId
-      )
-    ) {
+    const index = this.surveyData.findIndex(
+      (entry) => entry.taskData.taskId === taskEntry.taskData.taskId
+    );
+
+    if (index === -1) {
       this.surveyData.push(taskEntry);
+      this.surveyData.sort(
+        (a, b) => a.taskData.topicOrder - b.taskData.topicOrder
+      );
+    } else {
+      this.surveyData.splice(index, 1, taskEntry);
       this.surveyData.sort(
         (a, b) => a.taskData.topicOrder - b.taskData.topicOrder
       );
