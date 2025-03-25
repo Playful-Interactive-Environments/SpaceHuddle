@@ -47,9 +47,9 @@
       </el-collapse-item>
       <el-collapse-item
         name="tables"
-        class="pdfPageBreakElement"
+        class="pdfPageBreakElement dropDownTables"
         :style="{
-          width: tableElements.length > 0 ? '100%' : '50%',
+          width: tableElements.length > 1 ? '100%' : '50%',
         }"
       >
         <template #title>
@@ -78,9 +78,9 @@
       <el-collapse-item
         v-if="surveyData.length > 0"
         name="surveysQuizzes"
-        class="pdfPageBreakElement"
+        class="pdfPageBreakElement dropDownSurveysQuizzes"
         :style="{
-          width: surveyElements.length > 0 ? '100%' : '50%',
+          width: surveyElements.length > 1 ? '100%' : '50%',
         }"
       >
         <template #title>
@@ -1096,8 +1096,11 @@ export default class Analytics extends Vue {
     width: 100%;
     margin: 2rem 0;
   }
-  .AnalyticsTables {
-    width: 100%;
+  .dropDownTables,
+  .dropDownSurveysQuizzes {
+    @media (max-width: calc((700px * 2) + 12rem)) {
+      width: 100% !important;
+    }
   }
 
   .AnalyticsTables,

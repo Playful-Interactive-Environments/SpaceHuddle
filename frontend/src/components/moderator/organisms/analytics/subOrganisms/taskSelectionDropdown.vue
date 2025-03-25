@@ -119,6 +119,7 @@ export default class taskSelectionDropdown extends Vue {
 
 <style scoped lang="scss">
 .plus-icon {
+  margin-top: 0.5rem;
   transform: scale(1);
   transition: transform 0.3s ease;
 }

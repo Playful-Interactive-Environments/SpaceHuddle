@@ -5,7 +5,7 @@
       :key="index"
       class="question-container"
     >
-      <p class="questionText twoLineText" :style="questionTextStyle">
+      <p class="questionText twoLineText" :style="questionTextStyle" @click="console.log(computedSegments)">
         <ToolTip :content="questionData.question" :show-after="200">
           <span>{{ questionData.question }}</span>
         </ToolTip>
