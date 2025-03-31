@@ -9,7 +9,7 @@
       title="ExternalSource"
       width="100%"
       height="100%"
-      :src="sourceLink"
+      :src="getPdfBlobUrl(sourceLink)"
     ></iframe>
   </div>
   <p v-else-if="sourceLink">
@@ -60,8 +60,7 @@ export default class PublicScreen extends Vue {
   }
 
   get isValidSourceLink(): boolean {
-    const base64Pattern =
-      /^(data:application\/pdf;base64,[A-Za-z0-9+/]+={0,2})$/;
+    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
 
     return (
       base64Pattern.test(this.sourceLink) ||
@@ -77,6 +76,30 @@ export default class PublicScreen extends Vue {
         'i'
       ).test(this.sourceLink)
     );
+  }
+
+  base64ToBlob(base64: string, contentType = "application/pdf"): Blob {
+    const base64Data = base64.includes(",") ? base64.split(",")[1] : base64;
+
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: contentType });
+  }
+
+  getPdfBlobUrl(base64: string | null): string | null {
+    if (!base64) return null;
+
+    try {
+      const pdfBlob = this.base64ToBlob(base64);
+      return URL.createObjectURL(pdfBlob);
+    } catch (error) {
+      console.error("Error creating Blob URL:", error);
+      return null;
+    }
   }
 }
 </script>
