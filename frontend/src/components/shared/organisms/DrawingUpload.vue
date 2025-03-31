@@ -32,7 +32,7 @@
           check-orientation
           :canvas="{
             minWidth: 0,
-            maxWidth: 512,
+            maxWidth: 1024,
           }"
           :auto-zoom="true"
           :default-size="defaultSize"
