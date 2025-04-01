@@ -29,7 +29,7 @@
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <template v-for="(ax, index) in axes" :key="ax.taskId">
+              <template v-for="(ax, index) in axes" :key="ax.taskData.taskId">
                 <el-dropdown-item
                   v-if="isTopicHeading(index)"
                   class="heading oneLineText"

@@ -29,13 +29,28 @@
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="sv in surveyData"
-                :key="sv.taskData.taskId"
-                :command="sv"
-              >
-                {{ sv.taskData.taskName }}
-              </el-dropdown-item>
+              <template v-for="(sv, index) in surveyData" :key="sv.taskData.taskId">
+                <el-dropdown-item
+                    v-if="isTopicHeading(index)"
+                    class="heading oneLineText"
+                    :divided="true"
+                    :style="{ pointerEvents: 'none', padding: '0.02rem 0' }"
+                    disabled
+                >
+                  {{ sv.taskData.topicName }}
+                </el-dropdown-item>
+                <el-dropdown-item
+                    :command="sv"
+                    :divided="isTopicHeading(index)"
+                >
+                  <font-awesome-icon
+                      class="axisIcon"
+                      :icon="getIconOfType(TaskType.INFORMATION)"
+                      :style="{ color: getColorOfType(TaskType.INFORMATION) }"
+                  />
+                  <span>&nbsp;{{ sv.taskData.taskName }}</span>
+                </el-dropdown-item>
+              </template>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
