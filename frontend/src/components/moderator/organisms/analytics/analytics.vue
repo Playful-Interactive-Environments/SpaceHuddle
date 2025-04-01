@@ -224,7 +224,10 @@ interface Answer {
 interface QuestionData {
   question: string;
   questionType: string;
-  parameter: any;
+  parameter: {
+    minValue?: number;
+    maxValue?: number;
+  };
   answers: Answer[];
 }
 

@@ -153,7 +153,7 @@
               class="barRectGradient"
               v-bind="barRectGradientProps(index, i, segment)"
             />
-            <g class="barSegmentPercentages">
+<!--            <g class="barSegmentPercentages">
               <rect v-bind="percentageRectProps(segment)" />
               <text
                 class="svgText"
@@ -162,7 +162,7 @@
               >
                 {{ Math.round(segment.percentage * 100) }}%
               </text>
-            </g>
+            </g>-->
           </g>
         </svg>
         <div
@@ -192,10 +192,15 @@
           "
         >
           <ToolTip
-            :content="segment.answer"
             :show-after="200"
             class="segment-text-toolTip"
           >
+            <template #content>
+              <p class="segment-answer">
+                {{ segment.answer }}<br />
+                <span class="segment-percentage">{{ Math.round(segment.percentage * 100) }}%</span>
+              </p>
+            </template>
             <div class="segment-text-toolTip oneLineText">
               <span class="oneLineText">{{ segment.answer }}</span>
             </div>
@@ -730,6 +735,14 @@ export default class StackedBarChart extends Vue {
   top: 60%;
 
   transform: translateX(0.2rem);
+}
+
+.segment-answer {
+  text-align: center;
+  .segment-percentage {
+    font-size: var(--font-size-xsmall);
+    font-weight: var(--font-weight-bold);
+  }
 }
 
 .segment-avatars-icon {

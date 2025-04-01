@@ -57,7 +57,7 @@ interface TaskData {
 
 interface TaskDataObject {
   taskData: TaskData;
-  [key: string]: any; // Allow any additional properties
+  [key: string]: any;
 }
 
 @Options({
@@ -103,7 +103,7 @@ export default class taskSelectionDropdown extends Vue {
   }
 
   addToElementsArray(el: TaskDataObject): void {
-    this.elements.unshift(el);
+    this.elements.push(el);
   }
 
   isTopicHeading(index: number): boolean {
