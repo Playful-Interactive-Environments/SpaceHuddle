@@ -286,7 +286,7 @@ export default class Highscore extends Vue {
 }
 
 .participantSelected {
-  background-color: var(--color-background-blue);
+  background-color: var(--color-highlight-lighter);
 }
 
 .text-button {
