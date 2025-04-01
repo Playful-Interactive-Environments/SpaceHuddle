@@ -8,7 +8,7 @@
       <div
         class="axisControls axisControlsFlex"
         v-for="axis in activeAxes"
-        :key="axis.taskId"
+        :key="axis.taskData.taskId"
         :style="{
           textAlign: 'center',
           width: `${axesSpacing}px`,
@@ -31,7 +31,7 @@
               <el-dropdown-menu>
                 <el-dropdown-item
                   v-for="entry of getCachedIdeas(axis)"
-                  :key="entry.avatar.id + axis.taskId"
+                  :key="entry.avatar.id + axis.taskData.taskId"
                   :divided="true"
                   :disabled="true"
                   :style="{
@@ -60,7 +60,7 @@
                       class="ideaCardContainer"
                       v-for="(idea, index) of entry.ideas"
                       :key="
-                        entry.avatar.id + axis.taskId + (idea ? idea.id : index)
+                        entry.avatar.id + axis.taskData.taskId + (idea ? idea.id : index)
                       "
                     >
                       <IdeaCard
@@ -222,7 +222,7 @@
       <g
         class="axes"
         v-for="(axis, index) in activeAxes"
-        :key="axis.taskId"
+        :key="axis.taskData.taskId"
         :transform="`translate(${axesSpacing * index + paddingLeft}, 0)`"
       >
         <!-- Axis Line -->
@@ -238,7 +238,7 @@
           v-for="labelIndex in this.getLabelCount(
             axis.axisValues.find((ax) => ax?.id === axis.categoryActive)?.range
           ) + 1"
-          :key="labelIndex - 1 + axis.taskId"
+          :key="labelIndex - 1 + axis.taskData.taskId"
         >
           <VariableSVGWrapper>
             <template
@@ -301,7 +301,7 @@
         <div
           class="axisControls"
           v-for="(axis, index) in activeAxes"
-          :key="axis.taskId"
+          :key="axis.taskData.taskId"
           :style="{
             textAlign: 'center',
             width: `${axesSpacing / 1.5}px`,
@@ -365,7 +365,7 @@
                   <el-dropdown-menu class="centered-dropdown-menu">
                     <template
                       v-for="(ax, axIndex) in availableAxesForSelection"
-                      :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
+                      :key="ax ? ax.taskData.taskId + 'ax' : axIndex + 'ax'"
                     >
                       <el-dropdown-item
                         v-if="
@@ -467,7 +467,7 @@
                   v-for="(ax, axIndex) in availableAxesForSelection.filter(
                     (avAxis) => !this.axes.includes(avAxis) || !avAxis.active
                   )"
-                  :key="ax ? ax.taskId + 'ax' : axIndex + 'ax'"
+                  :key="ax ? ax.taskData.taskId + 'ax' : axIndex + 'ax'"
                 >
                   <el-dropdown-item
                     v-if="
