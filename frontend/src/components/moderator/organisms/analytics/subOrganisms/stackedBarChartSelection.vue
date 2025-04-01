@@ -25,6 +25,12 @@
             <p class="oneLineText stackedChartsTaskName">
               {{ survey ? survey.taskData.taskName : 'Select Survey' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
+              <span
+                  class="participant-count"
+                ><font-awesome-icon icon="user" />&nbsp;{{
+                  getParticipantCount(survey.questions)
+                }}
+              </span>
             </p>
           </div>
           <template #dropdown>
@@ -197,6 +203,18 @@ export default class StackedBarCharts extends Vue {
       index === 0
     );
   }
+
+  getParticipantCount(questionDataArray: QuestionData[]): number {
+    const uniqueAvatarIds = new Set<string>();
+
+    questionDataArray.forEach((questionData) => {
+      questionData.answers.forEach((answer) => {
+        uniqueAvatarIds.add(answer.avatar.id);
+      });
+    });
+
+    return uniqueAvatarIds.size;
+  }
 }
 </script>
 
@@ -291,4 +309,9 @@ export default class StackedBarCharts extends Vue {
   font-weight: var(--font-weight-bold);
   margin-bottom: 0.5rem;
 }
+
+.participant-count {
+  margin-left: 1rem;
+}
+
 </style>

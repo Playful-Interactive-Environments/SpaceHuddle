@@ -837,8 +837,6 @@ export default class Analytics extends Vue {
       }
     > = {};
 
-    console.log(this.surveyIdeas);
-
     steps.forEach((entry) => {
       const { avatar, ideaId, parameter } = entry;
       const answer = parameter.answer != null ? parameter.answer : [];

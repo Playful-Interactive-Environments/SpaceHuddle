@@ -2,7 +2,7 @@
   <div v-if="hasData" class="highscoreContainer">
     <el-card
       v-for="(axis, index) in tableElements"
-      :key="axis?.taskId"
+      :key="axis?.taskData.taskId"
       class="highScoreSelectionContainer"
       shadow="never"
       body-style="text-align: center"
@@ -25,6 +25,12 @@
             <p class="oneLineText highscoreModuleName">
               {{ axis ? axis.taskData.taskName : 'Select Task' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
+              <span
+                  class="participant-count"
+              ><font-awesome-icon icon="user" />&nbsp;{{
+                  getParticipantCount(axis)
+                }}
+              </span>
             </p>
           </div>
           <template #dropdown>
@@ -230,6 +236,25 @@ export default class Tables extends Vue {
       index === 0
     );
   }
+
+  getParticipantCount(axis: Axis): number {
+    const taskId = axis.taskData.taskId;
+    const category = axis.categoryActive;
+
+    return this.participantData.reduce((counter, partData) => {
+      const partAxis = partData.axes.find(
+          (partAxis) => partAxis.taskId === taskId
+      );
+      if (partAxis) {
+        counter += partAxis.axisValues.reduce((count, value) => {
+          return (
+              count + (value.id === category && value.value !== null ? 1 : 0)
+          );
+        }, 0);
+      }
+      return counter;
+    }, 0);
+  }
 }
 </script>
 
@@ -318,5 +343,9 @@ export default class Tables extends Vue {
   font-size: var(--font-size-xlarge);
   font-weight: var(--font-weight-bold);
   margin-bottom: 0.5rem;
+}
+
+.participant-count {
+  margin-left: 1rem;
 }
 </style>

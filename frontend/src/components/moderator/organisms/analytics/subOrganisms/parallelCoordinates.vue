@@ -780,15 +780,15 @@ export default class ParallelCoordinates extends Vue {
   }
 
   getParticipationCount(axis: Axis): number {
+    const taskId = axis.taskData.taskId;
     const category = axis.categoryActive;
+
     return this.participantData.reduce((counter, partData) => {
-      const partAxis = partData.axes.find(
-        (partAxis) => partAxis.taskId === axis.taskData.taskId
-      );
+      const partAxis = partData.axes.find(partAxis => partAxis.taskId === taskId);
       if (partAxis) {
-        counter += partAxis.axisValues.filter(
-          (value) => value.id === category && value.value !== null
-        ).length;
+        counter += partAxis.axisValues.reduce((count, value) => {
+          return count + (value.id === category && value.value !== null ? 1 : 0);
+        }, 0);
       }
       return counter;
     }, 0);
