@@ -409,9 +409,10 @@ export default class StackedBarChart extends Vue {
   get sliderPositions() {
     return [
       this.paddingSlider,
-      this.parentWidth * this.barWidthPercentage * 0.25,
-      this.parentWidth * this.barWidthPercentage * 0.5,
-      this.parentWidth * this.barWidthPercentage * 0.75,
+      this.parentWidth * this.barWidthPercentage * 0.2,
+      this.parentWidth * this.barWidthPercentage * 0.4,
+      this.parentWidth * this.barWidthPercentage * 0.6,
+      this.parentWidth * this.barWidthPercentage * 0.8,
       this.parentWidth * this.barWidthPercentage - this.paddingSlider,
     ];
   }

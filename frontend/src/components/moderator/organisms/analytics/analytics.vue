@@ -377,6 +377,7 @@ export default class Analytics extends Vue {
   }
 
   get dataEntries(): DataEntry[] {
+    console.log(this.CalculateDataEntries().filter((entry) => entry.axes[0].axisValues[0].value != null));
     return this.CalculateDataEntries();
   }
 
@@ -514,8 +515,7 @@ export default class Analytics extends Vue {
       task.modules.find(
         (module) =>
           module.name !== 'personalityTest' &&
-          module.name !== 'survey' &&
-          module.name !== 'quiz'
+          module.name !== 'survey'
       )
     );
 
