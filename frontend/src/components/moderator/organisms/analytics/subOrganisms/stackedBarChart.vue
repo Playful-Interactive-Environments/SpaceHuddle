@@ -5,7 +5,11 @@
       :key="index"
       class="question-container"
     >
-      <p class="questionText twoLineText" :style="questionTextStyle" @click="console.log(computedSegments)">
+      <p
+        class="questionText twoLineText"
+        :style="questionTextStyle"
+        @click="console.log(computedSegments)"
+      >
         <ToolTip :content="questionData.question" :show-after="200">
           <span>{{ questionData.question }}</span>
         </ToolTip>
@@ -153,16 +157,6 @@
               class="barRectGradient"
               v-bind="barRectGradientProps(index, i, segment)"
             />
-<!--            <g class="barSegmentPercentages">
-              <rect v-bind="percentageRectProps(segment)" />
-              <text
-                class="svgText"
-                v-bind="percentageTextProps(segment)"
-                text-anchor="left"
-              >
-                {{ Math.round(segment.percentage * 100) }}%
-              </text>
-            </g>-->
           </g>
         </svg>
         <div
@@ -191,14 +185,13 @@
             )
           "
         >
-          <ToolTip
-            :show-after="200"
-            class="segment-text-toolTip"
-          >
+          <ToolTip :show-after="200" class="segment-text-toolTip">
             <template #content>
               <p class="segment-answer">
                 {{ segment.answer }}<br />
-                <span class="segment-percentage">{{ Math.round(segment.percentage * 100) }}%</span>
+                <span class="segment-percentage"
+                  >{{ Math.round(segment.percentage * 100) }}%</span
+                >
               </p>
             </template>
             <div class="segment-text-toolTip oneLineText">
@@ -228,7 +221,10 @@ interface Answer {
 interface QuestionData {
   question: string;
   questionType: string;
-  parameter: any;
+  parameter: {
+    minValue?: number;
+    maxValue?: number;
+  };
   answers: Answer[];
 }
 
@@ -402,6 +398,7 @@ export default class StackedBarChart extends Vue {
   }
 
   calculateCircleX(segment: AnswerSegment, questionData: QuestionData): number {
+    if (!questionData.parameter.maxValue) return 0;
     return (
       (Number(segment.answer) / questionData.parameter.maxValue) *
         (this.parentWidth * this.barWidthPercentage - 2 * this.paddingSlider) +
@@ -552,30 +549,6 @@ export default class StackedBarChart extends Vue {
         strokeWidth: 6,
         stroke: 'var(--color-background)',
         backgroundColor: 'var(--color-background)',
-      },
-    };
-  }
-
-  percentageRectProps(segment: AnswerSegment) {
-    return {
-      x: segment.x + segment.width - 55,
-      y: 0,
-      width: 30,
-      height: 12,
-      fill: 'var(--color-background)',
-      rx: 12 / 2.5,
-      ry: 12 / 2.5,
-    };
-  }
-
-  percentageTextProps(segment: AnswerSegment) {
-    return {
-      x: segment.x + segment.width - 50,
-      y: 7.5,
-      fontSize: '10.5',
-      style: {
-        color: 'var(--color-dark-contrast)',
-        textAlign: 'center',
       },
     };
   }

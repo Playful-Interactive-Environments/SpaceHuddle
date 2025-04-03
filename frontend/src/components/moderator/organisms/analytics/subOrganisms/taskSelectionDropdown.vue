@@ -20,7 +20,7 @@
             v-if="isTopicHeading(index)"
             class="heading oneLineText"
             :divided="true"
-            :style="{ pointerEvents: 'none', padding: '0.02rem 0' }"
+            :style="{ pointerEvents: 'none' }"
             disabled
           >
             {{ el.taskData.topicName }}
