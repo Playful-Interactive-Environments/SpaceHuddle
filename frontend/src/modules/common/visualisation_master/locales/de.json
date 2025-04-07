@@ -4,7 +4,10 @@
     "description": "Visualisiere Ideen"
   },
   "moderatorConfig": {
-    "voteUseAverage": "Nimm den Durchschnitt der Abstimmungen"
+    "voteUseAverage": "Nimm den Durchschnitt der Abstimmungen",
+    "podium": {
+      "topAmount": "Maximalzahl"
+    }
   },
   "visModules": {
     "gallery": {

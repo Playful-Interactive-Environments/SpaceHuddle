@@ -21,6 +21,7 @@
           </span>
         </div>
         <div
+          v-if="session"
           class="media-right"
           :style="{ '--connection-key-length': session.connectionKey.length }"
         >
@@ -84,7 +85,7 @@
                 class="header-qrcode-dropdown"
               >
                 <p :style="{ marginBottom: '1rem' }">
-                  {{ session.connectionKey }}
+                  {{ session?.connectionKey }}
                 </p>
                 <QrcodeVue
                   :foreground="contrastColor"

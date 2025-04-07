@@ -35,79 +35,89 @@
   <div id="visContainer">
     <Gallery
       v-if="currentVisModule === 'gallery'"
-      :task-id="this.taskId"
+      :task-id="taskId"
       :timeModifier="timeModifier"
-      :ideas="this.ideas"
+      :ideas="ideas"
       :paused="paused"
+      :parameter="parameter"
     />
     <CardShuffle
       v-if="currentVisModule === 'cardShuffle'"
-      :task-id="this.taskId"
+      :task-id="taskId"
       :timeModifier="timeModifier"
-      :ideas="this.ideas"
+      :ideas="ideas"
       :paused="paused"
+      :parameter="parameter"
     />
     <infinite-scroll
       v-if="currentVisModule === 'infiniteScroll'"
-      :task-id="this.taskId"
+      :task-id="taskId"
       :timeModifier="timeModifier"
-      :ideas="this.ideas"
+      :ideas="ideas"
       :paused="paused"
+      :parameter="parameter"
     />
     <BarChart
       v-if="currentVisModule === 'barChart'"
-      :task-id="this.taskId"
+      :task-id="taskId"
       :timeModifier="timeModifier"
-      :timerEnded="this.timerEnd"
+      :timerEnded="timerEnd"
       :votes="votes"
+      :parameter="parameter"
     />
     <strata
       v-if="currentVisModule === 'strata'"
-      :task-id="this.taskId"
+      :task-id="taskId"
       :timeModifier="timeModifier"
-      :timerEnded="this.timerEnd"
+      :timerEnded="timerEnd"
       :votes="votes"
+      :parameter="parameter"
     />
     <podium
       v-if="currentVisModule === 'podium'"
-      :task-id="this.taskId"
+      :task-id="taskId"
       :timeModifier="timeModifier"
-      :timerEnded="this.timerEnd"
+      :timerEnded="timerEnd"
       :votes="votes"
+      :parameter="parameter"
     />
     <elimination
       v-if="currentVisModule === 'elimination'"
-      :task-id="this.taskId"
+      :task-id="taskId"
       :timeModifier="timeModifier"
-      :timerEnded="this.timerEnd"
+      :timerEnded="timerEnd"
       :votes="votes"
+      :parameter="parameter"
     />
     <canvas-module
       v-if="currentVisModule === 'canvasModule'"
-      :task-id="this.taskId"
-      :task="this.task"
-      :taskType="this.task.taskType"
+      :task-id="taskId"
+      :task="task"
+      :taskType="task?.taskType"
       :timeModifier="timeModifier"
-      :timerEnded="this.timerEnd"
-      :ideas="this.ideas"
-      :categories="this.categories"
+      :timerEnded="timerEnd"
+      :ideas="ideas"
+      :categories="categories"
       :paused="paused"
+      :parameter="parameter"
     />
     <analytics-dashboard
       v-if="currentVisModule === 'analyticsDashboard'"
-      :task-id="this.taskId"
-      :task="this.task"
+      :task-id="taskId"
+      :task="task"
       :timeModifier="timeModifier"
-      :ideas="this.ideas"
+      :ideas="ideas"
       :paused="paused"
+      :parameter="parameter"
     />
     <analytics
       v-if="currentVisModule === 'analytics'"
-      :task-id="this.taskId"
-      :task="this.task"
+      :task-id="taskId"
+      :task="task"
       :timeModifier="timeModifier"
-      :ideas="this.ideas"
+      :ideas="ideas"
       :paused="paused"
+      :parameter="parameter"
     />
   </div>
 </template>
@@ -171,6 +181,7 @@ export default class PublicScreen extends Vue {
   categories: Category[] = [];
 
   voteUseAverage = false;
+  parameter: any = {};
 
   paused = false;
 
@@ -301,6 +312,7 @@ export default class PublicScreen extends Vue {
     )[0];
     this.currentVisModule = visModule.parameter.visModule.id;
     this.voteUseAverage = visModule.parameter.voteUseAverage;
+    this.parameter = visModule.parameter;
   }
 
   @Watch('task.parameter.stateFilter', { immediate: true })

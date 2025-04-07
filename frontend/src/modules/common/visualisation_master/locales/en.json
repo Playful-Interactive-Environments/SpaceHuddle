@@ -4,7 +4,10 @@
     "description": "Visualise Ideas"
   },
   "moderatorConfig": {
-    "voteUseAverage": "Use average votings"
+    "voteUseAverage": "Use average votings",
+    "podium": {
+      "topAmount": "top amount"
+    }
   },
   "visModules": {
     "gallery": {

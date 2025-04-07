@@ -42,6 +42,14 @@
       </p>
     </el-card>
   </div>
+  <el-form-item
+    v-if="selectedVisModule === 'podium'"
+    :label="
+      $t('module.common.visualisation_master.moderatorConfig.podium.topAmount')
+    "
+  >
+    <el-input-number min="1" max="10" v-model="modelValue.topAmount" />
+  </el-form-item>
 </template>
 
 <script lang="ts">
@@ -87,6 +95,13 @@ export default class ModeratorConfig extends Vue {
   changeSelection(visModule) {
     this.modelValue.visModule = visModule;
     this.selectedVisModule = visModule.id;
+    if (this.selectedVisModule === 'podium') {
+      if (!('topAmount' in this.modelValue)) {
+        this.modelValue.topAmount = 5;
+      }
+    } else {
+      delete this.modelValue.topAmount;
+    }
   }
 
   mounted() {

@@ -3,7 +3,7 @@
     <div class="buttonContainer" v-if="!ended">
       <el-button
         class="startButton"
-        v-if="!started && this.topVotes[0]"
+        v-if="!started && topVotes[0]"
         @click="startAnimation"
       >
         <span>
@@ -13,7 +13,7 @@
       </el-button>
       <el-button
         class="startButton"
-        v-if="!started && this.topVotes[0]"
+        v-if="!started && topVotes[0]"
         @click="startModeratedAnimation"
       >
         <span>
@@ -38,7 +38,7 @@
         :style="{
           width: 100 / topVotes.length - 1 + '%',
           transition: getIdeaTransitionConfig(
-            topVotes.length - this.order[index] - 1
+            topVotes.length - order[index] - 1
           ),
           marginTop: getTopMargin(index),
           pointerEvents: ended ? 'all' : 'none',
@@ -66,9 +66,8 @@
     </div>
     <div
       v-if="
-        this.votes.filter(
-          (d) => d.ratingSum < this.voteSets[this.voteSets.length - 1]
-        ).length > 0
+        votes.filter((d) => d.ratingSum < voteSets[voteSets.length - 1])
+          .length > 0
       "
       id="revealOtherVotes"
       :style="{
@@ -84,9 +83,8 @@
     </div>
     <div
       v-if="
-        this.votes.filter(
-          (d) => d.ratingSum < this.voteSets[this.voteSets.length - 1]
-        ).length > 0
+        votes.filter((d) => d.ratingSum < voteSets[voteSets.length - 1])
+          .length > 0
       "
       id="otherVotesContainer"
       class="columnLayout"
@@ -97,8 +95,8 @@
       }"
     >
       <IdeaCard
-        v-for="vote in this.votes.filter(
-          (d) => d.ratingSum < this.voteSets[this.voteSets.length - 1]
+        v-for="vote in votes.filter(
+          (d) => d.ratingSum < voteSets[voteSets.length - 1]
         )"
         :key="vote.idea.id"
         :idea="vote.idea"
@@ -128,6 +126,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: 0 }) readonly timeModifier!: number;
   @Prop({ default: false }) readonly timerEnded!: boolean;
   @Prop({ default: [] }) readonly votes!: VoteResult[];
+  @Prop({ default: {} }) readonly parameter!: any;
   chartData: any = {
     labels: [],
     datasets: [],
@@ -190,7 +189,13 @@ export default class PublicScreen extends Vue {
       for (let i = 0; i < votes.length; i++) {
         this.voteSets.push(votes[i].ratingSum);
       }
-      this.voteSets = Array.from(new Set(this.voteSets)).splice(0, 5);
+      if (!this.topAmount) this.topAmount = 5;
+      if (this.voteSets.length > this.topAmount) {
+        this.voteSets = Array.from(new Set(this.voteSets)).slice(
+          0,
+          this.topAmount
+        );
+      } else this.voteSets = Array.from(new Set(this.voteSets));
       for (let i = 0; i < this.voteSets.length; i++) {
         if (i % 2 === 0) {
           this.order.push(i);
@@ -207,6 +212,15 @@ export default class PublicScreen extends Vue {
       if (!this.started && !this.ended) {
         this.moderatedIndex = this.topVotes.length;
       }
+    }
+  }
+
+  @Watch('paramter', { immediate: true })
+  onParameterChanged(): void {
+    if (this.parameter && this.parameter.topAmount) {
+      this.topAmount = this.parameter.topAmount;
+      this.moderatedIndex = this.topAmount;
+      if (this.voteSets.length > 0) this.onVotesChanged();
     }
   }
 }
