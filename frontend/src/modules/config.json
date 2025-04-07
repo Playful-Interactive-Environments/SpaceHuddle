@@ -283,6 +283,15 @@
              "icon": "star",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,  
            "path": "voting/default"  
        },  
+       "like": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "heart",  "iconPrefix": "fas",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,  
+           "path": "voting/like"  
+       },  
        "slots": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
@@ -297,16 +306,7 @@
            "locales": "de,en,",  
              "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,  
            "path": "voting/vote"  
-       },
-       "like": {
-           "publicScreen": "output/PublicScreen",
-           "participant": "output/Participant",
-           "moderatorContent": "output/ModeratorContent",
-           "moderatorConfig": "output/ModeratorConfig",
-           "locales": "de,en,",
-           "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,
-           "path": "voting/like"
-       },
+       },  
        "settings": {  
            "parameter": "TaskParameter",  
            "locales": "de,en,",  
