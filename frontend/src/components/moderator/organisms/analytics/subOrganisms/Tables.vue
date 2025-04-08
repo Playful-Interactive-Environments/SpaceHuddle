@@ -25,9 +25,8 @@
             <p class="oneLineText highscoreModuleName">
               {{ axis ? axis.taskData.taskName : 'Select Task' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
-              <span
-                  class="participant-count"
-              ><font-awesome-icon icon="user" />&nbsp;{{
+              <span class="participant-count"
+                ><font-awesome-icon icon="user" />&nbsp;{{
                   getParticipantCount(axis)
                 }}
               </span>
@@ -243,12 +242,12 @@ export default class Tables extends Vue {
 
     return this.participantData.reduce((counter, partData) => {
       const partAxis = partData.axes.find(
-          (partAxis) => partAxis.taskId === taskId
+        (partAxis) => partAxis.taskId === taskId
       );
       if (partAxis) {
         counter += partAxis.axisValues.reduce((count, value) => {
           return (
-              count + (value.id === category && value.value !== null ? 1 : 0)
+            count + (value.id === category && value.value !== null ? 1 : 0)
           );
         }, 0);
       }

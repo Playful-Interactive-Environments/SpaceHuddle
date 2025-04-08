@@ -170,6 +170,7 @@ export default class Highscore extends Vue {
     }
   }
 
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any*/
   isHighScoreEntry(entry: any): boolean {
     return (
       entry.values[0]?.id !== undefined &&

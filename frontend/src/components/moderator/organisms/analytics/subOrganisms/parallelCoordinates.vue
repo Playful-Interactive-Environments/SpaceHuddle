@@ -60,7 +60,9 @@
                       class="ideaCardContainer"
                       v-for="(idea, index) of entry.ideas"
                       :key="
-                        entry.avatar.id + axis.taskData.taskId + (idea ? idea.id : index)
+                        entry.avatar.id +
+                        axis.taskData.taskId +
+                        (idea ? idea.id : index)
                       "
                     >
                       <IdeaCard
@@ -784,10 +786,14 @@ export default class ParallelCoordinates extends Vue {
     const category = axis.categoryActive;
 
     return this.participantData.reduce((counter, partData) => {
-      const partAxis = partData.axes.find(partAxis => partAxis.taskId === taskId);
+      const partAxis = partData.axes.find(
+        (partAxis) => partAxis.taskId === taskId
+      );
       if (partAxis) {
         counter += partAxis.axisValues.reduce((count, value) => {
-          return count + (value.id === category && value.value !== null ? 1 : 0);
+          return (
+            count + (value.id === category && value.value !== null ? 1 : 0)
+          );
         }, 0);
       }
       return counter;
@@ -1067,7 +1073,9 @@ export default class ParallelCoordinates extends Vue {
   }
 
   deactivateAxis(axis: Axis) {
-    const axisIndex = this.axes.findIndex((a) => a.taskData.taskId === axis.taskData.taskId);
+    const axisIndex = this.axes.findIndex(
+      (a) => a.taskData.taskId === axis.taskData.taskId
+    );
     if (axisIndex !== -1) {
       this.axes[axisIndex].active = false;
       this.axes.splice(axisIndex, 1);
@@ -1095,7 +1103,9 @@ export default class ParallelCoordinates extends Vue {
   }
 
   computeIdeasForAxis(axis: Axis): { avatar: Avatar; ideas: Idea[] }[] {
-    const steps = this.steps.find((step) => step.taskData.taskId === axis.taskData.taskId);
+    const steps = this.steps.find(
+      (step) => step.taskData.taskId === axis.taskData.taskId
+    );
     if (!steps) return [];
 
     const { taskType } = steps.taskData;

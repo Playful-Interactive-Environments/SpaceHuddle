@@ -38,7 +38,11 @@
       :label="$t('module.information.externalContent.moderatorConfig.preview')"
     >
       <div class="iframe-container" v-if="isValidSourceLink">
-        <iframe :src="getPdfBlobUrl(modelValue.sourceLink)" width="100%" height="500"></iframe>
+        <iframe
+          :src="getPdfBlobUrl(modelValue.sourceLink)"
+          width="100%"
+          height="500"
+        ></iframe>
       </div>
       <p v-else-if="modelValue.sourceLink">
         {{ $t('module.information.externalContent.moderatorConfig.invalid') }}
@@ -144,8 +148,8 @@ export default class ModeratorConfig extends Vue {
     });
   }
 
-  base64ToBlob(base64: string, contentType = "application/pdf"): Blob {
-    const base64Data = base64.includes(",") ? base64.split(",")[1] : base64;
+  base64ToBlob(base64: string, contentType = 'application/pdf'): Blob {
+    const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
 
     const byteCharacters = atob(base64Data);
     const byteNumbers = new Array(byteCharacters.length);
@@ -163,7 +167,7 @@ export default class ModeratorConfig extends Vue {
       const pdfBlob = this.base64ToBlob(base64);
       return URL.createObjectURL(pdfBlob);
     } catch (error) {
-      console.error("Error creating Blob URL:", error);
+      console.error('Error creating Blob URL:', error);
       return null;
     }
   }

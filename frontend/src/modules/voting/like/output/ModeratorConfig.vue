@@ -11,8 +11,6 @@ import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import { Idea } from '@/types/api/Idea';
-import * as viewService from '@/services/view-service';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 @Options({
   components: {},

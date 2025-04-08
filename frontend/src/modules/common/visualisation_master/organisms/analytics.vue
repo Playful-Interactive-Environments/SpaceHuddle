@@ -1,5 +1,9 @@
 <template>
-  <AnalyticsChart :session-id="sessionId" :received-tasks="selectedTasks" :topics="topics" />
+  <AnalyticsChart
+    :session-id="sessionId"
+    :received-tasks="selectedTasks"
+    :topics="topics"
+  />
 </template>
 
 <script lang="ts">
@@ -13,7 +17,6 @@ import TaskType from '@/types/enum/TaskType';
 import AnalyticsChart from '@/components/moderator/organisms/analytics/analytics.vue';
 import { Topic } from '@/types/api/Topic';
 import * as taskService from '@/services/task-service';
-import * as topicService from '@/services/topic-service';
 import { ParticipantInfo } from '@/types/api/Participant';
 import * as cashService from '@/services/cash-service';
 

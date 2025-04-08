@@ -25,8 +25,7 @@
             <p class="oneLineText stackedChartsTaskName">
               {{ survey ? survey.taskData.taskName : 'Select Survey' }}
               <font-awesome-icon :icon="['fas', 'angle-down']" />
-              <span
-                  class="participant-count"
+              <span class="participant-count"
                 ><font-awesome-icon icon="user" />&nbsp;{{
                   getParticipantCount(survey.questions)
                 }}
@@ -102,6 +101,7 @@ interface Answer {
 interface QuestionData {
   question: string;
   questionType: string;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any*/
   parameter: any;
   answers: Answer[];
 }
@@ -313,5 +313,4 @@ export default class StackedBarCharts extends Vue {
 .participant-count {
   margin-left: 1rem;
 }
-
 </style>

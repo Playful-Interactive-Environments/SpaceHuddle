@@ -2,7 +2,9 @@
   <div class="likePublicScreen">
     <div
       class="GalleryContainer"
-      v-for="ideaGroup in groupedIdeas.filter((group) => includedGroups.includes(String(group[0].participantId)))"
+      v-for="ideaGroup in groupedIdeas.filter((group) =>
+        includedGroups.includes(String(group[0].participantId))
+      )"
       :key="ideaGroup[0].participantId"
     >
       <Gallery
