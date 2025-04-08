@@ -157,6 +157,7 @@
               class="barRectGradient"
               v-bind="barRectGradientProps(index, i, segment)"
             />
+            <circle v-if="hasCorrect" v-bind="correctCircleProps(segment)" />
           </g>
         </svg>
         <div
@@ -551,6 +552,15 @@ export default class StackedBarChart extends Vue {
         stroke: 'var(--color-background)',
         backgroundColor: 'var(--color-background)',
       },
+    };
+  }
+
+  correctCircleProps(segment: AnswerSegment) {
+    return {
+      cx: segment.x + this.barHeight / 1.8,
+      cy: this.barHeight / 2,
+      r: this.barHeight / 3.2,
+      fill: segment.color,
     };
   }
 
