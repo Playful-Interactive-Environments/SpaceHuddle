@@ -61,7 +61,8 @@
   "analytics": {
     "highscore": {
       "points": "Points",
-      "stars": "Stars"
+      "stars": "Stars",
+      "sumCorrect": "Correct answers"
     }
   }
 }

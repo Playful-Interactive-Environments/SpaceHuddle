@@ -33,7 +33,10 @@
             $t('moderator.organism.analytics.parallelCoordinates.title')
           }}</span>
         </template>
-        <div class="AnalyticsParallelCoordinates">
+        <div
+          class="AnalyticsParallelCoordinates"
+          @click="console.log(dataEntries)"
+        >
           <parallel-coordinates
             v-if="hasAxesAndData"
             :chart-axes="availableAxes"
@@ -377,11 +380,6 @@ export default class Analytics extends Vue {
   }
 
   get dataEntries(): DataEntry[] {
-    console.log(
-      this.CalculateDataEntries().filter(
-        (entry) => entry.axes[0].axisValues[0].value != null
-      )
-    );
     return this.CalculateDataEntries();
   }
 
@@ -584,10 +582,10 @@ export default class Analytics extends Vue {
         (task.taskType as string) !== 'BRAINSTORMING' &&
         (task.taskType as string) !== 'VOTING'
       ) {
-        taskParticipantService.registerGetIterationList(
+        taskParticipantService.registerGetIterationStepList(
           task.id,
           (steps: TaskParticipantIterationStep[]) => {
-            this.updateIterationSteps(task.id, task, steps);
+            this.updateQuizTasks(task.id, task, steps);
           },
           EndpointAuthorisationType.MODERATOR,
           30
@@ -905,6 +903,22 @@ export default class Analytics extends Vue {
     }
   }
 
+  updateQuizTasks(
+    id: string,
+    task: Task,
+    steps: TaskParticipantIterationStep[]
+  ): void {
+    const newSteps: TaskParticipantIterationStep[] = [...steps];
+    let sumCorrect = 0;
+    newSteps.forEach((step) => {
+      if (step.state === TaskParticipantIterationStepStatesType.CORRECT) {
+        sumCorrect += 1;
+      }
+      step.parameter.sumCorrect = sumCorrect;
+    });
+    this.updateIterationSteps(id, task, newSteps);
+  }
+
   getAllParticipantData() {
     const dataArray: {
       participant: ParticipantInfo;
@@ -992,6 +1006,7 @@ export default class Analytics extends Vue {
     'averageRating',
     'bestIdeaAverageRating',
     'ideas',
+    'sumCorrect',
   ];
 
   CalculateAxes(): Axis[] {
