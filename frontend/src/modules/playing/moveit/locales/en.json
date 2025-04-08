@@ -287,9 +287,11 @@
       "points": "Points",
       "maxSpeed": "Max Speed",
       "averageSpeed": "Ø Speed",
+      "consumption": "Consumption",
       "units": {
         "maxSpeed": "km/h",
-        "averageSpeed": "km/h"
+        "averageSpeed": "km/h",
+        "consumption": "l"
       }
     }
   }

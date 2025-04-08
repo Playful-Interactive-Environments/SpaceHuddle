@@ -446,7 +446,7 @@ export default class StackedBarChart extends Vue {
       x1: '0%',
       y1: '0%',
       x2: '100%',
-      y2: '0%',
+      y2: '10%',
     };
   }
 

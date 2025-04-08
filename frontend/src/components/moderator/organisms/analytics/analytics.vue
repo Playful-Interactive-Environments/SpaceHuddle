@@ -33,10 +33,7 @@
             $t('moderator.organism.analytics.parallelCoordinates.title')
           }}</span>
         </template>
-        <div
-          class="AnalyticsParallelCoordinates"
-          @click="console.log(dataEntries)"
-        >
+        <div class="AnalyticsParallelCoordinates">
           <parallel-coordinates
             v-if="hasAxesAndData"
             :chart-axes="availableAxes"
@@ -990,10 +987,9 @@ export default class Analytics extends Vue {
 
   wantedValues = [
     'stars',
-    'playtime',
-    'playTime',
     'maxSpeed',
     'averageSpeed',
+    'consumption',
     'cardsPlayed',
     'co2',
     'water',
