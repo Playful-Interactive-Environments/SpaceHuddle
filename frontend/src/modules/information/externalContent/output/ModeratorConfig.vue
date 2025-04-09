@@ -80,7 +80,6 @@ export default class ModeratorConfig extends Vue {
     } else {
       this.cachedBlobUrl = newSourceLink;
     }
-    console.log('cachedBlobUrl', this.cachedBlobUrl);
   }
 
   isBase64PDF(sourceLink: string): boolean {
@@ -98,7 +97,6 @@ export default class ModeratorConfig extends Vue {
   }
 
   base64ToBlob(base64: string, contentType = 'application/pdf'): Blob {
-    console.log('converting base64 to blob...');
     const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
     const byteCharacters = atob(base64Data);
     const byteNumbers = new Array(byteCharacters.length);
@@ -107,11 +105,13 @@ export default class ModeratorConfig extends Vue {
     }
     const byteArray = new Uint8Array(byteNumbers);
     const newBlob = new Blob([byteArray], { type: contentType });
-    console.log('conversion successful: ', newBlob);
     return newBlob;
   }
 
   get isValidSourceLink(): boolean {
+    if (!this.modelValue.sourceLink) {
+      return false;
+    }
     const urlPattern = new RegExp(
       '^(https?:\\/\\/)' +
         '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
@@ -133,8 +133,6 @@ export default class ModeratorConfig extends Vue {
 
   async onFileChange(): Promise<void> {
     const input = this.$refs.fileInput as HTMLInputElement;
-    console.log('input', input);
-
     if (input && input.files && input.files.length > 0) {
       const file = input.files[0];
 
@@ -150,8 +148,6 @@ export default class ModeratorConfig extends Vue {
       const blobUrl = URL.createObjectURL(file);
       this.currentBlobUrl = blobUrl;
 
-      console.log('blobUrl', blobUrl);
-
       let base64URL: string | unknown | null = blobUrl;
       await this.convertBlobUrlToBase64(blobUrl)
         .then((base64) => {
@@ -165,14 +161,12 @@ export default class ModeratorConfig extends Vue {
   }
 
   async convertBlobUrlToBase64(blobUrl) {
-    console.log('converting blob to base64...');
     const response = await fetch(blobUrl);
     const blob = await response.blob();
 
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = function () {
-        console.log('conversion successful');
         resolve(reader.result);
       };
       reader.onerror = function () {
