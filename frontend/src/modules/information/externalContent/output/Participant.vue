@@ -1,12 +1,12 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="module?.name">
     <div class="iframe-container" v-if="isValidSourceLink && participantView">
       <iframe
         id="iframe"
         title="ExternalSource"
         width="100%"
         height="100%"
-        :src="getPdfBlobUrl(sourceLink)"
+        :src="getIframeSrc(sourceLink)"
       >
       </iframe>
     </div>
@@ -50,6 +50,7 @@ export default class Participant extends Vue {
   task!: Task;
   sourceLink = '';
   participantView = false;
+  private currentBlobUrl: string | null = null;
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
@@ -77,24 +78,30 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+    // Revoke the Blob URL when the component is unmounted
+    if (this.currentBlobUrl) {
+      URL.revokeObjectURL(this.currentBlobUrl);
+    }
   }
 
   get isValidSourceLink(): boolean {
     const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
+    const urlPattern = new RegExp(
+      '^(https?:\\/\\/)' +
+        '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
+        'localhost|' +
+        '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
+        '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
+        '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
+        '(\\?[;&a-z0-9%_.~+=-]*)?' +
+        '(\\#[-a-z0-9_]*)?$',
+      'i'
+    );
 
     return (
       base64Pattern.test(this.sourceLink) ||
-      new RegExp(
-        '^(https?:\\/\\/)' +
-          '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
-          'localhost|' +
-          '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
-          '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
-          '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
-          '(\\?[;&a-z0-9%_.~+=-]*)?' +
-          '(\\#[-a-z0-9_]*)?$',
-        'i'
-      ).test(this.sourceLink)
+      urlPattern.test(this.sourceLink) ||
+      this.sourceLink.includes('<iframe')
     );
   }
 
@@ -110,16 +117,26 @@ export default class Participant extends Vue {
     return new Blob([byteArray], { type: contentType });
   }
 
-  getPdfBlobUrl(base64: string | null): string | null {
-    if (!base64) return null;
+  getIframeSrc(sourceLink: string | null): string | null {
+    if (!sourceLink) return null;
 
-    try {
-      const pdfBlob = this.base64ToBlob(base64);
-      return URL.createObjectURL(pdfBlob);
-    } catch (error) {
-      console.error('Error creating Blob URL:', error);
-      return null;
+    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
+    if (base64Pattern.test(sourceLink)) {
+      try {
+        const pdfBlob = this.base64ToBlob(sourceLink);
+        // Revoke the old Blob URL if it exists
+        if (this.currentBlobUrl) {
+          URL.revokeObjectURL(this.currentBlobUrl);
+        }
+        this.currentBlobUrl = URL.createObjectURL(pdfBlob);
+        return this.currentBlobUrl;
+      } catch (error) {
+        console.error('Error creating Blob URL:', error);
+        return null;
+      }
     }
+
+    return sourceLink;
   }
 }
 </script>

@@ -14,7 +14,7 @@
         type="text"
         v-model="modelValue.sourceLink"
         clearable
-        maxlength="2048"
+        maxlength="4096"
         @blur="cleanEmbedCode"
       />
     </el-form-item>
@@ -39,7 +39,7 @@
     >
       <div class="iframe-container" v-if="isValidSourceLink">
         <iframe
-          :src="getPdfBlobUrl(modelValue.sourceLink)"
+          :src="getIframeSrc(modelValue.sourceLink)"
           width="100%"
           height="500"
         ></iframe>
@@ -74,6 +74,8 @@ export default class ModeratorConfig extends Vue {
   @Prop({ default: {} }) formData!: any;
   @Prop({ default: {} }) taskType!: any;
 
+  private currentBlobUrl: string | null = null;
+
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
     if (this.modelValue) {
@@ -88,38 +90,43 @@ export default class ModeratorConfig extends Vue {
 
   get isValidSourceLink(): boolean {
     const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
+    const urlPattern = new RegExp(
+      '^(https?:\\/\\/)' +
+        '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
+        'localhost|' +
+        '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
+        '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
+        '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
+        '(\\?[;&a-z0-9%_.~+=-]*)?' +
+        '(\\#[-a-z0-9_]*)?$',
+      'i'
+    );
 
     return (
       base64Pattern.test(this.modelValue.sourceLink) ||
-      new RegExp(
-        '^(https?:\\/\\/)' +
-          '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
-          'localhost|' +
-          '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' +
-          '\\[([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}\\])' +
-          '(\\:\\d+)?(\\/[-a-z0-9%_.~+&:]*)*' +
-          '(\\?[;&a-z0-9%_.~+=-]*)?' +
-          '(\\#[-a-z0-9_]*)?$',
-        'i'
-      ).test(this.modelValue.sourceLink)
+      urlPattern.test(this.modelValue.sourceLink) ||
+      this.modelValue.sourceLink.includes('<iframe')
     );
   }
 
   async onFileChange(): Promise<void> {
     const input = this.$refs.fileInput as HTMLInputElement;
 
-    // Ensure the input and files array exists
     if (input && input.files && input.files.length > 0) {
       const file = input.files[0];
 
-      // Check if the uploaded file is a PDF
       if (file.type !== 'application/pdf') {
-        this.modelValue.sourceLink = ''; // Clear the sourceLink if the file type is incorrect
+        this.modelValue.sourceLink = '';
         return;
       }
 
-      // Update sourceLink with the file URL so it can be displayed in the iframe
+      if (this.currentBlobUrl) {
+        URL.revokeObjectURL(this.currentBlobUrl);
+      }
+
       const blobUrl = URL.createObjectURL(file);
+      this.currentBlobUrl = blobUrl;
+
       let base64URL: string | unknown | null = blobUrl;
       await this.convertBlobUrlToBase64(blobUrl)
         .then((base64) => {
@@ -160,16 +167,26 @@ export default class ModeratorConfig extends Vue {
     return new Blob([byteArray], { type: contentType });
   }
 
-  getPdfBlobUrl(base64: string | null): string | null {
-    if (!base64) return null;
+  getIframeSrc(sourceLink: string | null): string | null {
+    if (!sourceLink) return null;
 
-    try {
-      const pdfBlob = this.base64ToBlob(base64);
-      return URL.createObjectURL(pdfBlob);
-    } catch (error) {
-      console.error('Error creating Blob URL:', error);
-      return null;
+    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
+    if (base64Pattern.test(sourceLink)) {
+      try {
+        const pdfBlob = this.base64ToBlob(sourceLink);
+        // Revoke the old Blob URL if it exists
+        if (this.currentBlobUrl) {
+          URL.revokeObjectURL(this.currentBlobUrl);
+        }
+        this.currentBlobUrl = URL.createObjectURL(pdfBlob);
+        return this.currentBlobUrl;
+      } catch (error) {
+        console.error('Error creating Blob URL:', error);
+        return null;
+      }
     }
+
+    return sourceLink;
   }
 
   cleanEmbedCode(): void {
