@@ -38,11 +38,7 @@
       :label="$t('module.information.externalContent.moderatorConfig.preview')"
     >
       <div class="iframe-container" v-if="isValidSourceLink">
-        <iframe
-          :src="getIframeSrc(modelValue.sourceLink)"
-          width="100%"
-          height="500"
-        ></iframe>
+        <iframe :src="cachedBlobUrl" width="100%" height="500"></iframe>
       </div>
       <p v-else-if="modelValue.sourceLink">
         {{ $t('module.information.externalContent.moderatorConfig.invalid') }}
@@ -75,21 +71,47 @@ export default class ModeratorConfig extends Vue {
   @Prop({ default: {} }) taskType!: any;
 
   private currentBlobUrl: string | null = null;
+  private cachedBlobUrl: string | null = null;
 
-  @Watch('modelValue', { immediate: true })
-  async onModelValueChanged(): Promise<void> {
-    if (this.modelValue) {
-      if (!('sourceLink' in this.modelValue)) {
-        this.modelValue.sourceLink = '';
-      }
-      if (!('participantView' in this.modelValue)) {
-        this.modelValue.participantView = false;
-      }
+  @Watch('modelValue.sourceLink')
+  onSourceLinkChanged(newSourceLink: string) {
+    if (this.isBase64PDF(newSourceLink)) {
+      this.cachedBlobUrl = this.convertBase64ToBlobUrl(newSourceLink);
+    } else {
+      this.cachedBlobUrl = newSourceLink;
     }
+    console.log('cachedBlobUrl', this.cachedBlobUrl);
+  }
+
+  isBase64PDF(sourceLink: string): boolean {
+    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
+    return base64Pattern.test(sourceLink);
+  }
+
+  convertBase64ToBlobUrl(base64: string): string {
+    const pdfBlob = this.base64ToBlob(base64);
+    if (this.currentBlobUrl) {
+      URL.revokeObjectURL(this.currentBlobUrl);
+    }
+    this.currentBlobUrl = URL.createObjectURL(pdfBlob);
+    return this.currentBlobUrl;
+  }
+
+  base64ToBlob(base64: string, contentType = 'application/pdf'): Blob {
+    console.log('converting base64 to blob...');
+    const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const newBlob = new Blob([byteArray], { type: contentType });
+    console.log('conversion successful: ', newBlob);
+    return newBlob;
   }
 
   get isValidSourceLink(): boolean {
-    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
     const urlPattern = new RegExp(
       '^(https?:\\/\\/)' +
         '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
@@ -103,7 +125,7 @@ export default class ModeratorConfig extends Vue {
     );
 
     return (
-      base64Pattern.test(this.modelValue.sourceLink) ||
+      this.isBase64PDF(this.modelValue.sourceLink) ||
       urlPattern.test(this.modelValue.sourceLink) ||
       this.modelValue.sourceLink.includes('<iframe')
     );
@@ -111,6 +133,7 @@ export default class ModeratorConfig extends Vue {
 
   async onFileChange(): Promise<void> {
     const input = this.$refs.fileInput as HTMLInputElement;
+    console.log('input', input);
 
     if (input && input.files && input.files.length > 0) {
       const file = input.files[0];
@@ -127,6 +150,8 @@ export default class ModeratorConfig extends Vue {
       const blobUrl = URL.createObjectURL(file);
       this.currentBlobUrl = blobUrl;
 
+      console.log('blobUrl', blobUrl);
+
       let base64URL: string | unknown | null = blobUrl;
       await this.convertBlobUrlToBase64(blobUrl)
         .then((base64) => {
@@ -140,12 +165,14 @@ export default class ModeratorConfig extends Vue {
   }
 
   async convertBlobUrlToBase64(blobUrl) {
+    console.log('converting blob to base64...');
     const response = await fetch(blobUrl);
     const blob = await response.blob();
 
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = function () {
+        console.log('conversion successful');
         resolve(reader.result);
       };
       reader.onerror = function () {
@@ -153,40 +180,6 @@ export default class ModeratorConfig extends Vue {
       };
       reader.readAsDataURL(blob);
     });
-  }
-
-  base64ToBlob(base64: string, contentType = 'application/pdf'): Blob {
-    const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
-
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: contentType });
-  }
-
-  getIframeSrc(sourceLink: string | null): string | null {
-    if (!sourceLink) return null;
-
-    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
-    if (base64Pattern.test(sourceLink)) {
-      try {
-        const pdfBlob = this.base64ToBlob(sourceLink);
-        // Revoke the old Blob URL if it exists
-        if (this.currentBlobUrl) {
-          URL.revokeObjectURL(this.currentBlobUrl);
-        }
-        this.currentBlobUrl = URL.createObjectURL(pdfBlob);
-        return this.currentBlobUrl;
-      } catch (error) {
-        console.error('Error creating Blob URL:', error);
-        return null;
-      }
-    }
-
-    return sourceLink;
   }
 
   cleanEmbedCode(): void {

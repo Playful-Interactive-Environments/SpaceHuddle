@@ -9,7 +9,7 @@
       title="ExternalSource"
       width="100%"
       height="100%"
-      :src="getIframeSrc(sourceLink)"
+      :src="cachedBlobUrl"
     ></iframe>
   </div>
   <p v-else-if="sourceLink">
@@ -32,9 +32,9 @@ export default class PublicScreen extends Vue {
   task!: Task;
   sourceLink = '';
   private currentBlobUrl: string | null = null;
+  private cachedBlobUrl: string | null = null;
 
   mounted() {
-    // Register task settings when component is mounted
     this.reloadTaskSettings();
   }
 
@@ -50,6 +50,40 @@ export default class PublicScreen extends Vue {
     taskService.registerGetTaskById(this.taskId, this.updateTask);
   }
 
+  @Watch('sourceLink')
+  onSourceLinkChanged(newSourceLink: string) {
+    if (this.isBase64PDF(newSourceLink)) {
+      this.cachedBlobUrl = this.convertBase64ToBlobUrl(newSourceLink);
+    } else {
+      this.cachedBlobUrl = newSourceLink;
+    }
+  }
+
+  isBase64PDF(sourceLink: string): boolean {
+    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
+    return base64Pattern.test(sourceLink);
+  }
+
+  convertBase64ToBlobUrl(base64: string): string {
+    const pdfBlob = this.base64ToBlob(base64);
+    if (this.currentBlobUrl) {
+      URL.revokeObjectURL(this.currentBlobUrl);
+    }
+    this.currentBlobUrl = URL.createObjectURL(pdfBlob);
+    return this.currentBlobUrl;
+  }
+
+  base64ToBlob(base64: string, contentType = 'application/pdf'): Blob {
+    const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: contentType });
+  }
+
   updateTask(task: Task): void {
     this.task = task;
     const module = this.task.modules.find(
@@ -61,7 +95,6 @@ export default class PublicScreen extends Vue {
   }
 
   get isValidSourceLink(): boolean {
-    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
     const urlPattern = new RegExp(
       '^(https?:\\/\\/)' +
         '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' +
@@ -75,48 +108,13 @@ export default class PublicScreen extends Vue {
     );
 
     return (
-      base64Pattern.test(this.sourceLink) ||
+      this.isBase64PDF(this.sourceLink) ||
       urlPattern.test(this.sourceLink) ||
       this.sourceLink.includes('<iframe')
     );
   }
 
-  base64ToBlob(base64: string, contentType = 'application/pdf'): Blob {
-    const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
-
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: contentType });
-  }
-
-  getIframeSrc(sourceLink: string | null): string | null {
-    if (!sourceLink) return null;
-
-    const base64Pattern = /^data:application\/pdf;base64,[A-Za-z0-9+/=]+$/;
-    if (base64Pattern.test(sourceLink)) {
-      try {
-        const pdfBlob = this.base64ToBlob(sourceLink);
-        // Revoke the old Blob URL if it exists
-        if (this.currentBlobUrl) {
-          URL.revokeObjectURL(this.currentBlobUrl);
-        }
-        this.currentBlobUrl = URL.createObjectURL(pdfBlob);
-        return this.currentBlobUrl;
-      } catch (error) {
-        console.error('Error creating Blob URL:', error);
-        return null;
-      }
-    }
-
-    return sourceLink;
-  }
-
   unmounted(): void {
-    // Revoke the Blob URL when the component is unmounted
     if (this.currentBlobUrl) {
       URL.revokeObjectURL(this.currentBlobUrl);
     }
