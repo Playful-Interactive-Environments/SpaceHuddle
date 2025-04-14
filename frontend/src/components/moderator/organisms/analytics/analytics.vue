@@ -906,13 +906,20 @@ export default class Analytics extends Vue {
     steps: TaskParticipantIterationStep[]
   ): void {
     const newSteps: TaskParticipantIterationStep[] = [...steps];
-    let sumCorrect = 0;
+    const participantSumCorrect: Map<string, number> = new Map();
+
     newSteps.forEach((step) => {
-      if (step.state === TaskParticipantIterationStepStatesType.CORRECT) {
-        sumCorrect += 1;
+      const participantId = step.avatar.id;
+      if (!participantSumCorrect.has(participantId)) {
+        participantSumCorrect.set(participantId, 0);
       }
-      step.parameter.sumCorrect = sumCorrect;
+      if (step.state === 'CORRECT') {
+        const currentSumCorrect = participantSumCorrect.get(participantId) || 0;
+        participantSumCorrect.set(participantId, currentSumCorrect + 1);
+      }
+      step.parameter.sumCorrect = participantSumCorrect.get(participantId) || 0;
     });
+
     this.updateIterationSteps(id, task, newSteps);
   }
 

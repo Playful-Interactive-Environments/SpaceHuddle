@@ -215,7 +215,7 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  @Watch('paramter', { immediate: true })
+  @Watch('parameter', { immediate: true })
   onParameterChanged(): void {
     if (this.parameter && this.parameter.topAmount) {
       this.topAmount = this.parameter.topAmount;
