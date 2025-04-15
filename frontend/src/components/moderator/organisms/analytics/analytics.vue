@@ -387,6 +387,7 @@ export default class Analytics extends Vue {
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateBrainstormings);
+    cashService.deregisterAllGet(this.updateQuizTasks);
     cashService.deregisterAllGet(this.updatePersonalityTests);
     cashService.deregisterAllGet(this.updateSurveyTasks);
     cashService.deregisterAllGet(this.updateSurveyIdeas);
