@@ -1055,14 +1055,16 @@ export default class Analytics extends Vue {
           return acc;
         }, [] as { id: string; range: number }[]);
 
-        const active = axisValues.length > 0;
+        const active =
+          axisValues.length > 0 &&
+          String(taskData.taskType) !== 'BRAINSTORMING';
 
         return {
           taskData,
           axisValues,
           categoryActive: active ? axisValues[0]?.id || '' : '',
           active,
-          available: active,
+          available: axisValues.length > 0,
         };
       })
       .sort((a, b) => a.taskData.topicOrder - b.taskData.topicOrder);
