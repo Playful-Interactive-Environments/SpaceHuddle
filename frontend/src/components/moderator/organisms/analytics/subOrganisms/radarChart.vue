@@ -57,14 +57,21 @@
           />
         </pattern>
       </svg>
-      <ToolTip
+      <div
         v-for="(label, index) in labels"
         :key="'label-' + index"
-        :show-after="200"
-        :effect="'light'"
-        :disabled="getParticipantsOfFilterClass(index).length <= 0"
+        :style="getLabelPosition(index)"
+        :class="{
+          'radar-label': true,
+          'radar-label-hover': getParticipantsOfFilterClass(index).length > 0,
+        }"
+        @click="
+          participantSelectionChanged(
+            getParticipantsOfFilterClass(index).map((avatar) => avatar.id)
+          )
+        "
       >
-        <template #content>
+        <p>
           <font-awesome-icon
             v-for="avatar of getParticipantsOfFilterClass(index)"
             :key="avatar.id"
@@ -72,34 +79,22 @@
             class="avatar-icon"
             :style="{
               color: avatar.color,
+              fontSize: 'var(--font-size-xsmall)',
             }"
-          ></font-awesome-icon>
-        </template>
-        <div
-          :style="getLabelPosition(index)"
-          :class="{
-            'radar-label': true,
-            'radar-label-hover': getParticipantsOfFilterClass(index).length > 0,
-          }"
-          @click="
-            participantSelectionChanged(
-              getParticipantsOfFilterClass(index).map((avatar) => avatar.id)
+          />
+        </p>
+        <p class="twoLineText radar-label-text">
+          {{
+            $t(
+              `module.information.personalityTest.${test}.result.${label}.name`
             )
-          "
-        >
-          <p class="twoLineText radar-label-text">
-            {{
-              $t(
-                `module.information.personalityTest.${test}.result.${label}.name`
-              )
-            }}
-          </p>
-          <p v-if="getParticipantsOfFilterClass(index).length > 0">
-            {{ getParticipantsOfFilterClass(index).length }}
-            <font-awesome-icon icon="user" />
-          </p>
-        </div>
-      </ToolTip>
+          }}
+        </p>
+        <p v-if="getParticipantsOfFilterClass(index).length > 0">
+          {{ getParticipantsOfFilterClass(index).length }}
+          <font-awesome-icon icon="user" />
+        </p>
+      </div>
     </div>
     <el-radio-group v-model="filterClass" class="classSelection">
       <el-radio-button :label="'primary'" :value="'primary'">{{
