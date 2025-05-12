@@ -65,11 +65,6 @@
           'radar-label': true,
           'radar-label-hover': getParticipantsOfFilterClass(index).length > 0,
         }"
-        @click="
-          participantSelectionChanged(
-            getParticipantsOfFilterClass(index).map((avatar) => avatar.id)
-          )
-        "
       >
         <p>
           <font-awesome-icon
@@ -81,19 +76,28 @@
               color: avatar.color,
               fontSize: 'var(--font-size-xsmall)',
             }"
+            @click="participantSelectionChanged([avatar.id])"
           />
         </p>
-        <p class="twoLineText radar-label-text">
-          {{
-            $t(
-              `module.information.personalityTest.${test}.result.${label}.name`
+        <div
+          @click="
+            participantSelectionChanged(
+              getParticipantsOfFilterClass(index).map((avatar) => avatar.id)
             )
-          }}
-        </p>
-        <p v-if="getParticipantsOfFilterClass(index).length > 0">
-          {{ getParticipantsOfFilterClass(index).length }}
-          <font-awesome-icon icon="user" />
-        </p>
+          "
+        >
+          <p class="twoLineText radar-label-text">
+            {{
+              $t(
+                `module.information.personalityTest.${test}.result.${label}.name`
+              )
+            }}
+          </p>
+          <p v-if="getParticipantsOfFilterClass(index).length > 0">
+            {{ getParticipantsOfFilterClass(index).length }}
+            <font-awesome-icon icon="user" />
+          </p>
+        </div>
       </div>
     </div>
     <el-radio-group v-model="filterClass" class="classSelection">
@@ -415,7 +419,13 @@ export default class RadarChart extends Vue {
   color: var(--color-dark-contrast);
   font-size: var(--font-size-large);
   margin: 0 0.2rem;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
+
+  transform: scale(1);
+}
+
+.avatar-icon:hover {
+  transform: scale(1.15);
 }
 
 .classSelection {
