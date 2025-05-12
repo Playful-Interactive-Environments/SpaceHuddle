@@ -71,6 +71,9 @@
             :steps="steps"
             v-model:tableElements="tableElements"
             v-model:selectedParticipantIds="selectedParticipantIds"
+            @update:table-elements="
+              activeNames.includes('tables') ? null : activeNames.push('tables')
+            "
             :style="{ opacity: loadingSteps ? 0 : 1 }"
           />
         </div>
@@ -102,6 +105,11 @@
             :survey-data="surveyData"
             v-model:selectedParticipantIds="selectedParticipantIds"
             v-model:survey-elements="surveyElements"
+            @update:survey-elements="
+              activeNames.includes('surveysQuizzes')
+                ? null
+                : activeNames.push('surveysQuizzes')
+            "
             :style="{ opacity: loadingSteps ? 0 : 1 }"
           />
         </div>
@@ -1062,7 +1070,8 @@ export default class Analytics extends Vue {
           taskData,
           axisValues,
           categoryActive: active ? axisValues[0]?.id || '' : '',
-          active: taskData.taskType as string === 'BRAINSTORMING' ? false : active,
+          active:
+            (taskData.taskType as string) === 'BRAINSTORMING' ? false : active,
           available: active,
         };
       })
