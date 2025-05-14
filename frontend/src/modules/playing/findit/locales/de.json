@@ -57,6 +57,10 @@
           "dead-tree": {
             "name": "Toter Baum",
             "description": "Tote Bäume können austrocknen und bieten somit ein erhöhtes Risiko Feuer zu fangen."
+          },
+          "bottle": {
+            "name": "Glasflasche",
+            "description": "Gut gemacht! Dieses Objekt gehört nicht in die Natur. Glasflaschen können zwar nur ganz selten, aber unter bestimmten Bedingungen Brände auslösen. Auch Tiere können sich an Glasscherben verletzen. Deshalb: Aufheben und richtig entsorgen!"
           }
         },
         "red_herring": {
@@ -68,10 +72,6 @@
             "name": "Käfer",
             "description": "Käfer sind Teil des natürlichen Ökosystems, bilden die Grundlage der Nahrungskette für andere Tiere und lockern den Boden. Ihr Überleben ist daher wichtig für das Überleben des Waldes und anderer Tiere."
           },
-          "bottle": {
-            "name": "Glasflasche",
-            "description": "Es ist ein Mythos, dass zurückgelassene Glasflaschen aller Art unter den richtigen Umständen wie eine Linse wirken und das Licht fokussieren. Am Brennpunkt kann kein ein Feuer entstehen! Allerdings gehört Müll nicht in den Wald, da sich Tier verletzen können"
-          },
           "oil": {
             "name": "Ölkanister",
             "description": "Öl kann in die Umwelt gelangen und dabei die Umwelt verunreinigen/vergiften."
@@ -79,6 +79,10 @@
           "electricalScrap": {
             "name": "Elektroschrot",
             "description": "Akkus in Elektroschrot kann in die Umwelt gelangen und dabei die Umwelt verunreinigen/vergiften."
+          },
+          "plastic_bottle": {
+            "name": "Plastikflasche",
+            "description": "Dieses Objekt gehört nicht hierher, wird aber in diesem Fall nicht gesucht. Plastikflaschen verrotten nicht und bleiben viele Jahre in der Natur. Sie können außerdem für Tiere gefährlich sein. Deshalb: Aufheben und richtig entsorgen!"
           }
         }
       },
@@ -107,7 +111,11 @@
           },
           "bottle": {
             "name": "Glasflasche",
-            "description": "Es ist ein Mythos, dass zurückgelassene Glasflaschen aller Art unter den richtigen Umständen wie eine Linse wirken und das Licht fokussieren. Am Brennpunkt kann kein ein Feuer entstehen! Allerdings gehört Müll nicht in den Wald, da sich Tier verletzen können"
+            "description": "Gut gemacht! Dieses Objekt gehört nicht in die Natur. Glasflaschen verrotten nicht und bleiben viele Jahre in der Natur. Tiere können sich an Glasscherben verletzen. Deshalb: Aufheben und richtig entsorgen!"
+          },
+          "plastic_bottle": {
+            "name": "Plastikflasche",
+            "description": "Gut gemacht! Dieses Objekt gehört nicht in die Natur. Plastikflaschen verrotten nicht und bleiben viele Jahre in der Natur. Sie können außerdem für Tiere gefährlich sein. Deshalb: Aufheben und richtig entsorgen!"
           },
           "oil": {
             "name": "Ölkanister",

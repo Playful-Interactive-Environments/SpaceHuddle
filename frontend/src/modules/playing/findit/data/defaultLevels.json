@@ -3,7 +3,7 @@
     "type": "fire",
     "items": [
       {
-        "type": "red_herring",
+        "type": "hazards",
         "name": "bottleWine",
         "position": [
           68.57205013278809,
@@ -14,7 +14,7 @@
         "saturation": 1
       },
       {
-        "type": "red_herring",
+        "type": "hazards",
         "name": "bottleBeer",
         "position": [
           58.28524115207628,
@@ -92,7 +92,7 @@
       },
       {
         "type": "red_herring",
-        "name": "bottleWhite",
+        "name": "plasticBottle",
         "position": [
           94.47667476708284,
           47.83037581614579
@@ -102,7 +102,7 @@
         "saturation": 1
       },
       {
-        "type": "red_herring",
+        "type": "hazards",
         "name": "bottleWhite",
         "position": [
           44.52349978665631,
@@ -113,7 +113,7 @@
         "saturation": 1
       },
       {
-        "type": "red_herring",
+        "type": "hazards",
         "name": "bottleWine",
         "position": [
           39.990546113145857,

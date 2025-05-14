@@ -170,6 +170,14 @@
             "explanationKey": "bug",
             "collectKey": "leave",
             "notSearched": true
+          },
+          "plasticBottle": {
+            "severity": 1,
+            "maxCount": 5,
+            "width": 1,
+            "shape": "rect",
+            "explanationKey": "plastic_bottle",
+            "collectKey": "recycle"
           }
         }
       },

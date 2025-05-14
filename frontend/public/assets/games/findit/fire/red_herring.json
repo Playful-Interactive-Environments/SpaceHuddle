@@ -1,46 +1,50 @@
 {
 "frames": {
-	"dragonfly": {
-		"frame": {"x":0, "y":0, "w":838, "h":582},
-		"spriteSourceSize": {"x":0,"y":0,"w":838,"h":582},
-		"sourceSize": {"w":838,"h":582}
-	},
-	"turtle": {
-		"frame": {"x":692, "y":761, "w":670, "h":615},
-		"spriteSourceSize": {"x":0,"y":0,"w":670,"h":615},
-		"sourceSize": {"w":670,"h":615}
-	},
-	"earthworm": {
-		"frame": {"x":0, "y":583, "w":822, "h":177},
-		"spriteSourceSize": {"x":0,"y":0,"w":822,"h":177},
-		"sourceSize": {"w":822,"h":177}
-	},
 	"bug": {
 		"frame": {"x":1363, "y":695, "w":448, "h":564},
 		"spriteSourceSize": {"x":0,"y":0,"w":448,"h":564},
 		"sourceSize": {"w":448,"h":564}
 	},
-	"oil": {
-		"frame": {"x":0, "y":761, "w":691, "h":689},
-		"spriteSourceSize": {"x":0,"y":0,"w":691,"h":689},
-		"sourceSize": {"w":691,"h":689}
+	"dragonfly": {
+		"frame": {"x":0, "y":0, "w":838, "h":582},
+		"spriteSourceSize": {"x":1,"y":0,"w":840,"h":583},
+		"sourceSize": {"w":840,"h":583}
 	},
-	"scooter": {
-		"frame": {"x":839, "y":0, "w":658, "h":694},
-		"spriteSourceSize": {"x":0,"y":0,"w":658,"h":694},
-		"sourceSize": {"w":658,"h":694}
-	},
-	"ladybug": {
-		"frame": {"x":0, "y":1451, "w":323, "h":360},
-		"spriteSourceSize": {"x":0,"y":0,"w":323,"h":360},
-		"sourceSize": {"w":323,"h":360}
+	"earthworm": {
+		"frame": {"x":0, "y":583, "w":822, "h":177},
+		"spriteSourceSize": {"x":1,"y":0,"w":824,"h":177},
+		"sourceSize": {"w":824,"h":177}
 	},
 	"handy": {
 		"frame": {"x":324, "y":1451, "w":154, "h":307},
-		"spriteSourceSize": {"x":0,"y":0,"w":154,"h":307},
-		"sourceSize": {"w":154,"h":307}
+		"spriteSourceSize": {"x":7,"y":6,"w":167,"h":317},
+		"sourceSize": {"w":167,"h":317}
+	},
+	"ladybug": {
+		"frame": {"x":0, "y":1451, "w":323, "h":360},
+		"spriteSourceSize": {"x":1,"y":0,"w":325,"h":360},
+		"sourceSize": {"w":325,"h":360}
+	},
+	"oil": {
+		"frame": {"x":0, "y":761, "w":691, "h":689},
+		"spriteSourceSize": {"x":5,"y":5,"w":700,"h":700},
+		"sourceSize": {"w":700,"h":700}
+	},
+	"plasticBottle": {
+		"frame": {"x":1363, "y":1260, "w":168, "h":547},
+		"spriteSourceSize": {"x":11,"y":6,"w":183,"h":560},
+		"sourceSize": {"w":183,"h":560}
+	},
+	"scooter": {
+		"frame": {"x":839, "y":0, "w":658, "h":694},
+		"spriteSourceSize": {"x":21,"y":3,"w":700,"h":700},
+		"sourceSize": {"w":700,"h":700}
+	},
+	"turtle": {
+		"frame": {"x":692, "y":761, "w":670, "h":615},
+		"spriteSourceSize": {"x":1,"y":0,"w":672,"h":615},
+		"sourceSize": {"w":672,"h":615}
 	}
-
 },
 "meta": {
 	"image": "red_herring.png",

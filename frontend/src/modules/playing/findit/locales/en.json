@@ -57,6 +57,10 @@
           "dead-tree": {
             "name": "dead Tree",
             "description": "Dead trees can dry out, which increases the risk of them catching fire."
+          },
+          "bottle":{
+            "name": "Glass Bottle",
+            "description": "Well done! This object does not belong in nature. Although glass bottles can only very rarely cause fires, they can do so under certain conditions. Animals can also be injured by broken glass. So pick it up and dispose of it properly!"
           }
         },
         "red_herring": {
@@ -68,10 +72,6 @@
             "name": "Bugs",
             "description": "Beetles are part of the natural ecosystem, form the basis of the food chain for other animals and loosen the soil. Their survival is therefore important for the survival of the forest and other animals."
           },
-          "bottle":{
-            "name": "Glass Bottle",
-            "description": "It is a myth that left-behind glass bottles of all kinds act like a lens under the right circumstances and focus the light. No one can start a fire at the focal point! However, garbage does not belong in the forest, as animals can get hurt."
-          },
           "oil": {
             "name": "Oil Canister",
             "description": "Oil can get into the environment and contaminate/poison the environment."
@@ -79,6 +79,10 @@
           "electricalScrap": {
             "name": "Electrical Scrap",
             "description": "Batteries in e-waste can get into the environment and contaminate/poison the environment."
+          },
+          "plastic_bottle":{
+            "name": "Plastic Bottle",
+            "description": "This object does not belong here, but is not wanted in this case. Plastic bottles do not decompose and remain in nature for many years. They can also be dangerous for animals. So pick it up and dispose of it properly!"
           }
         }
       },
@@ -107,7 +111,11 @@
           },
           "bottle":{
             "name": "Glass Bottle",
-            "description": "It is a myth that left-behind glass bottles of all kinds act like a lens under the right circumstances and focus the light. No one can start a fire at the focal point! However, garbage does not belong in the forest, as animals can get hurt."
+            "description": "Well done! This object does not belong in nature. Glass bottles do not rot and remain in nature for many years. Animals can injure themselves on broken glass. So pick it up and dispose of it properly!"
+          },
+          "plastic_bottle": {
+            "name": "Plastic Bottle",
+            "description": "Well done! This object does not belong in nature. Plastic bottles do not decompose and remain in nature for many years. They can also be dangerous for animals. So pick it up and dispose of it properly!"
           },
           "oil": {
             "name": "Oil Canister",
