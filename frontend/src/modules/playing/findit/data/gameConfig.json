@@ -55,6 +55,42 @@
             "shape": "rect",
             "explanationKey": "dead-tree",
             "collectKey": "dispose"
+          },
+          "bottleWhite": {
+            "escalationLevels": [
+              { "min": 90, "max": 120 },
+              { "min": 45, "max": 60 }
+            ],
+            "severity": 3,
+            "maxCount": 5,
+            "width": 1,
+            "shape": "rect",
+            "explanationKey": "bottle",
+            "collectKey": "recycle"
+          },
+          "bottleWine": {
+            "escalationLevels": [
+              { "min": 90, "max": 120 },
+              { "min": 45, "max": 60 }
+            ],
+            "severity": 3,
+            "maxCount": 5,
+            "width": 1,
+            "shape": "rect",
+            "explanationKey": "bottle",
+            "collectKey": "recycle"
+          },
+          "bottleBeer": {
+            "escalationLevels": [
+              { "min": 90, "max": 120 },
+              { "min": 45, "max": 60 }
+            ],
+            "severity": 3,
+            "maxCount": 5,
+            "width": 1,
+            "shape": "rect",
+            "explanationKey": "bottle",
+            "collectKey": "recycle"
           }
         }
       },
@@ -67,30 +103,6 @@
           "explanationText": "module.playing.findit.participant.placeables.fire"
         },
         "items": {
-          "bottleWhite": {
-            "severity": 2,
-            "maxCount": 5,
-            "width": 1,
-            "shape": "rect",
-            "explanationKey": "bottle",
-            "collectKey": "recycle"
-          },
-          "bottleWine": {
-            "severity": 1,
-            "maxCount": 5,
-            "width": 1,
-            "shape": "rect",
-            "explanationKey": "bottle",
-            "collectKey": "recycle"
-          },
-          "bottleBeer": {
-            "severity": 1,
-            "maxCount": 5,
-            "width": 1,
-            "shape": "rect",
-            "explanationKey": "bottle",
-            "collectKey": "recycle"
-          },
           "oil": {
             "severity": 1,
             "maxCount": 2,

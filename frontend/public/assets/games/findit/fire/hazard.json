@@ -1,5 +1,20 @@
 {
 "frames": {
+	"bottleBeer": {
+		"frame": {"x":790, "y":0, "w":194, "h":557},
+		"spriteSourceSize": {"x":0,"y":0,"w":194,"h":557},
+		"sourceSize": {"w":194,"h":557}
+	},
+	"bottleWhite": {
+		"frame": {"x":1346, "y":0, "w":194, "h":664},
+		"spriteSourceSize": {"x":0,"y":0,"w":194,"h":664},
+		"sourceSize": {"w":194,"h":664}
+	},
+	"bottleWine": {
+		"frame": {"x":1346, "y":665, "w":194, "h":725},
+		"spriteSourceSize": {"x":0,"y":0,"w":194,"h":725},
+		"sourceSize": {"w":194,"h":725}
+	},
 	"campfire": {
 		"frame": {"x":749, "y":593, "w":596, "h":690},
 		"spriteSourceSize": {"x":0,"y":0,"w":596,"h":690},
@@ -19,7 +34,7 @@
 },
 "meta": {
 	"image": "hazard.png",
-	"size": {"w": 1346, "h": 1395},
+	"size": {"w": 1541, "h": 1395},
 	"scale": "1"
 }
 }
