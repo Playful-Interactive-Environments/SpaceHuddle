@@ -774,13 +774,16 @@ export default class Analytics extends Vue {
     test: string,
     title: string
   ): void {
-    if (result[0].parameter.resultTypeValues) {
+    const resultFiltered = result.filter(
+      (entry) => entry.parameter.resultTypeValues
+    );
+    if (resultFiltered[0].parameter.resultTypeValues) {
       const radarData = {
-        taskId: result[0].taskId,
+        taskId: resultFiltered[0].taskId,
         title: title,
         test: test,
-        labels: Object.keys(result[0].parameter.resultTypeValues),
-        data: result
+        labels: Object.keys(resultFiltered[0].parameter.resultTypeValues),
+        data: resultFiltered
           .map((entry) => ({
             data: entry.parameter.resultTypeValues
               ? (Object.values(entry.parameter.resultTypeValues) as number[])

@@ -8,7 +8,6 @@
       <p
         class="questionText twoLineText"
         :style="questionTextStyle"
-        @click="console.log(computedSegments)"
       >
         <ToolTip :content="questionData.question" :show-after="200">
           <span>{{ questionData.question }}</span>
@@ -70,6 +69,7 @@
                   text-anchor="middle"
                 >
                   {{ segment.answer || 0 }}
+                  {{ Math.round(segment.percentage * 100) }}%
                 </text>
               </g>
             </g>

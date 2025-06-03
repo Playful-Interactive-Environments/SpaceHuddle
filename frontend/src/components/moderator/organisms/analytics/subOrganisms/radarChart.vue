@@ -66,7 +66,7 @@
           'radar-label-hover': getParticipantsOfFilterClass(index).length > 0,
         }"
       >
-        <p>
+        <div v-if="activeLabel === label" class="selectableParticipants">
           <font-awesome-icon
             v-for="avatar of getParticipantsOfFilterClass(index)"
             :key="avatar.id"
@@ -76,13 +76,13 @@
               color: avatar.color,
               fontSize: 'var(--font-size-xsmall)',
             }"
-            @click="participantSelectionChanged([avatar.id])"
+            @click="participantSelectionChanged([avatar.id], label)"
           />
-        </p>
+        </div>
         <div
           @click="
             participantSelectionChanged(
-              getParticipantsOfFilterClass(index).map((avatar) => avatar.id)
+              getParticipantsOfFilterClass(index).map((avatar) => avatar.id), label
             )
           "
         >
@@ -144,6 +144,7 @@ export default class RadarChart extends Vue {
   normalizedDatasets: { data: number[]; avatar: Avatar }[] = [];
 
   filterClass = 'primary';
+  activeLabel = '';
 
   get minMaxValues(): { min: number; max: number } {
     const allData = this.datasets.flatMap((dataset) => dataset.data);
@@ -164,7 +165,12 @@ export default class RadarChart extends Vue {
     this.updateNormalizedDatasets();
   }
 
-  participantSelectionChanged(ids: string[] | null) {
+  participantSelectionChanged(ids: string[] | null, label: string) {
+    if (this.activeLabel === label) {
+      this.activeLabel = '';
+    } else {
+      this.activeLabel = label;
+    }
     if (ids) {
       if (JSON.stringify(this.selectedParticipantIds) === JSON.stringify(ids)) {
         this.$emit('update:selectedParticipantIds', []);
@@ -224,9 +230,9 @@ export default class RadarChart extends Vue {
         this.selectedParticipantIds.includes(dataset.avatar.id)
       )
     ) {
-      return 0.25;
+      return 0.2;
     }
-    return 0.05;
+    return 0.01;
   }
 
   normalizeData(data: number[]): number[] {
@@ -404,6 +410,9 @@ export default class RadarChart extends Vue {
 
 .radar-label {
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: var(--font-size-xsmall);
   color: var(--color-dark-contrast);
   font-weight: var(--font-weight-default);
@@ -418,10 +427,10 @@ export default class RadarChart extends Vue {
 .avatar-icon {
   color: var(--color-dark-contrast);
   font-size: var(--font-size-large);
-  margin: 0 0.2rem;
   transition: color 0.3s ease, transform 0.3s ease;
 
   transform: scale(1);
+  padding: 0.2rem;
 }
 
 .avatar-icon:hover {
@@ -430,5 +439,17 @@ export default class RadarChart extends Vue {
 
 .classSelection {
   font-size: var(--font-size-small);
+}
+
+.selectableParticipants {
+  position: absolute;
+  top: -1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.2rem;
+  background-color: white;
+  border-radius: var(--border-radius-small);
+  padding: 0.1rem;
 }
 </style>
