@@ -30,9 +30,9 @@
           :key="dataset.avatar.id"
           :points="getDataPoints(dataset.data)"
           :fill="datasetColors[dataset.avatar.id]"
-          :fill-opacity="datasetOpacities[dataset.avatar.id]"
+          :fill-opacity="datasetOpacities[dataset.avatar.id] - 0.2"
           :stroke="datasetColors[dataset.avatar.id]"
-          :stroke-opacity="datasetOpacities[dataset.avatar.id] + 0.2"
+          :stroke-opacity="datasetOpacities[dataset.avatar.id]"
           stroke-width="0.5"
           class="radar-polygon"
         />
@@ -223,16 +223,16 @@ export default class RadarChart extends Vue {
 
   calculateOpacity(dataset: { data: unknown[]; avatar: Avatar }): number {
     if (this.selectedParticipantIds.includes(dataset.avatar.id)) {
-      return 0.8;
+      return 1;
     } else if (
       !this.selectedParticipantIds.length ||
       !this.datasets.find((dataset) =>
         this.selectedParticipantIds.includes(dataset.avatar.id)
       )
     ) {
-      return 0.2;
+      return 0.4;
     }
-    return 0.01;
+    return 0.11;
   }
 
   normalizeData(data: number[]): number[] {
@@ -398,14 +398,14 @@ export default class RadarChart extends Vue {
 .average-radar-polygon {
   fill: url(#diagonalHatch);
   stroke: var(--color-evaluating);
-  stroke-width: 1;
+  stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 
 .hatch-path {
   stroke: var(--color-evaluating);
-  stroke-width: 0.3;
+  stroke-width: 0.6;
 }
 
 .radar-label {
