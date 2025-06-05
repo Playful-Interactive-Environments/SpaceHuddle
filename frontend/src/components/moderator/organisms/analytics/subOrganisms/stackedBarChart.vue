@@ -1,207 +1,210 @@
 <template>
   <div class="chart-container" ref="chartContainer">
-    <div
-      v-for="(questionData, index) in chartData"
-      :key="index"
-      class="question-container"
-    >
-      <p
-        class="questionText twoLineText"
-        :style="questionTextStyle"
-      >
-        <ToolTip :content="questionData.question" :show-after="200">
-          <span>{{ questionData.question }}</span>
-        </ToolTip>
-      </p>
-      <div
-        v-if="shouldRenderSlider(questionData, index)"
-        class="barSegments"
-        :style="barSegmentsStyle"
-      >
-        <svg :width="barWidth" :height="barHeight">
-          <g>
-            <line
-              v-bind="sliderLineProps()"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-            <g v-for="(x, i) in sliderPositions" :key="i">
-              <line
-                v-bind="sliderTickProps(x)"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-              <text
-                v-if="isSliderEdge(x)"
-                class="svgText"
-                v-bind="sliderTextProps(x)"
-                text-anchor="middle"
-              />
-            </g>
-            <g v-for="(segment, i) in computedSegments[index]" :key="i">
-              <defs>
-                <linearGradient
-                  :id="gradientId(index, i)"
-                  v-bind="gradientProps"
-                >
-                  <stop
-                    class="linearGradientStop"
-                    v-for="(color, j) in getColor(segment)"
-                    :key="j"
-                    v-bind="gradientStopProps(segment, j)"
-                    :stop-color="color"
+    <draggable v-model="surveyChartData" item-key="id">
+      <template v-slot:item="{ element, index }">
+        <div class="question-container">
+          <p class="questionText twoLineText" :style="questionTextStyle">
+            <ToolTip :content="element.question" :show-after="200">
+              <span><b>{{ chartData.indexOf(element) + 1 }}.</b> {{ element.question }}</span>
+            </ToolTip>
+          </p>
+          <div
+            v-if="shouldRenderSlider(element, index)"
+            class="barSegments"
+            :style="barSegmentsStyle"
+          >
+            <svg :width="barWidth" :height="barHeight">
+              <g>
+                <line
+                  v-bind="sliderLineProps()"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <g v-for="(x, i) in sliderPositions" :key="i">
+                  <line
+                    v-bind="sliderTickProps(x)"
+                    stroke-width="2"
+                    stroke-linecap="round"
                   />
-                </linearGradient>
-              </defs>
-              <g class="circle">
-                <circle
-                  class="cursorPointer"
-                  v-bind="circleProps(segment, questionData)"
+                  <text
+                    v-if="isSliderEdge(x)"
+                    class="svgText"
+                    v-bind="sliderTextProps(x)"
+                    text-anchor="middle"
+                  />
+                </g>
+                <g v-for="(segment, i) in computedSegments[index]" :key="i">
+                  <defs>
+                    <linearGradient
+                      :id="gradientId(index, i)"
+                      v-bind="gradientProps"
+                    >
+                      <stop
+                        class="linearGradientStop"
+                        v-for="(color, j) in getColor(segment)"
+                        :key="j"
+                        v-bind="gradientStopProps(segment, j)"
+                        :stop-color="color"
+                      />
+                    </linearGradient>
+                  </defs>
+                  <g class="circle">
+                    <circle
+                      class="cursorPointer"
+                      v-bind="circleProps(segment, element)"
+                      @click="
+                        participantSelectionChanged(
+                          segment.avatars.map((avatar) => avatar.id)
+                        )
+                      "
+                    />
+                    <text
+                      class="circleLabel"
+                      v-bind="circleTextProps(segment, element)"
+                      text-anchor="middle"
+                    >
+                      {{ segment.answer || 0 }}
+                      {{ Math.round(segment.percentage * 100) }}%
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </svg>
+            <div
+              v-for="(segment, i) in computedSegments[index]"
+              :key="'text-' + i"
+              class="segment-avatars-circle"
+              :style="{
+                left: `${
+                  calculateCircleX(segment, element) - segment.width / 2
+                }px`,
+                width: `${segment.width}px`,
+              }"
+            >
+              <font-awesome-icon
+                class="segment-avatars-icon"
+                v-for="avatar in filteredAvatars(segment)"
+                :key="avatar.id"
+                :icon="avatar.symbol"
+                :style="{ color: avatar.color }"
+                @click="participantSelectionChanged([avatar.id])"
+              />
+            </div>
+          </div>
+          <div
+            v-else-if="shouldRenderTextCarousel(element, index)"
+            :style="carouselStyle"
+          >
+            <el-carousel
+              :interval="5000"
+              type="card"
+              :height="carouselHeight"
+              trigger="click"
+            >
+              <el-carousel-item
+                class="carouselItem"
+                v-for="(segment, i) in computedSegments[index]"
+                :key="i"
+              >
+                <p>{{ segment.answer }}</p>
+                <font-awesome-icon
+                  class="carouselColorItem cursorPointer"
+                  :icon="segment.avatars[0].symbol"
+                  :style="carouselIconStyle(segment)"
                   @click="
                     participantSelectionChanged(
                       segment.avatars.map((avatar) => avatar.id)
                     )
                   "
                 />
-                <text
-                  class="circleLabel"
-                  v-bind="circleTextProps(segment, questionData)"
-                  text-anchor="middle"
-                >
-                  {{ segment.answer || 0 }}
-                  {{ Math.round(segment.percentage * 100) }}%
-                </text>
-              </g>
-            </g>
-          </g>
-        </svg>
-        <div
-          v-for="(segment, i) in computedSegments[index]"
-          :key="'text-' + i"
-          class="segment-avatars-circle"
-          :style="{
-            left: `${
-              calculateCircleX(segment, questionData) - segment.width / 2
-            }px`,
-            width: `${segment.width}px`,
-          }"
-        >
-          <font-awesome-icon
-            class="segment-avatars-icon"
-            v-for="avatar in filteredAvatars(segment)"
-            :key="avatar.id"
-            :icon="avatar.symbol"
-            :style="{ color: avatar.color }"
-            @click="participantSelectionChanged([avatar.id])"
-          />
-        </div>
-      </div>
-      <div
-        v-else-if="shouldRenderTextCarousel(questionData, index)"
-        :style="carouselStyle"
-      >
-        <el-carousel
-          :interval="5000"
-          type="card"
-          :height="carouselHeight"
-          trigger="click"
-        >
-          <el-carousel-item
-            class="carouselItem"
-            v-for="(segment, i) in computedSegments[index]"
-            :key="i"
+              </el-carousel-item>
+            </el-carousel>
+          </div>
+          <div
+            v-else-if="shouldRenderBarSegments(index)"
+            class="barSegments"
+            :style="barSegmentsStyle"
           >
-            <p>{{ segment.answer }}</p>
-            <font-awesome-icon
-              class="carouselColorItem cursorPointer"
-              :icon="segment.avatars[0].symbol"
-              :style="carouselIconStyle(segment)"
+            <svg :width="barWidth" :height="barHeight">
+              <g
+                v-for="(segment, i) in computedSegments[index]"
+                :key="i"
+                class="barSegmentElement cursorPointer"
+                @click="
+                  participantSelectionChanged(
+                    segment.avatars.map((avatar) => avatar.id)
+                  )
+                "
+              >
+                <defs>
+                  <linearGradient
+                    :id="gradientId(index, i)"
+                    v-bind="gradientProps"
+                  >
+                    <stop
+                      v-for="(color, j) in getColor(segment)"
+                      :key="j"
+                      class="linearGradientStop"
+                      v-bind="gradientStopProps(segment, j)"
+                      :stop-color="color"
+                    />
+                  </linearGradient>
+                </defs>
+                <rect v-bind="barRectProps(segment)" />
+                <rect
+                  class="barRectGradient"
+                  v-bind="barRectGradientProps(index, i, segment)"
+                />
+                <circle
+                  v-if="hasCorrect"
+                  v-bind="correctCircleProps(segment)"
+                />
+              </g>
+            </svg>
+            <div
+              v-for="(segment, i) in computedSegments[index]"
+              :key="'text-' + i"
+              class="segment-avatars"
+              :style="avatarStyle(segment)"
+            >
+              <font-awesome-icon
+                class="segment-avatars-icon"
+                v-for="avatar in filteredAvatars(segment)"
+                :key="avatar.id"
+                :icon="avatar.symbol"
+                :style="{ color: avatar.color }"
+                @click="participantSelectionChanged([avatar.id])"
+              />
+            </div>
+            <div
+              v-for="(segment, i) in computedSegments[index]"
+              :key="'text-' + i"
+              class="segment-text"
+              :style="segmentTextStyle(segment)"
               @click="
                 participantSelectionChanged(
                   segment.avatars.map((avatar) => avatar.id)
                 )
               "
-            />
-          </el-carousel-item>
-        </el-carousel>
-      </div>
-      <div
-        v-else-if="shouldRenderBarSegments(index)"
-        class="barSegments"
-        :style="barSegmentsStyle"
-      >
-        <svg :width="barWidth" :height="barHeight">
-          <g
-            v-for="(segment, i) in computedSegments[index]"
-            :key="i"
-            class="barSegmentElement cursorPointer"
-            @click="
-              participantSelectionChanged(
-                segment.avatars.map((avatar) => avatar.id)
-              )
-            "
-          >
-            <defs>
-              <linearGradient :id="gradientId(index, i)" v-bind="gradientProps">
-                <stop
-                  v-for="(color, j) in getColor(segment)"
-                  :key="j"
-                  class="linearGradientStop"
-                  v-bind="gradientStopProps(segment, j)"
-                  :stop-color="color"
-                />
-              </linearGradient>
-            </defs>
-            <rect v-bind="barRectProps(segment)" />
-            <rect
-              class="barRectGradient"
-              v-bind="barRectGradientProps(index, i, segment)"
-            />
-            <circle v-if="hasCorrect" v-bind="correctCircleProps(segment)" />
-          </g>
-        </svg>
-        <div
-          v-for="(segment, i) in computedSegments[index]"
-          :key="'text-' + i"
-          class="segment-avatars"
-          :style="avatarStyle(segment)"
-        >
-          <font-awesome-icon
-            class="segment-avatars-icon"
-            v-for="avatar in filteredAvatars(segment)"
-            :key="avatar.id"
-            :icon="avatar.symbol"
-            :style="{ color: avatar.color }"
-            @click="participantSelectionChanged([avatar.id])"
-          />
-        </div>
-        <div
-          v-for="(segment, i) in computedSegments[index]"
-          :key="'text-' + i"
-          class="segment-text"
-          :style="segmentTextStyle(segment)"
-          @click="
-            participantSelectionChanged(
-              segment.avatars.map((avatar) => avatar.id)
-            )
-          "
-        >
-          <ToolTip :show-after="200" class="segment-text-toolTip">
-            <template #content>
-              <p class="segment-answer">
-                {{ segment.answer }}<br />
-                <span class="segment-percentage"
-                  >{{ Math.round(segment.percentage * 100) }}%</span
-                >
-              </p>
-            </template>
-            <div class="segment-text-toolTip oneLineText">
-              <span class="oneLineText">{{ segment.answer }}</span>
+            >
+              <ToolTip :show-after="200" class="segment-text-toolTip">
+                <template #content>
+                  <p class="segment-answer">
+                    {{ segment.answer }}<br />
+                    <span class="segment-percentage"
+                      >{{ Math.round(segment.percentage * 100) }}%</span
+                    >
+                  </p>
+                </template>
+                <div class="segment-text-toolTip oneLineText">
+                  <span class="oneLineText">{{ segment.answer }}</span>
+                </div>
+              </ToolTip>
             </div>
-          </ToolTip>
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </draggable>
   </div>
 </template>
 
@@ -212,6 +215,7 @@ import { debounce } from 'lodash';
 import { Avatar } from '@/types/api/Participant';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import draggable from 'vuedraggable';
 
 interface Answer {
   avatar: Avatar;
@@ -243,6 +247,7 @@ interface AnswerSegment {
   components: {
     FontAwesomeIcon,
     ToolTip,
+    draggable,
   },
 })
 export default class StackedBarChart extends Vue {
@@ -256,6 +261,8 @@ export default class StackedBarChart extends Vue {
   @Prop({ default: () => 'var(--color-evaluating)' })
   readonly colorIncorrect!: string;
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
+
+  surveyChartData: QuestionData[] = [];
 
   barHeight = 40;
   barWidthPercentage = 0.65;
@@ -358,13 +365,14 @@ export default class StackedBarChart extends Vue {
   }
 
   get computedSegments() {
-    return this.chartData.map((question) =>
+    return this.surveyChartData.map((question) =>
       this.getAnswerSegments(question.answers, question.questionType)
     );
   }
 
-  @Watch('chartData', { deep: true })
+  @Watch('chartData', { immediate: true, deep: true })
   onChartDataChanged() {
+    this.surveyChartData = [...this.chartData];
     this.calculateParentWidth();
   }
 
@@ -651,6 +659,7 @@ export default class StackedBarChart extends Vue {
 }
 
 .question-container {
+  cursor: grab;
   position: relative;
   display: flex;
   align-items: center;
