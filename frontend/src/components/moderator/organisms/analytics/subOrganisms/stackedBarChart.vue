@@ -5,7 +5,10 @@
         <div class="question-container">
           <p class="questionText twoLineText" :style="questionTextStyle">
             <ToolTip :content="element.question" :show-after="200">
-              <span><b>{{ chartData.indexOf(element) + 1 }}.</b> {{ element.question }}</span>
+              <span
+                ><b>{{ chartData.indexOf(element) + 1 }}.</b>
+                {{ element.question }}</span
+              >
             </ToolTip>
           </p>
           <div

@@ -521,7 +521,11 @@ export default class Participant extends Vue {
         : 0;
       const rangeCount = end - start + 1;
       if (rangeCount <= 5) {
-        return [...Array(rangeCount).keys()].map((x) => (x + start).toString());
+        const marks: { [key: number]: string } = {};
+        for (let i = start; i <= end; i++) {
+          marks[i] = i.toString();
+        }
+        return marks;
       } else {
         const markerValues = [
           start,

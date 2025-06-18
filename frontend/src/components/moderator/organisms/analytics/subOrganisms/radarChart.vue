@@ -82,7 +82,8 @@
         <div
           @click="
             participantSelectionChanged(
-              getParticipantsOfFilterClass(index).map((avatar) => avatar.id), label
+              getParticipantsOfFilterClass(index).map((avatar) => avatar.id),
+              label
             )
           "
         >
