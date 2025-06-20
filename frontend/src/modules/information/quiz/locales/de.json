@@ -49,7 +49,9 @@
     "waiting": "Bitte warten. Fragen und Antworten werden geladen.",
     "imageKeywords": "Bildbeschreibung",
     "good": "trifft voll zu",
-    "bad": "trifft nicht zu"
+    "bad": "trifft nicht zu",
+    "yes": "Ja",
+    "no": "Nein"
   },
   "enum": {
     "questionType": {

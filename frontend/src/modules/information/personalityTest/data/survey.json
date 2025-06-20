@@ -951,5 +951,676 @@
       "file": "CommunicationType",
       "class": "CommunicationCalculation"
     }
+  },
+  "logisticsJob": {
+    "icon": "user-tie",
+    "iconPrefix": "fas",
+    "questions": [
+      {
+        "question": "Checking and approving the quality and quantity of goods received and dispatched sounds interesting",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "I have a strong interest in sustainability and environmental protection",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "I am good at recognizing the needs of other people",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "Could you take responsibility for planning and running class parties?",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "I don't mind being exposed to dirt, dust or moisture",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "I enjoy working with technical things",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "I am interested in having a lot to do with other people at work",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "Are you able to draw a conclusion from a given piece of information?",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "At school, I can work calmly and with concentration even in stressful situations",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "I can imagine having a job where I have to react and intervene quickly when problems arise",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I am interested in the interaction between humans and machines (robots, drones, etc.)",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "I am fascinated by automation, autonomous vehicles and robots",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "Are you interested in how to get to school in a more environmentally friendly way?",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "I am interested in the processes in a warehouse",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "I am good at explaining the results of a complicated project in a way that everyone can understand",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "I enjoy communicating in English",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "Do you think it is important that we try to cause less environmental damage when we move around?",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "I am interested in transporting goods from A to B by road",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "Can you find your way around a new city without a map or app?",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "I find it easy to put myself in other people's shoes",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "Are you good at prioritizing tasks and doing the most urgent things first?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "In my future job, I can well imagine leading employees and having responsibility for them",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "I can work well with other groups to find a solution to a problem",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "I would enjoy planning and optimizing delivery and pick-up routes",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "I am willing to learn a programming language",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "I am interested in new technologies such as artificial intelligence and automation",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "Would you like to learn more about how our travel habits affect the environment?",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "I find it exciting to carry out research and continuous observation in order to follow current developments and trends",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "I would like to organize transportation for events or excursions and plan the routes",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "I am good at gathering information from different sources",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "In my future job, I would like to negotiate prices with business partners",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "Physically strenuous work is no problem for me",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "I can very well imagine resolving conflicts and mediating between parties or people in my future job",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "I don't mind sitting for long periods of time",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "I enjoy talking to new people and making contact",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "Can you solve difficult puzzles or problems at school?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "Continuous training in new technologies to keep up to date would not be a problem for me in my job",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "I am interested in how devices or machines are assembled",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "I find the processes involved in warehousing, i.e. storing and keeping things, exciting",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "I would like to write reports and presentations on the current status of a project",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "I enjoy finding the fastest way to get from one place to another",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "Would you like to work on projects that help to make transportation more environmentally friendly?",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "I find it exciting to see how modern technologies can support people in their work",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "I find it exciting to find and correct errors in games or programs",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "In my free time, I like to repair objects or make things",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "Are you interested in how computers and smartphones can be used safely?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "Long car journeys would not be a problem for me in my job either",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "I would like to be able to program computer games or apps",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "In my future job, I would find it exciting to analyze the individual steps leading up to the delivery of a product to the customer and to identify potential ",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "Would you like to learn more about how to protect your private data online?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I like solving complex problems",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "I wouldn't mind not having fixed working hours but having to be flexible about when I start or finish work",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "Would you be interested in acting as a coordinator at a school party and finding quick solutions to unexpected problems?",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "Do you have a passion for planning parties, trips or other events in detail? ",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "I think renewable energy and sustainable materials are an important topic",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "Do you like keeping up with the latest technology and learning new things?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I think designing a workplace is exciting",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "In my job, I would like to work a lot with numbers and data",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Would you like to help decide which students should ride which bus on a field trip, based on the different activities and destinations?",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "I can see myself understanding and analyzing technical relationships in my job",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "I find it exciting to improve existing processes",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "I am willing to do additional courses or training, for example to obtain a driver's license to drive certain equipment or vehicles",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "Can you represent your opinion well in group discussions?",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "I am fascinated by the idea of building robots and programming them to perform tasks for me",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "Do you instinctively react quickly when something unexpected happens? ",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "Would you describe yourself as a good listener?",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "I am interested in learning what methods can be used to collect data and present it in an understandable way in order to present the data or derive conclusions",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Are you good at explaining and convincing others of your ideas?",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "Are you interested in how computers and networks work?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I am interested in psychology and human thinking, such as the question of how to motivate employees",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "I am interested in aviation",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "Can you make new plans quickly when something unexpected happens?",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "Do you like to change things and see if they work better afterwards?",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "As part of my job, I would like to maintain or repair vehicles/equipment",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "Do you have good Excel skills?",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Would you like to work on a school project that involves using environmentally friendly materials?",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "I would enjoy designing strategies to move people or things",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "Would you like to learn more about the technology behind the internet?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I have a good geographical understanding and can easily get from A to B in an unfamiliar city using public transportation",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "Would you like to do projects where you have to combine new technologies with old ones?",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "I prefer to be responsible only for my own work rather than being responsible for the work of an entire group - this statement does NOT apply to me",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "Would you like to take on the role of coordinator for group work, planning and reporting?",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "I find it easy to learn new programs on the computer",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Are you interested in how to get to school in a more environmentally friendly way?",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "I would be very interested in developing working models for human-machine/robot collaboration and determining which tasks should be carried out by machines/robots",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "Do you find it exciting to think about how technology could help improve learning?",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "Do you like searching the internet for information to make your tasks better?",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "Are you interested in seeing a project through from the initial idea to the finished product?",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "Would you enjoy making new contacts and building friendships at events?",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "Would you like to learn how to regularly check and maintain technical devices or systems?",
+        "type": "yesno",
+        "resultType": "F"
+      },
+      {
+        "question": "One of my strengths is being able to keep an eye on several things at the same time",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "Before I go on a big trip, I like to do everything I need to do myself, such as researching important information on entry requirements, collecting documents for visa applications and obtaining permits or information",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "Could you imagine representing your school at an education fair?",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "I am interested in monitoring the interaction between humans and machines and deriving suggestions for improvement",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "I like helping to understand how data can be used to infer what might happen in the future",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Are you interested in topics such as increasing recycling rates?",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "I would like to pilot a plane or a drone",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "I have a good geographical understanding",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "I find it exciting to distribute resources and tasks to people in a group work",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "I would like to understand how to measure and analyze the use of our school website",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Would you like to learn how to select and procure materials or things for school events?",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "You don't feel overwhelmed or stressed if you have to quickly change your itinerary due to unforeseen events such as a road closure",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "Would you want to carry out regular checks that the data on your school computer is secure?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "If I could choose, I would like to do activities that require fine motor skills, such as sewing, modelling or making fine drawings",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "I prefer to focus on the big picture rather than the details",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "I am interested in collecting and analyzing feedback on our group projects",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Would you enjoy analyzing possible difficulties and finding solutions in a project group?",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "Are you interested in how a retail company buys its goods, for example? This includes steps such as searching for suppliers, selecting suppliers and negotiating prices",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "I can imagine being involved in planning whether goods should be delivered by truck, bicycle or robots in the city in the future",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "I like creating visual representations such as diagrams of survey results",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "In sport, are you often the first to react to starting signals, rallies or sudden changes in the game?",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "Are you interested in quality management tasks?",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "Could you imagine collecting data regularly and checking whether your school is achieving its environmental goals? ",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "Are you interested or willing to look into the topic of automated driving systems? ",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "I would enjoy thinking about how the city network and traffic could be designed to make transportation easier",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "Would you enjoy writing reports about computer security at school?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I can imagine helping to design the layout of a warehouse, including the systems and machines used",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "I find it interesting to analyze school work to see where the class can improve",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "Can you imagine how furniture can be rearranged in a room without actually moving it?",
+        "type": "yesno",
+        "resultType": "A"
+      },
+      {
+        "question": "I am interested in monitoring self-driving vehicles and intervening quickly if necessary",
+        "type": "yesno",
+        "resultType": "B"
+      },
+      {
+        "question": "Would you help set rules on what to do if someone has unauthorized access to school computers?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I find it interesting to ensure workplace safety in my job and to develop guidelines and rules for this",
+        "type": "yesno",
+        "resultType": "J"
+      },
+      {
+        "question": "I would like to learn to predict which sports teams will do well based on their previous games",
+        "type": "yesno",
+        "resultType": "E"
+      },
+      {
+        "question": "In my future job, I would like to be responsible for cultivating and maintaining relationships with business partners",
+        "type": "yesno",
+        "resultType": "I"
+      },
+      {
+        "question": "I am interested in designing processes to repair, recycle or reuse products instead of throwing them away",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "Can you imagine working with authorities and other companies to improve urban transportation?",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "Could you lead a school project where you decide who takes on which parts so that everything is ready on time?",
+        "type": "yesno",
+        "resultType": "K"
+      },
+      {
+        "question": "Would you describe yourself as an organizational talent?",
+        "type": "yesno",
+        "resultType": "D"
+      },
+      {
+        "question": "I find it easy to explain rules and make sure they are followed",
+        "type": "yesno",
+        "resultType": "C"
+      },
+      {
+        "question": "Can you imagine writing a guide on how to protect yourself in the event of a cyber attack?",
+        "type": "yesno",
+        "resultType": "H"
+      },
+      {
+        "question": "I would lead workshops and training sessions to inform others about sustainability issues",
+        "type": "yesno",
+        "resultType": "G"
+      },
+      {
+        "question": "Do you find it easy to keep track of many tasks?",
+        "type": "yesno",
+        "resultType": "K"
+      }
+    ],
+    "result": ["A","B","C","D","E","F","G","H","I","J","K"],
+    "calculation": {
+      "file": "LogisticsJobType",
+      "class": "LogisticsJobCalculation"
+    }
   }
 }
