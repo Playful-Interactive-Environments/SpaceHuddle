@@ -71,7 +71,7 @@ class ParticipantRepository implements RepositoryInterface
                 $data->sessionId = $sessionId;
                 $data->ipHash = self::encryptText($data->ip);
                 $data->browserKey = $this->generateNewConnectionKey("browser_key", $data->sessionKey . ".");
-                $data->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+                $data->color = sprintf('#%02X%02X%02X', mt_rand(0, 204), mt_rand(0, 204), mt_rand(0, 204));
                 $data->symbol = AvatarSymbol::getRandomValue();
                 $data->state = ParticipantState::ACTIVE;
 

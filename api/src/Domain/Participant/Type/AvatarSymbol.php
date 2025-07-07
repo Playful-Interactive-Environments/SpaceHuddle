@@ -26,7 +26,6 @@ class AvatarSymbol
     public const BINOCULARS = "binoculars";
     public const BLENDER = "blender";
     public const BOMB = "bomb";
-    public const BONG = "bong";
     public const BOOK = "book";
     public const BRAIN = "brain";
     public const BROOM = "broom";
