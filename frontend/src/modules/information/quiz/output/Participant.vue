@@ -208,6 +208,20 @@
             size="large"
           ></el-rate>
         </div>
+        <div v-else-if="activeQuestionType === QuestionType.YESNO">
+          <el-radio-group
+            v-model="activeAnswer.numValue"
+            size="large"
+            v-on:change="inputChanged"
+          >
+            <el-radio-button :label="1">{{
+                $t(`module.information.quiz.participant.yes`)
+              }}</el-radio-button>
+            <el-radio-button :label="0">{{
+              $t(`module.information.quiz.participant.no`)
+            }}</el-radio-button>
+          </el-radio-group>
+        </div>
         <el-slider
           v-else-if="
             activeQuestionType === QuestionType.SLIDER &&
@@ -645,6 +659,7 @@ export default class Participant extends Vue {
       if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.YESNO ||
         this.activeQuestionType === QuestionType.SLIDER
       ) {
         answers = this.activeAnswer.numValue;
@@ -809,6 +824,7 @@ export default class Participant extends Vue {
     if (
       this.activeQuestionType === QuestionType.NUMBER ||
       this.activeQuestionType === QuestionType.RATING ||
+      this.activeQuestionType === QuestionType.YESNO ||
       this.activeQuestionType === QuestionType.SLIDER
     )
       answerValue = this.activeAnswer.numValue;
@@ -1308,6 +1324,7 @@ export default class Participant extends Vue {
       } else if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.YESNO ||
         this.activeQuestionType === QuestionType.SLIDER
       ) {
         if (answer.keywords) {

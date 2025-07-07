@@ -15,6 +15,8 @@
     "previous": "zurück",
     "next": "weiter",
     "submit": "Speichern",
-    "waiting": "Bitte warten. Fragen und Antworten werden geladen."
+    "waiting": "Bitte warten. Fragen und Antworten werden geladen.",
+    "yes": "Ja",
+    "no": "Nein"
   }
 }

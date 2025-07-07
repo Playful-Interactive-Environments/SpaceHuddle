@@ -10,6 +10,7 @@ export enum QuestionType {
   TEXT = 'text',
   IMAGE = 'image',
   INFO = 'info',
+  YESNO = 'yesno',
 }
 
 export const SurveyQuestionType: QuestionType[] = [

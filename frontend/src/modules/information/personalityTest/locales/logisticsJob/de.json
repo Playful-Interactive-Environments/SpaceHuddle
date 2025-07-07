@@ -1,0 +1,456 @@
+{
+  "moderatorConfig": {
+    "name": "Zukunftsberufe in der Logistik",
+    "description": "Welchen Zukunftsberuf in der Logistik findest du am interessantesten? Beantworte die Fragen und finde es heraus!"
+  },
+  "participant": {
+    "primary": "Primärklasse",
+    "secondary": "Sekundärklasse",
+    "score": "Du hast für jede der Klassen in diesem Test die folgende Punktzahl erreicht:"
+  },
+  "questions": {
+    "Checking and approving the quality and quantity of goods received and dispatched sounds interesting": {
+      "text": "Die Prüfung und Freigabe der Qualität und Anzahl der eingegangenen und versandten Waren klingt interessant"
+    },
+    "I have a strong interest in sustainability and environmental protection": {
+      "text": "Ich habe ein starkes Interesse an Nachhaltigkeit und Umweltschutz"
+    },
+    "I am good at recognizing the needs of other people": {
+      "text": "Ich bin gut darin, die Bedürfnisse von anderen Personen zu erkennen"
+    },
+    "Could you take responsibility for planning and running class parties?": {
+      "text": "Könntest du die Verantwortung für die Planung und Durchführung von Klassenfeiern übernehmen?"
+    },
+    "I dont mind being exposed to dirt, dust or moisture": {
+      "text": "Es macht mir nichts aus, Schmutz, Staub oder Nässe ausgesetzt zu sein"
+    },
+    "I enjoy working with technical things": {
+      "text": "Es macht mir Spaß, mich mit technischen Dingen zu beschäftigen"
+    },
+    "I am interested in having a lot to do with other people at work": {
+      "text": "Es interessiert mich, im Beruf viel mit anderen Menschen zu tun zu haben"
+    },
+    "Are you able to draw a conclusion from a given piece of information?": {
+      "text": "Bist du in der Lage, aus einer gegebenen Information eine Schlussfolgerung zu ziehen?"
+    },
+    "At school, I can work calmly and with concentration even in stressful situations": {
+      "text": "In der Schule kann ich auch in Stresssituation ruhig und konzentriert arbeiten"
+    },
+    "I can imagine having a job where I have to react and intervene quickly when problems arise": {
+      "text": "Ich kann mir vorstellen, einen Job zu haben, in dem ich bei Problemen schnell reagieren und eingreifen muss"
+    },
+    "I am interested in the interaction between humans and machines (robots, drones, etc)": {
+      "text": "Das Zusammenspiel von Mensch und Maschine (Roboter, Drohnen,etc.) interessiert mich"
+    },
+    "I am fascinated by automation, autonomous vehicles and robots": {
+      "text": "Automatisierung, autonome Fahrzeuge und Roboter faszinieren mich"
+    },
+    "Are you interested in how to get to school in a more environmentally friendly way?": {
+      "text": "Interessierst du dich dafür, wie man umweltschonender zur Schule kommen kann?"
+    },
+    "I am interested in the processes in a warehouse": {
+      "text": "Ich habe Interesse an den Prozessen in einem Warenlager"
+    },
+    "I am good at explaining the results of a complicated project in a way that everyone can understand": {
+      "text": "Ich bin gut darin, die Ergebnisse eines komplizierten Projektes so zu erklären, dass es alle verstehen"
+    },
+    "I enjoy communicating in English": {
+      "text": "Mir macht es Spaß, auf Englisch zu kommunizieren"
+    },
+    "Do you think it is important that we try to cause less environmental damage when we move around?": {
+      "text": "Findest du es wichtig, dass wir versuchen, weniger Umweltschäden zu verursachen, wenn wir uns fortbewegen?"
+    },
+    "I am interested in transporting goods from A to B by road": {
+      "text": "Ich habe Interesse daran, Güter von A nach B auf der Straße zu befördern"
+    },
+    "Can you find your way around a new city without a map or app?": {
+      "text": "Findest du dich in einer neuen Stadt auch ohne Karte oder App gut zurecht?"
+    },
+    "I find it easy to put myself in other peoples shoes": {
+      "text": "Es fällt mir leicht, mich in die Lage anderer hineinzuversetzen"
+    },
+    "Are you good at prioritizing tasks and doing the most urgent things first?": {
+      "text": "Bist du gut darin, Aufgaben nach Dringlichkeit zu reihen, und das Dringendste zuerst zu erledigen?"
+    },
+    "In my future job, I can well imagine leading employees and having responsibility for them": {
+      "text": "In meinem zukünftigen Beruf kann ich mir gut vorstellen, Mitarbeiter zu führen und Verantwortung für sie zu haben"
+    },
+    "I can work well with other groups to find a solution to a problem": {
+      "text": "Ich kann gut mit anderen Gruppen zusammenarbeiten, um eine Lösung für ein Problem zu finden"
+    },
+    "I would enjoy planning and optimizing delivery and pick-up routes": {
+      "text": "Es würde mir Spaß machen Liefer- und Abholrouten zu planen und zu optimieren"
+    },
+    "I am willing to learn a programming language": {
+      "text": "Ich bin bereit, eine Programmiersprache zu erlernen"
+    },
+    "I am interested in new technologies such as artificial intelligence and automation": {
+      "text": "Neue Technologien wie künstliche Intelligenz und Automatisierung verfolge ich mit Interesse"
+    },
+    "Would you like to learn more about how our travel habits affect the environment?": {
+      "text": "Möchtest du mehr darüber lernen, wie unsere Reisegewohnheiten die Umwelt beeinflussen?"
+    },
+    "I find it exciting to carry out research and continuous observation in order to follow current developments and trends": {
+      "text": "Ich finde es spannend, Recherchen und kontinuierliche Beobachtungen durchzuführen, um aktuelle Entwicklungen und Trends zu verfolgen"
+    },
+    "I would like to organize transportation for events or excursions and plan the routes": {
+      "text": "Für Veranstaltungen oder Ausflüge würde ich gerne Transportmöglichkeiten organisieren und die Routen planen"
+    },
+    "I am good at gathering information from different sources": {
+      "text": "Ich bin gut darin, mir Informationen aus unterschiedlichen Quellen zusammenzusuchen"
+    },
+    "In my future job, I would like to negotiate prices with business partners": {
+      "text": "In meinem zukünftigen Job würde ich gerne mit Geschäftspartnern Preise verhandeln"
+    },
+    "Physically strenuous work is no problem for me": {
+      "text": "Körperlich anstrengende Arbeit ist kein Problem für mich"
+    },
+    "I can very well imagine resolving conflicts and mediating between parties or people in my future job": {
+      "text": "Konflikte zu lösen und zwischen Parteien oder Personen zu vermitteln kann ich mir im zukünftigen Beruf sehr gut vorstellen"
+    },
+    "I dont mind sitting for long periods of time": {
+      "text": "Viel und lange zu sitzen macht mir nichts aus"
+    },
+    "I enjoy talking to new people and making contact": {
+      "text": "Mich mit neuen Menschen zu unterhalten und Kontakt aufzubauen macht mir Spaß"
+    },
+    "Can you solve difficult puzzles or problems at school?": {
+      "text": "Kannst du schwierige Rätsel oder Probleme in der Schule lösen?"
+    },
+    "Continuous training in new technologies to keep up to date would not be a problem for me in my job": {
+      "text": "Die kontinuierliche Weiterbildung hinsichtlich neuen Technologien, um auf dem aktuellsten Stand zu bleiben, wäre für mich im Job kein Problem"
+    },
+    "I am interested in how devices or machines are assembled": {
+      "text": "Wie Geräte oder Maschinen zusammengebaut sind, interessiert mich"
+    },
+    "I find the processes involved in warehousing, ie storing and keeping things, exciting": {
+      "text": "Ich finde die Prozesse rund um Lagerhaltung, sprich die Lagerung und Aufbewahrung von Dingen, spannend"
+    },
+    "I would like to write reports and presentations on the current status of a project": {
+      "text": "Ich würde gerne Berichte und Präsentationen über den aktuellen Status eines Projekts verfassen"
+    },
+    "I enjoy finding the fastest way to get from one place to another": {
+      "text": "Ich habe Spaß daran, den schnellsten Weg zu finden, um von einem Ort zum anderen zu kommen"
+    },
+    "Would you like to work on projects that help to make transportation more environmentally friendly?": {
+      "text": "Würdest du gerne an Projekten arbeiten, die helfen, den Verkehr umweltfreundlicher zu machen?"
+    },
+    "I find it exciting to see how modern technologies can support people in their work": {
+      "text": "Ich finde es spannend zu sehen, wie moderne Technologien Menschen bei ihrer Arbeit unterstützen können"
+    },
+    "I find it exciting to find and correct errors in games or programs": {
+      "text": "Ich finde es spannend, Fehler in Spielen oder Programmen zu finden und zu korrigieren"
+    },
+    "In my free time, I like to repair objects or make things": {
+      "text": "In meiner Freizeit repariere ich gerne Gegenstände oder bastle"
+    },
+    "Are you interested in how computers and smartphones can be used safely?": {
+      "text": "Interessiert es dich, wie man Computer und Smartphones sicher nutzen kann?"
+    },
+    "Long car journeys would not be a problem for me in my job either": {
+      "text": "Lange Autofahrten wären auch im Beruf für mich kein Problem"
+    },
+    "I would like to be able to program computer games or apps": {
+      "text": "Ich würde gerne Computerspiele oder Apps programmieren können"
+    },
+    "In my future job, I would find it exciting to analyze the individual steps leading up to the delivery of a product to the customer and to identify potential ": {
+      "text": "In meinem zukünftigen Job fände ich es spannend, die einzelnen Schritte bis zur Anlieferung einer Ware beim Kunden zu analysieren und Verbesserungsmöglichkeiten zur Verringerung der Umweltbelastungen zu identifizieren"
+    },
+    "Would you like to learn more about how to protect your private data online?": {
+      "text": "Möchtest du mehr darüber lernen, wie man seine privaten Daten online schützt?"
+    },
+    "I like solving complex problems": {
+      "text": "Ich löse gerne komplexe Probleme"
+    },
+    "I wouldnt mind not having fixed working hours but having to be flexible about when I start or finish work": {
+      "text": "Keine fixen Arbeitszeiten zu haben sondern flexibel bezüglich meinem Dienstbeginn oder Dienstschluss bleiben zu müssen würde mich nicht stören"
+    },
+    "Would you be interested in acting as a coordinator at a school party and finding quick solutions to unexpected problems?": {
+      "text": "Würdest du dich dafür interessieren, bei einem Schulfest als Koordinator zu fungieren und bei unerwarteten Problemen schnell Lösungen zu finden?"
+    },
+    "Do you have a passion for planning parties, trips or other events in detail? ": {
+      "text": "Hast du eine Leidenschaft dafür, Feiern, Reisen oder andere Veranstaltungen genauestens zu planen? "
+    },
+    "I think renewable energy and sustainable materials are an important topic": {
+      "text": "Ich finde, erneuerbare Energien und nachhaltige Materialien sind ein wichtiges Thema"
+    },
+    "Do you like keeping up with the latest technology and learning new things?": {
+      "text": "Magst du es, auf dem neuesten Stand der Technik zu bleiben und Neues zu lernen?"
+    },
+    "I think designing a workplace is exciting": {
+      "text": "Einen Arbeitsplatz zu gestalten stelle ich mir spannend vor"
+    },
+    "In my job, I would like to work a lot with numbers and data": {
+      "text": "Im Job möchte ich mich gerne viel mit Zahlen und Daten beschäftigen"
+    },
+    "Would you like to help decide which students should ride which bus on a field trip, based on the different activities and destinations?": {
+      "text": "Würdest du gerne bei einem Ausflug helfen, zu entscheiden, welche Schüler in welchem Bus fahren sollten, basierend auf den verschiedenen Aktivitäten und Zielen?"
+    },
+    "I can see myself understanding and analyzing technical relationships in my job": {
+      "text": "Technische Zusammenhänge zu verstehen und zu analysieren kann ich mir beruflich gut vorstellen"
+    },
+    "I find it exciting to improve existing processes": {
+      "text": "Ich finde es spannend, bereits bestehende Prozesse zu verbessern"
+    },
+    "I am willing to do additional courses or training, for example to obtain a drivers license to drive certain equipment or vehicles": {
+      "text": "Ich bin bereit zusätzliche Kurse oder Ausbildungen zu machen, um beispielsweise einen Führerschein zur Lenkung von bestimmten Geräten oder Fahrzeugen zu erwerben"
+    },
+    "Can you represent your opinion well in group discussions?": {
+      "text": "Kannst du deine Meinung in Gruppendiskussionen gut vertreten?"
+    },
+    "I am fascinated by the idea of building robots and programming them to perform tasks for me": {
+      "text": "Mich fasziniert die Idee, Roboter zu bauen und so zu programmieren, dass sie Aufgaben für mich erledigen"
+    },
+    "Do you instinctively react quickly when something unexpected happens? ": {
+      "text": "Reagierst du instinktiv schnell, wenn etwas Unerwartetes passiert? "
+    },
+    "Would you describe yourself as a good listener?": {
+      "text": "Würdest du dich als guten Zuhörer beschreiben?"
+    },
+    "I am interested in learning what methods can be used to collect data and present it in an understandable way in order to present the data or derive conclusions": {
+      "text": "Ich habe Interesse daran zu lernen, mit welchen Methoden Daten gesammelt und verständlich aufbereitet werden können, um die Daten zu präsentieren oder Schlussfolgerungen abzuleiten"
+    },
+    "Are you good at explaining and convincing others of your ideas?": {
+      "text": "Kannst du gut erklären und andere von deinen Ideen überzeugen?"
+    },
+    "Are you interested in how computers and networks work?": {
+      "text": "Interessierst du dich dafür, wie Computer und Netzwerke funktionieren?"
+    },
+    "I am interested in psychology and human thinking, such as the question of how to motivate employees": {
+      "text": "Psychologie und menschliches Denken wie beispielsweise die Frage: Wie kann man Mitarbeiter motivieren interessiert mich"
+    },
+    "I am interested in aviation": {
+      "text": "Ich interessiere mich für die Luftfahrt"
+    },
+    "Can you make new plans quickly when something unexpected happens?": {
+      "text": "Kannst du schnell neue Pläne machen, wenn etwas Unerwartetes passiert?"
+    },
+    "Do you like to change things and see if they work better afterwards?": {
+      "text": "Magst du es, Dinge zu verändern und zu sehen, ob sie danach besser funktionieren?"
+    },
+    "As part of my job, I would like to maintain or repair vehicles/equipment": {
+      "text": "Als Teil meines Jobs würde ich gerne Fahrzeuge/Geräte warten oder reparieren"
+    },
+    "Do you have good Excel skills?": {
+      "text": "Verfügst du über gute Excel-Skills?"
+    },
+    "Would you like to work on a school project that involves using environmentally friendly materials?": {
+      "text": "Würdest du gerne bei einem Schulprojekt mitarbeiten, bei dem es darum geht, umweltfreundliche Materialien zu verwenden?"
+    },
+    "I would enjoy designing strategies to move people or things": {
+      "text": "Strategien zum Bewegen von Menschen oder Dingen zu entwerfen würde mir Spaß machen"
+    },
+    "Would you like to learn more about the technology behind the internet?": {
+      "text": "Möchtest du mehr über die Technologie hinter dem Internet lernen?"
+    },
+    "I have a good geographical understanding and can easily get from A to B in an unfamiliar city using public transportation": {
+      "text": "Ich habe ein gutes geografisches Verständnis und kann mithilfe öffentlicher Verkehrsmittel in einer unbekannten Stadt gut von A nach B kommen"
+    },
+    "Would you like to do projects where you have to combine new technologies with old ones?": {
+      "text": "Würdest du gerne Projekte machen, bei denen du neue Technologien mit alten verknüpfen musst?"
+    },
+    "I prefer to be responsible only for my own work rather than being responsible for the work of an entire group - this statement does NOT apply to me": {
+      "text": "Ich bin lieber nur für meine eigene Arbeit zuständig, als für die Arbeit einer gesamten Gruppe verantwortlich zu sein – diese Aussage trifft auf mich NICHT zu"
+    },
+    "Would you like to take on the role of coordinator for group work, planning and reporting?": {
+      "text": "Möchtest du bei Gruppenarbeiten die Rolle des Koordinators übernehmen, der plant und berichtet?"
+    },
+    "I find it easy to learn new programs on the computer": {
+      "text": "Mir fällt es leicht, neue Programme am Computer zu lernen"
+    },
+    "I would be very interested in developing working models for human-machine/robot collaboration and determining which tasks should be carried out by machines/robots": {
+      "text": "Es würde mich sehr interessieren, Arbeitsmodelle für die Zusammenarbeit von Mensch und Maschine/Roboter zu entwickeln und festzulegen, welche Aufgaben von Maschinen/Robotern ausgeführt werden sollen"
+    },
+    "Do you find it exciting to think about how technology could help improve learning?": {
+      "text": "Findest du es spannend, zu überlegen, wie Technologie helfen könnte, das Lernen zu verbessern?"
+    },
+    "Do you like searching the internet for information to make your tasks better?": {
+      "text": "Magst du es, im Internet nach Informationen zu suchen, um deine Aufgaben besser zu machen?"
+    },
+    "Are you interested in seeing a project through from the initial idea to the finished product?": {
+      "text": "Interessiert es dich, ein Projekt von der ersten Idee bis zum fertigen Produkt zu begleiten?"
+    },
+    "Would you enjoy making new contacts and building friendships at events?": {
+      "text": "Würde es dir gefallen, neue Kontakte zu knüpfen und Freundschaften auf Veranstaltungen aufzubauen?"
+    },
+    "Would you like to learn how to regularly check and maintain technical devices or systems?": {
+      "text": "Möchtest du lernen, wie man technische Geräte oder Systeme regelmäßig überprüft und wartet?"
+    },
+    "One of my strengths is being able to keep an eye on several things at the same time": {
+      "text": "Eine meiner Stärken ist es, mehrere Dinge gleichzeitig im Auge zu behalten"
+    },
+    "Before I go on a big trip, I like to do everything I need to do myself, such as researching important information on entry requirements, collecting documents for visa applications and obtaining permits or information": {
+      "text": "Bevor ich eine große Reise antrete erledige ich gerne selbst alles Notwendige, wie beispielsweise wichtige Informationen zu den Einreisebestimmungen zu recherchieren, Dokumente für die Beantragung eines Visums zu sammeln, und Genehmigungen oder Informationen einzuholen"
+    },
+    "Could you imagine representing your school at an education fair?": {
+      "text": "Könntest du dir vorstellen, auf einer Bildungsmesse deine Schule zu vertreten?"
+    },
+    "I am interested in monitoring the interaction between humans and machines and deriving suggestions for improvement": {
+      "text": "Es interessiert mich, das Zusammenspiel zwischen Mensch und Maschine zu überwachen und daraus Verbesserungsvorschläge abzuleiten"
+    },
+    "I like helping to understand how data can be used to infer what might happen in the future": {
+      "text": "Ich helfe gerne dabei, zu verstehen, wie man aus Daten schließen kann, was in der Zukunft passieren könnte"
+    },
+    "Are you interested in topics such as increasing recycling rates?": {
+      "text": "Hast du Interesse an Themen wie beispielsweise die Erhöhung der Recyclingrate?"
+    },
+    "I would like to pilot a plane or a drone": {
+      "text": "Ich würde gerne ein Flugzeug oder eine Drohne steuern"
+    },
+    "I have a good geographical understanding": {
+      "text": "Ich verfüge über ein gutes geografisches Verständnis"
+    },
+    "I find it exciting to distribute resources and tasks to people in a group work": {
+      "text": "Ich finde es spannend, bei einer Gruppenarbeit die Ressourcen und Aufgaben an Personen zu verteilen"
+    },
+    "I would like to understand how to measure and analyze the use of our school website": {
+      "text": "Ich würde gerne verstehen, wie man die Nutzung unserer Schulwebsite misst und analysiert"
+    },
+    "Would you like to learn how to select and procure materials or things for school events?": {
+      "text": "Möchtest du lernen, wie man Materialien oder Dinge für Schulevents auswählt und beschafft?"
+    },
+    "You dont feel overwhelmed or stressed if you have to quickly change your itinerary due to unforeseen events such as a road closure": {
+      "text": "Du fühlst dich nicht überfordert oder gestresst, wenn du aufgrund unvorhergesehener Ereignisse wie einer Straßensperre schnell die Reiseroute ändern musst"
+    },
+    "Would you want to carry out regular checks that the data on your school computer is secure?": {
+      "text": "Würdest du regelmäßige Überprüfungen, ob die Daten auf deinem Schulcomputer sicher sind, durchführen wollen?"
+    },
+    "If I could choose, I would like to do activities that require fine motor skills, such as sewing, modelling or making fine drawings": {
+      "text": "Wenn ich es mir aussuchen könnte würde ich gerne Tätigkeiten durchführen, die Feinmotorik erfordern, wie Nähen, Modellieren oder feine Zeichnungen anfertigen"
+    },
+    "I prefer to focus on the big picture rather than the details": {
+      "text": "Ich bevorzuge es, den Blick auf das große Ganze zu haben als auf Details"
+    },
+    "I am interested in collecting and analyzing feedback on our group projects": {
+      "text": "Es interessiert mich, Feedback zu unseren Gruppenprojekten zu sammeln und zu analysieren"
+    },
+    "Would you enjoy analyzing possible difficulties and finding solutions in a project group?": {
+      "text": "Würde es dir Spaß machen, in einer Projektgruppe mögliche Schwierigkeiten zu analysieren und Lösungen zu finden?"
+    },
+    "Are you interested in how a retail company buys its goods, for example? This includes steps such as searching for suppliers, selecting suppliers and negotiating prices": {
+      "text": "Interessierst du dich dafür, wie beispielsweise ein Einzelhandelsunternehmen ihre Ware einkauft? Dazu gehören Schritte wie Lieferanten suchen, Lieferanten auswählen und Preise verhandeln"
+    },
+    "I can imagine being involved in planning whether goods should be delivered by truck, bicycle or robots in the city in the future": {
+      "text": "Ich kann mir vorstellen, an der Planung beteiligt zu sein, ob Güter in Zukunft mit dem LKW, Fahrrad oder Robotern in der Stadt zugestellt werden sollen"
+    },
+    "I like creating visual representations such as diagrams of survey results": {
+      "text": "Ich mag es, visuelle Darstellungen wie beispielsweise Diagramme von Umfrageergebnissen zu erstellen"
+    },
+    "In sport, are you often the first to react to starting signals, rallies or sudden changes in the game?": {
+      "text": "Reagierst du beim Sport oft als erster auf Startsignale, Ballwechsel oder plötzliche Spielveränderungen?"
+    },
+    "Are you interested in quality management tasks?": {
+      "text": "Hast du Interesse an Qualitätsmanagementaufgaben?"
+    },
+    "Could you imagine collecting data regularly and checking whether your school is achieving its environmental goals? ": {
+      "text": "Könntest du dir vorstellen, regelmäßig Daten zu sammeln und zu überprüfen, ob deine Schule ihre Umweltziele erreicht? "
+    },
+    "Are you interested or willing to look into the topic of automated driving systems? ": {
+      "text": "Hast du Interesse daran oder bist du bereit, dich mit dem Thema automatisierte Fahrsysteme zu befassen? "
+    },
+    "I would enjoy thinking about how the city network and traffic could be designed to make transportation easier": {
+      "text": "Ich hätte Spaß daran, zu überlegen, wie das Städtenetz und der Verkehr gestaltet sein könnten, um das Transportieren zu vereinfachen"
+    },
+    "Would you enjoy writing reports about computer security at school?": {
+      "text": "Würde es dir gefallen, Berichte über die Computersicherheit in der Schule zu schreiben?"
+    },
+    "I can imagine helping to design the layout of a warehouse, including the systems and machines used": {
+      "text": "Ich kann mir vorstellen, das Layout einer Lagerhalle mitsamt der eingesetzten Systeme und Maschinen mitzugestalten"
+    },
+    "I find it interesting to analyze school work to see where the class can improve": {
+      "text": "Ich finde es interessant, Schularbeiten zu analysieren, um zu sehen, wo sich die Klasse verbessern kann"
+    },
+    "Can you imagine how furniture can be rearranged in a room without actually moving it?": {
+      "text": "Kannst du dir vorstellen, wie Möbel in einem Raum umgestellt werden können, ohne sie tatsächlich zu bewegen?"
+    },
+    "I am interested in monitoring self-driving vehicles and intervening quickly if necessary": {
+      "text": "Ich habe Interesse daran, selbstfahrende Fahrzeuge zu überwachen und bei Bedarf schnell einzugreifen"
+    },
+    "Would you help set rules on what to do if someone has unauthorized access to school computers?": {
+      "text": "Würdest du helfen, Regeln aufzustellen, wie man sich verhält, wenn jemand unerlaubt Zugriff auf Schulcomputer hat?"
+    },
+    "I find it interesting to ensure workplace safety in my job and to develop guidelines and rules for this": {
+      "text": "Ich finde es interessant, im Job die Sicherheit am Arbeitsplatz sicherzustellen und dafür Richtlinien und Regeln zu entwickeln"
+    },
+    "I would like to learn to predict which sports teams will do well based on their previous games": {
+      "text": "Ich würde gerne lernen vorherzusagen, welche Sportteams gut abschneiden werden, basierend auf ihren bisherigen Spielen"
+    },
+    "In my future job, I would like to be responsible for cultivating and maintaining relationships with business partners": {
+      "text": "In meinem zukünftigen Job würde ich gerne zuständig dafür sein, Beziehungen zu Geschäftspartnern zu pflegen und aufrechtzuerhalten"
+    },
+    "I am interested in designing processes to repair, recycle or reuse products instead of throwing them away": {
+      "text": "Ich interessiere mich dafür, Prozesse zu gestalten, um Produkte zu reparieren, recyceln oder wiederzuverwenden anstatt wegzuwerfen"
+    },
+    "Can you imagine working with authorities and other companies to improve urban transportation?": {
+      "text": "Kannst du dir vorstellen, mit Behörden und anderen Unternehmen zusammenzuarbeiten, um den Stadtverkehr zu verbessern?"
+    },
+    "Could you lead a school project where you decide who takes on which parts so that everything is ready on time?": {
+      "text": "Könntest du ein Schulprojekt leiten, bei dem du entscheidest, wer welche Teile übernimmt, damit alles rechtzeitig fertig wird?"
+    },
+    "Would you describe yourself as an organizational talent?": {
+      "text": "Würdest du dich als Organisationstalent beschreiben?"
+    },
+    "I find it easy to explain rules and make sure they are followed": {
+      "text": "Es fällt mir leicht, Regeln zu erklären und dafür zu sorgen, dass sie eingehalten werden"
+    },
+    "Can you imagine writing a guide on how to protect yourself in the event of a cyber attack?": {
+      "text": "Kannst du dir vorstellen, einen Leitfaden zu schreiben, wie man sich bei einem Cyberangriff schützen kann?"
+    },
+    "I would lead workshops and training sessions to inform others about sustainability issues": {
+      "text": "Ich würde Workshops und Schulungen leiten, um andere über Nachhaltigkeitsthemen zu informieren"
+    },
+    "Do you find it easy to keep track of many tasks?": {
+      "text": "Fällt es dir leicht, den Überblick über viele Aufgaben zu bewahren?"
+    }
+  },
+  "answers": {
+    "1": "Ja",
+    "0": "Nein"
+  },
+  "result": {
+    "A": {
+      "name": "DrohnenpilotIn",
+      "description": "Ein Drohnenpilot steuert kleine Fluggeräte, sogenannte Drohnen, ohne selbst in der Luft zu sein und mitzufliegen. Drohnen sollen in Zukunft eine weitere Möglichkeit sein, Ware wie kleinere Pakete zu transportieren oder sehr dringende medizinische Produkte zu liefern. Nicht nur Pakete sollen transportiert werden, auch könnte ein weiterer Einsatz sein, Teile von Maschinen, die schwer erreichbar sind, mittels einer Drohne zu begutachten. Dabei ist eines der Aufgaben, zu planen, wann und wo die Drohne fliegen soll. Dabei überlegt man sich die besten Wege für die Drohne, damit sie schnell und sicher ankommt. Bevor eine Drohne fliegen kann, muss der Pilot sicherstellen, dass sie in gutem Zustand ist. Er prüft die Drohne, programmiert sie, sodass sie weiß, wohin sie fliegen soll, und kümmert sich darum, dass alles richtig funktioniert. Es müssen auch weitere Vorbereitungen getroffen werden, wie beispielsweise eine Flugerlaubnis einzuholen, damit die Drohne überhaupt abheben kann. Schließlich lässt ein Drohnenpilot die Drohne fliegen und steuert sie möglicherweise von einem Computer aus. Dabei muss sehr genau gesteuert werden können und immer aufgepasst werden, dass die Drohne sicher fliegt. Ein Drohnenpilot lernt auch viel über Technik und muss sich an viele Regeln halten, damit niemand durch die Drohne gestört oder gefährdet wird."
+    },
+    "B": {
+      "name": "FahrerIn selbstfahrende LKW ",
+      "description": "LKWs der Zukunft werden durch die dahinterliegende Technologie selbst fahren können und mit anderen, hintereinanderfahrenden LKWs kommunizieren. Der Fahrer steuert daher die Lastwagen nicht selbst, sondern hilft vielmehr, dass die Lastwagen ganz alleine fahren können. Er passt auf, dass alles sicher bleibt, auch wenn der Lastwagen selbst lenkt. Die Hauptaufgabe in diesem Beruf ist es, den Lastwagen zu überwachen und sicherzustellen, dass alles korrekt funktioniert. In diesem Beruf muss man schnell reagieren können und bereit sein, das Steuer zu übernehmen, falls der LKW plötzlich nicht mehr von selbst fahren kann, zum Beispiel bei einem technischen Problem oder wenn eine unerwartete Situation auf der Straße auftritt. Eine weitere Aufgabe ist es, zu planen, wo und wie der LKW fahren soll. Manchmal muss die Route geändert werden, wenn es auf dem geplanten Weg zum Beispiel eine Baustelle gibt. Auch wenn man viel selbständig arbeitet, kommuniziert man trotzdem mit dem Team und mit einer zentralen Stelle, die hilft, die beste Strecke zu finden und alles gut zu organisieren. In diesem Beruf muss sich der Fahrer auch darum kümmern, dass der LKW in gutem Zustand ist. Überprüfungen und kleine Reparaturen müssen durchgeführt werden, damit sichergestellt ist, dass der LKW sicher ist. Es ist auch darauf zu achten, dass die Ladung sicher ist und alles an Bord ist, was laut den Lieferscheinen dabei sein sollte."
+    },
+    "C": {
+      "name": "SpezialistIn für Warenlager der Zukunft",
+      "description": "In diesem Beruf wird in einem Warenlager gearbeitet, in dem viele verschiedene Produkte gelagert werden, die von Menschen und Maschinen bewegt und sortiert werden. Die Hauptaufgabe ist, dafür zu sorgen, dass alles im Lager glatt läuft. Man plant, wie Lagerhallen in der Zukunft aussehen und organisiert sein sollen, um alles schnell zu finden und zu versenden. Außerdem plant und nutzt man den Einsatz von Robotern, künstlicher Intelligenz und automatischen Systemen, um die Arbeit zu erleichtern und um das Lager zu managen. Als Spezialist sorgt man dafür, dass Maschinen wie Roboter und Drohnen gut zusammenarbeiten und helfen, alle Aufgaben schnell und sicher zu erledigen. In diesem Beruf plant man auch, wie viele Menschen jeden Tag arbeiten müssen und welche Aufgaben sie haben, um sicherzustellen, dass alles, was im Lager passiert, richtig ist. Es ist auch wichtig, dass alles sicher und sauber bleibt. Der Spezialist überwacht Systeme, die aufpassen, dass die Qualität der Arbeit gut ist und alle Regeln und Vorschriften eingehalten werden. Wenn etwas nicht stimmt, zum Beispiel wenn ein Roboter ausfällt, ist der Spezialist auch dafür verantwortlich, das Problem schnell zu lösen. Manchmal musst man sogar selbst einen der Roboter steuern. Kurz gesagt: diese Arbeit ist sehr wichtig, um sicherzustellen, dass Kunden ihre Bestellungen schnell und richtig erhalten."
+    },
+    "D": {
+      "name": "LogistikspezialistIn städtischer Verkehr",
+      "description": "Der Logistikspezialist für den städtischen Verkehr beschäftigt sich mit dem Transport in der Stadt. Dabei stellt sich beispielsweise die Frage, wie Ware am besten in Städten angeliefert oder abgeholt werden soll oder wie die Routen (Wege)     geplant werden sollen, um Stau zu vermeiden. In diesem Beruf muss man gut darin sein, die besten Wege durch die Stadt zu finden, damit die Lieferungen schnell und ohne Störungen durch den Verkehr erfolgen können. Es werden dazu Daten angesehen und Informationen über die Stadt genutzt, um zu sehen, wie die Lieferwege sind, wie der Verkehr ist oder wo es oft zu Staus kommt. Daraus kann gelernt werden und Pläne können verbessert werden, um beispielsweise das nächste Mal einen Stau zu vermeiden. Eine weitere Aufgabe der Zukunft wird es sein, sich damit zu beschäftigen, welche Transportmittel oder Geräte in der Stadt eingesetzt werden sollen, wie Autos, Lastwagen, Roboter, Drohnen, Fahrräder oder andere. Es wird entschieden, welches Fahrzeug und welcher Fahrer für welche Lieferung am besten geeignet ist. Manchmal braucht man ein großes Auto, manchmal reicht ein kleines oder sogar ein Fahrrad zur Lieferung. Wichtig ist auch in diesem Beruf der Blick auf die Umwelt und Nachhaltigkeit. Generell kümmert sich der Spezialist darum, dass der Verkehr in Städten reibungslos fließt. Neben der Routenplanung verfolgt man in Echtzeit den Transport und greift, wenn notwendig, bei einer Straßensperre oder anderen unvorhergesehenen Problemen so schnell wie möglich ein."
+    },
+    "E": {
+      "name": "ExpertIn für Datenauswertung",
+      "description": "Der Experte für Datenauswertung schaut sich große Mengen von Informationen an und versucht herauszufinden, was sie bedeuten, damit die Firma kluge Entscheidungen treffen kann. Dafür werden die Daten und Informationen aus unterschiedlichen Quellen gesammelt und untersucht. Diese Zahlen oder Daten können beispielsweise Verkaufszahlen sein oder Information darüber, wie sehr die Kunden die Produkte mögen. Manchmal sind die gesammelten Daten aber unvollständig oder fehlerhaft. Der Experte muss diese Daten daher finden und bereinigen, damit sie genutzt werden können. Mithilfe von Computerprogrammen oder mathematischen Formeln wird versucht, Muster aus den Informationen und Daten zu erkennen. Beispielsweise könnte herausgefunden werden, welche Produkte sich am besten verkaufen oder zu welcher Jahreszeit die meisten Menschen einkaufen. Anhand von Wetterdaten könnte auch ein Muster gefunden werden und versucht werden vorherzusagen, wann mit sonnigem Wetter zu rechnen ist, damit Grillprodukte gut verkauft werden können. Aufgrund von dem, was der Experte herausgefunden hat, ist es eine weitere Aufgabe, Empfehlungen zu geben. Beispielsweise könnte der Experte vorschlagen, mehr von einem Produkt zu produzieren, das sich gut verkauft. Der Experte macht auch Berichte und Diagramme (ähnlich wie Bilder)     die zeigen, was er herausgefunden hat. Diese helfen den Chefs der Firma, schnelle und gute Entscheidungen zu treffen."
+    },
+    "F": {
+      "name": "ExpertIn für Roboter und automatische Maschinen",
+      "description": "Der Experte für Roboter und automatische Maschinen ist wie ein Erfinder, der herausfindet, wie Roboter oder automatisierte Geräte oder Systeme Menschen bei ihrer Arbeit helfen können. Die Experten planen, wie Roboter oder von selbst funktionierende Geräte am besten eingesetzt werden können, bauen diese Geräte, stellen sie ein und sorgen dafür, dass sie richtig arbeiten. Das bedeutet, sie müssen oft die Roboter oder Geräte programmieren, und ihnen somit beibringen, was sie tun sollen. Eine weitere wichtige Aufgabe ist es, die Roboter zu testen, um sicherzustellen, dass sie ihre Aufgaben gut machen. Roboter und automatisierte Geräte sollen aber auch weiter verbessert werden, wenn es nötig ist. Deswegen beobachten die Experten die Roboter, überprüfen die Geräte und nutzen weitere Daten, um zu sehen, was gut läuft oder was verbessert werden kann. Manchmal muss die Software aktualisiert werden, damit alles auf dem neuesten Stand der Technik bleibt. Zudem kümmern sich diese Experten darum, dass die neuen Roboter und Systeme gut mit den Computern und Programmen, die schon im Unternehmen sind, zusammenarbeiten. Wenn einmal ein Fehler auftritt, ist es die Aufgabe von Experten herauszufinden, was schiefgelaufen ist, und das Problem zu lösen. In diesem Beruf lernt man viel über Technologien wie Robotik oder automatische Geräte und darüber, diese Geräte zu programmieren."
+    },
+    "G": {
+      "name": "ManagerIn für Nachhaltigkeit",
+      "description": "Der Manager für Nachhaltigkeit hat ein starkes Interesse an Nachhaltigkeit und Umweltschutz und stellt sicher, dass die logistischen Abläufe und Prozesse umweltfreundlich sind. Eine der Aufgaben ist es beispielsweise, die besten Transportwege zu finden oder umweltfreundlichere Transportmittel auszuwählen, um weniger Diesel oder Benzin zu verbrauchen, damit die Luft sauber gehalten wird. Generell achtet der Nachhaltigkeitsmanager darauf, dass die Verkehrsmittel wie Schiffe oder Lastwagen beim Transport von Ware sauber arbeiten. Eine weitere Aufgabe ist es, nachhaltige Verpackungsmaterialien einzusetzen und Möglichkeiten zu finden, damit weniger Müll entsteht. Der Manager überlegt, wie man Materialien wiederverwenden oder recyceln kann, anstatt sie wegzuwerfen. Zum Beispiel könnte ein altes Plastikspielzeug eingeschmolzen und zu etwas Neuem gemacht werden, statt es einfach in den Müll zu werfen. Der Nachhaltigkeitsmanager arbeitet auch mit vielen anderen Leuten im Unternehmen zusammen, um sicherzustellen, dass neue Produkte so gestaltet sind, dass sie umweltfreundlich sind. Schon beim Entwerfen eines Produktes wird darüber nachgedacht, wie es später leicht repariert, wiederverwendet oder recycelt werden kann. Außerdem kümmert sich der Manager darum, dass das Unternehmen erneuerbare Energien wie Sonnen oder Windenergie nutzt."
+    },
+    "H": {
+      "name": "ExpertIn für Datensicherheit",
+      "description": "Experten für Datensicherheit sorgen dafür, dass alle Informationen und Daten auf Computern sicher sind, sodass niemand, der nicht darf, sie sehen oder stehlen kann. Dafür erstellt die Person in diesem Beruf Regeln, wie man die Daten in der Firma sicher hält, besonders für Firmen, die viel mit Transport und Lagerung von Ware zu tun haben. Die Person sorgt auch dafür, dass diese Regeln befolgt werden. Sie ist auch dafür zuständig, Programme zu installieren und einzusetzen, um die Daten und Informationen zu schützen. Das sind Programme wie Firewalls, die wie eine unsichtbare Barriere sind, und Antivirensoftware, um die Computer vor Viren und Hackern zu schützen. Es ist wichtig, sich in diesem Beruf ein breites Wissen an Netzwerktechnik und IT-Infrastruktur aufzubauen. Eine weitere Aufgabe des Experten ist es, regelmäßig zu überprüfen, ob alle Systeme, Computer und Geräte sicher sind und diese, wenn notwendig, zu verbessern. In diesem Beruf ist es wichtig zu beobachten und herauszufinden, ob es irgendwelche Sicherheitsprobleme gibt. Im Notfall muss schnell reagiert werden, und Probleme der Wichtigkeit nach gereiht werden, um das dringendste Problem so schnell wie möglich zu beheben. Es müssen bereits im Vorhinein Pläne gemacht werden für den Fall, dass etwas Schlimmes passiert, wie ein Hackerangriff, damit die Firma schnell reagieren kann und die Daten sicher bleiben. Dafür ist es notwendig, immer auf dem Laufenden über neue Gefahren für die Datensicherheit zu bleiben."
+    },
+    "I": {
+      "name": "EinkäuferIn der Zukunft",
+      "description": "Der Einkäufer der Zukunft in einem Unternehmen hat eine wichtige Aufgabe: Er sucht und kauft alles, was das Unternehmen benötigt, um gut zu funktionieren. Das können ganz einfache Dinge wie Büromaterial oder auch große Maschinen sein. Man denkt also darüber nach, wie man Dinge schlauer und besser einkaufen kann. Dabei schaut sich der Einkäufer viele Angebote an und wählt die besten Lieferanten aus, die gute Produkte zu einem fairen Preis anbieten. Es werden Computerprogramme benutzt, die helfen, die besten Entscheidungen zu treffen oder Vorschläge zu liefern. Gibt es Probleme, wie wenn beispielsweise ein Lieferant nicht pünktlich liefern kann, dann muss der Einkäufer schnell eine Lösung finden, vielleicht einen anderen Lieferanten, der schneller liefern kann. Generell muss man in diesem Beruf die Augen immer offen halten, um zu sehen, welche neuen, spannenden Produkte es am Markt gibt. Auch muss man in diesem Beruf darauf achten, wie viel Geld das Unternehmen für die Einkäufe ausgibt und die Ausgaben im Auge behalten. Dafür müssen die Preise mit den Lieferanten verhandelt werden, um den besten Preis zu bekommen, ähnlich wie auf einem Flohmarkt. Da gute Geschäftsbeziehungen immer wichtiger werden, liegt ein großer Schwerpunkt in diesem Beruf darauf, gute Beziehungen zu den Lieferanten aufzubauen und die gute Beziehung aufrechtzuerhalten. Das bedeutet, Kontaktfähigkeit und ein gutes Gespür für Menschen ist genauso wichtig wie Verhandlungsgeschick."
+    },
+    "J": {
+      "name": "PlanerIn für Zusammenarbeit Mensch-Maschine",
+      "description": "Ein Planer für Zusammenarbeit zwischen Mensch und Maschine kümmert sich darum, dass Menschen und technische Geräte wie Roboter und andere Maschinen gut zusammenarbeiten können. Das ist wichtig, damit die Technik den Menschen bei ihrer Arbeit helfen kann. Dafür sieht sich der Planer den Arbeitsplatz und die Aufgaben an und entscheidet, welche Technologien, wie beispielsweise Roboter oder automatische Systeme, in der Firma am besten eingesetzt werden sollen. Der Planer schaut genau hin, was am besten zu den Aufgaben der Mitarbeiter passt. In diesem Beruf wird auch viel beobachtet, zum Beispiel, wie gut die Menschen und Maschinen zusammenarbeiten und ob die Mitarbeiter mit den Maschinen gut zurechtkommen. Es ist auch die Aufgabe, zu verstehen, was die Mitarbeiter brauchen, um ihre Arbeit gut zu machen. Man passt die Technologien so an, dass sie den Mitarbeitern wirklich helfen und nicht im Weg sind. Dafür wird auch eng mit Technikern zusammengearbeitet, um sicherzustellen, dass die Bedienung der Maschinen für die Mitarbeiter einfach ist und Mensch und Maschine gut miteinander kommunizieren können. Beispielsweise werden Bedienfehler behoben. Außerdem sorgt man in diesem Beruf dafür, dass am Arbeitsplatz alles sicher ist. Dafür entwickelt man Richtlinien, wie Mitarbeiter sicher mit den Maschinen umgehen können."
+    },
+    "K": {
+      "name": "ProjektmanagerIn moderne Logistik",
+      "description": "Der Projektmanager der Zukunft spielt eine wichtige Rolle bei der Planung, Überwachung und Optimierung von logistischen Abläufen. In diesem Beruf beschäftigt man sich mit vielen unterschiedlichen Projekten und Zukunftsthemen, wie beispielsweise die Nachhaltigkeit, oder aber auch mit Transportmitteln und Routen. Beispielsweise werden neue Abläufe beim Versand der Ware, der Verpackung oder der Lagerung von Ware eingeführt. Als ein weiteres Beispiel könnten auch neue Computerprogramme oder automatisierte Systeme und Technologien wie Roboter eingeführt werden, was auch die Logistik betrifft. Denn Roboter helfen beispielsweise dabei, Pakete schnell und genau zu sortieren und zu verschicken. Der Projektmanager übernimmt eine koordinierende Rolle zwischen den verschiedenen Arbeitsgruppen und Abteilungen. Auch muss ein Projektmanager immer aufpassen, dass die Projekte gut laufen und prüfen, ob alles im Zeitplan ist und ob das Geld richtig ausgegeben wird. Wenn Probleme auftauchen, muss schnell eine Lösung gefunden werden. Zudem informiert der Projektmanager die Geschäftsleitung und andere Abteilungen über den aktuellen Stand und Fortschritt des Projektes und nachdem ein Projekt fertig ist, macht der Projektmanager Berichte und Präsentationen darüber, wie alles gelaufen ist."
+    }
+  }
+}

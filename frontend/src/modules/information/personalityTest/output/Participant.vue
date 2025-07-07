@@ -141,6 +141,22 @@
         v-on:change="inputChanged"
       ></el-rate>
     </div>
+    <div
+      v-else-if="activeQuestion && activeQuestionType === QuestionType.YESNO"
+    >
+      <el-radio-group
+        v-model="activeAnswer.numValue"
+        size="large"
+        v-on:change="inputChanged"
+      >
+        <el-radio-button :label="1">{{
+          $t(`module.information.personalityTest.participant.yes`)
+        }}</el-radio-button>
+        <el-radio-button :label="0">{{
+          $t(`module.information.personalityTest.participant.no`)
+        }}</el-radio-button>
+      </el-radio-group>
+    </div>
     <div id="submitScreen" v-if="activeAnswer.isSaved">
       <span>{{
         $t(
@@ -448,7 +464,10 @@ export default class Participant extends Vue {
       }
     };
     let answerValue: any = null;
-    if (this.activeQuestionType === QuestionType.RATING)
+    if (
+      this.activeQuestionType === QuestionType.RATING ||
+      this.activeQuestionType === QuestionType.YESNO
+    )
       answerValue = this.activeAnswer.numValue;
     const hasAnswer = answerValue !== null && answerValue.toString() !== '';
     const answer = this.storedActiveAnswer;
@@ -600,7 +619,10 @@ export default class Participant extends Vue {
         if (this.ownAnswerList[question.question.id] === undefined) {
           await delay(100);
         }
-        if (question.questionType === QuestionType.RATING) {
+        if (
+          question.questionType === QuestionType.RATING ||
+          this.activeQuestionType === QuestionType.YESNO
+        ) {
           answerList[question.question.description] = parseInt(
             this.ownAnswerList[question.question.id]
           );
@@ -908,7 +930,10 @@ export default class Participant extends Vue {
   async loadStoredAnswersForActiveQuestion(): Promise<void> {
     if (!this.activeQuestion) return;
     const questionId = this.activeQuestion.question.id;
-    if (this.activeQuestionType === QuestionType.RATING) {
+    if (
+      this.activeQuestionType === QuestionType.RATING ||
+      this.activeQuestionType === QuestionType.YESNO
+    ) {
       const answer = this.hierarchyList.find(
         (item) => item.isOwn && item.parentId === questionId
       );
@@ -1003,7 +1028,10 @@ export default class Participant extends Vue {
       }
     } else if (this.activeQuestionType === QuestionType.SINGLECHOICE) {
       return this.activeAnswer.textValue !== null;
-    } else if (this.activeQuestionType === QuestionType.RATING) {
+    } else if (
+      this.activeQuestionType === QuestionType.RATING ||
+      this.activeQuestionType === QuestionType.YESNO
+    ) {
       return this.activeAnswer.numValue !== null;
     }
     return false;

@@ -49,7 +49,9 @@
     "waiting": "Please wait. Questions and answers are being loaded.",
     "imageKeywords": "image caption",
     "good": "fully applies",
-    "bad": "strongly disagree"
+    "bad": "strongly disagree",
+    "yes": "Yes",
+    "no": "No"
   },
   "enum": {
     "questionType": {

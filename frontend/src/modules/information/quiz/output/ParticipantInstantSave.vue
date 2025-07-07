@@ -176,6 +176,22 @@
             v-on:change="onAnswerValueChanged"
           ></el-rate>
         </div>
+        <div v-else-if="activeQuestionType === QuestionType.YESNO">
+          <el-radio-group
+            v-model="activeAnswer.numValue"
+            size="large"
+            v-on:change="inputChanged"
+          >
+            <el-radio-button
+              :label="$t(`module.information.quiz.participant.yes`)"
+              :value="1"
+            />
+            <el-radio-button
+              :label="$t(`module.information.quiz.participant.no`)"
+              :value="0"
+            />
+          </el-radio-group>
+        </div>
         <el-slider
           v-else-if="activeQuestionType === QuestionType.SLIDER"
           :min="activeQuestion.parameter.minValue"
@@ -530,6 +546,7 @@ export default class Participant extends Vue {
       if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.YESNO ||
         this.activeQuestionType === QuestionType.SLIDER
       ) {
         answers = this.activeAnswer.numValue;
@@ -831,6 +848,7 @@ export default class Participant extends Vue {
       if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.YESNO ||
         this.activeQuestionType === QuestionType.SLIDER
       )
         answerValue = this.activeAnswer.numValue;
@@ -1206,6 +1224,7 @@ export default class Participant extends Vue {
       } else if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.YESNO ||
         this.activeQuestionType === QuestionType.SLIDER
       ) {
         if (answer.keywords) {
@@ -1329,6 +1348,7 @@ export default class Participant extends Vue {
       } else if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.YESNO ||
         this.activeQuestionType === QuestionType.SLIDER
       ) {
         return this.activeAnswer.numValue !== null;

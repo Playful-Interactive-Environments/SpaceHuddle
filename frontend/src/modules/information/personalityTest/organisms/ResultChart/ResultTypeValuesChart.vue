@@ -52,8 +52,8 @@
       :options="{
         scales: {
           x: {
-            min: minCount - 0.5,
-            max: maxCount + 0.5,
+            min: minCount,
+            max: maxCount,
             title: {
               display: true,
               text: $t(
@@ -63,12 +63,13 @@
             ticks: {
               color: contrastColor,
               precision: 0,
+              stepSize: 1,
               callback: (value, index) => getResultTypeName(value),
             },
           },
           y: {
-            min: minCount - 0.5,
-            max: maxCount + 0.5,
+            min: minCount,
+            max: maxCount,
             title: {
               display: true,
               text: $t(
@@ -78,6 +79,7 @@
             ticks: {
               color: contrastColor,
               precision: 0,
+              stepSize: 1,
               callback: (value, index) => getResultTypeName(value),
             },
           },

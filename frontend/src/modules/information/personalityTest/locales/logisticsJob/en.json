@@ -1,0 +1,456 @@
+{
+  "moderatorConfig": {
+    "name": "Future professions in logistics",
+    "description": "Which future profession in logistics do you find most interesting? Answer the questions and find out!"
+  },
+  "participant": {
+    "primary": "Primary Class",
+    "secondary": "Secondary Class",
+    "score": "Your scores for each of the classes in this test were as follows:"
+  },
+  "questions": {
+    "Checking and approving the quality and quantity of goods received and dispatched sounds interesting": {
+      "text": "Checking and approving the quality and quantity of goods received and dispatched sounds interesting"
+    },
+    "I have a strong interest in sustainability and environmental protection": {
+      "text": "I have a strong interest in sustainability and environmental protection"
+    },
+    "I am good at recognizing the needs of other people": {
+      "text": "I am good at recognizing the needs of other people"
+    },
+    "Could you take responsibility for planning and running class parties?": {
+      "text": "Could you take responsibility for planning and running class parties?"
+    },
+    "I dont mind being exposed to dirt, dust or moisture": {
+      "text": "I don't mind being exposed to dirt, dust or moisture"
+    },
+    "I enjoy working with technical things": {
+      "text": "I enjoy working with technical things"
+    },
+    "I am interested in having a lot to do with other people at work": {
+      "text": "I am interested in having a lot to do with other people at work"
+    },
+    "Are you able to draw a conclusion from a given piece of information?": {
+      "text": "Are you able to draw a conclusion from a given piece of information?"
+    },
+    "At school, I can work calmly and with concentration even in stressful situations": {
+      "text": "At school, I can work calmly and with concentration even in stressful situations"
+    },
+    "I can imagine having a job where I have to react and intervene quickly when problems arise": {
+      "text": "I can imagine having a job where I have to react and intervene quickly when problems arise"
+    },
+    "I am interested in the interaction between humans and machines (robots, drones, etc)": {
+      "text": "I am interested in the interaction between humans and machines (robots, drones, etc.)"
+    },
+    "I am fascinated by automation, autonomous vehicles and robots": {
+      "text": "I am fascinated by automation, autonomous vehicles and robots"
+    },
+    "Are you interested in how to get to school in a more environmentally friendly way?": {
+      "text": "Are you interested in how to get to school in a more environmentally friendly way?"
+    },
+    "I am interested in the processes in a warehouse": {
+      "text": "I am interested in the processes in a warehouse"
+    },
+    "I am good at explaining the results of a complicated project in a way that everyone can understand": {
+      "text": "I am good at explaining the results of a complicated project in a way that everyone can understand"
+    },
+    "I enjoy communicating in English": {
+      "text": "I enjoy communicating in English"
+    },
+    "Do you think it is important that we try to cause less environmental damage when we move around?": {
+      "text": "Do you think it is important that we try to cause less environmental damage when we move around?"
+    },
+    "I am interested in transporting goods from A to B by road": {
+      "text": "I am interested in transporting goods from A to B by road"
+    },
+    "Can you find your way around a new city without a map or app?": {
+      "text": "Can you find your way around a new city without a map or app?"
+    },
+    "I find it easy to put myself in other peoples shoes": {
+      "text": "I find it easy to put myself in other people's shoes"
+    },
+    "Are you good at prioritizing tasks and doing the most urgent things first?": {
+      "text": "Are you good at prioritizing tasks and doing the most urgent things first?"
+    },
+    "In my future job, I can well imagine leading employees and having responsibility for them": {
+      "text": "In my future job, I can well imagine leading employees and having responsibility for them"
+    },
+    "I can work well with other groups to find a solution to a problem": {
+      "text": "I can work well with other groups to find a solution to a problem"
+    },
+    "I would enjoy planning and optimizing delivery and pick-up routes": {
+      "text": "I would enjoy planning and optimizing delivery and pick-up routes"
+    },
+    "I am willing to learn a programming language": {
+      "text": "I am willing to learn a programming language"
+    },
+    "I am interested in new technologies such as artificial intelligence and automation": {
+      "text": "I am interested in new technologies such as artificial intelligence and automation"
+    },
+    "Would you like to learn more about how our travel habits affect the environment?": {
+      "text": "Would you like to learn more about how our travel habits affect the environment?"
+    },
+    "I find it exciting to carry out research and continuous observation in order to follow current developments and trends": {
+      "text": "I find it exciting to carry out research and continuous observation in order to follow current developments and trends"
+    },
+    "I would like to organize transportation for events or excursions and plan the routes": {
+      "text": "I would like to organize transportation for events or excursions and plan the routes"
+    },
+    "I am good at gathering information from different sources": {
+      "text": "I am good at gathering information from different sources"
+    },
+    "In my future job, I would like to negotiate prices with business partners": {
+      "text": "In my future job, I would like to negotiate prices with business partners"
+    },
+    "Physically strenuous work is no problem for me": {
+      "text": "Physically strenuous work is no problem for me"
+    },
+    "I can very well imagine resolving conflicts and mediating between parties or people in my future job": {
+      "text": "I can very well imagine resolving conflicts and mediating between parties or people in my future job"
+    },
+    "I dont mind sitting for long periods of time": {
+      "text": "I don't mind sitting for long periods of time"
+    },
+    "I enjoy talking to new people and making contact": {
+      "text": "I enjoy talking to new people and making contact"
+    },
+    "Can you solve difficult puzzles or problems at school?": {
+      "text": "Can you solve difficult puzzles or problems at school?"
+    },
+    "Continuous training in new technologies to keep up to date would not be a problem for me in my job": {
+      "text": "Continuous training in new technologies to keep up to date would not be a problem for me in my job"
+    },
+    "I am interested in how devices or machines are assembled": {
+      "text": "I am interested in how devices or machines are assembled"
+    },
+    "I find the processes involved in warehousing, ie storing and keeping things, exciting": {
+      "text": "I find the processes involved in warehousing, i.e. storing and keeping things, exciting"
+    },
+    "I would like to write reports and presentations on the current status of a project": {
+      "text": "I would like to write reports and presentations on the current status of a project"
+    },
+    "I enjoy finding the fastest way to get from one place to another": {
+      "text": "I enjoy finding the fastest way to get from one place to another"
+    },
+    "Would you like to work on projects that help to make transportation more environmentally friendly?": {
+      "text": "Would you like to work on projects that help to make transportation more environmentally friendly?"
+    },
+    "I find it exciting to see how modern technologies can support people in their work": {
+      "text": "I find it exciting to see how modern technologies can support people in their work"
+    },
+    "I find it exciting to find and correct errors in games or programs": {
+      "text": "I find it exciting to find and correct errors in games or programs"
+    },
+    "In my free time, I like to repair objects or make things": {
+      "text": "In my free time, I like to repair objects or make things"
+    },
+    "Are you interested in how computers and smartphones can be used safely?": {
+      "text": "Are you interested in how computers and smartphones can be used safely?"
+    },
+    "Long car journeys would not be a problem for me in my job either": {
+      "text": "Long car journeys would not be a problem for me in my job either"
+    },
+    "I would like to be able to program computer games or apps": {
+      "text": "I would like to be able to program computer games or apps"
+    },
+    "In my future job, I would find it exciting to analyze the individual steps leading up to the delivery of a product to the customer and to identify potential ": {
+      "text": "In my future job, I would find it exciting to analyze the individual steps leading up to the delivery of a product to the customer and to identify potential "
+    },
+    "Would you like to learn more about how to protect your private data online?": {
+      "text": "Would you like to learn more about how to protect your private data online?"
+    },
+    "I like solving complex problems": {
+      "text": "I like solving complex problems"
+    },
+    "I wouldnt mind not having fixed working hours but having to be flexible about when I start or finish work": {
+      "text": "I wouldn't mind not having fixed working hours but having to be flexible about when I start or finish work"
+    },
+    "Would you be interested in acting as a coordinator at a school party and finding quick solutions to unexpected problems?": {
+      "text": "Would you be interested in acting as a coordinator at a school party and finding quick solutions to unexpected problems?"
+    },
+    "Do you have a passion for planning parties, trips or other events in detail? ": {
+      "text": "Do you have a passion for planning parties, trips or other events in detail? "
+    },
+    "I think renewable energy and sustainable materials are an important topic": {
+      "text": "I think renewable energy and sustainable materials are an important topic"
+    },
+    "Do you like keeping up with the latest technology and learning new things?": {
+      "text": "Do you like keeping up with the latest technology and learning new things?"
+    },
+    "I think designing a workplace is exciting": {
+      "text": "I think designing a workplace is exciting"
+    },
+    "In my job, I would like to work a lot with numbers and data": {
+      "text": "In my job, I would like to work a lot with numbers and data"
+    },
+    "Would you like to help decide which students should ride which bus on a field trip, based on the different activities and destinations?": {
+      "text": "Would you like to help decide which students should ride which bus on a field trip, based on the different activities and destinations?"
+    },
+    "I can see myself understanding and analyzing technical relationships in my job": {
+      "text": "I can see myself understanding and analyzing technical relationships in my job"
+    },
+    "I find it exciting to improve existing processes": {
+      "text": "I find it exciting to improve existing processes"
+    },
+    "I am willing to do additional courses or training, for example to obtain a drivers license to drive certain equipment or vehicles": {
+      "text": "I am willing to do additional courses or training, for example to obtain a driver's license to drive certain equipment or vehicles"
+    },
+    "Can you represent your opinion well in group discussions?": {
+      "text": "Can you represent your opinion well in group discussions?"
+    },
+    "I am fascinated by the idea of building robots and programming them to perform tasks for me": {
+      "text": "I am fascinated by the idea of building robots and programming them to perform tasks for me"
+    },
+    "Do you instinctively react quickly when something unexpected happens? ": {
+      "text": "Do you instinctively react quickly when something unexpected happens? "
+    },
+    "Would you describe yourself as a good listener?": {
+      "text": "Would you describe yourself as a good listener?"
+    },
+    "I am interested in learning what methods can be used to collect data and present it in an understandable way in order to present the data or derive conclusions": {
+      "text": "I am interested in learning what methods can be used to collect data and present it in an understandable way in order to present the data or derive conclusions"
+    },
+    "Are you good at explaining and convincing others of your ideas?": {
+      "text": "Are you good at explaining and convincing others of your ideas?"
+    },
+    "Are you interested in how computers and networks work?": {
+      "text": "Are you interested in how computers and networks work?"
+    },
+    "I am interested in psychology and human thinking, such as the question of how to motivate employees": {
+      "text": "I am interested in psychology and human thinking, such as the question of how to motivate employees"
+    },
+    "I am interested in aviation": {
+      "text": "I am interested in aviation"
+    },
+    "Can you make new plans quickly when something unexpected happens?": {
+      "text": "Can you make new plans quickly when something unexpected happens?"
+    },
+    "Do you like to change things and see if they work better afterwards?": {
+      "text": "Do you like to change things and see if they work better afterwards?"
+    },
+    "As part of my job, I would like to maintain or repair vehicles/equipment": {
+      "text": "As part of my job, I would like to maintain or repair vehicles/equipment"
+    },
+    "Do you have good Excel skills?": {
+      "text": "Do you have good Excel skills?"
+    },
+    "Would you like to work on a school project that involves using environmentally friendly materials?": {
+      "text": "Would you like to work on a school project that involves using environmentally friendly materials?"
+    },
+    "I would enjoy designing strategies to move people or things": {
+      "text": "I would enjoy designing strategies to move people or things"
+    },
+    "Would you like to learn more about the technology behind the internet?": {
+      "text": "Would you like to learn more about the technology behind the internet?"
+    },
+    "I have a good geographical understanding and can easily get from A to B in an unfamiliar city using public transportation": {
+      "text": "I have a good geographical understanding and can easily get from A to B in an unfamiliar city using public transportation"
+    },
+    "Would you like to do projects where you have to combine new technologies with old ones?": {
+      "text": "Would you like to do projects where you have to combine new technologies with old ones?"
+    },
+    "I prefer to be responsible only for my own work rather than being responsible for the work of an entire group - this statement does NOT apply to me": {
+      "text": "I prefer to be responsible only for my own work rather than being responsible for the work of an entire group - this statement does NOT apply to me"
+    },
+    "Would you like to take on the role of coordinator for group work, planning and reporting?": {
+      "text": "Would you like to take on the role of coordinator for group work, planning and reporting?"
+    },
+    "I find it easy to learn new programs on the computer": {
+      "text": "I find it easy to learn new programs on the computer"
+    },
+    "I would be very interested in developing working models for human-machine/robot collaboration and determining which tasks should be carried out by machines/robots": {
+      "text": "I would be very interested in developing working models for human-machine/robot collaboration and determining which tasks should be carried out by machines/robots"
+    },
+    "Do you find it exciting to think about how technology could help improve learning?": {
+      "text": "Do you find it exciting to think about how technology could help improve learning?"
+    },
+    "Do you like searching the internet for information to make your tasks better?": {
+      "text": "Do you like searching the internet for information to make your tasks better?"
+    },
+    "Are you interested in seeing a project through from the initial idea to the finished product?": {
+      "text": "Are you interested in seeing a project through from the initial idea to the finished product?"
+    },
+    "Would you enjoy making new contacts and building friendships at events?": {
+      "text": "Would you enjoy making new contacts and building friendships at events?"
+    },
+    "Would you like to learn how to regularly check and maintain technical devices or systems?": {
+      "text": "Would you like to learn how to regularly check and maintain technical devices or systems?"
+    },
+    "One of my strengths is being able to keep an eye on several things at the same time": {
+      "text": "One of my strengths is being able to keep an eye on several things at the same time"
+    },
+    "Before I go on a big trip, I like to do everything I need to do myself, such as researching important information on entry requirements, collecting documents for visa applications and obtaining permits or information": {
+      "text": "Before I go on a big trip, I like to do everything I need to do myself, such as researching important information on entry requirements, collecting documents for visa applications and obtaining permits or information"
+    },
+    "Could you imagine representing your school at an education fair?": {
+      "text": "Could you imagine representing your school at an education fair?"
+    },
+    "I am interested in monitoring the interaction between humans and machines and deriving suggestions for improvement": {
+      "text": "I am interested in monitoring the interaction between humans and machines and deriving suggestions for improvement"
+    },
+    "I like helping to understand how data can be used to infer what might happen in the future": {
+      "text": "I like helping to understand how data can be used to infer what might happen in the future"
+    },
+    "Are you interested in topics such as increasing recycling rates?": {
+      "text": "Are you interested in topics such as increasing recycling rates?"
+    },
+    "I would like to pilot a plane or a drone": {
+      "text": "I would like to pilot a plane or a drone"
+    },
+    "I have a good geographical understanding": {
+      "text": "I have a good geographical understanding"
+    },
+    "I find it exciting to distribute resources and tasks to people in a group work": {
+      "text": "I find it exciting to distribute resources and tasks to people in a group work"
+    },
+    "I would like to understand how to measure and analyze the use of our school website": {
+      "text": "I would like to understand how to measure and analyze the use of our school website"
+    },
+    "Would you like to learn how to select and procure materials or things for school events?": {
+      "text": "Would you like to learn how to select and procure materials or things for school events?"
+    },
+    "You dont feel overwhelmed or stressed if you have to quickly change your itinerary due to unforeseen events such as a road closure": {
+      "text": "You don't feel overwhelmed or stressed if you have to quickly change your itinerary due to unforeseen events such as a road closure"
+    },
+    "Would you want to carry out regular checks that the data on your school computer is secure?": {
+      "text": "Would you want to carry out regular checks that the data on your school computer is secure?"
+    },
+    "If I could choose, I would like to do activities that require fine motor skills, such as sewing, modelling or making fine drawings": {
+      "text": "If I could choose, I would like to do activities that require fine motor skills, such as sewing, modelling or making fine drawings"
+    },
+    "I prefer to focus on the big picture rather than the details": {
+      "text": "I prefer to focus on the big picture rather than the details"
+    },
+    "I am interested in collecting and analyzing feedback on our group projects": {
+      "text": "I am interested in collecting and analyzing feedback on our group projects"
+    },
+    "Would you enjoy analyzing possible difficulties and finding solutions in a project group?": {
+      "text": "Would you enjoy analyzing possible difficulties and finding solutions in a project group?"
+    },
+    "Are you interested in how a retail company buys its goods, for example? This includes steps such as searching for suppliers, selecting suppliers and negotiating prices": {
+      "text": "Are you interested in how a retail company buys its goods, for example? This includes steps such as searching for suppliers, selecting suppliers and negotiating prices"
+    },
+    "I can imagine being involved in planning whether goods should be delivered by truck, bicycle or robots in the city in the future": {
+      "text": "I can imagine being involved in planning whether goods should be delivered by truck, bicycle or robots in the city in the future"
+    },
+    "I like creating visual representations such as diagrams of survey results": {
+      "text": "I like creating visual representations such as diagrams of survey results"
+    },
+    "In sport, are you often the first to react to starting signals, rallies or sudden changes in the game?": {
+      "text": "In sport, are you often the first to react to starting signals, rallies or sudden changes in the game?"
+    },
+    "Are you interested in quality management tasks?": {
+      "text": "Are you interested in quality management tasks?"
+    },
+    "Could you imagine collecting data regularly and checking whether your school is achieving its environmental goals? ": {
+      "text": "Could you imagine collecting data regularly and checking whether your school is achieving its environmental goals? "
+    },
+    "Are you interested or willing to look into the topic of automated driving systems? ": {
+      "text": "Are you interested or willing to look into the topic of automated driving systems? "
+    },
+    "I would enjoy thinking about how the city network and traffic could be designed to make transportation easier": {
+      "text": "I would enjoy thinking about how the city network and traffic could be designed to make transportation easier"
+    },
+    "Would you enjoy writing reports about computer security at school?": {
+      "text": "Would you enjoy writing reports about computer security at school?"
+    },
+    "I can imagine helping to design the layout of a warehouse, including the systems and machines used": {
+      "text": "I can imagine helping to design the layout of a warehouse, including the systems and machines used"
+    },
+    "I find it interesting to analyze school work to see where the class can improve": {
+      "text": "I find it interesting to analyze school work to see where the class can improve"
+    },
+    "Can you imagine how furniture can be rearranged in a room without actually moving it?": {
+      "text": "Can you imagine how furniture can be rearranged in a room without actually moving it?"
+    },
+    "I am interested in monitoring self-driving vehicles and intervening quickly if necessary": {
+      "text": "I am interested in monitoring self-driving vehicles and intervening quickly if necessary"
+    },
+    "Would you help set rules on what to do if someone has unauthorized access to school computers?": {
+      "text": "Would you help set rules on what to do if someone has unauthorized access to school computers?"
+    },
+    "I find it interesting to ensure workplace safety in my job and to develop guidelines and rules for this": {
+      "text": "I find it interesting to ensure workplace safety in my job and to develop guidelines and rules for this"
+    },
+    "I would like to learn to predict which sports teams will do well based on their previous games": {
+      "text": "I would like to learn to predict which sports teams will do well based on their previous games"
+    },
+    "In my future job, I would like to be responsible for cultivating and maintaining relationships with business partners": {
+      "text": "In my future job, I would like to be responsible for cultivating and maintaining relationships with business partners"
+    },
+    "I am interested in designing processes to repair, recycle or reuse products instead of throwing them away": {
+      "text": "I am interested in designing processes to repair, recycle or reuse products instead of throwing them away"
+    },
+    "Can you imagine working with authorities and other companies to improve urban transportation?": {
+      "text": "Can you imagine working with authorities and other companies to improve urban transportation?"
+    },
+    "Could you lead a school project where you decide who takes on which parts so that everything is ready on time?": {
+      "text": "Could you lead a school project where you decide who takes on which parts so that everything is ready on time?"
+    },
+    "Would you describe yourself as an organizational talent?": {
+      "text": "Would you describe yourself as an organizational talent?"
+    },
+    "I find it easy to explain rules and make sure they are followed": {
+      "text": "I find it easy to explain rules and make sure they are followed"
+    },
+    "Can you imagine writing a guide on how to protect yourself in the event of a cyber attack?": {
+      "text": "Can you imagine writing a guide on how to protect yourself in the event of a cyber attack?"
+    },
+    "I would lead workshops and training sessions to inform others about sustainability issues": {
+      "text": "I would lead workshops and training sessions to inform others about sustainability issues"
+    },
+    "Do you find it easy to keep track of many tasks?": {
+      "text": "Do you find it easy to keep track of many tasks?"
+    }
+  },
+  "answers": {
+    "1": "Yes",
+    "0": "No"
+  },
+  "result": {
+    "A": {
+      "name": "Drone pilot",
+      "description": "A drone pilot controls small aircraft, so-called drones, without being in the air and flying along. In the future, drones will be another option for transporting goods such as small parcels or delivering very urgent medical products. They will not only be used to transport parcels, but could also be used to inspect parts of machines that are difficult to reach using a drone. One of the tasks here is to plan when and where the drone should fly. This involves thinking about the best routes for the drone so that it arrives quickly and safely. Before a drone can fly, the pilot must ensure that it is in good condition. He checks the drone, programs it so that it knows where to fly and makes sure that everything is working properly. Other preparations also need to be made, such as obtaining permission to fly so that the drone can take off at all. Finally, a drone pilot flies the drone and possibly controls it from a computer. They must be able to control it very precisely and always ensure that the drone flies safely. A drone pilot also learns a lot about technology and must adhere to many rules so that no one is disturbed or endangered by the drone."
+    },
+    "B": {
+      "name": "Driver of self-driving trucks ",
+      "description": "Trucks of the future will be able to drive themselves thanks to the underlying technology and communicate with other trucks driving behind them. The driver therefore does not steer the trucks himself, but rather helps the trucks to drive all by themselves. They make sure that everything remains safe, even when the truck is driving itself. The main task in this job is to monitor the truck and ensure that everything is working correctly. In this job, you have to be able to react quickly and be ready to take the wheel if the truck suddenly can't drive itself, for example in the event of a technical problem or if an unexpected situation arises on the road. Another task is to plan where and how the truck should drive. Sometimes the route has to be changed if there is a roadworks site on the planned route, for example. Even though you work independently a lot, you still communicate with the team and with a central office that helps to find the best route and organize everything well. In this job, the driver also has to make sure that the truck is in good condition. Checks and small repairs must be carried out to ensure that the truck is safe. You also have to make sure that the load is safe and that everything is on board that the delivery bills say it should be."
+    },
+    "C": {
+      "name": "Warehouse specialist of the future",
+      "description": "This job involves working in a warehouse where many different products are stored, moved and sorted by people and machines. The main task is to ensure that everything runs smoothly in the warehouse. You plan how warehouses should look and be organized in the future so that everything can be found and dispatched quickly. They also plan and use robots, artificial intelligence and automated systems to make work easier and to manage the warehouse. As a specialist, you ensure that machines such as robots and drones work well together and help to complete all tasks quickly and safely. In this profession, you also plan how many people need to work each day and what their tasks are to ensure that everything that happens in the warehouse is correct. It is also important that everything remains safe and clean. The specialist monitors systems to make sure that the quality of work is good and that all rules and regulations are followed. If something goes wrong, for example if a robot breaks down, the specialist is also responsible for solving the problem quickly. Sometimes you even have to control one of the robots yourself. In short, this work is very important to ensure that customers receive their orders quickly and correctly."
+    },
+    "D": {
+      "name": "Logistics specialist for urban transport",
+      "description": "The logistics specialist for urban transport deals with transportation in the city. For example, the question arises as to how goods should best be delivered or collected in cities or how routes (paths) should be planned to avoid traffic jams. In this profession, you need to be good at finding the best routes through the city so that deliveries can be made quickly and without disruption from traffic. This involves looking at data and using information about the city to see what the delivery routes are like, what the traffic is like or where congestion often occurs. This can be used to learn and plans can be improved, for example to avoid a traffic jam next time. Another future task will be to look at which means of transportation or devices should be used in the city, such as cars, trucks, robots, drones, bicycles or others. It will be decided which vehicle and which driver is best suited for which delivery. Sometimes you need a large car, sometimes a small one or even a bicycle is sufficient for the delivery. It is also important in this profession to keep an eye on the environment and sustainability. In general, the specialist ensures that traffic in cities flows smoothly. In addition to route planning, they monitor transportation in real time and, if necessary, intervene as quickly as possible in the event of road closures or other unforeseen problems."
+    },
+    "E": {
+      "name": "Data analysis expert",
+      "description": "The data analysis expert looks at large amounts of information and tries to find out what it means so that the company can make smart decisions. To do this, data and information from various sources is collected and analyzed. These figures or data can be, for example, sales figures or information about how much customers like the products. Sometimes, however, the data collected is incomplete or incorrect. The expert must therefore find this data and clean it up so that it can be used. Computer programs or mathematical formulas are used to try and identify patterns from the information and data. For example, they could find out which products sell best or at what time of year most people shop. Weather data could also be used to find a pattern and try to predict when the weather is likely to be sunny so that barbecue products can be sold well. Based on what the expert has found out, another task is to make recommendations. For example, the expert might suggest producing more of a product that sells well. The expert also makes reports and diagrams (similar to pictures) showing what they have found out. These help the bosses of the company to make quick and good decisions."
+    },
+    "F": {
+      "name": "Expert in robots and automated machines",
+      "description": "The expert in robots and automated machines is like an inventor who figures out how robots or automated devices or systems can help people do their jobs. The experts plan how robots or self-functioning devices can best be used, build these devices, set them up and make sure they work properly. This means they often have to program the robots or devices, teaching them what to do. Another important task is to test the robots to make sure they do their jobs well. However, robots and automated devices should also be further improved if necessary. That's why the experts observe the robots, check the devices and use other data to see what is working well or what can be improved. Sometimes the software needs to be updated so that everything remains state of the art. These experts also make sure that the new robots and systems work well with the computers and programs already in the company. If an error occurs, it is the experts' job to find out what went wrong and solve the problem. In this job, you learn a lot about technologies such as robotics or automatic devices and how to program these devices."
+    },
+    "G": {
+      "name": "Sustainability Manager",
+      "description": "The Sustainability Manager has a strong interest in sustainability and environmental protection and ensures that logistics operations and processes are environmentally friendly. One of the tasks is, for example, to find the best transportation routes or select more environmentally friendly means of transport in order to use less diesel or petrol to keep the air clean. In general, the sustainability manager makes sure that means of transportation such as ships or trucks work cleanly when transporting goods. Another task is to use sustainable packaging materials and find ways to reduce waste. The manager considers how materials can be reused or recycled instead of thrown away. For example, an old plastic toy could be melted down and made into something new instead of simply throwing it in the bin. The sustainability manager also works with many other people in the company to ensure that new products are designed to be environmentally friendly. Even when designing a product, thought is given to how it can later be easily repaired, reused or recycled. The manager also makes sure that the company uses renewable energies such as solar or wind power."
+    },
+    "H": {
+      "name": "Data security expert",
+      "description": "Data security experts make sure that all information and data on computers is secure so that no one who is not authorized can see or steal it. To do this, the person in this profession creates rules on how to keep the data in the company secure, especially for companies that have a lot to do with transportation and storage of goods. The person also ensures that these rules are followed. They are also responsible for installing and using programs to protect the data and information. These are programs such as firewalls, which are like an invisible barrier, and antivirus software to protect the computers from viruses and hackers. It is important to build up a broad knowledge of network technology and IT infrastructure in this profession. Another task of the expert is to regularly check whether all systems, computers and devices are secure and to improve them if necessary. In this profession, it is important to observe and find out if there are any security problems. In the event of an emergency, it is important to react quickly and prioritize problems in order of importance to resolve the most urgent issue as quickly as possible. Plans must be made in advance in case something bad happens, such as a hacker attack, so that the company can react quickly and the data remains secure. To do this, it is necessary to keep up to date with new threats to data security."
+    },
+    "I": {
+      "name": "Buyer of the future",
+      "description": "The buyer of the future in a company has an important task: they look for and buy everything the company needs to function well. This can be very simple things like office supplies or large machines. So they think about how to buy things smarter and better. The buyer looks at many offers and selects the best suppliers who offer good products at a fair price. Computer programs are used to help make the best decisions or provide suggestions. If there are problems, for example if a supplier cannot deliver on time, then the buyer must quickly find a solution, perhaps another supplier who can deliver more quickly. In general, you always have to keep your eyes open in this job to see what new, exciting products are available on the market. You also have to pay attention to how much money the company spends on purchases and keep an eye on expenditure. This involves negotiating prices with suppliers to get the best price, much like a flea market. As good business relationships are becoming increasingly important, a big focus in this job is on building good relationships with suppliers and maintaining the good relationship. This means that sociability and a good feel for people are just as important as negotiating skills."
+    },
+    "J": {
+      "name": "Human-machine collaboration planner",
+      "description": "A human-machine collaboration planner ensures that people and technical devices such as robots and other machines can work well together. This is important so that technology can help people in their work. To do this, the planner looks at the workplace and the tasks and decides which technologies, such as robots or automated systems, are best to be used in the company. The planner looks closely at what best suits the tasks of the employees. This job also involves a lot of observation, for example how well people and machines work together and whether the employees get on well with the machines. It is also the job of understanding what employees need to do their work well. The technologies are adapted so that they really help the employees and don't get in the way. This also involves working closely with technicians to ensure that the machines are easy for employees to operate and that people and machines can communicate well with each other. For example, operating errors are rectified. This job also involves ensuring that everything is safe in the workplace. To do this, you develop guidelines on how employees can handle the machines safely."
+    },
+    "K": {
+      "name": "Project Manager Modern Logistics",
+      "description": "The project manager of the future plays an important role in the planning, monitoring and optimization of logistics processes. This job involves working on many different projects and future topics, such as sustainability, as well as means of transportation and routes. For example, new processes are introduced for shipping goods, packaging or storing goods. Another example could be the introduction of new computer programs or automated systems and technologies such as robots, which also affects logistics. For example, robots help to sort and send parcels quickly and accurately. The project manager takes on a coordinating role between the various work groups and departments. A project manager must also always make sure that the projects are running smoothly and check whether everything is on schedule and whether the money is being spent correctly. If problems arise, a solution must be found quickly. In addition, the project manager informs the management and other departments about the current status and progress of the project and after a project is finished, the project manager makes reports and presentations about how everything went."
+    }
+  }
+}
