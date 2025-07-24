@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    class="AnalyticsTopicViewDialog"
     ref="analyticsContainer"
     v-model="showSettings"
     :before-close="handleClose"
@@ -387,5 +388,13 @@ export default class AnalyticsTopicView extends Vue {
 .transition-anim-enter,
 .transition-anim-leave-to {
   opacity: 0;
+}
+</style>
+
+<style lang="scss">
+.AnalyticsTopicViewDialog {
+  .el-dialog__body {
+    overflow: unset !important;
+  }
 }
 </style>

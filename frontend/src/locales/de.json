@@ -391,6 +391,30 @@
       "analytics": {
         "loading": "Wird geladen, bitte warten...",
         "loadingNoTasks": "Keine Aufgaben ausgewählt",
+        "collapse": "Minimieren",
+        "expand": "Maximieren",
+        "tutorial": {
+          "participantSelection": {
+            "title": "Teilnehmer*innen Auswahl",
+            "info": "Hier kannst du eine Übersicht über alle Teilnehmer*innen deiner Sitzung sehen. Klicke auf einen Teilnehmer, um sie über das gesamte Tool hervorzuheben."
+          },
+          "overview": {
+            "title": "Übersicht",
+            "info": "Hier kannst du eine Übersicht über alle Aufgaben und Themen deiner Sitzung sehen. Klicke auf eine Aufgabe, um die Details zu sehen."
+          },
+          "table": {
+            "title": "Tabellen",
+            "info": "Klicke auf den Titel mit dem + um eine neue Tabelle hinzuzufügen.\n Hier siehst du eine Übersicht der Teilnehmer und die wichtigen Werte, die in einer Aufgabe gesammelt werden. Falls mehr als 5 Teilnehmer*innen vorhanden sind, wird die Tabelle aufgeteilt, um die Übersichtlichkeit zu verbessern. Die restlichen Einträge können mit dem unteren Pfeil aufgeklappt werden. \n Die Tabelle kann auch nach den Spalten sortiert werden, indem du auf die Spaltenüberschrift klickst."
+          },
+          "stackedBarChart": {
+            "title": "Umfragen und Quizzes",
+            "info": "Hier kannst du eine Übersicht über alle Aufgaben und Themen deiner Sitzung sehen. Klicke auf eine Aufgabe, um die Details zu sehen."
+          },
+          "radarChart": {
+            "title": "Typologietests",
+            "info": "Hier kannst du eine Übersicht über alle Aufgaben und Themen deiner Sitzung sehen. Klicke auf eine Aufgabe, um die Details zu sehen."
+          }
+        },
         "participantSelection": {
           "title": "Teilnehmer Auswahl"
         },

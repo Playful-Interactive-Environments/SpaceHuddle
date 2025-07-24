@@ -1,88 +1,148 @@
 <template>
-  <div v-if="hasData" class="stackedChartsContainer">
-    <el-card
-      v-for="(survey, index) in surveyElements"
-      :key="survey?.taskData.taskId"
-      class="stackedChartsSelectionContainer"
-      shadow="never"
-      body-style="text-align: center"
-      :class="{ addOn__boarder: !survey }"
-    >
-      <div class="stackedChartsTaskSelection">
-        <el-dropdown
-          v-if="hasSurveyData"
-          @command="(command) => updateSurveyElements(index, command)"
-          trigger="click"
-          placement="bottom"
-        >
-          <div class="el-dropdown-link">
-            <font-awesome-icon
-              v-if="survey"
-              class="highscoreModuleIcon"
-              :icon="getIconOfType(TaskType.INFORMATION)"
-              :style="{ color: getColorOfType(TaskType.INFORMATION) }"
-            />
-            <p class="oneLineText stackedChartsTaskName">
-              {{ survey ? survey.taskData.taskName : 'Select Survey' }}
+  <draggable
+    v-if="hasData"
+    v-model="surveyElementsData"
+    v-bind="dragOptions"
+    item-key="id"
+    class="stackedChartsContainer"
+    :group="{
+      name: 'stackedChartsSelection',
+      pull: 'true',
+      put: false,
+    }"
+  >
+    <template v-slot:item="{ element, index }">
+      <el-card
+        :id="element.taskData.taskId + 'surveyCard'"
+        class="stackedChartsSelectionContainer"
+        shadow="never"
+        body-style="text-align: center"
+        :class="{
+          addOn__boarder: !element,
+        }"
+      >
+        <div class="stackedChartsTaskSelection">
+          <el-dropdown
+            v-if="hasSurveyData"
+            @command="(command) => updateSurveyElements(index, command)"
+            trigger="click"
+            placement="bottom"
+          >
+            <div class="el-dropdown-link">
+              <font-awesome-icon
+                v-if="element"
+                class="highscoreModuleIcon"
+                :icon="getIconOfType(TaskType.INFORMATION)"
+                :style="{ color: getColorOfType(TaskType.INFORMATION) }"
+              />
+              <ToolTip>
+                <template #content>
+                  <div :style="{ textAlign: 'center' }">
+                    <p class="heading heading--white">
+                      {{
+                        `${$t('moderator.molecule.moduleCount.topics')} ${
+                          element.taskData.topicOrder + 1
+                        }: ${element.taskData.topicName}`
+                      }}
+                    </p>
+                    <p>{{ element.taskData.taskName }}</p>
+                  </div>
+                </template>
+                <p class="oneLineText stackedChartsTaskName">
+                  T{{ element.taskData.topicOrder + 1 }}:&nbsp;{{
+                    element.taskData.taskName
+                  }}
+                </p>
+              </ToolTip>
               <font-awesome-icon :icon="['fas', 'angle-down']" />
-              <span class="participant-count"
+              <span class="participant-count stackedChartsTaskName"
                 ><font-awesome-icon icon="user" />&nbsp;{{
-                  getParticipantCount(survey.questions)
+                  getParticipantCount(element.questions)
                 }}
               </span>
-            </p>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <template
-                v-for="(sv, index) in surveyData"
-                :key="sv.taskData.taskId"
-              >
-                <el-dropdown-item
-                  v-if="isTopicHeading(index)"
-                  class="heading oneLineText"
-                  :divided="true"
-                  :style="{ pointerEvents: 'none' }"
-                  disabled
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <template
+                  v-for="(sv, index) in surveyData"
+                  :key="sv.taskData.taskId"
                 >
-                  {{ sv.taskData.topicName }}
-                </el-dropdown-item>
-                <el-dropdown-item
-                  :command="sv"
-                  :divided="isTopicHeading(index)"
-                >
-                  <font-awesome-icon
-                    class="axisIcon"
-                    :icon="getIconOfType(TaskType.INFORMATION)"
-                    :style="{ color: getColorOfType(TaskType.INFORMATION) }"
-                  />
-                  <span>&nbsp;{{ sv.taskData.taskName }}</span>
-                </el-dropdown-item>
-              </template>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <font-awesome-icon
-          v-if="survey"
-          :icon="['fas', 'trash']"
-          class="trashButton"
-          @click="removeFromSurveyElements(index)"
+                  <el-dropdown-item
+                    v-if="isTopicHeading(index)"
+                    class="heading oneLineText"
+                    :divided="true"
+                    :style="{ pointerEvents: 'none' }"
+                    disabled
+                  >
+                    {{ sv.taskData.topicName }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    :command="sv"
+                    :divided="isTopicHeading(index)"
+                  >
+                    <font-awesome-icon
+                      class="axisIcon"
+                      :icon="getIconOfType(TaskType.INFORMATION)"
+                      :style="{ color: getColorOfType(TaskType.INFORMATION) }"
+                    />
+                    <span>&nbsp;{{ sv.taskData.taskName }}</span>
+                  </el-dropdown-item>
+                </template>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <font-awesome-icon
+            v-if="element"
+            :icon="['fas', 'trash']"
+            class="trashButton"
+            @click="removeFromSurveyElements(index)"
+          />
+        </div>
+        <stacked-bar-chart
+          v-if="element"
+          class="stackedChart"
+          :task-id="element.taskData.taskId"
+          :has-correct="isQuizOrTalk(element)"
+          :chart-data="element.questions"
+          :color-theme="colorTheme"
+          :color-correct="'var(--color-brainstorming)'"
+          :color-incorrect="'var(--color-evaluating)'"
+          v-model:selectedParticipantIds="participantIds"
+          @update:selected-participant-ids="updateSelectedParticipantIds"
         />
-      </div>
-      <stacked-bar-chart
-        v-if="survey"
-        class="stackedChart"
-        :task-id="survey.taskData.taskId"
-        :has-correct="isQuizOrTalk(survey)"
-        :chart-data="survey.questions"
-        :color-theme="colorTheme"
-        :color-correct="'var(--color-brainstorming)'"
-        :color-incorrect="'var(--color-evaluating)'"
-        v-model:selectedParticipantIds="participantIds"
-        @update:selected-participant-ids="updateSelectedParticipantIds"
-      />
-    </el-card>
-  </div>
+        <ToolTip
+          :text="
+            this.expandedElements.find(
+              (elId) => elId === element.taskData.taskId + 'surveyCard'
+            )
+              ? $t('moderator.organism.analytics.collapse')
+              : $t('moderator.organism.analytics.expand')
+          "
+          :placement="'bottom'"
+        >
+          <div
+            class="expandCard"
+            @click="handleExpandClick(element.taskData.taskId + 'surveyCard')"
+          >
+            <font-awesome-icon
+              v-if="
+                !this.expandedElements.find(
+                  (elId) => elId === element.taskData.taskId + 'surveyCard'
+                )
+              "
+              :icon="['fas', 'chevron-right']"
+              class="expandIcon"
+            />
+            <font-awesome-icon
+              v-else
+              :icon="['fas', 'chevron-left']"
+              class="expandIcon"
+            />
+          </div>
+        </ToolTip>
+      </el-card>
+    </template>
+  </draggable>
 </template>
 
 <script lang="ts">
@@ -92,6 +152,8 @@ import StackedBarChart from '@/components/moderator/organisms/analytics/subOrgan
 import { Avatar } from '@/types/api/Participant';
 import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import draggable from 'vuedraggable';
 
 interface Answer {
   avatar: Avatar;
@@ -124,13 +186,20 @@ interface SurveyData {
       return TaskType;
     },
   },
-  components: { StackedBarChart },
-  emits: ['update:selectedParticipantIds', 'update:surveyElements'],
+  components: { ToolTip, StackedBarChart, draggable },
+  emits: [
+    'update:selectedParticipantIds',
+    'update:surveyElements',
+    'hasExpandedElement',
+  ],
 })
 export default class StackedBarCharts extends Vue {
   @Prop() readonly surveyData!: SurveyData[];
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
   @Prop({ default: () => [] }) surveyElements!: SurveyData[];
+
+  surveyElementsData: SurveyData[] = [];
+  expandedElements: string[] = [];
 
   chartData: SurveyData[] = [];
   participantIds: string[] = [];
@@ -144,7 +213,16 @@ export default class StackedBarCharts extends Vue {
 
   @Watch('surveyElements', { deep: true })
   onValueChanged(newValue: SurveyData[]) {
+    this.surveyElementsData = [...newValue];
     this.$emit('update:surveyElements', newValue);
+  }
+
+  get dragOptions(): object {
+    return {
+      animation: 200,
+      group: 'description',
+      ghostClass: 'ghost',
+    };
   }
 
   get hasData(): boolean {
@@ -153,6 +231,10 @@ export default class StackedBarCharts extends Vue {
 
   get hasSurveyData(): boolean {
     return this.surveyData.length >= 1;
+  }
+
+  hasExpandedElement(): boolean {
+    return document.getElementsByClassName('expanded').length > 0;
   }
 
   @Watch('surveyData', { immediate: true })
@@ -169,6 +251,10 @@ export default class StackedBarCharts extends Vue {
 
   updateSelectedParticipantIds(): void {
     this.$emit('update:selectedParticipantIds', this.participantIds);
+  }
+
+  updateHasExpandedElements(): void {
+    this.$emit('hasExpandedElement', this.hasExpandedElement());
   }
 
   getColorOfType(taskType: TaskType) {
@@ -215,6 +301,22 @@ export default class StackedBarCharts extends Vue {
 
     return uniqueAvatarIds.size;
   }
+
+  handleExpandClick(id: string): void {
+    const element = document.getElementById(id);
+    if (element) {
+      if (element.classList.contains('expanded')) {
+        element.classList.remove('expanded');
+        this.expandedElements = this.expandedElements.filter(
+          (elId) => elId !== id
+        );
+      } else {
+        element.classList.add('expanded');
+        this.expandedElements.push(id);
+      }
+      this.updateHasExpandedElements();
+    }
+  }
 }
 </script>
 
@@ -230,12 +332,13 @@ export default class StackedBarCharts extends Vue {
 }
 
 .stackedChartsSelectionContainer {
+  cursor: move;
   min-width: 700px;
   width: calc(50% - 1.5rem);
-  overflow-y: scroll;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overflow-x: hidden;
+  overflow: visible;
+  position: relative;
+
+  transition: width 0.4s ease;
 
   @media (max-width: calc((700px * 2) + 12rem)) {
     width: 100%;
@@ -248,6 +351,10 @@ export default class StackedBarCharts extends Vue {
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.expanded {
+  width: 100% !important;
 }
 
 .stackedChart {
@@ -312,5 +419,35 @@ export default class StackedBarCharts extends Vue {
 
 .participant-count {
   margin-left: 1rem;
+}
+
+.expandCard {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  right: -1.2rem;
+  top: 1rem;
+  font-size: 0.7rem;
+  transition: background-color 0.4s ease;
+  color: var(--color-background);
+  background-color: var(--color-background-darker);
+  border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
+  cursor: pointer;
+  .expandIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.expandCard:hover {
+  background-color: var(--color-evaluating);
+}
+
+.ghost {
+  opacity: 0.5;
+  background: var(--color-background-dark);
 }
 </style>

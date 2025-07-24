@@ -1,6 +1,11 @@
 <template>
   <div class="chart-container" ref="chartContainer">
-    <draggable v-model="surveyChartData" item-key="id">
+    <draggable
+      v-model="surveyChartData"
+      item-key="id"
+      v-bind="dragOptions"
+      :group="{ name: 'stackedChart', pull: 'true', put: false }"
+    >
       <template v-slot:item="{ element, index }">
         <div class="question-container">
           <p class="questionText twoLineText" :style="questionTextStyle">
@@ -283,6 +288,14 @@ export default class StackedBarChart extends Vue {
 
   beforeDestroy() {
     this.resizeObserver?.disconnect();
+  }
+
+  get dragOptions(): object {
+    return {
+      animation: 200,
+      group: 'description',
+      ghostClass: 'ghost',
+    };
   }
 
   setupResizeObserver() {
@@ -662,7 +675,7 @@ export default class StackedBarChart extends Vue {
 }
 
 .question-container {
-  cursor: grab;
+  cursor: move;
   position: relative;
   display: flex;
   align-items: center;
@@ -831,5 +844,10 @@ export default class StackedBarChart extends Vue {
 .radar-polygon,
 .average-radar-polygon {
   will-change: transform;
+}
+
+.ghost {
+  opacity: 0.5;
+  background: var(--color-background-dark);
 }
 </style>

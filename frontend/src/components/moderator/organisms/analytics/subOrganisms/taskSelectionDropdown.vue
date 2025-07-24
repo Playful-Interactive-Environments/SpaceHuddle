@@ -1,13 +1,13 @@
 <template>
   <el-dropdown
     v-if="hasElements"
-    @command="addToElementsArray"
+    @command="(command) => handleElementArrayUpdate(index, command)"
     trigger="click"
     placement="bottom"
   >
     <div class="el-dropdown-link">
       <p class="oneLineText highscoreModuleName">
-        <font-awesome-icon :icon="['fas', 'plus']" class="plus-icon" />
+        <slot />
       </p>
     </div>
     <template #dropdown>
@@ -44,6 +44,7 @@ import { Options, Vue } from 'vue-class-component';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import TaskType from '@/types/enum/TaskType';
 import { Prop, Watch } from 'vue-property-decorator';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 
 interface TaskData {
   taskId: string;
@@ -62,6 +63,7 @@ interface TaskDataObject {
 }
 
 @Options({
+  components: { ToolTip },
   emits: ['update:elements'],
 })
 export default class taskSelectionDropdown extends Vue {
@@ -81,6 +83,7 @@ export default class taskSelectionDropdown extends Vue {
     },
   })
   availableElements!: TaskDataObject[];
+  @Prop({ default: 'add' }) mode!: string;
 
   @Watch('elements', { deep: true })
   onValueChanged(newValue: { taskData: TaskData }[]) {
@@ -103,8 +106,20 @@ export default class taskSelectionDropdown extends Vue {
       : undefined;
   }
 
+  handleElementArrayUpdate(index: number, el: TaskDataObject) {
+    if (this.mode === 'add') {
+      this.addToElementsArray(el);
+    } else if (this.mode === 'update') {
+      this.updateElementsArray(index, el);
+    }
+  }
+
   addToElementsArray(el: TaskDataObject): void {
     this.elements.push(el);
+  }
+
+  updateElementsArray(index: number, el: TaskDataObject): void {
+    this.elements.splice(index, 1, el);
   }
 
   isTopicHeading(index: number): boolean {
@@ -119,13 +134,12 @@ export default class taskSelectionDropdown extends Vue {
 </script>
 
 <style scoped lang="scss">
-.plus-icon {
-  margin-top: 0.5rem;
-  transform: scale(1);
-  transition: transform 0.3s ease;
+.highscoreModuleName {
+  font-size: var(--font-size-large);
+  transition: color 0.3s ease;
 }
 
-.plus-icon:hover {
-  transform: scale(1.15);
+.highscoreModuleName:hover {
+  color: var(--color-evaluating);
 }
 </style>

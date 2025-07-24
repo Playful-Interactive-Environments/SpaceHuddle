@@ -1,16 +1,30 @@
 <template>
   <div class="participantSelectionContainer">
-    <font-awesome-icon
+    <div
+      class="participantIcon"
       v-for="participant in participants"
       :key="participant.id"
-      :icon="participant.avatar.symbol"
-      :style="{
-        color: getParticipantColor(participant),
-        transform: getParticipantScale(participant),
-      }"
-      class="participant"
-      @click="participantSelectionChanged(participant.id)"
-    />
+    >
+      <font-awesome-icon
+        :icon="participant.avatar.symbol"
+        :style="{
+          color: getParticipantColor(participant),
+        }"
+        class="participant"
+        :class="{
+          participantSelected: selectedParticipantIds.includes(participant.id),
+        }"
+        @click="participantSelectionChanged(participant.id)"
+      />
+      <font-awesome-icon
+        :icon="['fas', 'circle']"
+        class="selectedIndicator"
+        :style="{
+          color: getParticipantColor(participant),
+          opacity: selectedParticipantIds.includes(participant.id) ? 1 : 0,
+        }"
+      />
+    </div>
   </div>
 </template>
 
@@ -49,12 +63,6 @@ export default class ParticipantSelection extends Vue {
       ? participant.avatar.color
       : this.defaultColor;
   }
-
-  getParticipantScale(participant: ParticipantInfo): string {
-    return this.selectedParticipantIds.includes(participant.id)
-      ? 'scale(1.15)'
-      : 'scale(1)';
-  }
 }
 </script>
 
@@ -65,8 +73,23 @@ export default class ParticipantSelection extends Vue {
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  padding: 1rem 2rem;
+  padding: 1rem 2rem 0.5rem 2rem;
   font-size: var(--font-size-large);
+}
+
+.participantIcon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  .selectedIndicator {
+    font-size: 0.3rem;
+  }
+}
+
+.participantSelected {
+  transform: scale(1.15) !important;
 }
 
 .participant {

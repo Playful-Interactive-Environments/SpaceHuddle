@@ -391,6 +391,30 @@
       "analytics": {
         "loading": "Loading, please wait...",
         "loadingNoTasks": "No tasks selected",
+        "collapse": "collapse",
+        "expand": "expand",
+        "tutorial": {
+          "participantSelection": {
+            "title": "Participant Selection",
+            "info": "Here you can select the participants for your session. You can filter by name or email address. Click on a participant to see their details."
+          },
+          "overview": {
+            "title": "Overview",
+            "info": "Here you can see an overview of all tasks and topics of your session. Click on a task to see the details."
+          },
+          "table": {
+            "title": "Tables",
+            "info": "Here you can see an overview of all tasks and topics of your session. Click on a task to see the details."
+          },
+          "stackedBarChart": {
+            "title": "Surveys and Quizzes",
+            "info": "Here you can see an overview of all tasks and topics of your session. Click on a task to see the details."
+          },
+          "radarChart": {
+            "title": "Typology tests",
+            "info": "Here you can see an overview of all tasks and topics of your session. Click on a task to see the details."
+          }
+        },
         "participantSelection": {
           "title": "Participant Selection"
         },

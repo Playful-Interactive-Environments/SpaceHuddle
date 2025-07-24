@@ -1,82 +1,140 @@
 <template>
-  <div v-if="hasData" class="highscoreContainer">
-    <el-card
-      v-for="(axis, index) in tableElements"
-      :key="axis?.taskData.taskId"
-      class="highScoreSelectionContainer"
-      shadow="never"
-      body-style="text-align: center"
-      :class="{ addOn__boarder: !axis }"
-    >
-      <div class="highscoreModuleSelection">
-        <el-dropdown
-          v-if="hasAxes"
-          @command="(command) => updateTableElements(index, command)"
-          trigger="click"
-          placement="bottom"
-        >
-          <div class="el-dropdown-link">
-            <font-awesome-icon
-              v-if="axis"
-              class="highscoreModuleIcon"
-              :icon="getIconOfAxis(axis)"
-              :style="{ color: getColorOfAxis(axis) }"
-            />
-            <p class="oneLineText highscoreModuleName">
-              {{ axis ? axis.taskData.taskName : 'Select Task' }}
+  <draggable
+    v-if="hasData"
+    v-model="tableElementsData"
+    v-bind="dragOptions"
+    item-key="id"
+    class="highscoreContainer"
+    :group="{
+      name: 'TablesSelection',
+      pull: 'true',
+      put: false,
+    }"
+  >
+    <template v-slot:item="{ element, index }">
+      <el-card
+        :id="element.taskData.taskId + 'tableCard'"
+        class="highScoreSelectionContainer"
+        shadow="never"
+        body-style="text-align: center"
+        :class="{ addOn__boarder: !element }"
+      >
+        <div class="highscoreModuleSelection">
+          <el-dropdown
+            v-if="hasAxes"
+            @command="(command) => updateTableElements(index, command)"
+            trigger="click"
+            placement="bottom"
+          >
+            <div class="el-dropdown-link">
+              <font-awesome-icon
+                v-if="element"
+                class="highscoreModuleIcon"
+                :icon="getIconOfAxis(element)"
+                :style="{ color: getColorOfAxis(element) }"
+              />
+              <ToolTip>
+                <template #content>
+                  <div :style="{ textAlign: 'center' }">
+                    <p class="heading heading--white">
+                      {{
+                        `${$t('moderator.molecule.moduleCount.topics')} ${
+                          element.taskData.topicOrder + 1
+                        }: ${element.taskData.topicName}`
+                      }}
+                    </p>
+                    <p>{{ element.taskData.taskName }}</p>
+                  </div>
+                </template>
+                <p class="oneLineText highscoreModuleName">
+                  T{{ element.taskData.topicOrder + 1 }}:&nbsp;{{
+                    element.taskData.taskName
+                  }}
+                </p>
+              </ToolTip>
               <font-awesome-icon :icon="['fas', 'angle-down']" />
-              <span class="participant-count"
+              <span class="participant-count highscoreModuleName"
                 ><font-awesome-icon icon="user" />&nbsp;{{
-                  getParticipantCount(axis)
+                  getParticipantCount(element)
                 }}
               </span>
-            </p>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <template v-for="(ax, index) in axes" :key="ax.taskData.taskId">
-                <el-dropdown-item
-                  v-if="isTopicHeading(index)"
-                  class="heading oneLineText"
-                  :divided="true"
-                  :style="{ pointerEvents: 'none' }"
-                  disabled
-                >
-                  {{ ax.taskData.topicName }}
-                </el-dropdown-item>
-                <el-dropdown-item
-                  :command="ax"
-                  :divided="isTopicHeading(index)"
-                >
-                  <font-awesome-icon
-                    class="axisIcon"
-                    :icon="getIconOfAxis(ax)"
-                    :style="{ color: getColorOfAxis(ax) }"
-                  />
-                  <span>&nbsp;{{ ax.taskData.taskName }}</span>
-                </el-dropdown-item>
-              </template>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <font-awesome-icon
-          v-if="axis"
-          :icon="['fas', 'trash']"
-          class="trashButton"
-          @click="removeFromTableElements(index)"
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <template v-for="(ax, index) in axes" :key="ax.taskData.taskId">
+                  <el-dropdown-item
+                    v-if="isTopicHeading(index)"
+                    class="heading oneLineText"
+                    :divided="true"
+                    :style="{ pointerEvents: 'none' }"
+                    disabled
+                  >
+                    {{ ax.taskData.topicName }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    :command="ax"
+                    :divided="isTopicHeading(index)"
+                  >
+                    <font-awesome-icon
+                      class="axisIcon"
+                      :icon="getIconOfAxis(ax)"
+                      :style="{ color: getColorOfAxis(ax) }"
+                    />
+                    <span>&nbsp;{{ ax.taskData.taskName }}</span>
+                  </el-dropdown-item>
+                </template>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <font-awesome-icon
+            v-if="element"
+            :icon="['fas', 'trash']"
+            class="trashButton"
+            @click="removeFromTableElements(index)"
+          />
+        </div>
+        <Highscore
+          v-if="element"
+          class="highscore"
+          :task-id="element.taskData.taskId"
+          :table-data="filterParticipantData(element.taskData.taskId)"
+          v-model:selectedParticipantIds="participantIds"
+          @update:selected-participant-ids="updateSelectedParticipantIds"
+          :translation-path="getTranslationPath(element)"
         />
-      </div>
-      <Highscore
-        v-if="axis"
-        class="highscore"
-        :task-id="axis.taskData.taskId"
-        :table-data="filterParticipantData(axis.taskData.taskId)"
-        v-model:selectedParticipantIds="participantIds"
-        @update:selected-participant-ids="updateSelectedParticipantIds"
-        :translation-path="getTranslationPath(axis)"
-      />
-    </el-card>
-  </div>
+        <ToolTip
+          :text="
+            this.expandedElements.find(
+              (elId) => elId === element.taskData.taskId + 'tableCard'
+            )
+              ? $t('moderator.organism.analytics.collapse')
+              : $t('moderator.organism.analytics.expand')
+          "
+          :placement="'bottom'"
+        >
+          <div
+            class="expandCard"
+            @click="handleExpandClick(element.taskData.taskId + 'tableCard')"
+          >
+            <font-awesome-icon
+              v-if="
+                !this.expandedElements.find(
+                  (elId) => elId === element.taskData.taskId + 'tableCard'
+                )
+              "
+              :icon="['fas', 'chevron-right']"
+              class="expandIcon"
+            />
+            <font-awesome-icon
+              v-else
+              :icon="['fas', 'chevron-left']"
+              class="expandIcon"
+            />
+          </div>
+        </ToolTip>
+      </el-card>
+    </template>
+  </draggable>
 </template>
 
 <script lang="ts">
@@ -89,6 +147,8 @@ import TaskType from '@/types/enum/TaskType';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import { HighScoreEntry } from '@/components/moderator/organisms/analytics/Highscore.vue';
 import { Idea } from '@/types/api/Idea';
+import ToolTip from '@/components/shared/atoms/ToolTip.vue';
+import draggable from 'vuedraggable';
 
 interface SubAxis {
   id: string;
@@ -126,8 +186,12 @@ interface DataEntry {
 }
 
 @Options({
-  components: { Highscore },
-  emits: ['update:selectedParticipantIds', 'update:tableElements'],
+  components: { draggable, ToolTip, Highscore },
+  emits: [
+    'update:selectedParticipantIds',
+    'update:tableElements',
+    'hasExpandedElement',
+  ],
 })
 export default class Tables extends Vue {
   @Prop() readonly taskId!: string;
@@ -139,6 +203,10 @@ export default class Tables extends Vue {
 
   @Prop({ default: () => [] }) tableElements!: Axis[];
 
+  tableElementsData: Axis[] = [];
+
+  expandedElements: string[] = [];
+
   chartData: DataEntry[] = [];
   participantIds: string[] = [];
 
@@ -148,6 +216,18 @@ export default class Tables extends Vue {
 
   get hasAxes(): boolean {
     return this.axes.length >= 1;
+  }
+
+  get dragOptions(): object {
+    return {
+      animation: 200,
+      group: 'description',
+      ghostClass: 'ghost',
+    };
+  }
+
+  hasExpandedElement(): boolean {
+    return document.getElementsByClassName('expanded').length > 0;
   }
 
   @Watch('participantData', { immediate: true })
@@ -170,6 +250,10 @@ export default class Tables extends Vue {
     this.$emit('update:selectedParticipantIds', this.participantIds);
   }
 
+  updateHasExpandedElements(): void {
+    this.$emit('hasExpandedElement', this.hasExpandedElement());
+  }
+
   getTranslationPath(axis: Axis): string {
     return `module.${axis.taskData.taskType.toLowerCase()}.${
       axis.taskData.moduleName
@@ -190,6 +274,7 @@ export default class Tables extends Vue {
 
   @Watch('tableElements', { deep: true })
   onValueChanged(newValue: Axis[]) {
+    this.tableElementsData = [...newValue];
     this.$emit('update:tableElements', newValue);
   }
 
@@ -254,6 +339,22 @@ export default class Tables extends Vue {
       return counter;
     }, 0);
   }
+
+  handleExpandClick(id: string): void {
+    const element = document.getElementById(id);
+    if (element) {
+      if (element.classList.contains('expanded')) {
+        element.classList.remove('expanded');
+        this.expandedElements = this.expandedElements.filter(
+          (elId) => elId !== id
+        );
+      } else {
+        element.classList.add('expanded');
+        this.expandedElements.push(id);
+      }
+      this.updateHasExpandedElements();
+    }
+  }
 }
 </script>
 
@@ -268,12 +369,13 @@ export default class Tables extends Vue {
 }
 
 .highScoreSelectionContainer {
+  cursor: move;
   min-width: 700px;
   width: calc(50% - 1.5rem);
-  overflow-y: scroll;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overflow-x: hidden;
+  overflow: visible;
+  position: relative;
+
+  transition: width 0.4s ease;
 
   @media (max-width: calc((700px * 2) + 12rem)) {
     width: 100%;
@@ -282,6 +384,10 @@ export default class Tables extends Vue {
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.expanded {
+  width: 100% !important;
 }
 
 .highscore {
@@ -346,5 +452,35 @@ export default class Tables extends Vue {
 
 .participant-count {
   margin-left: 1rem;
+}
+
+.expandCard {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  right: -1.2rem;
+  top: 1rem;
+  font-size: 0.7rem;
+  transition: background-color 0.4s ease;
+  color: var(--color-background);
+  background-color: var(--color-background-darker);
+  border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
+  cursor: pointer;
+  .expandIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.expandCard:hover {
+  background-color: var(--color-evaluating);
+}
+
+.ghost {
+  opacity: 0.5;
+  background: var(--color-background-dark);
 }
 </style>

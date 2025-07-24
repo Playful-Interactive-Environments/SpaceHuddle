@@ -1,159 +1,275 @@
 <template>
-  <div
-    id="analytics"
-    :style="{ marginTop: '3rem' }"
-    v-loading="isLoading"
-    :element-loading-background="'var(--color-background)'"
-    :element-loading-text="loadingTextNoTasks"
-  >
-    <el-collapse
-      v-model="activeNames"
-      v-loading="loadingSteps"
-      :element-loading-background="'var(--color-background)'"
-      :element-loading-text="loadingText"
+  <div class="AnalyticsWrapper" v-if="hasParticipantData && !isLoading">
+    <div
+      class="participantSelection"
+      :style="{
+        height: participantSelectionCollapsed ? '1.5rem' : 'auto',
+      }"
     >
-      <el-collapse-item name="participantSelection">
-        <template #title>
-          <span @click.stop>{{
-            $t('moderator.organism.analytics.participantSelection.title')
-          }}</span>
-        </template>
-        <div v-if="!loadingSteps" class="participantSelection">
-          <participant-selection
-            :participants="participants"
-            v-model:selectedParticipantIds="selectedParticipantIds"
-            @participant-selected="participantSelectionChanged"
-            :style="{ borderBottom: '2px solid var(--color-background-dark)' }"
-          />
-        </div>
-      </el-collapse-item>
-      <el-collapse-item name="overview">
-        <template #title>
-          <span @click.stop>{{
-            $t('moderator.organism.analytics.parallelCoordinates.title')
-          }}</span>
-        </template>
-        <div class="AnalyticsParallelCoordinates">
-          <parallel-coordinates
-            v-if="hasAxesAndData"
-            :chart-axes="availableAxes"
-            :participant-data="dataEntries"
-            :steps="steps"
-            v-model:selectedParticipantIds="selectedParticipantIds"
-            @participant-selected="participantSelectionChanged"
-            :style="{ opacity: loadingSteps ? 0 : 1 }"
-          />
-        </div>
-      </el-collapse-item>
-      <el-collapse-item
-        name="tables"
-        class="pdfPageBreakElement dropDownTables"
-        :style="{
-          width: tableElements.length > 1 ? '100%' : '50%',
-        }"
+      <participant-selection
+        class="participantSelectionModule"
+        :participants="participants"
+        v-model:selectedParticipantIds="selectedParticipantIds"
+        @participant-selected="participantSelectionChanged"
+      />
+      <font-awesome-icon
+        :icon="['fas', 'question']"
+        class="tutorialIcon"
+        @click="showParticipantSelectionTutorial = true"
+      />
+      <ToolTip
+        :text="
+          !participantSelectionCollapsed
+            ? $t('moderator.organism.analytics.collapse')
+            : $t('moderator.organism.analytics.expand')
+        "
+        :placement="'bottom'"
       >
-        <template #title>
-          <span @click.stop
-            >{{ $t('moderator.organism.analytics.tables.title') }}
-            <ToolTip
-              :text="$t('moderator.organism.analytics.tables.selectTask')"
-              ><task-selection-dropdown
-                :available-elements="availableAxes"
-                v-model:elements="tableElements"
-            /></ToolTip>
-          </span>
-        </template>
-        <div class="AnalyticsTables">
-          <Tables
-            v-if="hasAxesAndData"
-            :participant-data="dataEntries"
-            :axes="availableAxes"
-            :steps="steps"
-            v-model:tableElements="tableElements"
-            v-model:selectedParticipantIds="selectedParticipantIds"
-            @update:table-elements="
-              activeNames.includes('tables') ? null : activeNames.push('tables')
-            "
-            :style="{ opacity: loadingSteps ? 0 : 1 }"
+        <div
+          class="collapseParticipantSelection"
+          @click="
+            participantSelectionCollapsed = !participantSelectionCollapsed
+          "
+        >
+          <font-awesome-icon
+            v-if="!participantSelectionCollapsed"
+            :icon="['fas', 'chevron-up']"
+            class="collapseIcon"
+          />
+          <font-awesome-icon
+            v-else
+            :icon="['fas', 'chevron-down']"
+            class="collapseIcon"
           />
         </div>
-      </el-collapse-item>
-      <el-collapse-item
-        v-if="surveyData.length > 0"
-        name="surveysQuizzes"
-        class="pdfPageBreakElement dropDownSurveysQuizzes"
-        :style="{
-          width: surveyElements.length > 1 ? '100%' : '50%',
-        }"
-      >
-        <template #title>
-          <span @click.stop
-            >{{ $t('moderator.organism.analytics.stackedBarCharts.title') }}
-
-            <ToolTip
-              :text="
-                $t('moderator.organism.analytics.stackedBarCharts.selectTask')
-              "
-              ><task-selection-dropdown
-                :available-elements="surveyData"
-                v-model:elements="surveyElements" /></ToolTip
-          ></span>
-        </template>
-        <div class="stackedBarChartContainer">
-          <StackedBarChartSelection
-            v-if="hasSurveyData"
-            :survey-data="surveyData"
-            v-model:selectedParticipantIds="selectedParticipantIds"
-            v-model:survey-elements="surveyElements"
-            @update:survey-elements="
-              activeNames.includes('surveysQuizzes')
-                ? null
-                : activeNames.push('surveysQuizzes')
-            "
-            :style="{ opacity: loadingSteps ? 0 : 1 }"
-          />
-        </div>
-      </el-collapse-item>
-      <el-collapse-item
-        v-if="radarDataEntries.length > 0"
-        name="radarCharts"
-        class="pdfPageBreakElement"
-      >
-        <template #title>
-          <span @click.stop>{{
-            $t('moderator.organism.analytics.radarCharts.title')
-          }}</span>
-        </template>
-        <div class="RadarChartContainer">
-          <div
-            class="radarChart"
-            v-for="(entry, index) in radarDataEntries"
-            :key="'radarChart' + index"
-            :style="{ opacity: loadingSteps ? 0 : 1 }"
-          >
-            <p v-if="entry.title" class="heading">
-              <font-awesome-icon
-                class="headingIcon"
-                :icon="getIconOfType(TaskType.INFORMATION)"
-                :style="{ color: getColorOfType(TaskType.INFORMATION) }"
-              />
-              {{ entry.title }}
-            </p>
-            <radar-chart
-              :labels="entry.labels"
-              :datasets="entry.data"
-              :test="entry.test"
-              :title="entry.title"
-              :size="300"
-              :levels="5"
-              :defaultColor="'var(--color-dark-contrast-light)'"
+      </ToolTip>
+    </div>
+    <div id="analytics" :style="{ marginTop: '3rem' }">
+      <el-collapse v-model="activeNames">
+        <el-collapse-item name="overview" v-if="hasAxesAndData">
+          <template #title>
+            <span class="titleSpan" @click.stop
+              >{{ $t('moderator.organism.analytics.parallelCoordinates.title')
+              }}<font-awesome-icon
+                :icon="['fas', 'question']"
+                class="tutorialIcon"
+                @click="showOverviewTutorial = true"
+            /></span>
+          </template>
+          <div class="AnalyticsParallelCoordinates">
+            <parallel-coordinates
+              :chart-axes="availableAxes"
+              :participant-data="dataEntries"
+              :steps="steps"
               v-model:selectedParticipantIds="selectedParticipantIds"
               @participant-selected="participantSelectionChanged"
             />
           </div>
-        </div>
-      </el-collapse-item>
-    </el-collapse>
+        </el-collapse-item>
+        <el-collapse-item
+          name="tables"
+          class="pdfPageBreakElement dropDownTables"
+          :style="{
+            width: tableElements.length > 1 || tablesExpanded ? '100%' : '50%',
+          }"
+          v-if="hasAxesAndData && hasSteps"
+        >
+          <template #title>
+            <span class="titleSpan" @click.stop>
+              <ToolTip
+                :text="$t('moderator.organism.analytics.tables.selectTask')"
+                :show-after="300"
+                class="titleToolTip"
+                ><task-selection-dropdown
+                  :available-elements="availableAxes"
+                  v-model:elements="tableElements"
+                  class="taskSelectionDropdown"
+                >
+                  {{ $t('moderator.organism.analytics.tables.title') }}
+                  <font-awesome-icon
+                    :icon="['fas', 'plus']"
+                    class="plus-icon"
+                  />
+                </task-selection-dropdown> </ToolTip
+              ><font-awesome-icon
+                :icon="['fas', 'question']"
+                class="tutorialIcon"
+                @click="showTableTutorial = true"
+              />
+            </span>
+          </template>
+          <div class="AnalyticsTables">
+            <Tables
+              :participant-data="dataEntries"
+              :axes="availableAxes"
+              :steps="steps"
+              v-model:tableElements="tableElements"
+              v-model:selectedParticipantIds="selectedParticipantIds"
+              @update:table-elements="
+                activeNames.includes('tables')
+                  ? null
+                  : activeNames.push('tables')
+              "
+              @has-expanded-element="tablesExpanded = $event"
+            />
+          </div>
+        </el-collapse-item>
+        <el-collapse-item
+          v-if="hasSurveyData"
+          name="surveysQuizzes"
+          class="pdfPageBreakElement dropDownSurveysQuizzes"
+          :style="{
+            width:
+              surveyElements.length > 1 || surveysExpanded ? '100%' : '50%',
+          }"
+        >
+          <template #title>
+            <span class="titleSpan" @click.stop>
+              <ToolTip
+                :text="$t('moderator.organism.analytics.tables.selectTask')"
+                :show-after="300"
+                ><task-selection-dropdown
+                  :available-elements="surveyData"
+                  v-model:elements="surveyElements"
+                  class="taskSelectionDropdown"
+                >
+                  {{
+                    $t('moderator.organism.analytics.stackedBarCharts.title')
+                  }}
+                  <font-awesome-icon
+                    :icon="['fas', 'plus']"
+                    class="plus-icon"
+                  />
+                </task-selection-dropdown>
+              </ToolTip>
+              <font-awesome-icon
+                :icon="['fas', 'question']"
+                class="tutorialIcon"
+                @click="showSurveyTutorial = true"
+              />
+            </span>
+          </template>
+          <div class="stackedBarChartContainer">
+            <StackedBarChartSelection
+              :survey-data="surveyData"
+              v-model:selectedParticipantIds="selectedParticipantIds"
+              v-model:survey-elements="surveyElements"
+              @update:survey-elements="
+                activeNames.includes('surveysQuizzes')
+                  ? null
+                  : activeNames.push('surveysQuizzes')
+              "
+              @has-expanded-element="surveysExpanded = $event"
+            />
+          </div>
+        </el-collapse-item>
+        <el-collapse-item
+          v-if="hasRadarData"
+          name="radarCharts"
+          class="pdfPageBreakElement"
+        >
+          <template #title>
+            <span class="titleSpan" @click.stop
+              >{{ $t('moderator.organism.analytics.radarCharts.title')
+              }}<font-awesome-icon
+                :icon="['fas', 'question']"
+                class="tutorialIcon"
+                @click="showRadarTutorial = true"
+            /></span>
+          </template>
+          <div class="RadarChartContainer">
+            <div
+              class="radarChart"
+              v-for="(entry, index) in radarDataEntries"
+              :key="'radarChart' + index"
+            >
+              <p
+                v-if="entry.taskData.taskName"
+                class="heading radarChartHeading"
+              >
+                <font-awesome-icon
+                  class="headingIcon"
+                  :icon="getIconOfType(TaskType.INFORMATION)"
+                  :style="{ color: getColorOfType(TaskType.INFORMATION) }"
+                />
+                <ToolTip>
+                  <template #content>
+                    <div :style="{ textAlign: 'center' }">
+                      <p class="heading heading--white">
+                        {{
+                          `${$t('moderator.molecule.moduleCount.topics')} ${
+                            entry.taskData.topicOrder + 1
+                          }: ${entry.taskData.topicName}`
+                        }}
+                      </p>
+                      <p>{{ entry.taskData.taskName }}</p>
+                    </div>
+                  </template>
+                  <p class="oneLineText RadarModuleName">
+                    T{{ entry.taskData.topicOrder + 1 }}:&nbsp;{{
+                      entry.taskData.taskName
+                    }}
+                  </p>
+                </ToolTip>
+                <span class="participant-count RadarModuleName"
+                  ><font-awesome-icon icon="user" />&nbsp;{{
+                    entry.data.length
+                  }}
+                </span>
+              </p>
+              <radar-chart
+                :labels="entry.labels"
+                :datasets="entry.data"
+                :test="entry.test"
+                :title="entry.title"
+                :size="300"
+                :levels="5"
+                :defaultColor="'var(--color-dark-contrast-light)'"
+                v-model:selectedParticipantIds="selectedParticipantIds"
+                @participant-selected="participantSelectionChanged"
+              />
+            </div>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
+      <el-dialog
+        v-model="showParticipantSelectionTutorial"
+        :title="
+          $t('moderator.organism.analytics.tutorial.participantSelection.title')
+        "
+      >
+        {{
+          $t('moderator.organism.analytics.tutorial.participantSelection.info')
+        }}
+      </el-dialog>
+      <el-dialog
+        v-model="showOverviewTutorial"
+        :title="$t('moderator.organism.analytics.tutorial.overview.title')"
+        >{{
+          $t('moderator.organism.analytics.tutorial.overview.info')
+        }}</el-dialog
+      >
+      <el-dialog
+        v-model="showTableTutorial"
+        :title="$t('moderator.organism.analytics.tutorial.table.title')"
+        >{{ $t('moderator.organism.analytics.tutorial.table.info') }}</el-dialog
+      >
+      <el-dialog
+        v-model="showSurveyTutorial"
+        :title="
+          $t('moderator.organism.analytics.tutorial.stackedBarChart.title')
+        "
+      >
+        {{ $t('moderator.organism.analytics.tutorial.stackedBarChart.info') }}
+      </el-dialog>
+      <el-dialog
+        v-model="showRadarTutorial"
+        :title="$t('moderator.organism.analytics.tutorial.radarChart.title')"
+        >{{
+          $t('moderator.organism.analytics.tutorial.radarChart.info')
+        }}</el-dialog
+      >
+    </div>
   </div>
 </template>
 
@@ -187,6 +303,7 @@ import { Topic } from '@/types/api/Topic';
 import TaskSelectionDropdown from '@/components/moderator/organisms/analytics/subOrganisms/taskSelectionDropdown.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import { Hierarchy } from '@/types/api/Hierarchy';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 interface subAxis {
   id: string;
@@ -239,6 +356,18 @@ interface QuestionData {
   answers: Answer[];
 }
 
+interface SurveyData {
+  taskData: {
+    moduleName: string;
+    taskId: string;
+    taskName: string;
+    taskType: TaskType;
+    topicName: string;
+    topicOrder: number;
+  };
+  questions: QuestionData[];
+}
+
 @Options({
   computed: {
     TaskType() {
@@ -246,6 +375,7 @@ interface QuestionData {
     },
   },
   components: {
+    FontAwesomeIcon,
     ToolTip,
     TaskSelectionDropdown,
     StackedBarChartSelection,
@@ -264,6 +394,10 @@ export default class Analytics extends Vue {
   @Prop() readonly sessionId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
+
+  participantSelectionCollapsed = false;
+  surveysExpanded = false;
+  tablesExpanded = false;
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
@@ -293,25 +427,14 @@ export default class Analytics extends Vue {
   }[] = [];
 
   participantCash?: cashService.SimplifiedCashEntry<ParticipantInfo[]>;
-  participants: ParticipantInfo[] | null = null;
+  participants: ParticipantInfo[] = [];
   sessionService?: cashService.SimplifiedCashEntry<Session>;
 
   axes: Axis[] = [];
-  loadingSteps = true;
 
   selectedParticipantIds: string[] = [];
 
-  surveyData: {
-    taskData: {
-      moduleName: string;
-      taskId: string;
-      taskName: string;
-      taskType: TaskType;
-      topicName: string;
-      topicOrder: number;
-    };
-    questions: QuestionData[];
-  }[] = [];
+  surveyData: SurveyData[] = [];
 
   activeNames = [
     'participantSelection',
@@ -322,7 +445,13 @@ export default class Analytics extends Vue {
   ];
 
   tableElements: Axis[] = [];
-  surveyElements: Axis[] = [];
+  surveyElements: SurveyData[] = [];
+
+  showParticipantSelectionTutorial = false;
+  showOverviewTutorial = false;
+  showTableTutorial = false;
+  showSurveyTutorial = false;
+  showRadarTutorial = false;
 
   get isLoading(): boolean {
     return this.receivedTasks.length <= 0;
@@ -336,10 +465,12 @@ export default class Analytics extends Vue {
     return this.$t('moderator.organism.analytics.loading');
   }
 
+  get hasSteps(): boolean {
+    return this.steps.length > 0;
+  }
+
   get hasAxesAndData(): boolean {
-    return (
-      this.axes.length > 0 && this.dataEntries.length > 0 && !this.loadingSteps
-    );
+    return this.axes.length > 0 && this.dataEntries.length > 0;
   }
 
   get availableAxes(): Axis[] {
@@ -347,7 +478,15 @@ export default class Analytics extends Vue {
   }
 
   get hasSurveyData(): boolean {
-    return this.surveyData.length > 0 && !this.loadingSteps;
+    return this.surveyData.length > 0;
+  }
+
+  get hasRadarData(): boolean {
+    return this.radarDataEntries.length > 0;
+  }
+
+  get hasParticipantData(): boolean {
+    return this.participants.length > 0;
   }
 
   getColorOfType(taskType: TaskType) {
@@ -367,7 +506,6 @@ export default class Analytics extends Vue {
   }
 
   resetData(): void {
-    this.loadingSteps = true;
     this.axes = [];
     this.steps = [];
     this.tasks = [];
@@ -424,7 +562,6 @@ export default class Analytics extends Vue {
 
   participantSelectionChanged(ids: string[]) {
     this.selectedParticipantIds = ids;
-    this.$emit('participantSelected', ids);
   }
 
   @Watch('task', { immediate: true })
@@ -612,11 +749,7 @@ export default class Analytics extends Vue {
       taskParticipantService.registerGetList(
         task.id,
         (result: TaskParticipantState[]) => {
-          this.updatePersonalityTests(
-            result,
-            task.modules[0].parameter.test,
-            task.name
-          );
+          this.updatePersonalityTests(result, task);
         },
         EndpointAuthorisationType.MODERATOR,
         30
@@ -749,39 +882,38 @@ export default class Analytics extends Vue {
     } else {
       this.steps.push(stepsEntry);
     }
-    if (
-      this.steps.length ===
-      this.gameTasks
-        .concat(this.votingTasks)
-        .concat(this.brainstormingTasks)
-        .concat(this.otherTasks).length
-    ) {
-      this.loadingSteps = false;
-    }
     this.axes = this.CalculateAxes();
   }
 
   radarDataEntries: {
-    taskId: string;
-    title: string;
+    taskData: {
+      moduleName: string;
+      taskId: string;
+      taskName: string;
+      taskType: TaskType;
+      topicName: string;
+      topicOrder: number;
+    };
     test: string;
     labels: string[];
     data: { data: number[]; avatar: Avatar }[];
   }[] = [];
 
-  updatePersonalityTests(
-    result: TaskParticipantState[],
-    test: string,
-    title: string
-  ): void {
+  updatePersonalityTests(result: TaskParticipantState[], task: Task): void {
     const resultFiltered = result.filter(
       (entry) => entry.parameter.resultTypeValues
     );
     if (resultFiltered[0].parameter.resultTypeValues) {
       const radarData = {
-        taskId: resultFiltered[0].taskId,
-        title: title,
-        test: test,
+        taskData: {
+          moduleName: task.modules[0].name,
+          taskId: task.id,
+          taskName: task.name,
+          taskType: task.taskType as TaskType,
+          topicName: this.topics[task.topicOrder]?.title ?? '',
+          topicOrder: task.topicOrder,
+        },
+        test: task.modules[0].parameter.test,
         labels: Object.keys(resultFiltered[0].parameter.resultTypeValues),
         data: resultFiltered
           .map((entry) => ({
@@ -794,7 +926,7 @@ export default class Analytics extends Vue {
       };
       if (
         !this.radarDataEntries.some(
-          (entry) => entry.taskId === radarData.taskId
+          (entry) => entry.taskData.taskId === radarData.taskData.taskId
         )
       ) {
         this.radarDataEntries.push(radarData);
@@ -1085,6 +1217,10 @@ export default class Analytics extends Vue {
     const participantData = this.getAllParticipantData();
     const axes = this.CalculateAxes();
 
+    if (axes.length <= 0 || participantData.length <= 0) {
+      return [];
+    }
+
     return participantData.map(({ participant, data }) => {
       const formattedAxes = axes
         .map((axis) => {
@@ -1133,6 +1269,56 @@ export default class Analytics extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.AnalyticsWrapper {
+  width: 100%;
+  position: relative;
+}
+.participantSelection {
+  position: sticky;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: height 0.3s ease;
+  top: 0;
+  width: 100%;
+  background-color: var(--color-background);
+  border-bottom: 2px solid var(--color-background-dark);
+  z-index: 500;
+  .tutorialIcon {
+    position: absolute;
+    right: 1rem;
+    font-size: var(--font-size-small);
+    cursor: pointer;
+  }
+  .participantSelectionModule {
+    height: 100%;
+    overflow: hidden;
+  }
+  .collapseParticipantSelection {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    bottom: -1.2rem;
+    font-size: 0.7rem;
+    transition: background-color 0.4s ease;
+    color: var(--color-background);
+    background-color: var(--color-background-darker);
+    border-radius: 0 0 var(--border-radius-small) var(--border-radius-small);
+    cursor: pointer;
+    .collapseIcon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  .collapseParticipantSelection:hover {
+    background-color: var(--color-evaluating);
+  }
+}
+
 #analytics {
   width: 100%;
   display: flex;
@@ -1146,7 +1332,24 @@ export default class Analytics extends Vue {
     flex-wrap: wrap;
   }
   .el-collapse-item {
+    transition: width 0.4s ease;
     width: 100%;
+    .taskSelectionDropdown,
+    .tutorialIcon {
+      cursor: pointer;
+    }
+    .titleSpan {
+      height: 100%;
+      width: calc(100% - 2rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: default;
+      .tutorialIcon {
+        margin-right: 0.3rem;
+        font-size: var(--font-size-small);
+      }
+    }
   }
 
   .el-collapse-item::v-deep(.el-collapse-item__content) {
@@ -1175,11 +1378,6 @@ export default class Analytics extends Vue {
     transition: opacity 3s ease;
   }
 
-  .participantSelection {
-    position: relative;
-    width: 100%;
-  }
-
   .RadarChartContainer {
     width: 100%;
     display: flex;
@@ -1191,6 +1389,21 @@ export default class Analytics extends Vue {
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+    .radarChartHeading {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      .RadarModuleName {
+        font-size: var(--font-size-default);
+        font-weight: var(--font-weight-bold);
+        margin: 0;
+      }
+      .participant-count {
+        margin-left: 1rem;
+      }
     }
   }
 

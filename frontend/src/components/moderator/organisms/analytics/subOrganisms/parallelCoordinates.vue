@@ -320,7 +320,10 @@
                 v-on:command="updateSubAxis(index, $event)"
                 trigger="click"
                 placement="bottom"
-                :style="{ opacity: axis.axisValues.length > 1 ? '1' : '0' }"
+                :style="{
+                  opacity: axis.axisValues.length > 1 ? '1' : '0',
+                  cursor: axis.axisValues.length > 1 ? 'pointer' : 'unset',
+                }"
                 :disabled="axis.axisValues.length <= 1"
               >
                 <div class="el-dropdown-link cogButton">
@@ -354,7 +357,7 @@
                     .length < 1
                 "
               >
-                <div class="el-dropdown-link">
+                <div class="el-dropdown-link axisDropdownLink">
                   <font-awesome-icon
                     class="axisIcon"
                     :icon="getIconOfAxis(axis)"
@@ -420,24 +423,49 @@
               </el-button>
             </div>
           </div>
-          <p class="heading twoLineText">{{ axis.taskData.taskName }}</p>
-          <p class="subAxisName twoLineText">
-            {{ $t(getTranslationPath(axis) + axis.categoryActive) }}
-          </p>
-          <p class="subAxisUnit twoLineText">
-            {{
-              $t(
-                getTranslationPath(axis) + 'units.' + axis.categoryActive
-              ).slice(-axis.categoryActive.length) !== axis.categoryActive
-                ? $t(getTranslationPath(axis) + 'units.' + axis.categoryActive)
-                : ''
-            }}
-          </p>
+          <ToolTip :placement="'bottom'">
+            <template #content>
+              <div :style="{ textAlign: 'center' }">
+                <p class="heading heading--white">
+                  {{
+                    `${$t('moderator.molecule.moduleCount.topics')} ${
+                      axis.taskData.topicOrder + 1
+                    }: ${axis.taskData.topicName}`
+                  }}
+                </p>
+                <p>{{ axis.taskData.taskName }}</p>
+              </div>
+            </template>
+            <div>
+              <p class="heading twoLineText">
+                T{{ axis.taskData.topicOrder + 1 }}:&nbsp;{{
+                  axis.taskData.taskName
+                }}
+              </p>
+              <p class="subAxisName twoLineText">
+                {{ $t(getTranslationPath(axis) + axis.categoryActive) }}
+              </p>
+              <p class="subAxisUnit twoLineText">
+                {{
+                  $t(
+                    getTranslationPath(axis) + 'units.' + axis.categoryActive
+                  ).slice(-axis.categoryActive.length) !== axis.categoryActive
+                    ? $t(
+                        getTranslationPath(axis) +
+                          'units.' +
+                          axis.categoryActive
+                      )
+                    : ''
+                }}
+              </p>
+            </div>
+          </ToolTip>
         </div>
       </div>
       <div
         class="axisControlsContainer axisPlusControlsContainer"
         :style="{ paddingLeft: `${axesSpacing / 2}px` }"
+        v-if="activeAxes.length > 0"
       >
         <div
           class="axisPlusContainer"
@@ -767,14 +795,16 @@ export default class ParallelCoordinates extends Vue {
   }
 
   get activeAxes() {
-    return this.axes
-      .filter((axis) => axis.active)
-      .map((axis) => {
-        return {
-          ...axis,
-          axisValues: axis.axisValues.filter((subAxis) => subAxis !== null),
-        };
-      });
+    return (
+      this.axes
+        .filter((axis) => axis.active)
+        .map((axis) => {
+          return {
+            ...axis,
+            axisValues: axis.axisValues.filter((subAxis) => subAxis !== null),
+          };
+        }) || []
+    );
   }
 
   get axesSpacing(): number {
@@ -1278,6 +1308,7 @@ export default class ParallelCoordinates extends Vue {
   }
   .heading {
     margin: 0;
+    margin-top: 4pt;
   }
   .subAxisName {
     font-size: var(--font-size-small);
@@ -1286,14 +1317,15 @@ export default class ParallelCoordinates extends Vue {
     font-size: var(--font-size-xsmall);
     font-weight: var(--font-weight-bold);
   }
+  .topicNumber {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-bold);
+  }
 }
 
 .axisControlsContainer {
   .axisControls {
-    cursor: grab;
-  }
-  .axisControls:active {
-    cursor: grabbing;
+    cursor: move;
   }
 }
 
@@ -1358,7 +1390,6 @@ export default class ParallelCoordinates extends Vue {
   padding: 0;
   margin: 0;
   font-size: var(--font-size-small);
-  cursor: pointer;
 }
 
 .listIcon {
