@@ -17,11 +17,21 @@
         @click="participantSelectionChanged(participant.id)"
       />
       <font-awesome-icon
-        :icon="['fas', 'circle']"
+        :icon="['fas', 'magnifying-glass']"
         class="selectedIndicator"
+        @click="participantSelectionFocused(participant.id)"
         :style="{
           color: getParticipantColor(participant),
-          opacity: selectedParticipantIds.includes(participant.id) ? 1 : 0,
+          opacity:
+            selectedParticipantIds.includes(participant.id) &&
+            selectedParticipantIds.length > 1
+              ? 1
+              : 0,
+          pointerEvents:
+            selectedParticipantIds.includes(participant.id) &&
+            selectedParticipantIds.length
+              ? 'auto'
+              : 'none',
         }"
       />
     </div>
@@ -55,6 +65,14 @@ export default class ParticipantSelection extends Vue {
         )
       : [...this.selectedParticipantIds, id];
 
+    this.emitUpdatedSelection(updatedSelection);
+  }
+
+  participantSelectionFocused(id: string): void {
+    this.emitUpdatedSelection([id]);
+  }
+
+  emitUpdatedSelection(updatedSelection: string[]): void {
     this.$emit('update:selectedParticipantIds', updatedSelection);
   }
 
@@ -84,7 +102,19 @@ export default class ParticipantSelection extends Vue {
   align-items: center;
   gap: 0.5rem;
   .selectedIndicator {
-    font-size: 0.3rem;
+    margin-top: -0.6rem;
+    margin-right: -0.8rem;
+    font-size: 10pt;
+    padding: 0.2rem;
+    border-radius: 50%;
+    z-index: 1;
+    background-color: var(--color-background);
+    transform: scale(1);
+    transition: transform 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+  }
+  .selectedIndicator:hover {
+    transform: scale(1.15) !important;
   }
 }
 
