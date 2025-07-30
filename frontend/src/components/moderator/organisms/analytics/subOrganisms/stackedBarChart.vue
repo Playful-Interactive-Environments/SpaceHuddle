@@ -34,12 +34,6 @@
                     stroke-width="2"
                     stroke-linecap="round"
                   />
-                  <text
-                    v-if="isSliderEdge(x)"
-                    class="svgText"
-                    v-bind="sliderTextProps(x)"
-                    text-anchor="middle"
-                  />
                 </g>
                 <g v-for="(segment, i) in computedSegments[index]" :key="i">
                   <defs>
@@ -76,8 +70,43 @@
                     </text>
                   </g>
                 </g>
+                <g v-for="(x, i) in sliderPositions" :key="i">
+                  <text
+                    class="svgText segment-text"
+                    v-bind="sliderTextProps(x)"
+                    text-anchor="middle"
+                  >
+                    {{
+                      (surveyChartData[index].parameter.maxValue /
+                        (sliderPositions.length - 1)) *
+                      i
+                    }}
+                  </text>
+                </g>
               </g>
             </svg>
+            <div
+              v-for="(segment, i) in computedSegments[index]"
+              :key="'circleToolTip-' + i"
+              v-bind="circleToolTipProps(segment, element)"
+              @click="
+                participantSelectionChanged(
+                  segment.avatars.map((avatar) => avatar.id)
+                )
+              "
+            >
+              <ToolTip :show-after="200" class="segment-text-toolTip">
+                <div :style="{ width: '100%', height: '100%' }"></div>
+                <template #content>
+                  <p class="segment-answer">
+                    {{ segment.answer || 0 }}<br />
+                    <span class="segment-percentage"
+                      >{{ Math.round(segment.percentage * 100) }}%</span
+                    >
+                  </p>
+                </template>
+              </ToolTip>
+            </div>
             <div
               v-for="(segment, i) in computedSegments[index]"
               :key="'text-' + i"
@@ -95,7 +124,6 @@
                 :key="avatar.id"
                 :icon="avatar.symbol"
                 :style="{ color: avatar.color }"
-                @click="participantSelectionChanged([avatar.id])"
               />
             </div>
           </div>
@@ -119,11 +147,6 @@
                   class="carouselColorItem cursorPointer"
                   :icon="segment.avatars[0].symbol"
                   :style="carouselIconStyle(segment)"
-                  @click="
-                    participantSelectionChanged(
-                      segment.avatars.map((avatar) => avatar.id)
-                    )
-                  "
                 />
               </el-carousel-item>
             </el-carousel>
@@ -181,7 +204,6 @@
                 :key="avatar.id"
                 :icon="avatar.symbol"
                 :style="{ color: avatar.color }"
-                @click="participantSelectionChanged([avatar.id])"
               />
             </div>
             <div
@@ -406,7 +428,7 @@ export default class StackedBarChart extends Vue {
     }
 
     if (colors.length === 0) {
-      colors.push('var(--color-background-darker)');
+      colors.push('var(--color-gray-inactive-light)');
     }
 
     return colors;
@@ -424,10 +446,14 @@ export default class StackedBarChart extends Vue {
 
   calculateCircleX(segment: AnswerSegment, questionData: QuestionData): number {
     if (!questionData.parameter.maxValue) return 0;
+    if (Number(segment.answer) / questionData.parameter.maxValue === 0) {
+      return this.paddingSlider;
+    } else if (Number(segment.answer) / questionData.parameter.maxValue === 1) {
+      return this.parentWidth * this.barWidthPercentage - this.paddingSlider;
+    }
     return (
       (Number(segment.answer) / questionData.parameter.maxValue) *
-        (this.parentWidth * this.barWidthPercentage - 2 * this.paddingSlider) +
-      this.paddingSlider
+      (this.parentWidth * this.barWidthPercentage - 2)
     );
   }
 
@@ -518,14 +544,36 @@ export default class StackedBarChart extends Vue {
         color: 'var(--color-dark-contrast)',
         textAlign: 'center',
       },
+      textShadow:
+        '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)',
     };
+  }
+
+  getRadius(segment: AnswerSegment) {
+    const baseRadius = this.circleRadius;
+    const maxRadius = 19;
+
+    const saturationPoint = 200;
+    const offset = 1;
+    const targetRadiusAtSaturation = maxRadius - 0.5;
+
+    const K =
+      (targetRadiusAtSaturation - baseRadius) /
+      Math.log(saturationPoint + offset);
+
+    let r = baseRadius;
+    if (segment.avatars.length > 0) {
+      const additionalRadius = K * Math.log(segment.avatars.length + offset);
+      r = baseRadius + additionalRadius;
+      return Math.min(r, maxRadius);
+    }
   }
 
   circleProps(segment: AnswerSegment, questionData: QuestionData) {
     return {
       cx: this.calculateCircleX(segment, questionData),
       cy: this.barHeight / 2,
-      r: this.circleRadius + (segment.avatars.length - 1),
+      r: this.getRadius(segment),
       fill: `url(#${this.gradientId(
         this.indexOfSegment(segment),
         this.indexOfAnswer(segment)
@@ -546,6 +594,19 @@ export default class StackedBarChart extends Vue {
       style: {
         color: 'var(--color-dark-contrast)',
         textAlign: 'center',
+      },
+    };
+  }
+
+  circleToolTipProps(segment: AnswerSegment, questionData: QuestionData) {
+    console.log(this.calculateCircleX(segment, questionData));
+    return {
+      style: {
+        width: '2rem',
+        height: '2rem',
+        left: `calc(${this.calculateCircleX(segment, questionData)}px - 1rem)`,
+        position: 'absolute',
+        cursor: 'pointer',
       },
     };
   }
@@ -602,9 +663,7 @@ export default class StackedBarChart extends Vue {
       top: '50%',
       transform: 'translateY(-50%)',
       textShadow:
-        this.selectedParticipantIds.length > 0
-          ? '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)'
-          : 'unset',
+        '-1px -1px 0 var(--color-background), 1px -1px 0 var(--color-background), -1px 1px 0 var(--color-background), 1px 1px 0 var(--color-background)',
     };
   }
 
@@ -731,7 +790,9 @@ export default class StackedBarChart extends Vue {
   display: flex;
   justify-content: right;
   align-items: center;
-  top: 75%;
+  top: -30%;
+  overflow-x: hidden;
+  overflow-y: visible;
 
   transform: translateX(0.2rem);
 }
@@ -741,7 +802,9 @@ export default class StackedBarChart extends Vue {
   display: flex;
   justify-content: center;
   align-items: center;
-  top: 60%;
+  top: -15%;
+  overflow-x: hidden;
+  overflow-y: visible;
 
   transform: translateX(0.2rem);
 }
@@ -759,14 +822,6 @@ export default class StackedBarChart extends Vue {
   padding: 0.3rem;
   border-radius: 50%;
   margin-left: -0.4rem;
-
-  cursor: pointer;
-  transform: scale(1);
-  transition: transform 0.3s ease;
-}
-.segment-avatars-icon:hover {
-  z-index: 10;
-  transform: scale(1.15);
 }
 
 .barSegmentPercentages {
@@ -835,7 +890,7 @@ export default class StackedBarChart extends Vue {
   }
 }
 
-.cursorPointer:hover {
+.cursorPointer {
   cursor: pointer;
 }
 

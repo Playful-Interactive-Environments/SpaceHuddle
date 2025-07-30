@@ -203,13 +203,7 @@ export default class StackedBarCharts extends Vue {
 
   chartData: SurveyData[] = [];
   participantIds: string[] = [];
-  colorTheme = [
-    'var(--color-informing-light)',
-    'var(--color-brainstorming-light)',
-    'var(--color-structuring-light)',
-    'var(--color-evaluating-light)',
-    'var(--color-playing-light)',
-  ];
+  colorTheme = ['var(--color-gray-inactive-light)'];
 
   @Watch('surveyElements', { deep: true })
   onValueChanged(newValue: SurveyData[]) {
