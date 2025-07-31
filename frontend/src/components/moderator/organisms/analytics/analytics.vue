@@ -99,19 +99,50 @@
             </span>
           </template>
           <div class="AnalyticsTables">
-            <Tables
-              :participant-data="dataEntries"
-              :axes="availableAxes"
-              :steps="steps"
-              v-model:tableElements="tableElements"
+            <DraggableCardList
+              :chart-data="axes"
+              v-model:selectedElements="tableElements"
               v-model:selectedParticipantIds="selectedParticipantIds"
-              @update:table-elements="
-                activeNames.includes('tables')
-                  ? null
-                  : activeNames.push('tables')
-              "
-              @has-expanded-element="tablesExpanded = $event"
-            />
+              v-model:expanded="tablesExpanded"
+              :dropdownItems="axes"
+              :getParticipantCount="getTablesParticipantCount"
+              @hasExpandedElement="handleHasExpandedElement"
+            >
+              <template #card-header-icon="{ element }">
+                <font-awesome-icon
+                  v-if="element"
+                  class="highscoreModuleIcon"
+                  :icon="getIconOfAxis(element)"
+                  :style="{ color: getColorOfAxis(element) }"
+                />
+              </template>
+              <template>
+                <font-awesome-icon
+                  class="axisIcon"
+                  :icon="getIconOfAxis(item)"
+                  :style="{ color: getColorOfAxis(item) }"
+                />
+              </template>
+              <template
+                #item-content="{
+                  element,
+                  selectedParticipantIds,
+                  updateSelectedParticipantIds,
+                }"
+              >
+                <Highscore
+                  v-if="element"
+                  class="highscore"
+                  :task-id="element.taskData.taskId"
+                  :table-data="filterParticipantData(element.taskData.taskId)"
+                  :selected-participant-ids="selectedParticipantIds"
+                  @update:selected-participant-ids="
+                    updateSelectedParticipantIds
+                  "
+                  :translation-path="getTranslationPath(element)"
+                />
+              </template>
+            </DraggableCardList>
           </div>
         </el-collapse-item>
         <el-collapse-item
@@ -150,85 +181,133 @@
             </span>
           </template>
           <div class="stackedBarChartContainer">
-            <StackedBarChartSelection
-              :survey-data="surveyData"
+            <DraggableCardList
+              :chart-data="surveyData"
+              v-model:selectedElements="surveyElements"
               v-model:selectedParticipantIds="selectedParticipantIds"
-              v-model:survey-elements="surveyElements"
-              @update:survey-elements="
-                activeNames.includes('surveysQuizzes')
-                  ? null
-                  : activeNames.push('surveysQuizzes')
-              "
-              @has-expanded-element="surveysExpanded = $event"
-            />
+              v-model:expanded="surveysExpanded"
+              :dropdownItems="surveyData"
+              :getParticipantCount="getSurveyParticipantCount"
+              @hasExpandedElement="handleHasExpandedElement"
+            >
+              <template #card-header-icon="{ element }">
+                <font-awesome-icon
+                  v-if="element"
+                  class="highscoreModuleIcon"
+                  :icon="getTaskIconOfType(TaskType.INFORMATION)"
+                  :style="{ color: getTaskColorOfType(TaskType.INFORMATION) }"
+                />
+              </template>
+              <template>
+                <font-awesome-icon
+                  class="axisIcon"
+                  :icon="getTaskIconOfType(TaskType.INFORMATION)"
+                  :style="{ color: getTaskColorOfType(TaskType.INFORMATION) }"
+                />
+              </template>
+              <template
+                #item-content="{
+                  element,
+                  selectedParticipantIds,
+                  updateSelectedParticipantIds,
+                }"
+              >
+                <stacked-bar-chart
+                  v-if="element"
+                  :task-id="element.taskData.taskId"
+                  :has-correct="isQuizOrTalk(element)"
+                  :chart-data="element.questions"
+                  :color-theme="colorTheme"
+                  :color-correct="'var(--color-brainstorming)'"
+                  :color-incorrect="'var(--color-evaluating)'"
+                  :selected-participant-ids="selectedParticipantIds"
+                  @update:selected-participant-ids="
+                    updateSelectedParticipantIds
+                  "
+                />
+              </template>
+            </DraggableCardList>
           </div>
         </el-collapse-item>
         <el-collapse-item
           v-if="hasRadarData"
           name="radarCharts"
           class="pdfPageBreakElement"
+          :style="{
+            width: radarElements.length > 1 || radarExpanded ? '100%' : '50%',
+          }"
         >
           <template #title>
-            <span class="titleSpan" @click.stop
-              >{{ $t('moderator.organism.analytics.radarCharts.title')
-              }}<font-awesome-icon
+            <span class="titleSpan" @click.stop>
+              <ToolTip
+                :text="$t('moderator.organism.analytics.tables.selectTask')"
+                :show-after="300"
+                ><task-selection-dropdown
+                  :available-elements="radarDataEntries"
+                  v-model:elements="radarElements"
+                  class="taskSelectionDropdown"
+                >
+                  {{ $t('moderator.organism.analytics.radarCharts.title') }}
+                  <font-awesome-icon
+                    :icon="['fas', 'plus']"
+                    class="plus-icon"
+                  />
+                </task-selection-dropdown>
+              </ToolTip>
+              <font-awesome-icon
                 :icon="['fas', 'question']"
                 class="tutorialIcon"
-                @click="showRadarTutorial = true"
-            /></span>
-          </template>
-          <div class="RadarChartContainer">
-            <div
-              class="radarChart"
-              v-for="(entry, index) in radarDataEntries"
-              :key="'radarChart' + index"
-            >
-              <p
-                v-if="entry.taskData.taskName"
-                class="heading radarChartHeading"
-              >
-                <font-awesome-icon
-                  class="headingIcon"
-                  :icon="getIconOfType(TaskType.INFORMATION)"
-                  :style="{ color: getColorOfType(TaskType.INFORMATION) }"
-                />
-                <ToolTip>
-                  <template #content>
-                    <div :style="{ textAlign: 'center' }">
-                      <p class="heading heading--white">
-                        {{
-                          `${$t('moderator.molecule.moduleCount.topics')} ${
-                            entry.taskData.topicOrder + 1
-                          }: ${entry.taskData.topicName}`
-                        }}
-                      </p>
-                      <p>{{ entry.taskData.taskName }}</p>
-                    </div>
-                  </template>
-                  <p class="oneLineText RadarModuleName">
-                    T{{ entry.taskData.topicOrder + 1 }}:&nbsp;{{
-                      entry.taskData.taskName
-                    }}
-                  </p>
-                </ToolTip>
-                <span class="participant-count RadarModuleName"
-                  ><font-awesome-icon icon="user" />&nbsp;{{
-                    entry.data.length
-                  }}
-                </span>
-              </p>
-              <radar-chart
-                :labels="entry.labels"
-                :datasets="entry.data"
-                :test="entry.test"
-                :title="entry.title"
-                :size="300"
-                :levels="5"
-                :defaultColor="'var(--color-dark-contrast-light)'"
-                v-model:selectedParticipantIds="selectedParticipantIds"
-                @participant-selected="participantSelectionChanged"
+                @click="showSurveyTutorial = true"
               />
-            </div>
+            </span>
+          </template>
+          <div class="stackedBarChartContainer">
+            <DraggableCardList
+              :chart-data="radarDataEntries"
+              v-model:selectedElements="radarElements"
+              v-model:selectedParticipantIds="selectedParticipantIds"
+              v-model:expanded="radarExpanded"
+              :dropdownItems="radarDataEntries"
+              :getParticipantCount="getRadarParticipantCount"
+              @hasExpandedElement="handleHasExpandedElement"
+            >
+              <template #card-header-icon="{ element }">
+                <font-awesome-icon
+                  v-if="element"
+                  class="highscoreModuleIcon"
+                  :icon="getTaskIconOfType(TaskType.INFORMATION)"
+                  :style="{ color: getTaskColorOfType(TaskType.INFORMATION) }"
+                />
+              </template>
+              <template>
+                <font-awesome-icon
+                  class="axisIcon"
+                  :icon="getTaskIconOfType(TaskType.INFORMATION)"
+                  :style="{ color: getTaskColorOfType(TaskType.INFORMATION) }"
+                />
+              </template>
+              <template
+                #item-content="{
+                  element,
+                  selectedParticipantIds,
+                  updateSelectedParticipantIds,
+                }"
+              >
+                <radar-chart-container
+                  :labels="element.labels"
+                  :datasets="element.data"
+                  :test="element.test"
+                  :title="element.title"
+                  :size="300"
+                  :levels="5"
+                  :defaultColor="'var(--color-dark-contrast-light)'"
+                  :selected-participant-ids="selectedParticipantIds"
+                  @update:selected-participant-ids="
+                    updateSelectedParticipantIds
+                  "
+                />
+              </template>
+            </DraggableCardList>
           </div>
         </el-collapse-item>
       </el-collapse>
@@ -290,20 +369,23 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import { Session } from '@/types/api/Session';
 import { Avatar, ParticipantInfo } from '@/types/api/Participant';
 import ParallelCoordinates from '@/components/moderator/organisms/analytics/subOrganisms/parallelCoordinates.vue';
-import Tables from '@/components/moderator/organisms/analytics/subOrganisms/Tables.vue';
 import { VoteResult } from '@/types/api/Vote';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import RadarChart from '@/components/moderator/organisms/analytics/subOrganisms/radarChart.vue';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
-import StackedBarChartSelection from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChartSelection.vue';
 import ParticipantSelection from '@/components/moderator/organisms/analytics/subOrganisms/participantSelection.vue';
 import { Topic } from '@/types/api/Topic';
 import TaskSelectionDropdown from '@/components/moderator/organisms/analytics/subOrganisms/taskSelectionDropdown.vue';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import DraggableCardList from '@/components/moderator/organisms/analytics/subOrganisms/draggableCardList.vue';
+import Highscore, {
+  HighScoreEntry,
+} from '@/components/moderator/organisms/analytics/Highscore.vue';
+import RadarChartContainer from '@/components/moderator/organisms/analytics/subOrganisms/radarChartContainer.vue';
 
 interface subAxis {
   id: string;
@@ -368,6 +450,20 @@ interface SurveyData {
   questions: QuestionData[];
 }
 
+interface RadarData {
+  taskData: {
+    moduleName: string;
+    taskId: string;
+    taskName: string;
+    taskType: TaskType;
+    topicName: string;
+    topicOrder: number;
+  };
+  test: string;
+  labels: string[];
+  data: { data: number[]; avatar: Avatar }[];
+}
+
 @Options({
   computed: {
     TaskType() {
@@ -375,13 +471,14 @@ interface SurveyData {
     },
   },
   components: {
+    RadarChartContainer,
+    Highscore,
+    DraggableCardList,
     FontAwesomeIcon,
     ToolTip,
     TaskSelectionDropdown,
-    StackedBarChartSelection,
     StackedBarChart,
     RadarChart,
-    Tables,
     ParallelCoordinates,
     ParticipantSelection,
   },
@@ -398,6 +495,7 @@ export default class Analytics extends Vue {
   participantSelectionCollapsed = false;
   surveysExpanded = false;
   tablesExpanded = false;
+  radarExpanded = false;
 
   tasks: Task[] = [];
   gameTasks: Task[] = [];
@@ -430,11 +528,11 @@ export default class Analytics extends Vue {
   participants: ParticipantInfo[] = [];
   sessionService?: cashService.SimplifiedCashEntry<Session>;
 
-  axes: Axis[] = [];
-
   selectedParticipantIds: string[] = [];
 
+  axes: Axis[] = [];
   surveyData: SurveyData[] = [];
+  radarDataEntries: RadarData[] = [];
 
   activeNames = [
     'participantSelection',
@@ -446,6 +544,7 @@ export default class Analytics extends Vue {
 
   tableElements: Axis[] = [];
   surveyElements: SurveyData[] = [];
+  radarElements: SurveyData[] = [];
 
   showParticipantSelectionTutorial = false;
   showOverviewTutorial = false;
@@ -455,14 +554,6 @@ export default class Analytics extends Vue {
 
   get isLoading(): boolean {
     return this.receivedTasks.length <= 0;
-  }
-
-  get loadingTextNoTasks(): string {
-    return this.$t('moderator.organism.analytics.loadingNoTasks');
-  }
-
-  get loadingText(): string {
-    return this.$t('moderator.organism.analytics.loading');
   }
 
   get hasSteps(): boolean {
@@ -487,14 +578,6 @@ export default class Analytics extends Vue {
 
   get hasParticipantData(): boolean {
     return this.participants.length > 0;
-  }
-
-  getColorOfType(taskType: TaskType) {
-    return getColorOfType(taskType);
-  }
-
-  getIconOfType(taskType: TaskType) {
-    return getIconOfType(taskType);
   }
 
   get topicId(): string | null {
@@ -562,6 +645,103 @@ export default class Analytics extends Vue {
 
   participantSelectionChanged(ids: string[]) {
     this.selectedParticipantIds = ids;
+  }
+
+  getIconOfAxis(axis: Axis): string | undefined {
+    return axis.taskData.taskType
+      ? getIconOfType(TaskType[axis.taskData.taskType.toUpperCase()])
+      : undefined;
+  }
+
+  getColorOfAxis(axis: Axis): string | undefined {
+    return axis.taskData.taskType
+      ? getColorOfType(TaskType[axis.taskData.taskType.toUpperCase()])
+      : undefined;
+  }
+
+  handleHasExpandedElement(expanded: boolean): void {
+    console.log('DraggableCardList expanded state changed:', expanded);
+  }
+
+  get tableChartData(): DataEntry[] {
+    return this.dataEntries.filter((entry) =>
+      entry.axes.some((axis) =>
+        axis.axisValues.some((value) => value.value != null)
+      )
+    );
+  }
+
+  filterParticipantData(taskId: string): HighScoreEntry[] {
+    return this.tableChartData
+      .filter((entry) =>
+        entry.axes.some(
+          (a) =>
+            a.taskId === taskId &&
+            a.axisValues.some((value) => value.value != null)
+        )
+      )
+      .map((entry) => ({
+        values:
+          entry.axes
+            .find((axis) => axis.taskId === taskId)
+            ?.axisValues.sort(
+              (a, b) =>
+                (['stars', 'rate'].includes(a.id) ? 1 : -1) -
+                (['stars', 'rate'].includes(b.id) ? 1 : -1)
+            ) || [],
+        participant: entry.participant,
+      }));
+  }
+
+  getTranslationPath(axis: Axis): string {
+    return `module.${axis.taskData.taskType.toLowerCase()}.${
+      axis.taskData.moduleName
+    }.analytics.highscore.`;
+  }
+
+  isQuizOrTalk(survey: SurveyData): boolean {
+    return ['quiz', 'talk'].includes(survey.taskData.moduleName);
+  }
+
+  getTablesParticipantCount(axis: Axis): number {
+    const taskId = axis.taskData.taskId;
+    const category = axis.categoryActive;
+
+    return this.tableChartData.reduce((counter, partData) => {
+      const partAxis = partData.axes.find(
+        (partAxis) => partAxis.taskId === taskId
+      );
+      if (partAxis) {
+        counter += partAxis.axisValues.reduce((count, value) => {
+          return (
+            count + (value.id === category && value.value !== null ? 1 : 0)
+          );
+        }, 0);
+      }
+      return counter;
+    }, 0);
+  }
+
+  getSurveyParticipantCount(survey: SurveyData): number {
+    const uniqueAvatarIds = new Set<string>();
+    survey.questions.forEach((questionData) => {
+      questionData.answers.forEach((answer) => {
+        uniqueAvatarIds.add(answer.avatar.id);
+      });
+    });
+    return uniqueAvatarIds.size;
+  }
+
+  getRadarParticipantCount(radar: RadarData): number {
+    return radar.data.length;
+  }
+
+  getTaskColorOfType(taskType: TaskType) {
+    return getColorOfType(taskType);
+  }
+
+  getTaskIconOfType(taskType: TaskType) {
+    return getIconOfType(taskType);
   }
 
   @Watch('task', { immediate: true })
@@ -884,20 +1064,6 @@ export default class Analytics extends Vue {
     }
     this.axes = this.CalculateAxes();
   }
-
-  radarDataEntries: {
-    taskData: {
-      moduleName: string;
-      taskId: string;
-      taskName: string;
-      taskType: TaskType;
-      topicName: string;
-      topicOrder: number;
-    };
-    test: string;
-    labels: string[];
-    data: { data: number[]; avatar: Avatar }[];
-  }[] = [];
 
   updatePersonalityTests(result: TaskParticipantState[], task: Task): void {
     const resultFiltered = result.filter(

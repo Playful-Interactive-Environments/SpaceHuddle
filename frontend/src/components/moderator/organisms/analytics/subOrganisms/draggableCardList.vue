@@ -1,40 +1,33 @@
 <template>
   <draggable
     v-if="hasData"
-    v-model="surveyElementsData"
+    v-model="elementsData"
     v-bind="dragOptions"
     item-key="id"
-    class="stackedChartsContainer"
+    class="draggable-card-container"
     :group="{
-      name: 'stackedChartsSelection',
+      name: 'DraggableCards',
       pull: 'true',
       put: false,
     }"
   >
     <template v-slot:item="{ element, index }">
       <el-card
-        :id="element.taskData.taskId + 'surveyCard'"
-        class="stackedChartsSelectionContainer"
+        :id="element.taskData.taskId + 'card' + index"
+        class="draggable-card-selection-container"
         shadow="never"
         body-style="text-align: center"
-        :class="{
-          addOn__boarder: !element,
-        }"
+        :class="{ addOn__boarder: !element }"
       >
-        <div class="stackedChartsTaskSelection">
+        <div class="card-selection-header">
           <el-dropdown
-            v-if="hasSurveyData"
-            @command="(command) => updateSurveyElements(index, command)"
+            v-if="hasDropdownData"
+            @command="(command) => updateElements(index, command)"
             trigger="click"
             placement="bottom"
           >
             <div class="el-dropdown-link">
-              <font-awesome-icon
-                v-if="element"
-                class="highscoreModuleIcon"
-                :icon="getIconOfType(TaskType.INFORMATION)"
-                :style="{ color: getColorOfType(TaskType.INFORMATION) }"
-              />
+              <slot name="card-header-icon" :element="element"></slot>
               <ToolTip>
                 <template #content>
                   <div :style="{ textAlign: 'center' }">
@@ -48,44 +41,40 @@
                     <p>{{ element.taskData.taskName }}</p>
                   </div>
                 </template>
-                <p class="oneLineText stackedChartsTaskName">
+                <p class="oneLineText card-name">
                   T{{ element.taskData.topicOrder + 1 }}:&nbsp;{{
                     element.taskData.taskName
                   }}
                 </p>
               </ToolTip>
               <font-awesome-icon :icon="['fas', 'angle-down']" />
-              <span class="participant-count stackedChartsTaskName"
+              <span class="participant-count card-name"
                 ><font-awesome-icon icon="user" />&nbsp;{{
-                  getParticipantCount(element.questions)
+                  getParticipantCount(element)
                 }}
               </span>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
                 <template
-                  v-for="(sv, index) in surveyData"
-                  :key="sv.taskData.taskId"
+                  v-for="(item, dropdownIndex) in dropdownItems"
+                  :key="item.taskData.taskId"
                 >
                   <el-dropdown-item
-                    v-if="isTopicHeading(index)"
+                    v-if="isTopicHeading(dropdownIndex)"
                     class="heading oneLineText"
                     :divided="true"
                     :style="{ pointerEvents: 'none' }"
                     disabled
                   >
-                    {{ sv.taskData.topicName }}
+                    {{ item.taskData.topicName }}
                   </el-dropdown-item>
                   <el-dropdown-item
-                    :command="sv"
-                    :divided="isTopicHeading(index)"
+                    :command="item"
+                    :divided="isTopicHeading(dropdownIndex)"
                   >
-                    <font-awesome-icon
-                      class="axisIcon"
-                      :icon="getIconOfType(TaskType.INFORMATION)"
-                      :style="{ color: getColorOfType(TaskType.INFORMATION) }"
-                    />
-                    <span>&nbsp;{{ sv.taskData.taskName }}</span>
+                    <slot name="dropdown-item-icon" :item="item"></slot>
+                    <span>&nbsp;{{ item.taskData.taskName }}</span>
                   </el-dropdown-item>
                 </template>
               </el-dropdown-menu>
@@ -95,25 +84,22 @@
             v-if="element"
             :icon="['fas', 'trash']"
             class="trashButton"
-            @click="removeFromSurveyElements(index)"
+            @click="removeElement(index)"
           />
         </div>
-        <stacked-bar-chart
-          v-if="element"
-          class="stackedChart"
-          :task-id="element.taskData.taskId"
-          :has-correct="isQuizOrTalk(element)"
-          :chart-data="element.questions"
-          :color-theme="colorTheme"
-          :color-correct="'var(--color-brainstorming)'"
-          :color-incorrect="'var(--color-evaluating)'"
-          v-model:selectedParticipantIds="participantIds"
+
+        <slot
+          name="item-content"
+          :element="element"
+          :selected-participant-ids="participantIds"
+          :updateSelectedParticipantIds="updateSelectedParticipantIds"
           @update:selected-participant-ids="updateSelectedParticipantIds"
-        />
+        ></slot>
+
         <ToolTip
           :text="
             this.expandedElements.find(
-              (elId) => elId === element.taskData.taskId + 'surveyCard'
+              (elId) => elId === element.taskData.taskId + 'card' + index
             )
               ? $t('moderator.organism.analytics.collapse')
               : $t('moderator.organism.analytics.expand')
@@ -122,12 +108,12 @@
         >
           <div
             class="expandCard"
-            @click="handleExpandClick(element.taskData.taskId + 'surveyCard')"
+            @click="handleExpandClick(element.taskData.taskId + 'card' + index)"
           >
             <font-awesome-icon
               v-if="
                 !this.expandedElements.find(
-                  (elId) => elId === element.taskData.taskId + 'surveyCard'
+                  (elId) => elId === element.taskData.taskId + 'card' + index
                 )
               "
               :icon="['fas', 'chevron-right']"
@@ -148,26 +134,31 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import StackedBarChart from '@/components/moderator/organisms/analytics/subOrganisms/stackedBarChart.vue';
-import { Avatar } from '@/types/api/Participant';
-import TaskType from '@/types/enum/TaskType';
-import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import ToolTip from '@/components/shared/atoms/ToolTip.vue';
 import draggable from 'vuedraggable';
+import TaskType from '@/types/enum/TaskType';
+import { Avatar } from '@/types/api/Participant';
 
 interface Answer {
   avatar: Avatar;
   answer: string[];
+  correct?: boolean[] | null;
 }
 
 interface QuestionData {
   question: string;
   questionType: string;
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any*/
-  parameter: any;
+  parameter: {
+    minValue?: number;
+    maxValue?: number;
+  };
   answers: Answer[];
 }
 
+interface subAxis {
+  id: string;
+  range: number;
+}
 interface SurveyData {
   taskData: {
     moduleName: string;
@@ -180,35 +171,76 @@ interface SurveyData {
   questions: QuestionData[];
 }
 
+interface RadarData {
+  taskData: {
+    moduleName: string;
+    taskId: string;
+    taskName: string;
+    taskType: TaskType;
+    topicName: string;
+    topicOrder: number;
+  };
+  test: string;
+  labels: string[];
+  data: { data: number[]; avatar: Avatar }[];
+}
+
+interface Axis {
+  taskData: {
+    taskId: string;
+    taskType: TaskType;
+    taskName: string;
+    topicName: string;
+    topicOrder: number;
+    moduleName: string;
+    initOrder: number;
+  };
+  axisValues: (subAxis | null)[];
+  categoryActive: string;
+  active: boolean;
+  available: boolean;
+}
+
 @Options({
-  computed: {
-    TaskType() {
-      return TaskType;
-    },
-  },
-  components: { ToolTip, StackedBarChart, draggable },
+  components: { draggable, ToolTip },
   emits: [
     'update:selectedParticipantIds',
-    'update:surveyElements',
+    'update:selectedElements',
     'hasExpandedElement',
+    'update:expanded',
   ],
 })
-export default class StackedBarCharts extends Vue {
-  @Prop() readonly surveyData!: SurveyData[];
+export default class DraggableCardList extends Vue {
+  @Prop({ required: true }) expanded!: string;
+  @Prop({ required: true }) readonly chartData!:
+    | RadarData[]
+    | SurveyData[]
+    | Axis[];
+  @Prop({ required: true }) readonly selectedElements!:
+    | RadarData[]
+    | SurveyData[]
+    | Axis[];
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
-  @Prop({ default: () => [] }) surveyElements!: SurveyData[];
+  @Prop({ default: () => [] }) dropdownItems!:
+    | RadarData[]
+    | SurveyData[]
+    | Axis[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  @Prop({ default: () => (item: any) => 0 }) getParticipantCount!: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    item: any
+  ) => number;
 
-  surveyElementsData: SurveyData[] = [];
+  elementsData: RadarData[] | SurveyData[] | Axis[] = [];
   expandedElements: string[] = [];
-
-  chartData: SurveyData[] = [];
   participantIds: string[] = [];
-  colorTheme = ['var(--color-gray-inactive-light)'];
 
-  @Watch('surveyElements', { deep: true })
-  onValueChanged(newValue: SurveyData[]) {
-    this.surveyElementsData = [...newValue];
-    this.$emit('update:surveyElements', newValue);
+  get hasData(): boolean {
+    return !!this.chartData && this.chartData.length > 0;
+  }
+
+  get hasDropdownData(): boolean {
+    return this.dropdownItems.length >= 1;
   }
 
   get dragOptions(): object {
@@ -219,23 +251,15 @@ export default class StackedBarCharts extends Vue {
     };
   }
 
-  get hasData(): boolean {
-    return !!this.surveyData && this.chartData.length > 0;
-  }
-
-  get hasSurveyData(): boolean {
-    return this.surveyData.length >= 1;
-  }
-
   hasExpandedElement(): boolean {
     return document.getElementsByClassName('expanded').length > 0;
   }
 
-  @Watch('surveyData', { immediate: true })
-  onChartDataChanged(): void {
-    if (this.surveyData) {
-      this.chartData = this.surveyData;
-    }
+  @Watch('selectedElements', { deep: true, immediate: true })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSelectedElementsChanged(newValue: any[]) {
+    this.elementsData = [...newValue];
+    this.$emit('update:selectedElements', newValue);
   }
 
   @Watch('selectedParticipantIds', { immediate: true })
@@ -243,57 +267,31 @@ export default class StackedBarCharts extends Vue {
     this.participantIds = this.selectedParticipantIds;
   }
 
-  updateSelectedParticipantIds(): void {
+  updateSelectedParticipantIds(ids: string[]): void {
+    this.participantIds = ids;
     this.$emit('update:selectedParticipantIds', this.participantIds);
   }
 
   updateHasExpandedElements(): void {
-    this.$emit('hasExpandedElement', this.hasExpandedElement());
+    this.$emit('update:expanded', this.hasExpandedElement());
   }
 
-  getColorOfType(taskType: TaskType) {
-    return getColorOfType(taskType);
+  removeElement(index: number): void {
+    this.selectedElements.splice(index, 1);
   }
 
-  getIconOfType(taskType: TaskType) {
-    return getIconOfType(taskType);
-  }
-
-  addToSurveyElements(survey: SurveyData): void {
-    this.surveyElements.push(survey);
-  }
-
-  removeFromSurveyElements(index: number): void {
-    this.surveyElements.splice(index, 1);
-  }
-
-  updateSurveyElements(index: number, survey: SurveyData): void {
-    this.surveyElements.splice(index, 1, survey);
-  }
-
-  isQuizOrTalk(survey: SurveyData): boolean {
-    return ['quiz', 'talk'].includes(survey.taskData.moduleName);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  updateElements(index: number, element: any): void {
+    this.selectedElements.splice(index, 1, element);
   }
 
   isTopicHeading(index: number): boolean {
     return (
-      (this.surveyData[index - 1] &&
-        this.surveyData[index].taskData.topicOrder !==
-          this.surveyData[index - 1].taskData.topicOrder) ||
+      (this.dropdownItems[index - 1] &&
+        this.dropdownItems[index].taskData.topicOrder !==
+          this.dropdownItems[index - 1].taskData.topicOrder) ||
       index === 0
     );
-  }
-
-  getParticipantCount(questionDataArray: QuestionData[]): number {
-    const uniqueAvatarIds = new Set<string>();
-
-    questionDataArray.forEach((questionData) => {
-      questionData.answers.forEach((answer) => {
-        uniqueAvatarIds.add(answer.avatar.id);
-      });
-    });
-
-    return uniqueAvatarIds.size;
   }
 
   handleExpandClick(id: string): void {
@@ -315,7 +313,7 @@ export default class StackedBarCharts extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.stackedChartsContainer {
+.draggable-card-container {
   position: relative;
   display: flex;
   justify-content: flex-start;
@@ -325,12 +323,13 @@ export default class StackedBarCharts extends Vue {
   width: 100%;
 }
 
-.stackedChartsSelectionContainer {
+.draggable-card-selection-container {
   cursor: move;
   min-width: 700px;
   width: calc(50% - 1.5rem);
   overflow: visible;
   position: relative;
+  background-color: var(--color-background);
 
   transition: width 0.4s ease;
 
@@ -351,8 +350,23 @@ export default class StackedBarCharts extends Vue {
   width: 100% !important;
 }
 
-.stackedChart {
-  margin-top: 1rem;
+.card-selection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .trashButton {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: var(--font-size-small);
+    cursor: pointer;
+  }
+}
+
+.card-name {
+  font-size: var(--font-size-default);
+  font-weight: var(--font-weight-bold);
 }
 
 .el-dropdown-link {
@@ -369,46 +383,6 @@ export default class StackedBarCharts extends Vue {
   &:hover {
     border: 2px solid var(--color-background-darker);
   }
-}
-
-.stackedChartsTaskSelection {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .trashButton {
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    font-size: var(--font-size-small);
-    cursor: pointer;
-  }
-}
-
-.stackedChartsTaskName {
-  font-size: var(--font-size-default);
-  font-weight: var(--font-weight-bold);
-}
-
-.highscoreModuleIcon {
-  font-size: var(--font-size-xlarge);
-}
-
-.addOn__boarder {
-  border: 2px dashed var(--color-primary);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.el-card {
-  background-color: transparent;
-}
-
-.stackedChartsSelectionHeadline {
-  font-size: var(--font-size-xlarge);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: 0.5rem;
 }
 
 .participant-count {
