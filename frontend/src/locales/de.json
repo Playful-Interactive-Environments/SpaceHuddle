@@ -435,7 +435,9 @@
           "primary": "Primärklasse",
           "secondary": "Sekundärklasse",
           "exception": "Ausnahmeklasse",
-          "title": "Typologietests"
+          "title": "Typologietests",
+          "noTypeSelected": "Alle Typen",
+          "noClassSelected": "Alle Klassen"
         },
         "legend": {
           "gearIcon": "Achsenwert einstellen",

@@ -2,7 +2,11 @@
   <div class="radarChartContainer">
     <div
       class="radar-chart"
-      :style="{ width: size + 'px', height: size + 'px' }"
+      :style="{
+        width: size + 'px',
+        height: size + 'px',
+        margin: showLabels ? '4rem' : 0,
+      }"
     >
       <svg :width="size" :height="size" viewBox="0 0 100 100">
         <!-- Draw the grid -->
@@ -10,6 +14,7 @@
           v-for="level in gridLevels"
           :key="level"
           :points="getPolygonPoints(level)"
+          :style="{ strokeWidth: opacity ? 0.2 : 1 }"
           class="grid-polygon"
         ></polygon>
 
@@ -21,6 +26,7 @@
           y1="50"
           :x2="getAxisEnd(index, maxRadius).x"
           :y2="getAxisEnd(index, maxRadius).y"
+          :style="{ strokeWidth: opacity ? 0.2 : 1 }"
           class="axis-line"
         ></line>
 
@@ -30,16 +36,18 @@
           :key="dataset.avatar.id"
           :points="getDataPoints(dataset.data)"
           :fill="datasetColors[dataset.avatar.id]"
-          :fill-opacity="datasetOpacities[dataset.avatar.id] - 0.2"
+          :fill-opacity="
+            opacity ? datasetOpacities[dataset.avatar.id] - 0.2 : 1
+          "
           :stroke="datasetColors[dataset.avatar.id]"
-          :stroke-opacity="datasetOpacities[dataset.avatar.id]"
+          :stroke-opacity="opacity ? datasetOpacities[dataset.avatar.id] : 1"
           stroke-width="0.5"
           class="radar-polygon"
         />
 
         <!-- Draw the average dataset polygon -->
         <polygon
-          v-if="averageDataset"
+          v-if="averageDataset && showAverage"
           :points="getDataPoints(averageDataset.data)"
           class="average-radar-polygon"
         />
@@ -57,60 +65,41 @@
           />
         </pattern>
       </svg>
-      <div
-        v-for="(label, index) in labels"
-        :key="'label-' + index"
-        :style="getLabelPosition(index)"
-        :class="{
-          'radar-label': true,
-          'radar-label-hover': getParticipantsOfFilterClass(index).length > 0,
-        }"
-      >
-        <div v-if="activeLabel === label" class="selectableParticipants">
-          <font-awesome-icon
-            v-for="avatar of getParticipantsOfFilterClass(index)"
-            :key="avatar.id"
-            :icon="avatar.symbol"
-            class="avatar-icon"
-            :style="{
-              color: avatar.color,
-              fontSize: 'var(--font-size-xsmall)',
-            }"
-          />
-        </div>
+      <div v-if="showLabels" class="labels">
         <div
-          @click="
-            participantSelectionChanged(
-              getParticipantsOfFilterClass(index).map((avatar) => avatar.id),
-              label
-            )
-          "
+          v-for="(label, index) in labels"
+          :key="'label-' + index"
+          :style="getLabelPosition(index)"
+          class="radar-label"
         >
-          <p class="twoLineText radar-label-text">
-            {{
-              $t(
-                `module.information.personalityTest.${test}.result.${label}.name`
-              )
-            }}
-          </p>
-          <p v-if="getParticipantsOfFilterClass(index).length > 0">
-            {{ getParticipantsOfFilterClass(index).length }}
-            <font-awesome-icon icon="user" />
-          </p>
+          <div v-if="activeLabel === label" class="selectableParticipants">
+            <font-awesome-icon
+              v-for="avatar of getParticipantsOfFilterClass(index)"
+              :key="avatar.id"
+              :icon="avatar.symbol"
+              class="avatar-icon"
+              :style="{
+                color: avatar.color,
+                fontSize: 'var(--font-size-xsmall)',
+              }"
+            />
+          </div>
+          <div>
+            <p class="twoLineText radar-label-text">
+              {{
+                $t(
+                  `module.information.personalityTest.${test}.result.${label}.name`
+                )
+              }}
+            </p>
+            <p v-if="getParticipantsOfFilterClass(index).length > 0">
+              {{ getParticipantsOfFilterClass(index).length }}
+              <font-awesome-icon icon="user" />
+            </p>
+          </div>
         </div>
       </div>
     </div>
-    <el-radio-group v-model="filterClass" class="classSelection">
-      <el-radio-button :label="'primary'" :value="'primary'">{{
-        $t('moderator.organism.analytics.radarCharts.primary')
-      }}</el-radio-button>
-      <el-radio-button :label="'secondary'" :value="'secondary'">{{
-        $t('moderator.organism.analytics.radarCharts.secondary')
-      }}</el-radio-button>
-      <el-radio-button :label="'exception'" :value="'exception'">{{
-        $t('moderator.organism.analytics.radarCharts.exception')
-      }}</el-radio-button>
-    </el-radio-group>
   </div>
 </template>
 
@@ -137,13 +126,17 @@ export default class RadarChart extends Vue {
   }[];
   @Prop({ type: Number, default: 300 }) size!: number;
   @Prop({ type: Number, default: 5 }) levels!: number;
+  @Prop({ default: 'primary' }) filterClass!: string;
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
   @Prop({ type: Number, default: 5 }) defaultColor!: string;
+
+  @Prop({ default: true }) showLabels!: string;
+  @Prop({ default: true }) showAverage!: string;
+  @Prop({ default: true }) opacity!: string;
 
   taskType = TaskType.INFORMATION;
   normalizedDatasets: { data: number[]; avatar: Avatar }[] = [];
 
-  filterClass = 'primary';
   activeLabel = '';
 
   get minMaxValues(): { min: number; max: number } {
@@ -374,28 +367,36 @@ export default class RadarChart extends Vue {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 4rem;
 }
 
 .grid-polygon {
   fill: none;
   stroke: #ccc;
-  stroke-width: 0.2;
   will-change: transform;
 }
 
 .axis-line {
   stroke: #666;
-  stroke-width: 0.2;
   will-change: transform;
 }
 
 .radar-polygon {
+  animation: appear 0.5s ease forwards;
   transition: all 0.5s ease;
   will-change: fill-opacity, stroke-opacity;
 }
 
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .average-radar-polygon {
+  animation: appear 0.5s ease forwards;
   fill: url(#diagonalHatch);
   stroke: var(--color-evaluating);
   stroke-width: 1.5;
@@ -417,11 +418,6 @@ export default class RadarChart extends Vue {
   color: var(--color-dark-contrast);
   font-weight: var(--font-weight-default);
   transition: all 0.3s ease;
-}
-
-.radar-label-hover:hover {
-  cursor: pointer;
-  color: var(--color-informing-dark);
 }
 
 .avatar-icon {

@@ -435,7 +435,9 @@
           "primary": "primary class",
           "secondary": "secondary class",
           "exception": "exception class",
-          "title": "Typology tests"
+          "title": "Typology tests",
+          "noTypeSelected": "All Types",
+          "noClassSelected": "All Classes"
         },
         "legend": {
           "gearIcon": "Axis value settings",
