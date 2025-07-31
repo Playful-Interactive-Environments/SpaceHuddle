@@ -36,7 +36,7 @@
                   />
                 </g>
                 <g v-for="(segment, i) in computedSegments[index]" :key="i">
-                  <defs>
+                  <!--                  <defs>
                     <linearGradient
                       :id="gradientId(index, i)"
                       v-bind="gradientProps"
@@ -49,8 +49,9 @@
                         :stop-color="color"
                       />
                     </linearGradient>
-                  </defs>
+                  </defs>-->
                   <g class="circle">
+                    <circle v-bind="circleBackgroundProps(segment, element)" />
                     <circle
                       class="cursorPointer"
                       v-bind="circleProps(segment, element)"
@@ -167,7 +168,7 @@
                   )
                 "
               >
-                <defs>
+                <!--                <defs>
                   <linearGradient
                     :id="gradientId(index, i)"
                     v-bind="gradientProps"
@@ -180,11 +181,11 @@
                       :stop-color="color"
                     />
                   </linearGradient>
-                </defs>
+                </defs>-->
                 <rect v-bind="barRectProps(segment)" />
                 <rect
-                  class="barRectGradient"
-                  v-bind="barRectGradientProps(index, i, segment)"
+                  class="barRectColor"
+                  v-bind="barRectColorProps(index, i, segment)"
                 />
                 <circle
                   v-if="hasCorrect"
@@ -290,6 +291,10 @@ export default class StackedBarChart extends Vue {
   readonly colorCorrect!: string;
   @Prop({ default: () => 'var(--color-evaluating)' })
   readonly colorIncorrect!: string;
+  @Prop({ default: () => 'var(--color-informing)' })
+  readonly colorSelected!: string;
+  @Prop({ default: () => 'var(--color-gray-inactive-light)' })
+  readonly colorDefault!: string;
   @Prop({ default: () => [] }) selectedParticipantIds!: string[];
 
   surveyChartData: QuestionData[] = [];
@@ -394,7 +399,7 @@ export default class StackedBarChart extends Vue {
             ? isCorrect
               ? this.colorCorrect
               : this.colorIncorrect
-            : this.colorTheme[i % this.colorTheme.length],
+            : this.colorDefault,
         };
 
         cumulativeX += width - overlap;
@@ -432,6 +437,39 @@ export default class StackedBarChart extends Vue {
     }
 
     return colors;
+  }
+
+  getSegmentColor(segment: AnswerSegment): string {
+    if (this.selectedParticipantIds.length <= 0) {
+      return segment.color;
+    } else {
+      const set = new Set(this.selectedParticipantIds);
+      for (const avatar of segment.avatars) {
+        if (set.has(avatar.id)) {
+          return this.colorSelected;
+        }
+      }
+    }
+    return this.colorDefault;
+  }
+
+  getOpacity(segment: AnswerSegment): number {
+    if (this.selectedParticipantIds.length <= 1) {
+      return 1;
+    } else {
+      const set = new Set(this.selectedParticipantIds);
+      let avatarCount = 0;
+      for (const avatar of segment.avatars) {
+        if (set.has(avatar.id)) {
+          avatarCount++;
+        }
+      }
+      if (avatarCount === 0) {
+        return 1;
+      }
+      console.log(this.selectedParticipantIds.length, avatarCount);
+      return (1 / this.selectedParticipantIds.length) * avatarCount;
+    }
   }
 
   participantSelectionChanged(ids: string[] | null) {
@@ -491,7 +529,7 @@ export default class StackedBarChart extends Vue {
     return this.parentWidth * this.barWidthPercentage;
   }
 
-  get gradientProps() {
+  /*get gradientProps() {
     return {
       x1: '0%',
       y1: '0%',
@@ -511,7 +549,7 @@ export default class StackedBarChart extends Vue {
           ? (j / (this.getColor(segment).length - 1)) * 100 + '%'
           : '50%',
     };
-  }
+  }*/
 
   sliderLineProps() {
     return {
@@ -574,10 +612,26 @@ export default class StackedBarChart extends Vue {
       cx: this.calculateCircleX(segment, questionData),
       cy: this.barHeight / 2,
       r: this.getRadius(segment),
-      fill: `url(#${this.gradientId(
+      /*fill: `url(#${this.gradientId(
         this.indexOfSegment(segment),
         this.indexOfAnswer(segment)
-      )})`,
+      )})`,*/
+      fill: this.getSegmentColor(segment),
+      style: {
+        strokeWidth: 3,
+        stroke: 'var(--color-background)',
+        backgroundColor: 'var(--color-background)',
+        opacity: this.getOpacity(segment),
+      },
+    };
+  }
+
+  circleBackgroundProps(segment: AnswerSegment, questionData: QuestionData) {
+    return {
+      cx: this.calculateCircleX(segment, questionData),
+      cy: this.barHeight / 2,
+      r: this.getRadius(segment),
+      fill: 'var(--color-background)',
       style: {
         strokeWidth: 3,
         stroke: 'var(--color-background)',
@@ -599,7 +653,6 @@ export default class StackedBarChart extends Vue {
   }
 
   circleToolTipProps(segment: AnswerSegment, questionData: QuestionData) {
-    console.log(this.calculateCircleX(segment, questionData));
     return {
       style: {
         width: '2rem',
@@ -620,22 +673,27 @@ export default class StackedBarChart extends Vue {
       fill: 'var(--color-background)',
       rx: this.barHeight / 2,
       ry: this.barHeight / 2,
+      style: {
+        strokeWidth: 8,
+        stroke: 'var(--color-background)',
+        backgroundColor: 'var(--color-background)',
+      },
     };
   }
 
-  barRectGradientProps(index: number, i: number, segment: AnswerSegment) {
+  barRectColorProps(index: number, i: number, segment: AnswerSegment) {
     return {
       x: segment.x,
       y: 0,
       width: segment.width >= 0 ? segment.width : 0,
       height: this.barHeight,
-      fill: `url(#${this.gradientId(index, i)})`,
+      /*fill: `url(#${this.gradientId(index, i)})`,*/
+      fill: this.getSegmentColor(segment),
       rx: this.barHeight / 2,
       ry: this.barHeight / 2,
       style: {
-        strokeWidth: 6,
-        stroke: 'var(--color-background)',
         backgroundColor: 'var(--color-background)',
+        opacity: this.getOpacity(segment),
       },
     };
   }
@@ -749,6 +807,10 @@ export default class StackedBarChart extends Vue {
   }
 }
 
+.barRectColor {
+  transition: fill 0.3s ease, opacity 0.3s ease;
+}
+
 .svgText {
   font-family: var(--font-family);
 }
@@ -835,9 +897,9 @@ export default class StackedBarChart extends Vue {
   }
 }
 
-.linearGradientStop {
+/*.linearGradientStop {
   transition: stop-color 0.5s ease;
-}
+}*/
 
 .el-carousel__item {
   height: 100%;

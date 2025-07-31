@@ -76,7 +76,6 @@
               color: avatar.color,
               fontSize: 'var(--font-size-xsmall)',
             }"
-            @click="participantSelectionChanged([avatar.id], label)"
           />
         </div>
         <div
@@ -428,14 +427,7 @@ export default class RadarChart extends Vue {
 .avatar-icon {
   color: var(--color-dark-contrast);
   font-size: var(--font-size-large);
-  transition: color 0.3s ease, transform 0.3s ease;
-
-  transform: scale(1);
   padding: 0.2rem;
-}
-
-.avatar-icon:hover {
-  transform: scale(1.15);
 }
 
 .classSelection {
