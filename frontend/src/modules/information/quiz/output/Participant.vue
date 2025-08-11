@@ -215,8 +215,8 @@
             v-on:change="inputChanged"
           >
             <el-radio-button :label="1">{{
-                $t(`module.information.quiz.participant.yes`)
-              }}</el-radio-button>
+              $t(`module.information.quiz.participant.yes`)
+            }}</el-radio-button>
             <el-radio-button :label="0">{{
               $t(`module.information.quiz.participant.no`)
             }}</el-radio-button>

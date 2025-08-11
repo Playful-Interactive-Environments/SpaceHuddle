@@ -81,6 +81,7 @@
         :size="size"
         :levels="levels"
         :defaultColor="defaultColor"
+        :range="minMaxValues"
         :filterClass="filterClass"
         v-model:selectedParticipantIds="participantIds"
         @participant-selected="participantSelectionChanged"
@@ -118,6 +119,7 @@
               ? data.avatar.color
               : defaultColor
           "
+          :range="minMaxValues"
           :filterClass="filterClass"
           :show-average="false"
           :show-labels="false"

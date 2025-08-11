@@ -117,41 +117,39 @@ import TaskType from '@/types/enum/TaskType';
   emits: ['update:selectedParticipantIds'],
 })
 export default class RadarChart extends Vue {
-  @Prop({ type: Array, required: true }) labels!: string[];
-  @Prop({ default: () => '' }) test!: string;
-  @Prop({ default: () => '' }) title!: string;
-  @Prop({ type: Array, required: true }) datasets!: {
+  @Prop({ type: Array, required: true }) readonly labels!: string[];
+  @Prop({ default: () => '' }) readonly test!: string;
+  @Prop({ default: () => '' }) readonly title!: string;
+  @Prop({ type: Array, required: true }) readonly datasets!: {
     data: number[];
     avatar: Avatar;
   }[];
-  @Prop({ type: Number, default: 300 }) size!: number;
-  @Prop({ type: Number, default: 5 }) levels!: number;
-  @Prop({ default: 'primary' }) filterClass!: string;
-  @Prop({ default: () => [] }) selectedParticipantIds!: string[];
-  @Prop({ type: Number, default: 5 }) defaultColor!: string;
+  @Prop({ type: Number, default: 300 }) readonly size!: number;
+  @Prop({ type: Number, default: 5 }) readonly levels!: number;
+  @Prop({ default: { min: 0, max: 10 } }) readonly range!: {
+    min: number;
+    max: number;
+  };
 
-  @Prop({ default: true }) showLabels!: string;
-  @Prop({ default: true }) showAverage!: string;
-  @Prop({ default: true }) opacity!: string;
+  @Prop({ default: 'primary' }) readonly filterClass!: string;
+  @Prop({ default: () => [] }) selectedParticipantIds!: string[];
+  @Prop({ type: Number, default: 5 }) readonly defaultColor!: string;
+
+  @Prop({ default: true }) readonly showLabels!: string;
+  @Prop({ default: true }) readonly showAverage!: string;
+  @Prop({ default: true }) readonly opacity!: string;
 
   taskType = TaskType.INFORMATION;
   normalizedDatasets: { data: number[]; avatar: Avatar }[] = [];
 
   activeLabel = '';
 
-  get minMaxValues(): { min: number; max: number } {
-    const allData = this.datasets.flatMap((dataset) => dataset.data);
-    const min = Math.min(...allData);
-    const max = Math.max(...allData);
-    return { min: min < 0 ? min : 0, max };
-  }
-
   get minValue(): number {
-    return this.minMaxValues.min;
+    return this.range.min;
   }
 
   get maxValue(): number {
-    return this.minMaxValues.max;
+    return this.range.max;
   }
 
   created() {
@@ -229,7 +227,7 @@ export default class RadarChart extends Vue {
   }
 
   normalizeData(data: number[]): number[] {
-    const { min, max } = this.minMaxValues;
+    const { min, max } = this.range;
     const range = max - min || 1;
     return data.map((value) => ((value - min) / range) * 100);
   }
