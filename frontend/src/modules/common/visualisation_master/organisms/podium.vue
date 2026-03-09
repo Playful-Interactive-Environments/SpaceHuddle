@@ -41,7 +41,13 @@
             topVotes.length - order[index] - 1
           ),
           marginTop: getTopMargin(index),
-          pointerEvents: ended ? 'all' : 'none',
+          pointerEvents: moderatedFlow
+            ? order[index] >= moderatedIndex
+              ? 'all'
+              : 'none'
+            : order[index] > moderatedIndex
+            ? 'all'
+            : 'none',
         }"
         @transitionend="
           moderatedIndex =
@@ -144,6 +150,11 @@ export default class PublicScreen extends Vue {
   revealedVoteIndexes: number[] = [];
   moderatedFlow = false;
   moderatedIndex = this.topAmount;
+
+  @Watch('moderatedIndex', { immediate: true })
+  onModIndexChanged(newIndex: number) {
+    console.log(newIndex);
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getIdeaTransitionConfig(index: number): string {
