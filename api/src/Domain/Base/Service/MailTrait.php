@@ -1,183 +1,124 @@
 <?php
 
-
 namespace App\Domain\Base\Service;
 
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\BodyRendererInterface;
 
-/**
- * Trait that send mails.
- */
 trait MailTrait
 {
-    /**
-     * Application settings
-     * @return mixed Application settings
-     */
     protected function settings() {
         return require __DIR__ . "/../../../../config/settings.php";
     }
 
     private function getMailFrom(): string {
         $applicationSettings = (object)$this->settings()["application"];
-        $from = $applicationSettings->email;
-        if (!isset($from)) $from = 'info@spacehuddle.io';
-
-        return $from;
+        return $applicationSettings->email ?? 'info@spacehuddle.io';
     }
 
     private function getApplicationName(): string {
         $applicationSettings = (object)$this->settings()["application"];
-        $name = $applicationSettings->name;
-        if (!isset($name)) $name = 'spacehuddle.io';
-
-        return $name;
+        return $applicationSettings->name ?? 'SpaceHuddle';
     }
 
-    /**
-     * Calculated the mail header
-     * @return string Mail Header
-     */
-    private function getMailHeader(): string {
-        $from = $this->getMailFrom();
+    private function getHtmlWrapper(string $header, string $content, string $buttonUrl = null, string $buttonText = null): string {
+        $colorBrainstorming = "#7b61ff";
+        $colorBackground = "#f4f7f9";
 
-        // To send HTML mail, the Content-type header must be set
-        $headers  = 'MIME-Version: 1.0' . "\r\n";
-        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+        $buttonHtml = "";
+        if ($buttonUrl && $buttonText) {
+                    $buttonHtml = "
+                        <div style='margin: 30px 0 10px 0; text-align: center;'>
+                            <a href='$buttonUrl' style='background-color: $colorBrainstorming; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;'>
+                                $buttonText
+                            </a>
+                        </div>
+                        <div style='text-align: center; padding: 0 20px;'>
+                            <p style='margin: 0; color: #9199A1; font-size: 6px; line-height: 1.2; word-break: break-all;'>
+                                $buttonUrl
+                            </p>
+                        </div>";
+                }
 
-        // Create email headers
-        $headers .= 'From: '.$from."\r\n".
-            'Reply-To: '.$from."\r\n";
-        return $headers;
+        return "
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset='UTF-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                </head>
+                <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: $colorBackground;'>
+                    <table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color: $colorBackground; padding: 40px 10px;'>
+                        <tr>
+                            <td align='center'>
+                                <table width='100%' style='max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);' border='0' cellspacing='0' cellpadding='0'>
+                                    <tr>
+                                        <td style='padding: 30px; text-align: center;'>
+                                            <img src='cid:logo' alt='Logo' width='140' style='display: block; margin: 0 auto;'>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 0 40px 40px 40px;'>
+                                            <h1 style='color: #1a202c; font-size: 22px; text-align: center; margin-bottom: 20px;'>$header</h1>
+                                            <div style='color: #4a5568; font-size: 16px; line-height: 1.6; text-align: center;'>$content</div>
+                                            $buttonHtml
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 20px; text-align: center; background-color: #f8fafc; color: #a0aec0; font-size: 12px;'>
+                                            &copy; " . date('Y') . " " . $this->getApplicationName() . "
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>";
     }
 
-    protected function smtpMail($email, $mailHeader, $message, $mailBody): void {
+    protected function smtpMail($email, $mailHeader, $message, $mailBody, $buttonUrl = null, $buttonText = null): void {
         $application = $this->getApplicationName();
         $smptSettings = (object)$this->settings()["smtp"];
-        $dsn = sprintf(
-            "%s://%s:%s@%s:%s",
-            $smptSettings->type,
-            $smptSettings->username,
-            $smptSettings->password,
-            $smptSettings->host,
-            $smptSettings->port
-        );
+        $dsn = sprintf("%s://%s:%s@%s:%s", $smptSettings->type, $smptSettings->username, $smptSettings->password, $smptSettings->host, $smptSettings->port);
+
         $mailer = new Mailer(Transport::fromDsn($dsn));
-        $from = $this->getMailFrom();
-        $email = (new Email())
-            ->from($from)
+
+        $renderedHeader = str_replace("#application", $application, $mailHeader);
+        $renderedBody = str_replace("#application", $application, $message);
+        $htmlContent = $this->getHtmlWrapper($renderedHeader, $renderedBody, $buttonUrl, $buttonText);
+
+        $emailObj = (new Email())
+            ->from($this->getMailFrom())
             ->to($email)
-            ->subject(str_replace("#application", $application, $mailHeader))
+            ->subject($renderedHeader)
             ->text(str_replace("#application", $application, $mailBody))
-            ->html(str_replace("#application", $application, $message));
+            ->html($htmlContent);
 
-        $mailer->send($email);
+        $logoPath = __DIR__ . '/../../../../../frontend/src/assets/icons/svg/logo.png';
+        if (file_exists($logoPath)) {
+            $emailObj->embedFromPath($logoPath, 'logo');
+        }
+
+        $mailer->send($emailObj);
     }
 
-    /**
-     * send a mail
-     * @param string $email Receiver
-     * @param string $mailHeader Email header
-     * @param string $mailBody Email body
-     */
-    protected function sendMail(
-        string $email,
-        string $mailHeader,
-        string $mailBody,
-    ): void {
-        $message = "
-            <h1>$mailHeader</h1>
-            <div>$mailBody</div>";
-
-        $this->smtpMail($email, $mailHeader, $message, $mailBody);
-
-        //mail($email, $mailHeader, $message, $this->getMailHeader());
+    protected function sendMail(string $email, string $mailHeader, string $mailBody): void {
+        $this->smtpMail($email, $mailHeader, $mailBody, $mailBody);
     }
 
-    /**
-     * send a mail with a url
-     * @param string $email Receiver
-     * @param string $mailHeader Email header
-     * @param string $mailBody Email body
-     * @param string $linkDisplayName Display name of the receiver url.
-     * @param string $linkTargetName Name of the receiver url in the settings file.
-     * @param string $linkParameter Optional: Add link parameter.
-     */
-    protected function sendMailWithUrl(
-        string $email,
-        string $mailHeader,
-        string $mailBody,
-        string $linkDisplayName,
-        string $linkTargetName,
-        string $linkParameter = ""
-    ): void {
+    protected function sendMailWithUrl(string $email, string $mailHeader, string $mailBody, string $linkDisplayName, string $linkTargetName, string $linkParameter = ""): void {
         $applicationSettings = (object)$this->settings()["application"];
-        $detailUrlPart = $applicationSettings->$linkTargetName;
-        $resetUrl = "$applicationSettings->baseUrl$detailUrlPart";
-
-        $message = "
-            <h1>$mailHeader</h1>
-            <div>$mailBody</div>
-            <div>
-                <a href='$resetUrl$linkParameter'>$linkDisplayName</a>
-            </div>
-            <p>
-                If the link above does not work, please copy this url manually into your browser.
-            </p>
-            <div>
-                $resetUrl$linkParameter
-            </div>";
-
-        $this->smtpMail($email, $mailHeader, $message, $mailBody);
-
-        //mail($email, $mailHeader, $message, $this->getMailHeader());
+        $url = $applicationSettings->baseUrl . $applicationSettings->$linkTargetName . $linkParameter;
+        $this->smtpMail($email, $mailHeader, $mailBody, $mailBody, $url, $linkDisplayName);
     }
 
-    /**
-     * send a mail with a created token
-     * @param string $email Receiver
-     * @param string $mailHeader Email header
-     * @param string $mailBody Email body
-     * @param string $linkDisplayName Display name of the receiver url.
-     * @param string $linkTargetName Name of the receiver url in the settings file.
-     * @param string $action Action for which the token is to be generated.
-     */
-    protected function sendMailWithTokenUrl(
-        string $email,
-        string $mailHeader,
-        string $mailBody,
-        string $linkDisplayName,
-        string $linkTargetName,
-        string $action
-    ): void {
-        $jwt = $this->jwtAuth->createJwt(
-            [
-                "action" => $action,
-                "username" => $email
-            ]
-        );
-
+    protected function sendMailWithTokenUrl(string $email, string $mailHeader, string $mailBody, string $linkDisplayName, string $linkTargetName, string $action): void {
+        $jwt = $this->jwtAuth->createJwt(["action" => $action, "username" => $email]);
         $applicationSettings = (object)$this->settings()["application"];
-        $detailUrlPart = $applicationSettings->$linkTargetName;
-        $resetUrl = "$applicationSettings->baseUrl$detailUrlPart";
-
-        $message = "
-            <h1>$mailHeader</h1>
-            <div>$mailBody</div>
-            <div>
-                <a href='$resetUrl$jwt'>$linkDisplayName</a>
-            </div>
-            <p>
-                If the link above does not work, please copy this url manually into your browser.
-            </p>
-            <div>
-                $resetUrl$jwt
-            </div>";
-
-        $this->smtpMail($email, $mailHeader, $message, $mailBody);
-
-        //mail($email, $mailHeader, $message, $this->getMailHeader());
+        $url = $applicationSettings->baseUrl . $applicationSettings->$linkTargetName . $jwt;
+        $this->smtpMail($email, $mailHeader, $mailBody, $mailBody, $url, $linkDisplayName);
     }
 }
